@@ -3066,13 +3066,13 @@ async function publishProgramme() {
   const month = document.getElementById('prog-month').value.trim();
   const desc  = document.getElementById('prog-desc').value.trim();
   if(!title || !month) { showToast('Title and month required'); return; }
-  const { error } = await supa.from('programmes').insert({
+  const { data, error } = await supa.from('programmes').insert({
     title,
     month,
     description: desc,
-    data: { currentBlock, customWorkouts },
+    data: { currentBlock },
     created_by: currentUser.id
-  });
+  }).select().single();
   if(error) { showToast('Publish failed: ' + error.message); return; }
   showToast('Programme published ✦');
   document.getElementById('prog-title').value = '';
@@ -3085,7 +3085,12 @@ async function deleteProgramme(progId) {
   if(!confirm('Delete this programme? This cannot be undone.')) return;
   const { error } = await supa.from('programmes').delete().eq('id', progId);
   if(error) { showToast('Delete failed: ' + error.message); return; }
+  // Also remove from builder saved blocks if it was loaded there
+  customWorkouts = customWorkouts.filter(w => w.id !== 'prog_' + progId);
+  localStorage.setItem('fw_customs', JSON.stringify(customWorkouts));
+  syncBlocksToCloud();
   showToast('Programme deleted');
+  renderBuilderSaved();
   loadProgrammes();
 }
 
@@ -3094,13 +3099,19 @@ async function loadProgrammeAsBlock(progId) {
   if(error || !data) { showToast('Failed to load programme'); return; }
   const block = data.data?.currentBlock;
   if(!block) { showToast('No block data found'); return; }
-  // Save as a custom workout so user can set it as current
+  // Check if already loaded
+  if(customWorkouts.find(w => w.id === 'prog_' + progId)) {
+    showToast('Already in your Builder');
+    setTimeout(() => navigate('builder'), 600);
+    return;
+  }
   const newBlock = { ...block, id: 'prog_' + progId, name: data.title };
   if(!newBlock.warmup) newBlock.warmup = [];
   if(!newBlock.skill)  newBlock.skill  = [];
   customWorkouts.unshift(newBlock);
   localStorage.setItem('fw_customs', JSON.stringify(customWorkouts));
   syncBlocksToCloud();
+  renderBuilderSaved();
   showToast('Programme added to Builder ✦');
   setTimeout(() => navigate('builder'), 800);
 }
