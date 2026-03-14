@@ -2962,6 +2962,26 @@ supa.auth.getSession().then(async ({ data: { session }, error }) => {
   }
 });
 
+// Listen for auth state changes — catches signout, deleted users, expired tokens
+supa.auth.onAuthStateChange(async (event, session) => {
+  if(event === 'SIGNED_OUT' || event === 'USER_DELETED' || !session) {
+    localStorage.removeItem('fw_user');
+    localStorage.removeItem('fw_premium');
+    localStorage.removeItem('fw_trial_start');
+    currentUser = null; isPremium = false;
+    location.reload();
+  } else if(event === 'SIGNED_IN' && session?.user) {
+    await afterAuth(session.user, false);
+  } else if(event === 'TOKEN_REFRESHED' && session?.user) {
+    // Silently refresh user data
+    const { data: profile } = await supa.from('profiles').select('tier').eq('id', session.user.id).single();
+    if(profile?.tier) {
+      currentUser.tier = profile.tier;
+      localStorage.setItem('fw_user', JSON.stringify(currentUser));
+    }
+  }
+});
+
 function updateUserBar() {
   const bar = document.getElementById('user-bar');
   const nameEl = document.getElementById('user-bar-name');
