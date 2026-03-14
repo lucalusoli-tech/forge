@@ -559,12 +559,11 @@
       <div class="upgrade-feat"><span class="upgrade-feat-icon">⬡</span><span>198-exercise library with calisthenics, barbell, dumbbell and machine</span></div>
       <div class="upgrade-feat"><span class="upgrade-feat-icon">↺</span><span>Rest timer, week navigation, and all future features</span></div>
     </div>
-    <div class="upgrade-price">
-      <div class="upgrade-price-amount">£4.99</div>
-      <div class="upgrade-price-period">/ month</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">
+      <button class="upgrade-cta" id="upgrade-cta-btn" onclick="activatePremium('premium')" style="flex:1">PREMIUM £9.99/mo →</button>
+      <button class="upgrade-cta" onclick="activatePremium('coached')" style="flex:1;background:transparent;border:1px solid var(--accent)">COACHED £19.99/mo →</button>
     </div>
-    <div class="upgrade-trial">✓ 7-day free trial — cancel anytime</div>
-    <button class="upgrade-cta" onclick="activatePremium()">START FREE TRIAL →</button>
+    <div class="upgrade-trial">✓ 7-day free trial · cancel anytime · Direct Debit</div>
     <button class="upgrade-dismiss" onclick="closeUpgrade()">Maybe later</button>
   </div>
 </div>
@@ -3004,11 +3003,34 @@ function openUpgrade() {
 }
 function closeUpgrade() { document.getElementById('upgrade-overlay').classList.remove('open'); }
 
-function activatePremium() {
-  isPremium = true;
-  localStorage.setItem('fw_premium','true');
-  if(!trialStart) { trialStart = Date.now(); localStorage.setItem('fw_trial_start', trialStart); }
-  closeUpgrade(); updateUserBar(); showToast('Premium activated ✦');
+async function activatePremium(tier='premium') {
+  if(!currentUser) { showToast('Sign in to upgrade'); return; }
+  const btn = document.getElementById('upgrade-cta-btn');
+  if(btn) { btn.textContent = 'LOADING...'; btn.disabled = true; }
+  try {
+    const res = await fetch(
+      'https://naxojfchohntrfpunbxg.supabase.co/functions/v1/gocardless-checkout',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: currentUser.id,
+          email: currentUser.email,
+          name: currentUser.name,
+          tier
+        })
+      }
+    );
+    const data = await res.json();
+    if(data.url) {
+      window.location.href = data.url;
+    } else {
+      throw new Error(data.error || 'Unknown error');
+    }
+  } catch(err) {
+    showToast('Payment error: ' + err.message);
+    if(btn) { btn.textContent = 'START FREE TRIAL →'; btn.disabled = false; }
+  }
 }
 
 function checkBlockLimit() {
