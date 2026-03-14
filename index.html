@@ -1,0 +1,951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FORGE — Train Like You Mean It</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black:       #080808;
+    --deep:        #0f0f0f;
+    --surface:     #141414;
+    --card:        #1a1a1a;
+    --border:      #242424;
+    --border-light:#333;
+    --text:        #e8e2d9;
+    --text-muted:  #6b6560;
+    --text-dim:    #333;
+    --accent:      #c9a96e;
+    --accent-dim:  #7a5f38;
+    --accent-glow: rgba(201,169,110,0.08);
+    --accent-glow2:rgba(201,169,110,0.15);
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-weight: 300;
+    overflow-x: hidden;
+    cursor: default;
+  }
+
+  /* ── GRAIN ─────────────────────────────────────── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.6;
+  }
+
+  /* ── NAV ─────────────────────────────────────────── */
+  nav {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 40px;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.4s, background 0.4s;
+  }
+  nav.scrolled {
+    background: rgba(8,8,8,0.92);
+    border-color: var(--border);
+    backdrop-filter: blur(12px);
+  }
+  .nav-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 6px;
+    color: var(--accent);
+  }
+  .nav-cta {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-decoration: none;
+    border: 1px solid var(--accent-dim);
+    padding: 10px 20px;
+    text-transform: uppercase;
+    transition: background 0.2s, color 0.2s;
+  }
+  .nav-cta:hover {
+    background: var(--accent);
+    color: var(--black);
+  }
+
+  /* ── HERO ─────────────────────────────────────────── */
+  .hero {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 120px 24px 80px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Spotlight */
+  .hero::after {
+    content: '';
+    position: absolute;
+    top: -10%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 600px;
+    background: radial-gradient(ellipse at center, rgba(201,169,110,0.07) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* Horizontal rule lines */
+  .hero-rule {
+    width: 1px;
+    height: 60px;
+    background: linear-gradient(to bottom, transparent, var(--accent-dim));
+    margin: 0 auto 32px;
+    opacity: 0;
+    animation: fadeUp 1s 0.2s forwards;
+  }
+
+  .hero-eyebrow {
+    font-size: 9px;
+    letter-spacing: 5px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 24px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.4s forwards;
+  }
+
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(80px, 18vw, 200px);
+    letter-spacing: 12px;
+    line-height: 0.9;
+    color: var(--text);
+    margin-bottom: 0;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.5s forwards;
+  }
+
+  .hero-title span { color: var(--accent); }
+
+  .hero-sub {
+    font-size: clamp(10px, 1.5vw, 13px);
+    letter-spacing: 3px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-top: 24px;
+    max-width: 460px;
+    line-height: 2;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.7s forwards;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: 16px;
+    margin-top: 48px;
+    flex-wrap: wrap;
+    justify-content: center;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.9s forwards;
+  }
+
+  .btn-primary {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--black);
+    background: var(--accent);
+    border: none;
+    padding: 16px 36px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: opacity 0.2s, transform 0.2s;
+  }
+  .btn-primary:hover { opacity: 0.85; transform: translateY(-2px); }
+
+  .btn-ghost {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    background: none;
+    border: 1px solid var(--border-light);
+    padding: 16px 36px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+    transition: color 0.2s, border-color 0.2s, transform 0.2s;
+  }
+  .btn-ghost:hover { color: var(--text); border-color: var(--text-muted); transform: translateY(-2px); }
+
+  .hero-price {
+    margin-top: 24px;
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    opacity: 0;
+    animation: fadeUp 0.8s 1.1s forwards;
+  }
+  .hero-price span { color: var(--text-muted); }
+
+  /* Scroll indicator */
+  .scroll-hint {
+    position: absolute;
+    bottom: 32px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    opacity: 0;
+    animation: fadeIn 1s 1.5s forwards;
+  }
+  .scroll-hint span {
+    font-size: 8px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+  .scroll-line {
+    width: 1px;
+    height: 40px;
+    background: linear-gradient(to bottom, var(--accent-dim), transparent);
+    animation: scrollPulse 2s 1.5s infinite;
+  }
+
+  /* ── TICKER ───────────────────────────────────────── */
+  .ticker-wrap {
+    overflow: hidden;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+    background: var(--deep);
+    padding: 12px 0;
+  }
+  .ticker-track {
+    display: flex;
+    gap: 0;
+    animation: ticker 24s linear infinite;
+    width: max-content;
+  }
+  .ticker-item {
+    font-size: 9px;
+    letter-spacing: 4px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    padding: 0 32px;
+    white-space: nowrap;
+  }
+  .ticker-item .dot {
+    color: var(--accent);
+    margin-right: 32px;
+    margin-left: 0;
+  }
+
+  /* ── SECTION SHARED ──────────────────────────────── */
+  section {
+    padding: 100px 40px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  .section-label {
+    font-size: 8px;
+    letter-spacing: 5px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(42px, 7vw, 80px);
+    letter-spacing: 4px;
+    line-height: 1;
+    color: var(--text);
+    margin-bottom: 24px;
+  }
+
+  .section-body {
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    line-height: 2.2;
+    max-width: 520px;
+  }
+
+  .divider {
+    width: 100%;
+    height: 1px;
+    background: var(--border);
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+
+  /* ── FEATURES GRID ───────────────────────────────── */
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    margin-top: 60px;
+  }
+
+  .feature-card {
+    background: var(--black);
+    padding: 36px 32px;
+    transition: background 0.3s;
+    position: relative;
+    overflow: hidden;
+  }
+  .feature-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent-glow);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .feature-card:hover { background: var(--deep); }
+  .feature-card:hover::before { opacity: 1; }
+
+  .feature-num {
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--accent-dim);
+    margin-bottom: 20px;
+  }
+  .feature-icon {
+    font-size: 22px;
+    margin-bottom: 16px;
+    display: block;
+  }
+  .feature-name {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 3px;
+    color: var(--text);
+    margin-bottom: 10px;
+  }
+  .feature-desc {
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    line-height: 2;
+  }
+
+  /* ── STATS BAR ────────────────────────────────────── */
+  .stats-bar {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    border: 1px solid var(--border);
+    background: var(--deep);
+    margin-top: 60px;
+  }
+
+  .stat-item {
+    padding: 36px 32px;
+    border-right: 1px solid var(--border);
+    text-align: center;
+  }
+  .stat-item:last-child { border-right: none; }
+
+  .stat-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 6vw, 72px);
+    letter-spacing: 4px;
+    color: var(--accent);
+    line-height: 1;
+    display: block;
+  }
+  .stat-label {
+    font-size: 8px;
+    letter-spacing: 3px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-top: 8px;
+    display: block;
+  }
+
+  /* ── PHILOSOPHY ──────────────────────────────────── */
+  .philosophy {
+    position: relative;
+    padding: 100px 40px;
+    overflow: hidden;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+  .philosophy-bg {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 20% 50%, rgba(201,169,110,0.04) 0%, transparent 60%);
+    pointer-events: none;
+  }
+  .philosophy-inner {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: 60px;
+    align-items: center;
+  }
+  .philosophy-quote {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(48px, 6vw, 80px);
+    letter-spacing: 3px;
+    line-height: 1.05;
+    color: var(--text);
+  }
+  .philosophy-quote em {
+    display: block;
+    color: var(--accent);
+    font-style: normal;
+  }
+  .philosophy-text {
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    line-height: 2.4;
+    border-left: 1px solid var(--border-light);
+    padding-left: 32px;
+  }
+
+  /* ── PRICING ─────────────────────────────────────── */
+  .pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1px;
+    background: var(--border);
+    margin-top: 60px;
+  }
+
+  .pricing-card {
+    background: var(--deep);
+    padding: 48px 36px;
+    position: relative;
+  }
+  .pricing-card.featured {
+    background: var(--card);
+  }
+  .pricing-card.featured::before {
+    content: 'MOST POPULAR';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    background: var(--accent);
+    color: var(--black);
+    font-size: 8px;
+    letter-spacing: 4px;
+    text-align: center;
+    padding: 6px 0;
+  }
+  .pricing-card.featured { padding-top: 60px; }
+
+  .pricing-tier {
+    font-size: 8px;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .pricing-price {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 56px;
+    letter-spacing: 2px;
+    color: var(--text);
+    line-height: 1;
+  }
+  .pricing-price sub {
+    font-family: 'DM Mono', monospace;
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+    vertical-align: middle;
+  }
+  .pricing-period {
+    font-size: 9px;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    margin-bottom: 32px;
+  }
+  .pricing-features {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 36px;
+  }
+  .pricing-features li {
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    line-height: 1.6;
+  }
+  .pricing-features li::before {
+    content: '✦';
+    color: var(--accent);
+    font-size: 8px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+  .pricing-features li.dim::before { color: var(--border-light); }
+  .pricing-features li.dim { color: var(--text-dim); }
+
+  .btn-full {
+    display: block;
+    width: 100%;
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    text-align: center;
+    padding: 14px 0;
+    text-decoration: none;
+    transition: all 0.2s;
+    cursor: pointer;
+    border: none;
+  }
+  .btn-full.accent {
+    background: var(--accent);
+    color: var(--black);
+  }
+  .btn-full.accent:hover { opacity: 0.85; }
+  .btn-full.outline {
+    background: none;
+    color: var(--text-muted);
+    border: 1px solid var(--border-light);
+  }
+  .btn-full.outline:hover { color: var(--text); border-color: var(--text-muted); }
+
+  /* ── DOWNLOAD SECTION ────────────────────────────── */
+  .download {
+    text-align: center;
+    padding: 120px 40px;
+    position: relative;
+    overflow: hidden;
+  }
+  .download-glow {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 800px;
+    height: 400px;
+    background: radial-gradient(ellipse at center, rgba(201,169,110,0.06) 0%, transparent 65%);
+    pointer-events: none;
+  }
+  .download-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(52px, 10vw, 120px);
+    letter-spacing: 8px;
+    line-height: 1;
+    color: var(--text);
+    margin-bottom: 16px;
+    position: relative;
+  }
+  .download-title span { color: var(--accent); }
+  .download-sub {
+    font-size: 10px;
+    letter-spacing: 3px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    margin-bottom: 48px;
+    position: relative;
+  }
+
+  .install-steps {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    max-width: 460px;
+    margin: 0 auto 48px;
+    position: relative;
+  }
+  .install-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--border);
+    width: 100%;
+    text-align: left;
+  }
+  .install-step:last-child { border-bottom: none; }
+  .step-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 2px;
+    color: var(--accent-dim);
+    flex-shrink: 0;
+    line-height: 1;
+    width: 32px;
+  }
+  .step-text {
+    font-size: 10px;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    line-height: 2;
+    padding-top: 4px;
+  }
+  .step-text strong {
+    color: var(--text);
+    font-weight: 500;
+    letter-spacing: 2px;
+    display: block;
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+
+  /* ── FOOTER ───────────────────────────────────────── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: gap;
+    max-width: 100%;
+  }
+  .footer-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    letter-spacing: 5px;
+    color: var(--accent);
+  }
+  .footer-copy {
+    font-size: 8px;
+    letter-spacing: 3px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  /* ── ANIMATIONS ───────────────────────────────────── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes ticker {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+  @keyframes scrollPulse {
+    0%, 100% { opacity: 0.3; transform: scaleY(1); }
+    50%       { opacity: 1;   transform: scaleY(1.2); }
+  }
+
+  /* Scroll reveal */
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.8s ease, transform 0.8s ease;
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+  .reveal-delay-4 { transition-delay: 0.4s; }
+
+  /* ── MOBILE ───────────────────────────────────────── */
+  @media (max-width: 768px) {
+    nav { padding: 16px 20px; }
+    section { padding: 72px 20px; }
+    .philosophy-inner { grid-template-columns: 1fr; gap: 32px; }
+    .philosophy-text { border-left: none; padding-left: 0; border-top: 1px solid var(--border); padding-top: 24px; }
+    .stats-bar { grid-template-columns: 1fr; }
+    .stat-item { border-right: none; border-bottom: 1px solid var(--border); }
+    .stat-item:last-child { border-bottom: none; }
+    footer { flex-direction: column; gap: 16px; text-align: center; padding: 32px 20px; }
+    .hero-actions { flex-direction: column; align-items: center; }
+    .btn-primary, .btn-ghost { width: 100%; text-align: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="nav-logo">FORGE</div>
+  <a href="#download" class="nav-cta">Get the App</a>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-rule"></div>
+  <p class="hero-eyebrow">Your Training Operating System</p>
+  <h1 class="hero-title">FOR<span>GE</span></h1>
+  <p class="hero-sub">Build blocks. Track progress. Develop skills. A cinematic training OS built for serious calisthenics athletes.</p>
+  <div class="hero-actions">
+    <a href="#download" class="btn-primary">Download Free</a>
+    <a href="#features" class="btn-ghost">Explore Features</a>
+  </div>
+  <p class="hero-price">Free to start &nbsp;·&nbsp; <span>£4.99 / mo for full access</span></p>
+  <div class="scroll-hint">
+    <span>Scroll</span>
+    <div class="scroll-line"></div>
+  </div>
+</div>
+
+<!-- TICKER -->
+<div class="ticker-wrap">
+  <div class="ticker-track">
+    <span class="ticker-item"><span class="dot">✦</span>198 Exercises</span>
+    <span class="ticker-item"><span class="dot">✦</span>Full BWF v5.4 Library</span>
+    <span class="ticker-item"><span class="dot">✦</span>Block Builder</span>
+    <span class="ticker-item"><span class="dot">✦</span>Skill Progressions</span>
+    <span class="ticker-item"><span class="dot">✦</span>Rest Timer</span>
+    <span class="ticker-item"><span class="dot">✦</span>Progress Tracking</span>
+    <span class="ticker-item"><span class="dot">✦</span>Session Logging</span>
+    <span class="ticker-item"><span class="dot">✦</span>Warm-Up Protocols</span>
+    <span class="ticker-item"><span class="dot">✦</span>Works Offline</span>
+    <span class="ticker-item"><span class="dot">✦</span>No Ads. Ever.</span>
+    <!-- duplicate for seamless loop -->
+    <span class="ticker-item"><span class="dot">✦</span>198 Exercises</span>
+    <span class="ticker-item"><span class="dot">✦</span>Full BWF v5.4 Library</span>
+    <span class="ticker-item"><span class="dot">✦</span>Block Builder</span>
+    <span class="ticker-item"><span class="dot">✦</span>Skill Progressions</span>
+    <span class="ticker-item"><span class="dot">✦</span>Rest Timer</span>
+    <span class="ticker-item"><span class="dot">✦</span>Progress Tracking</span>
+    <span class="ticker-item"><span class="dot">✦</span>Session Logging</span>
+    <span class="ticker-item"><span class="dot">✦</span>Warm-Up Protocols</span>
+    <span class="ticker-item"><span class="dot">✦</span>Works Offline</span>
+    <span class="ticker-item"><span class="dot">✦</span>No Ads. Ever.</span>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<section id="features">
+  <p class="section-label reveal">What's Inside</p>
+  <h2 class="section-title reveal reveal-delay-1">Built for<br>Athletes.</h2>
+  <p class="section-body reveal reveal-delay-2">Not a generic fitness app. FORGE is a precision instrument — built around how serious calisthenics athletes actually train. Blocks. Progressions. Skills. Volume.</p>
+
+  <div class="features-grid">
+    <div class="feature-card reveal">
+      <div class="feature-num">01</div>
+      <span class="feature-icon">⬡</span>
+      <div class="feature-name">Block Builder</div>
+      <div class="feature-desc">Design full training blocks with custom days, set/rep schemes, methods, and periodisation. Save, edit, and set active blocks in seconds.</div>
+    </div>
+    <div class="feature-card reveal reveal-delay-1">
+      <div class="feature-num">02</div>
+      <span class="feature-icon">◈</span>
+      <div class="feature-name">Skill Progressions</div>
+      <div class="feature-desc">Full BWF v5.4 progression chart. Front Lever, Planche, Handstand, Muscle-Up, Back Lever — every step, in order, at your fingertips.</div>
+    </div>
+    <div class="feature-card reveal reveal-delay-2">
+      <div class="feature-num">03</div>
+      <span class="feature-icon">◉</span>
+      <div class="feature-name">Session Logging</div>
+      <div class="feature-desc">Log sets, reps, and load per exercise. Auto rest timer. Session notes. Sparklines show your load history at a glance.</div>
+    </div>
+    <div class="feature-card reveal reveal-delay-1">
+      <div class="feature-num">04</div>
+      <span class="feature-icon">▣</span>
+      <div class="feature-name">Fixed Warm-Up & Skill</div>
+      <div class="feature-desc">Set warm-up and skill work once per block. They appear automatically every session — no rebuilding, no guesswork.</div>
+    </div>
+    <div class="feature-card reveal reveal-delay-2">
+      <div class="feature-num">05</div>
+      <span class="feature-icon">◎</span>
+      <div class="feature-name">Progress Tracking</div>
+      <div class="feature-desc">Week-by-week load tables per exercise. Colour coded — gold for current week, green for PRs, red for drops. See your trajectory instantly.</div>
+    </div>
+    <div class="feature-card reveal reveal-delay-3">
+      <div class="feature-num">06</div>
+      <span class="feature-icon">⬖</span>
+      <div class="feature-name">198 Exercises</div>
+      <div class="feature-desc">Calisthenics, barbell, dumbbell, machine. Every major movement. Descriptions, cues, target muscles, and reference video links for each.</div>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- STATS -->
+<section>
+  <div class="stats-bar reveal">
+    <div class="stat-item">
+      <span class="stat-num">198</span>
+      <span class="stat-label">Exercises in library</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">7</span>
+      <span class="stat-label">Day free trial</span>
+    </div>
+    <div class="stat-item">
+      <span class="stat-num">0</span>
+      <span class="stat-label">Ads. Ever.</span>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- PHILOSOPHY -->
+<div class="philosophy">
+  <div class="philosophy-bg"></div>
+  <div class="philosophy-inner">
+    <div class="philosophy-quote reveal">
+      TRAIN<br>WITH<br><em>PURPOSE.</em>
+    </div>
+    <p class="philosophy-text reveal reveal-delay-2">
+      Most training apps are built for the casual user. FORGE isn't.<br><br>
+      It's built for the athlete who programmes their own training, who tracks load week over week, who is working toward a specific skill and needs to see their progression laid out clearly.<br><br>
+      Dark. Focused. No noise. Just the work.
+    </p>
+  </div>
+</div>
+
+<!-- PRICING -->
+<section id="pricing">
+  <p class="section-label reveal">Pricing</p>
+  <h2 class="section-title reveal reveal-delay-1">Simple.<br>No Tricks.</h2>
+
+  <div class="pricing-grid">
+    <div class="pricing-card reveal">
+      <div class="pricing-tier">Free</div>
+      <div class="pricing-price">£0</div>
+      <div class="pricing-period">Forever</div>
+      <ul class="pricing-features">
+        <li>Full exercise library</li>
+        <li>Session logging</li>
+        <li>1 active training block</li>
+        <li>Rest timer</li>
+        <li class="dim">Unlimited blocks</li>
+        <li class="dim">Progress charts</li>
+        <li class="dim">Block archive</li>
+        <li class="dim">Sparklines</li>
+      </ul>
+      <a href="#download" class="btn-full outline">Start Free</a>
+    </div>
+    <div class="pricing-card featured reveal reveal-delay-1">
+      <div class="pricing-tier">Premium</div>
+      <div class="pricing-price">£4.99<sub>/mo</sub></div>
+      <div class="pricing-period">7-day free trial · cancel anytime</div>
+      <ul class="pricing-features">
+        <li>Everything in Free</li>
+        <li>Unlimited training blocks</li>
+        <li>Full progress tracking</li>
+        <li>Load sparklines</li>
+        <li>Block archive</li>
+        <li>Priority support</li>
+      </ul>
+      <a href="#download" class="btn-full accent">Start Free Trial</a>
+    </div>
+    <div class="pricing-card reveal reveal-delay-2">
+      <div class="pricing-tier">FORGE + Programmes</div>
+      <div class="pricing-price">£19.99<sub>/mo</sub></div>
+      <div class="pricing-period">Coming soon</div>
+      <ul class="pricing-features">
+        <li>Everything in Premium</li>
+        <li>Coached training blocks</li>
+        <li>Video cue library</li>
+        <li>Weekly check-ins</li>
+        <li>Direct coach access</li>
+        <li>Full accountability system</li>
+      </ul>
+      <a href="#contact" class="btn-full outline">Join Waitlist</a>
+    </div>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- DOWNLOAD -->
+<div class="download" id="download">
+  <div class="download-glow"></div>
+  <p class="section-label reveal" style="margin-bottom:20px">Install</p>
+  <h2 class="download-title reveal reveal-delay-1">GET<br><span>FORGE</span></h2>
+  <p class="download-sub reveal reveal-delay-2">Works on any device. No app store required.</p>
+
+  <div class="install-steps reveal reveal-delay-2">
+    <div class="install-step">
+      <div class="step-num">1</div>
+      <div class="step-text">
+        <strong>Open in Safari</strong>
+        On iPhone or iPad, open this page in Safari for the best experience.
+      </div>
+    </div>
+    <div class="install-step">
+      <div class="step-num">2</div>
+      <div class="step-text">
+        <strong>Tap Share</strong>
+        Hit the Share icon at the bottom of your browser.
+      </div>
+    </div>
+    <div class="install-step">
+      <div class="step-num">3</div>
+      <div class="step-text">
+        <strong>Add to Home Screen</strong>
+        Select "Add to Home Screen" — FORGE installs like a native app.
+      </div>
+    </div>
+    <div class="install-step">
+      <div class="step-num">4</div>
+      <div class="step-text">
+        <strong>Train</strong>
+        Open FORGE from your home screen. Build your first block.
+      </div>
+    </div>
+  </div>
+
+  <a href="forge.html" class="btn-primary reveal reveal-delay-3" style="font-size:12px;padding:18px 48px">Open FORGE →</a>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">FORGE</div>
+  <div class="footer-copy">© 2025 FORGE · All Rights Reserved</div>
+</footer>
+
+<script>
+  // Nav scroll
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 40);
+  });
+
+  // Scroll reveal
+  const reveals = document.querySelectorAll('.reveal');
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if(e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  reveals.forEach(el => observer.observe(el));
+</script>
+</body>
+</html>
