@@ -1449,13 +1449,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if(btn) btn.style.display = 'none';
   }
 
-  // Auth gate — show splash only if no user and not a returning guest
+  // Auth gate — let Supabase session check decide what to show
   const isGuest = localStorage.getItem('fw_guest') === '1';
-  if(!currentUser && !isGuest) {
-    showAuthScreen('splash');
-  } else {
-    startApp(!currentUser);
+  if(isGuest) {
+    startApp(true);
+  } else if(currentUser) {
+    // Has localStorage user — start app immediately, session validates in background
+    startApp(false);
   }
+  // If no currentUser and not guest — getSession below will handle showing auth or starting app
   updateUserBar();
 });
 
@@ -2953,14 +2955,14 @@ async function handleSignOut() {
 
 // On load — check if already logged in via Supabase session
 supa.auth.getSession().then(async ({ data: { session }, error }) => {
+  const isGuest = localStorage.getItem('fw_guest') === '1';
   if(session?.user) {
     await afterAuth(session.user, false);
-  } else {
-    // Clear stale localStorage if no valid session
-    localStorage.removeItem('fw_user');
-    localStorage.removeItem('fw_premium');
-    currentUser = null; isPremium = false;
+  } else if(!currentUser && !isGuest) {
+    // No session, no localStorage user, not a guest — show auth
+    showAuthScreen('splash');
   }
+  // If guest or localStorage user with no Supabase session — already handled above
 });
 
 // Auth state changes handled by getSession on load
