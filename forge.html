@@ -423,9 +423,18 @@
   /* ── PREMIUM ── */
   .premium-badge { display: inline-flex; align-items: center; gap: 4px; background: linear-gradient(135deg,#c9a96e,#8a5f2a); color: #080808; font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 2px; text-transform: uppercase; padding: 3px 8px; font-weight: 500; }
   .free-badge { display: inline-flex; align-items: center; background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 2px; text-transform: uppercase; padding: 3px 8px; }
-  .user-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 20px; border-bottom: 1px solid var(--border); background: var(--deep); }
+  .user-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 20px; border-bottom: 1px solid var(--border); background: var(--deep); cursor: pointer; }
+  .user-bar:active { background: var(--surface); }
   .user-name { font-size: 10px; letter-spacing: 1px; color: var(--text-muted); }
   .upgrade-link { font-size: 9px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; cursor: pointer; border: none; background: none; font-family: 'DM Mono', monospace; padding: 0; }
+  .signout-sheet { position: fixed; inset: 0; z-index: 300; display: none; }
+  .signout-sheet.open { display: block; }
+  .signout-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.6); }
+  .signout-card { position: absolute; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 24px 20px 40px; }
+  .signout-name { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px; color: var(--text); margin-bottom: 4px; }
+  .signout-email { font-size: 9px; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 24px; }
+  .signout-btn { width: 100%; padding: 14px; background: none; border: 1px solid var(--border-light); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; }
+  .signout-btn:active { border-color: var(--red); color: var(--red); }
 
   /* ── UPGRADE MODAL ── */
   .upgrade-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 500; display: flex; align-items: flex-end; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
@@ -562,9 +571,19 @@
 
 <div class="app">
   <div class="status-bar"></div>
-  <div class="user-bar" id="user-bar">
+  <div class="user-bar" id="user-bar" onclick="openSignOutSheet()">
     <span class="user-name" id="user-bar-name">GUEST</span>
-    <button class="upgrade-link" onclick="openUpgrade()" id="upgrade-link-btn">Upgrade to Premium ✦</button>
+    <button class="upgrade-link" id="upgrade-link-btn">Upgrade to Premium ✦</button>
+  </div>
+
+  <!-- Sign out sheet -->
+  <div class="signout-sheet" id="signout-sheet">
+    <div class="signout-backdrop" onclick="closeSignOutSheet()"></div>
+    <div class="signout-card">
+      <div class="signout-name" id="signout-sheet-name"></div>
+      <div class="signout-email" id="signout-sheet-email"></div>
+      <button class="signout-btn" onclick="handleSignOut()">Sign Out</button>
+    </div>
   </div>
   <div class="topbar">
     <button class="back-btn" id="back-btn" onclick="goBack()">← BACK</button>
@@ -2919,9 +2938,14 @@ async function handleSignOut() {
 }
 
 // On load — check if already logged in via Supabase session
-supa.auth.getSession().then(async ({ data: { session } }) => {
+supa.auth.getSession().then(async ({ data: { session }, error }) => {
   if(session?.user) {
     await afterAuth(session.user, false);
+  } else {
+    // Clear stale localStorage if no valid session
+    localStorage.removeItem('fw_user');
+    localStorage.removeItem('fw_premium');
+    currentUser = null; isPremium = false;
   }
 });
 
@@ -2939,18 +2963,31 @@ function updateUserBar() {
     upgradeBtn.textContent = '✦ PREMIUM';
     upgradeBtn.style.color = 'var(--accent)';
     upgradeBtn.style.cursor = 'default';
-    upgradeBtn.onclick = null;
+    upgradeBtn.onclick = e => e.stopPropagation();
     if(trialStart) {
       const daysLeft = 7 - Math.floor((Date.now()-trialStart)/(1000*60*60*24));
       if(daysLeft > 0 && daysLeft <= 7) upgradeBtn.textContent = `✦ TRIAL · ${daysLeft}D LEFT`;
     }
   } else {
     upgradeBtn.textContent = 'Upgrade to Premium ✦';
-    upgradeBtn.onclick = openUpgrade;
+    upgradeBtn.onclick = e => { e.stopPropagation(); openUpgrade(); };
   }
 }
 
-function openUpgrade() { document.getElementById('upgrade-overlay').classList.add('open'); }
+function openSignOutSheet() {
+  if(!currentUser) return;
+  document.getElementById('signout-sheet-name').textContent = currentUser.name.toUpperCase();
+  document.getElementById('signout-sheet-email').textContent = currentUser.email;
+  document.getElementById('signout-sheet').classList.add('open');
+}
+
+function closeSignOutSheet() {
+  document.getElementById('signout-sheet').classList.remove('open');
+}
+
+function openUpgrade() {
+  document.getElementById('upgrade-overlay').classList.add('open');
+}
 function closeUpgrade() { document.getElementById('upgrade-overlay').classList.remove('open'); }
 
 function activatePremium() {
