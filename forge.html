@@ -3054,6 +3054,9 @@ async function loadProgrammes() {
         ? `<button onclick="loadProgrammeAsBlock('${p.id}')" style="width:100%;padding:12px;background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer">LOAD INTO APP →</button>`
         : `<div style="padding:12px;border:1px solid var(--border);text-align:center;font-size:9px;letter-spacing:3px;color:var(--text-dim)">✦ COACHED TIER — £19.99/MO</div>`
       }
+      ${currentUser?.tier === 'admin' ? `
+        <button onclick="deleteProgramme('${p.id}')" style="width:100%;margin-top:8px;padding:10px;background:none;border:1px solid var(--border);color:var(--text-dim);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;cursor:pointer">✕ DELETE</button>
+      ` : ''}
     </div>
   `).join('');
 }
@@ -3075,6 +3078,14 @@ async function publishProgramme() {
   document.getElementById('prog-title').value = '';
   document.getElementById('prog-month').value = '';
   document.getElementById('prog-desc').value = '';
+  loadProgrammes();
+}
+
+async function deleteProgramme(progId) {
+  if(!confirm('Delete this programme? This cannot be undone.')) return;
+  const { error } = await supa.from('programmes').delete().eq('id', progId);
+  if(error) { showToast('Delete failed: ' + error.message); return; }
+  showToast('Programme deleted');
   loadProgrammes();
 }
 
