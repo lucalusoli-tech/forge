@@ -2881,7 +2881,14 @@ async function afterAuth(supaUser, isNew) {
   if(isNew) { trialStart = now; localStorage.setItem('fw_trial_start', now); }
   localStorage.setItem('fw_user', JSON.stringify(user));
   localStorage.setItem('fw_premium', 'true');
-  // Load cloud data then start app
+  // Upsert profile — safe whether it exists or not
+  await supa.from('profiles').upsert({
+    id: supaUser.id,
+    email: supaUser.email,
+    name: user.name,
+    tier: 'trial',
+    trial_start: new Date().toISOString()
+  }, { onConflict: 'id' });
   await loadFromCloud();
   startApp(false);
 }
