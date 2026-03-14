@@ -581,6 +581,7 @@
     <div class="signout-card">
       <div class="signout-name" id="signout-sheet-name"></div>
       <div class="signout-email" id="signout-sheet-email"></div>
+      <button class="upgrade-cta" id="signout-upgrade-btn" onclick="closeSignOutSheet();openUpgrade()" style="width:100%;margin-bottom:10px;display:none">UPGRADE TO PREMIUM ✦</button>
       <button class="signout-btn" onclick="handleSignOut()">Sign Out</button>
     </div>
   </div>
@@ -3011,6 +3012,8 @@ function openSignOutSheet() {
   if(!currentUser) return;
   document.getElementById('signout-sheet-name').textContent = currentUser.name.toUpperCase();
   document.getElementById('signout-sheet-email').textContent = currentUser.email;
+  const upgradeBtn = document.getElementById('signout-upgrade-btn');
+  if(upgradeBtn) upgradeBtn.style.display = isPremium ? 'none' : 'block';
   document.getElementById('signout-sheet').classList.add('open');
 }
 
