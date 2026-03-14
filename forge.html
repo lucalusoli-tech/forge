@@ -819,34 +819,43 @@
 
       <!-- COACHING -->
       <div class="page" id="page-coaching">
+
+        <!-- PROGRAMMES FEED -->
         <div class="coaching-hero">
-          <div class="coaching-eyebrow">1-2-1 Personal Training</div>
-          <div class="coaching-title">TRAIN WITH<br>A COACH</div>
-          <div class="coaching-desc">Personalised calisthenics and strength programming. Built around your body, your schedule, and your goals. No templates — every session designed for you.</div>
+          <div class="coaching-eyebrow">Monthly Drops</div>
+          <div class="coaching-title">PROGRAMMES</div>
+          <div class="coaching-desc">Coached training blocks — built by a certified PT, dropped every month. Load directly into your app and train.</div>
         </div>
-        <div class="coaching-pillars">
-          <div class="coaching-pillar">
-            <div class="coaching-pillar-icon">⬡</div>
-            <div class="coaching-pillar-title">Custom Blocks</div>
-            <div class="coaching-pillar-desc">Every training block written specifically for your level and goals</div>
-          </div>
-          <div class="coaching-pillar">
-            <div class="coaching-pillar-icon">◉</div>
-            <div class="coaching-pillar-title">Skill Progressions</div>
-            <div class="coaching-pillar-desc">Structured paths to muscle-up, front lever, planche and beyond</div>
-          </div>
-          <div class="coaching-pillar">
-            <div class="coaching-pillar-icon">✦</div>
-            <div class="coaching-pillar-title">Weekly Check-ins</div>
-            <div class="coaching-pillar-desc">Direct access, form reviews, and programming adjustments</div>
-          </div>
-          <div class="coaching-pillar">
-            <div class="coaching-pillar-icon">◌</div>
-            <div class="coaching-pillar-title">Full Accountability</div>
-            <div class="coaching-pillar-desc">Consistent progress through guided programming and honest feedback</div>
-          </div>
+
+        <!-- ADMIN: Publish panel (only visible to admin) -->
+        <div id="admin-publish-panel" style="display:none;margin:20px;border:1px solid var(--accent-dim);padding:20px;background:var(--surface)">
+          <div style="font-size:8px;letter-spacing:4px;color:var(--accent);margin-bottom:16px">ADMIN — PUBLISH PROGRAMME</div>
+          <input class="coaching-input" type="text" id="prog-title" placeholder="Programme title e.g. FORGE BLOCK 01">
+          <input class="coaching-input" type="text" id="prog-month" placeholder="Month e.g. March 2026">
+          <textarea class="coaching-textarea" id="prog-desc" placeholder="Short description — who it's for, what it focuses on..."></textarea>
+          <div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:10px">BLOCK DATA — paste from current block or leave to use active block</div>
+          <button class="coaching-submit" onclick="publishProgramme()" style="margin-bottom:0">PUBLISH ACTIVE BLOCK AS PROGRAMME →</button>
         </div>
+
+        <!-- PROGRAMMES LIST -->
+        <div id="programmes-list" style="padding:0 20px 20px">
+          <div style="padding:32px 0;text-align:center;font-size:9px;letter-spacing:3px;color:var(--text-dim)" id="programmes-empty">Loading programmes...</div>
+        </div>
+
+        <!-- DIVIDER -->
+        <div style="border-top:1px solid var(--border);margin:0 20px"></div>
+
+        <!-- COACHING ENQUIRY -->
         <div class="coaching-form">
+          <div class="coaching-eyebrow" style="padding-top:20px">1-2-1 Personal Training</div>
+          <div class="coaching-title" style="font-size:32px;margin-bottom:8px">TRAIN WITH<br>A COACH</div>
+          <div class="coaching-desc" style="margin-bottom:20px">Fully personalised programming. Built around your body, schedule, and goals.</div>
+          <div class="coaching-pillars" style="margin:0 0 20px">
+            <div class="coaching-pillar"><div class="coaching-pillar-icon">⬡</div><div class="coaching-pillar-title">Custom Blocks</div><div class="coaching-pillar-desc">Every block written specifically for your level</div></div>
+            <div class="coaching-pillar"><div class="coaching-pillar-icon">◉</div><div class="coaching-pillar-title">Skill Progressions</div><div class="coaching-pillar-desc">Structured paths to your target skills</div></div>
+            <div class="coaching-pillar"><div class="coaching-pillar-icon">✦</div><div class="coaching-pillar-title">Weekly Check-ins</div><div class="coaching-pillar-desc">Direct access and programming adjustments</div></div>
+            <div class="coaching-pillar"><div class="coaching-pillar-icon">◌</div><div class="coaching-pillar-title">Full Accountability</div><div class="coaching-pillar-desc">Consistent progress through honest feedback</div></div>
+          </div>
           <div class="coaching-form-label">Request a spot</div>
           <input class="coaching-input" type="text" id="coach-name" placeholder="Your name">
           <input class="coaching-input" type="email" id="coach-email" placeholder="Email address">
@@ -872,7 +881,7 @@
     <button class="nav-btn" id="nav-db" onclick="navigate('db')"><span class="nav-icon">◉</span><span class="nav-label">Library</span></button>
     <button class="nav-btn" id="nav-progress" onclick="navigate('progress')"><span class="nav-icon">◌</span><span class="nav-label">Progress</span></button>
     <button class="nav-btn" id="nav-builder" onclick="navigate('builder')"><span class="nav-icon">✦</span><span class="nav-label">Build</span></button>
-    <button class="nav-btn" id="nav-coaching" onclick="navigate('coaching')"><span class="nav-icon">人</span><span class="nav-label">Coach</span></button>
+    <button class="nav-btn" id="nav-coaching" onclick="navigate('coaching')"><span class="nav-icon">人</span><span class="nav-label">Programmes</span></button>
   </nav>
 </div>
 
@@ -1507,6 +1516,7 @@ function navigate(page, push=true) {
   document.getElementById('back-btn').classList.toggle('visible', isLog);
   document.getElementById('topbar-logo').style.display = isLog ? 'none' : 'block';
   if (page==='progress') renderProgress();
+  if (page==='coaching') loadProgrammes();
 }
 
 function goBack() {
@@ -2905,9 +2915,13 @@ async function afterAuth(supaUser, isNew) {
     id: supaUser.id,
     email: supaUser.email,
     name: user.name,
-    tier: 'trial',
-    trial_start: new Date().toISOString()
+    tier: isNew ? 'trial' : undefined,
+    trial_start: isNew ? new Date().toISOString() : undefined
   }, { onConflict: 'id' });
+  // Load tier from profile
+  const { data: profile } = await supa.from('profiles').select('tier').eq('id', supaUser.id).single();
+  if(profile?.tier) currentUser.tier = profile.tier;
+  localStorage.setItem('fw_user', JSON.stringify(currentUser));
   await loadFromCloud();
   startApp(false);
 }
@@ -3004,6 +3018,82 @@ function checkBlockLimit() {
 }
 
 // ─── COACHING ──────────────────────────────────────────────────
+// ─── PROGRAMMES ────────────────────────────────────────────────
+async function loadProgrammes() {
+  const list = document.getElementById('programmes-list');
+  const empty = document.getElementById('programmes-empty');
+  if(!list) return;
+
+  // Show admin panel if admin
+  if(currentUser?.tier === 'admin' || isPremium) {
+    const panel = document.getElementById('admin-publish-panel');
+    // Only show publish panel to admin
+    if(currentUser?.tier === 'admin') panel.style.display = 'block';
+  }
+
+  const { data: programmes, error } = await supa
+    .from('programmes')
+    .select('*')
+    .order('published_at', { ascending: false });
+
+  if(error || !programmes?.length) {
+    if(empty) empty.textContent = 'No programmes published yet. Check back soon.';
+    return;
+  }
+
+  if(empty) empty.style.display = 'none';
+
+  const isCoached = currentUser?.tier === 'coached' || currentUser?.tier === 'admin';
+
+  list.innerHTML = programmes.map(p => `
+    <div style="border:1px solid var(--border);background:var(--card);margin-bottom:12px;padding:20px">
+      <div style="font-size:8px;letter-spacing:3px;color:var(--accent);margin-bottom:8px">${p.month||''}</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--text);margin-bottom:8px">${p.title}</div>
+      <div style="font-size:10px;letter-spacing:1px;color:var(--text-muted);line-height:1.8;margin-bottom:16px">${p.description||''}</div>
+      ${isCoached
+        ? `<button onclick="loadProgrammeAsBlock('${p.id}')" style="width:100%;padding:12px;background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer">LOAD INTO APP →</button>`
+        : `<div style="padding:12px;border:1px solid var(--border);text-align:center;font-size:9px;letter-spacing:3px;color:var(--text-dim)">✦ COACHED TIER — £19.99/MO</div>`
+      }
+    </div>
+  `).join('');
+}
+
+async function publishProgramme() {
+  const title = document.getElementById('prog-title').value.trim();
+  const month = document.getElementById('prog-month').value.trim();
+  const desc  = document.getElementById('prog-desc').value.trim();
+  if(!title || !month) { showToast('Title and month required'); return; }
+  const { error } = await supa.from('programmes').insert({
+    title,
+    month,
+    description: desc,
+    data: { currentBlock, customWorkouts },
+    created_by: currentUser.id
+  });
+  if(error) { showToast('Publish failed: ' + error.message); return; }
+  showToast('Programme published ✦');
+  document.getElementById('prog-title').value = '';
+  document.getElementById('prog-month').value = '';
+  document.getElementById('prog-desc').value = '';
+  loadProgrammes();
+}
+
+async function loadProgrammeAsBlock(progId) {
+  const { data, error } = await supa.from('programmes').select('*').eq('id', progId).single();
+  if(error || !data) { showToast('Failed to load programme'); return; }
+  const block = data.data?.currentBlock;
+  if(!block) { showToast('No block data found'); return; }
+  // Save as a custom workout so user can set it as current
+  const newBlock = { ...block, id: 'prog_' + progId, name: data.title };
+  if(!newBlock.warmup) newBlock.warmup = [];
+  if(!newBlock.skill)  newBlock.skill  = [];
+  customWorkouts.unshift(newBlock);
+  localStorage.setItem('fw_customs', JSON.stringify(customWorkouts));
+  syncBlocksToCloud();
+  showToast('Programme added to Builder ✦');
+  setTimeout(() => navigate('builder'), 800);
+}
+
 function submitCoachingRequest() {
   const name = document.getElementById('coach-name').value.trim();
   const email = document.getElementById('coach-email').value.trim();
