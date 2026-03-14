@@ -3021,31 +3021,37 @@ function closeUpgrade() { document.getElementById('upgrade-overlay').classList.r
 
 async function activatePremium(tier='premium') {
   if(!currentUser) { showToast('Sign in to upgrade'); return; }
+  console.log('User:', JSON.stringify(currentUser));
   const btn = document.getElementById('upgrade-cta-btn');
   if(btn) { btn.textContent = 'LOADING...'; btn.disabled = true; }
   try {
+    const payload = {
+      user_id: currentUser.id,
+      email: currentUser.email,
+      name: currentUser.name,
+      tier
+    };
+    console.log('Payload:', JSON.stringify(payload));
     const res = await fetch(
       'https://naxojfchohntrfpunbxg.supabase.co/functions/v1/gocardless-checkout',
       {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: currentUser.id,
-          email: currentUser.email,
-          name: currentUser.name,
-          tier
-        })
+        body: JSON.stringify(payload)
       }
     );
+    console.log('Response status:', res.status);
     const data = await res.json();
+    console.log('Response data:', JSON.stringify(data));
     if(data.url) {
       window.location.href = data.url;
     } else {
       throw new Error(data.error || 'Unknown error');
     }
   } catch(err) {
+    console.error('Payment error:', err);
     showToast('Payment error: ' + err.message);
-    if(btn) { btn.textContent = 'START FREE TRIAL →'; btn.disabled = false; }
+    if(btn) { btn.textContent = 'PREMIUM £9.99/mo →'; btn.disabled = false; }
   }
 }
 
