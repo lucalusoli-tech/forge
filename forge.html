@@ -2974,21 +2974,30 @@ function updateUserBar() {
   if(!bar) return;
   if(currentUser) {
     nameEl.textContent = currentUser.name.toUpperCase();
-  } else {
-    nameEl.textContent = 'GUEST';
-  }
-  if(isPremium) {
-    upgradeBtn.textContent = '✦ PREMIUM';
-    upgradeBtn.style.color = 'var(--accent)';
-    upgradeBtn.style.cursor = 'default';
-    upgradeBtn.onclick = e => e.stopPropagation();
-    if(trialStart) {
-      const daysLeft = 7 - Math.floor((Date.now()-trialStart)/(1000*60*60*24));
-      if(daysLeft > 0 && daysLeft <= 7) upgradeBtn.textContent = `✦ TRIAL · ${daysLeft}D LEFT`;
+    if(isPremium) {
+      upgradeBtn.textContent = '✦ PREMIUM';
+      upgradeBtn.style.color = 'var(--accent)';
+      upgradeBtn.style.cursor = 'default';
+      upgradeBtn.onclick = e => e.stopPropagation();
+      if(trialStart) {
+        const daysLeft = 7 - Math.floor((Date.now()-trialStart)/(1000*60*60*24));
+        if(daysLeft > 0 && daysLeft <= 7) upgradeBtn.textContent = `✦ TRIAL · ${daysLeft}D LEFT`;
+      }
+    } else {
+      upgradeBtn.textContent = 'Upgrade ✦';
+      upgradeBtn.style.color = 'var(--accent)';
+      upgradeBtn.onclick = e => { e.stopPropagation(); openUpgrade(); };
     }
   } else {
-    upgradeBtn.textContent = 'Upgrade to Premium ✦';
-    upgradeBtn.onclick = e => { e.stopPropagation(); openUpgrade(); };
+    // Guest
+    nameEl.textContent = 'GUEST';
+    upgradeBtn.textContent = 'Sign In →';
+    upgradeBtn.style.color = 'var(--accent)';
+    upgradeBtn.onclick = e => {
+      e.stopPropagation();
+      localStorage.removeItem('fw_guest');
+      showAuthScreen('splash');
+    };
   }
 }
 
@@ -2997,7 +3006,7 @@ function openSignOutSheet() {
   document.getElementById('signout-sheet-name').textContent = currentUser.name.toUpperCase();
   document.getElementById('signout-sheet-email').textContent = currentUser.email;
   const upgradeBtn = document.getElementById('signout-upgrade-btn');
-  if(upgradeBtn) upgradeBtn.style.display = isPremium ? 'none' : 'block';
+  if(upgradeBtn) upgradeBtn.style.display = (currentUser.tier === 'coached' || currentUser.tier === 'admin') ? 'none' : 'block';
   document.getElementById('signout-sheet').classList.add('open');
 }
 
