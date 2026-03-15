@@ -3032,8 +3032,8 @@ async function activatePremium(tier='premium') {
       tier
     };
     console.log('Payload:', JSON.stringify(payload));
-    const session = await supa.auth.getSession();
-    const accessToken = session?.data?.session?.access_token || SUPA_KEY;
+    const { data: { session } } = await supa.auth.getSession();
+    const accessToken = session?.access_token ?? SUPA_KEY;
     const res = await fetch(
       'https://naxojfchohntrfpunbxg.supabase.co/functions/v1/gocardless-checkout',
       {
