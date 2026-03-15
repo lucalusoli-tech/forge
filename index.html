@@ -706,7 +706,7 @@
   <h1 class="hero-title">FOR<span>GE</span></h1>
   <p class="hero-sub">Build blocks. Track progress. Develop skills. A cinematic training OS built for serious calisthenics athletes.</p>
   <div class="hero-actions">
-    <a href="#download" class="btn-primary">Download Free</a>
+    <a href="#download" class="btn-primary">Start Now</a>
     <a href="#features" class="btn-ghost">Explore Features</a>
   </div>
   <p class="hero-price">Free to start &nbsp;·&nbsp; <span>£9.99 / mo for full access</span></p>
@@ -846,7 +846,7 @@
         <li class="dim">Block archive</li>
         <li class="dim">Sparklines</li>
       </ul>
-      <a href="#download" class="btn-full outline">Start Free</a>
+      <a href="#download" class="btn-full outline">Start Now</a>
     </div>
     <div class="pricing-card featured reveal reveal-delay-1">
       <div class="pricing-tier">Premium</div>
@@ -860,26 +860,67 @@
         <li>Block archive</li>
         <li>Priority support</li>
       </ul>
-      <a href="#download" class="btn-full accent">Start Free Trial</a>
+      <a href="#download" class="btn-full accent">Start Now</a>
     </div>
     <div class="pricing-card reveal reveal-delay-2">
       <div class="pricing-tier">FORGE + Programmes</div>
       <div class="pricing-price">£19.99<sub>/mo</sub></div>
-      <div class="pricing-period">Coming soon</div>
+      <div class="pricing-period">Everything in Premium, plus:</div>
       <ul class="pricing-features">
-        <li>Everything in Premium</li>
-        <li>Coached training blocks</li>
-        <li>Video cue library</li>
-        <li>Weekly check-ins</li>
-        <li>Direct coach access</li>
+        <li>New coached programme every month</li>
+        <li>Load directly into your app</li>
+        <li>Built by a certified L3 PT</li>
+        <li>Calisthenics & strength focus</li>
+        <li>Full exercise library + tracking</li>
+      </ul>
+      <a href="#download" class="btn-full outline">Start Now</a>
+    </div>
+    <div class="pricing-card reveal reveal-delay-3" style="border-top:2px solid var(--accent)">
+      <div class="pricing-tier" style="color:var(--text-muted)">1-2-1 Coaching</div>
+      <div class="pricing-price" style="font-size:36px">Bespoke</div>
+      <div class="pricing-period">Enquire for pricing</div>
+      <ul class="pricing-features">
+        <li>Fully personalised programming</li>
+        <li>Built around your body and goals</li>
+        <li>Weekly check-ins and form reviews</li>
+        <li>Direct access to your coach</li>
         <li>Full accountability system</li>
       </ul>
-      <a href="#contact" class="btn-full outline">Join Waitlist</a>
+      <a href="#coaching" class="btn-full outline" onclick="document.getElementById('coaching').scrollIntoView({behavior:'smooth'});return false;">Enquire Now →</a>
     </div>
   </div>
 </section>
 
 <div class="divider"></div>
+
+<!-- 1-2-1 COACHING SECTION -->
+<section id="coaching">
+  <p class="section-label reveal">1-2-1 Personal Training</p>
+  <h2 class="section-title reveal reveal-delay-1">TRAIN WITH<br>A COACH</h2>
+  <p class="section-body reveal reveal-delay-2">Fully personalised calisthenics and strength programming. Built around your body, your schedule, and your goals. No templates — every session designed for you.</p>
+  <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);margin:40px 0" class="reveal reveal-delay-2">
+    <div style="background:var(--black);padding:28px 24px"><div style="font-size:20px;margin-bottom:10px">⬡</div><div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:var(--text);margin-bottom:6px">Custom Blocks</div><div style="font-size:10px;color:var(--text-muted);line-height:1.8;letter-spacing:0.5px">Every block written specifically for your level and goals</div></div>
+    <div style="background:var(--black);padding:28px 24px"><div style="font-size:20px;margin-bottom:10px">◉</div><div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:var(--text);margin-bottom:6px">Skill Progressions</div><div style="font-size:10px;color:var(--text-muted);line-height:1.8;letter-spacing:0.5px">Structured paths to muscle-up, front lever, planche and beyond</div></div>
+    <div style="background:var(--black);padding:28px 24px"><div style="font-size:20px;margin-bottom:10px">✦</div><div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:var(--text);margin-bottom:6px">Weekly Check-ins</div><div style="font-size:10px;color:var(--text-muted);line-height:1.8;letter-spacing:0.5px">Direct access, form reviews, and programming adjustments</div></div>
+    <div style="background:var(--black);padding:28px 24px"><div style="font-size:20px;margin-bottom:10px">◌</div><div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:var(--text);margin-bottom:6px">Full Accountability</div><div style="font-size:10px;color:var(--text-muted);line-height:1.8;letter-spacing:0.5px">Consistent progress through guided programming and honest feedback</div></div>
+  </div>
+  <!-- Enquiry Form -->
+  <div style="max-width:560px;margin:0 auto" class="reveal reveal-delay-3">
+    <div style="font-size:8px;letter-spacing:4px;color:var(--accent);text-transform:uppercase;margin-bottom:20px;border-top:1px solid var(--border);padding-top:32px">Request a spot</div>
+    <input id="lp-coach-name" type="text" placeholder="Your name" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:13px;padding:13px 16px;outline:none;border-radius:0;margin-bottom:10px">
+    <input id="lp-coach-email" type="email" placeholder="Email address" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:13px;padding:13px 16px;outline:none;border-radius:0;margin-bottom:10px">
+    <select id="lp-coach-goal" style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);font-family:'DM Mono',monospace;font-size:13px;padding:13px 16px;outline:none;border-radius:0;margin-bottom:10px;-webkit-appearance:none">
+      <option value="" disabled selected>Your main goal...</option>
+      <option value="calisthenics-skills">Calisthenics skills — muscle-up, front lever, planche</option>
+      <option value="strength-hypertrophy">Strength & hypertrophy</option>
+      <option value="fat-loss-conditioning">Fat loss & conditioning</option>
+      <option value="general-fitness">General fitness & movement quality</option>
+      <option value="beginners">Complete beginner — start from scratch</option>
+    </select>
+    <textarea id="lp-coach-message" placeholder="Tell me where you're at and what you want to achieve..." style="width:100%;background:var(--surface);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:13px;padding:13px 16px;outline:none;resize:none;min-height:100px;border-radius:0;margin-bottom:10px"></textarea>
+    <button id="lp-coach-btn" onclick="submitLandingCoachEnquiry()" style="width:100%;padding:16px;background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent);font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;cursor:pointer">SEND REQUEST →</button>
+    <div id="lp-coach-sent" style="display:none;text-align:center;padding:24px;font-size:10px;letter-spacing:3px;color:var(--accent);text-transform:uppercase">✓ Request sent — I'll be in touch within 24h</div>
+  </div>
 
 <!-- DOWNLOAD -->
 <div class="download" id="download">
@@ -946,6 +987,31 @@
     });
   }, { threshold: 0.1 });
   reveals.forEach(el => observer.observe(el));
+
+  async function submitLandingCoachEnquiry() {
+    const name  = document.getElementById('lp-coach-name').value.trim();
+    const email = document.getElementById('lp-coach-email').value.trim();
+    const goal  = document.getElementById('lp-coach-goal').value;
+    const msg   = document.getElementById('lp-coach-message').value.trim();
+    if(!name || !email) { alert('Name and email required'); return; }
+    const btn = document.getElementById('lp-coach-btn');
+    btn.textContent = 'SENDING...'; btn.disabled = true;
+    try {
+      const res = await fetch('https://formspree.io/f/xreyaapy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({ name, email, goal, message: msg })
+      });
+      const data = await res.json();
+      if(data.ok) {
+        btn.style.display = 'none';
+        document.getElementById('lp-coach-sent').style.display = 'block';
+      } else { throw new Error(); }
+    } catch {
+      btn.textContent = 'SEND REQUEST →'; btn.disabled = false;
+      alert('Failed to send — please try again');
+    }
+  }
 </script>
 </body>
 </html>
