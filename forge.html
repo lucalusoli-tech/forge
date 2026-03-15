@@ -3123,7 +3123,9 @@ async function loadProgrammes() {
 
   if(empty) empty.style.display = 'none';
 
-  const isCoached = currentUser?.tier === 'coached' || currentUser?.tier === 'admin';
+  const userTier = currentUser?.tier;
+  const isCoached = userTier === 'coached' || userTier === 'admin';
+  const isPremiumOnly = userTier === 'premium';
 
   list.innerHTML = programmes.map(p => `
     <div style="border:1px solid var(--border);background:var(--card);margin-bottom:12px;padding:20px">
@@ -3132,9 +3134,11 @@ async function loadProgrammes() {
       <div style="font-size:10px;letter-spacing:1px;color:var(--text-muted);line-height:1.8;margin-bottom:16px">${p.description||''}</div>
       ${isCoached
         ? `<button onclick="loadProgrammeAsBlock('${p.id}')" style="width:100%;padding:12px;background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer">LOAD INTO APP →</button>`
-        : `<div style="padding:12px;border:1px solid var(--border);text-align:center;font-size:9px;letter-spacing:3px;color:var(--text-dim)">✦ COACHED TIER — £19.99/MO</div>`
+        : isPremiumOnly
+          ? `<button onclick="closeUpgrade();openUpgrade()" style="width:100%;padding:12px;background:none;border:1px solid var(--accent-dim);color:var(--accent);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer">UPGRADE TO COACHED £19.99 →</button>`
+          : `<div style="padding:12px;border:1px solid var(--border);text-align:center;font-size:9px;letter-spacing:3px;color:var(--text-dim)">✦ COACHED TIER — £19.99/MO</div>`
       }
-      ${currentUser?.tier === 'admin' ? `
+      ${userTier === 'admin' ? `
         <button onclick="deleteProgramme('${p.id}')" style="width:100%;margin-top:8px;padding:10px;background:none;border:1px solid var(--border);color:var(--text-dim);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;cursor:pointer">✕ DELETE</button>
       ` : ''}
     </div>
