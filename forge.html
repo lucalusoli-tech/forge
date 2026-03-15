@@ -561,7 +561,7 @@
     </div>
     <div style="display:flex;gap:8px;margin-bottom:12px">
       <button class="upgrade-cta" id="upgrade-cta-btn" onclick="activatePremium('premium')" style="flex:1">PREMIUM £9.99/mo →</button>
-      <button class="upgrade-cta" onclick="activatePremium('coached')" style="flex:1;background:transparent;border:1px solid var(--accent);color:var(--accent)">COACHED £19.99/mo →</button>
+      <button class="upgrade-cta" id="upgrade-coached-btn" onclick="activatePremium('coached')" style="flex:1;background:transparent;border:1px solid var(--accent);color:var(--accent)">COACHED £19.99/mo →</button>
     </div>
     <div class="upgrade-trial">✓ 7-day free trial · cancel anytime · Direct Debit</div>
     <button class="upgrade-dismiss" onclick="closeUpgrade()">Maybe later</button>
@@ -3021,7 +3021,18 @@ function openSignOutSheet() {
   document.getElementById('signout-sheet-name').textContent = currentUser.name.toUpperCase();
   document.getElementById('signout-sheet-email').textContent = currentUser.email;
   const upgradeBtn = document.getElementById('signout-upgrade-btn');
-  if(upgradeBtn) upgradeBtn.style.display = (currentUser.tier === 'coached' || currentUser.tier === 'admin') ? 'none' : 'block';
+  const tier = currentUser.tier;
+  if(upgradeBtn) {
+    if(tier === 'coached' || tier === 'admin') {
+      upgradeBtn.style.display = 'none';
+    } else if(tier === 'premium') {
+      upgradeBtn.textContent = 'UPGRADE TO COACHED £19.99 ✦';
+      upgradeBtn.style.display = 'block';
+    } else {
+      upgradeBtn.textContent = 'UPGRADE TO PREMIUM ✦';
+      upgradeBtn.style.display = 'block';
+    }
+  }
   document.getElementById('signout-sheet').classList.add('open');
 }
 
@@ -3030,6 +3041,11 @@ function closeSignOutSheet() {
 }
 
 function openUpgrade() {
+  const tier = currentUser?.tier;
+  const premiumBtn = document.getElementById('upgrade-cta-btn');
+  const coachedBtn = document.getElementById('upgrade-coached-btn');
+  if(premiumBtn) premiumBtn.style.display = (tier === 'premium' || tier === 'coached' || tier === 'admin') ? 'none' : 'block';
+  if(coachedBtn) coachedBtn.style.display = (tier === 'coached' || tier === 'admin') ? 'none' : 'block';
   document.getElementById('upgrade-overlay').classList.add('open');
 }
 function closeUpgrade() { document.getElementById('upgrade-overlay').classList.remove('open'); }
