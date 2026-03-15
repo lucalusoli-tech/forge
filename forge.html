@@ -3050,45 +3050,13 @@ function openUpgrade() {
 }
 function closeUpgrade() { document.getElementById('upgrade-overlay').classList.remove('open'); }
 
-async function activatePremium(tier='premium') {
+function activatePremium(tier='premium') {
   if(!currentUser) { showToast('Sign in to upgrade'); return; }
-  console.log('User:', JSON.stringify(currentUser));
-  const btn = document.getElementById('upgrade-cta-btn');
-  if(btn) { btn.textContent = 'LOADING...'; btn.disabled = true; }
-  try {
-    const payload = {
-      user_id: currentUser.id,
-      email: currentUser.email,
-      name: currentUser.name,
-      tier
-    };
-    console.log('Payload:', JSON.stringify(payload));
-    const { data: { session } } = await supa.auth.getSession();
-    const accessToken = session?.access_token ?? SUPA_KEY;
-    const res = await fetch(
-      'https://naxojfchohntrfpunbxg.supabase.co/functions/v1/gocardless-checkout',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`
-        },
-        body: JSON.stringify(payload)
-      }
-    );
-    console.log('Response status:', res.status);
-    const data = await res.json();
-    console.log('Response data:', JSON.stringify(data));
-    if(data.url) {
-      window.location.href = data.url;
-    } else {
-      throw new Error(data.error || 'Unknown error');
-    }
-  } catch(err) {
-    console.error('Payment error:', err);
-    showToast('Payment error: ' + err.message);
-    if(btn) { btn.textContent = 'PREMIUM £9.99/mo →'; btn.disabled = false; }
-  }
+  const urls = {
+    premium: 'https://pay.gocardless.com/BRT0004RAGN1D9Y',
+    coached: 'https://pay.gocardless.com/BRT0004RAGQ08F0'
+  };
+  window.location.href = urls[tier] || urls.premium;
 }
 
 function checkBlockLimit() {
