@@ -2958,11 +2958,20 @@ supa.auth.getSession().then(async ({ data: { session }, error }) => {
   const isGuest = localStorage.getItem('fw_guest') === '1';
   if(session?.user) {
     await afterAuth(session.user, false);
+    // Refresh tier from database in case payment just completed
+    const { data: profile } = await supa.from('profiles').select('tier').eq('id', session.user.id).single();
+    if(profile?.tier && currentUser) {
+      currentUser.tier = profile.tier;
+      if(profile.tier === 'premium' || profile.tier === 'coached') {
+        isPremium = true;
+        localStorage.setItem('fw_premium', 'true');
+      }
+      localStorage.setItem('fw_user', JSON.stringify(currentUser));
+      updateUserBar();
+    }
   } else if(!currentUser && !isGuest) {
-    // No session, no localStorage user, not a guest — show auth
     showAuthScreen('splash');
   }
-  // If guest or localStorage user with no Supabase session — already handled above
 });
 
 // Auth state changes handled by getSession on load
