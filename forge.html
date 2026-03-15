@@ -3196,16 +3196,32 @@ async function loadProgrammeAsBlock(progId) {
   setTimeout(() => navigate('builder'), 800);
 }
 
-function submitCoachingRequest() {
-  const name = document.getElementById('coach-name').value.trim();
+async function submitCoachingRequest() {
+  const name  = document.getElementById('coach-name').value.trim();
   const email = document.getElementById('coach-email').value.trim();
-  const goal = document.getElementById('coach-goal').value;
-  const msg = document.getElementById('coach-message').value.trim();
+  const goal  = document.getElementById('coach-goal').value;
+  const msg   = document.getElementById('coach-message').value.trim();
   if(!name || !email) { showToast('Name and email required'); return; }
-  // Mock submit — real version POSTs to backend
-  document.querySelector('.coaching-submit').style.display = 'none';
-  document.getElementById('coaching-sent').style.display = 'block';
-  showToast('Request sent ✓');
+  const btn = document.querySelector('.coaching-submit');
+  btn.textContent = 'SENDING...'; btn.disabled = true;
+  try {
+    const res = await fetch('https://formspree.io/f/xreyaapy', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+      body: JSON.stringify({ name, email, goal, message: msg })
+    });
+    const data = await res.json();
+    if(data.ok) {
+      btn.style.display = 'none';
+      document.getElementById('coaching-sent').style.display = 'block';
+      showToast('Request sent ✓');
+    } else {
+      throw new Error('Submission failed');
+    }
+  } catch(err) {
+    btn.textContent = 'SEND REQUEST →'; btn.disabled = false;
+    showToast('Failed to send — try again');
+  }
 }
 
 </script>
