@@ -2922,7 +2922,13 @@ async function afterAuth(supaUser, isNew) {
   }, { onConflict: 'id' });
   // Load tier from profile
   const { data: profile } = await supa.from('profiles').select('tier').eq('id', supaUser.id).single();
-  if(profile?.tier) currentUser.tier = profile.tier;
+  if(profile?.tier) {
+    currentUser.tier = profile.tier;
+    if(profile.tier === 'premium' || profile.tier === 'coached' || profile.tier === 'admin') {
+      isPremium = true;
+      localStorage.setItem('fw_premium', 'true');
+    }
+  }
   localStorage.setItem('fw_user', JSON.stringify(currentUser));
   await loadFromCloud();
   startApp(false);
