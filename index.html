@@ -17,8 +17,8 @@
     --border:      #242424;
     --border-light:#333;
     --text:        #e8e2d9;
-    --text-muted:  #6b6560;
-    --text-dim:    #333;
+    --text-muted:  #8c8480;
+    --text-dim:    #555;
     --accent:      #c9a96e;
     --accent-dim:  #7a5f38;
     --accent-glow: rgba(201,169,110,0.08);
@@ -332,7 +332,7 @@
   .feature-num {
     font-size: 9px;
     letter-spacing: 3px;
-    color: var(--accent-dim);
+    color: var(--text-dim);
     margin-bottom: 20px;
   }
   .feature-icon {
@@ -511,7 +511,7 @@
     flex-shrink: 0;
     margin-top: 2px;
   }
-  .pricing-features li.dim::before { color: var(--border-light); }
+  .pricing-features li.dim::before { color: var(--text-dim); }
   .pricing-features li.dim { color: var(--text-dim); }
 
   .btn-full {
@@ -639,7 +639,7 @@
   .footer-copy {
     font-size: 8px;
     letter-spacing: 3px;
-    color: var(--text-dim);
+    color: var(--text-muted);
     text-transform: uppercase;
   }
 
@@ -696,7 +696,10 @@
 <!-- NAV -->
 <nav id="nav">
   <div class="nav-logo">FORGE</div>
-  <a href="#download" class="nav-cta">Get the App</a>
+  <div style="display:flex;align-items:center;gap:20px">
+    <a href="support.html" style="font-size:9px;letter-spacing:2px;color:var(--text-muted);text-decoration:none;text-transform:uppercase;transition:color 0.2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-muted)'">Support</a>
+    <a href="#download" class="nav-cta">Get the App</a>
+  </div>
 </nav>
 
 <!-- HERO -->
@@ -846,7 +849,7 @@
         <li class="dim">Block archive</li>
         <li class="dim">Sparklines</li>
       </ul>
-      <a href="#download" class="btn-full outline">Start Now</a>
+      <a href="forge.html" class="btn-full outline">Start Now</a>
     </div>
     <div class="pricing-card featured reveal reveal-delay-1">
       <div class="pricing-tier">Premium</div>
@@ -860,7 +863,7 @@
         <li>Block archive</li>
         <li>Priority support</li>
       </ul>
-      <a href="#download" class="btn-full accent">Start Now</a>
+      <a href="forge.html" class="btn-full accent">Start Now</a>
     </div>
     <div class="pricing-card reveal reveal-delay-2">
       <div class="pricing-tier">FORGE + Programmes</div>
@@ -873,7 +876,7 @@
         <li>Calisthenics & strength focus</li>
         <li>Full exercise library + tracking</li>
       </ul>
-      <a href="#download" class="btn-full outline">Start Now</a>
+      <a href="forge.html" class="btn-full outline">Start Now</a>
     </div>
     <div class="pricing-card reveal reveal-delay-3" style="border-top:2px solid var(--accent)">
       <div class="pricing-tier">1-2-1 Coaching</div>
@@ -967,7 +970,11 @@
 <!-- FOOTER -->
 <footer>
   <div class="footer-logo">FORGE</div>
-  <div class="footer-copy">© 2025 FORGE · All Rights Reserved</div>
+  <div style="display:flex;align-items:center;gap:24px">
+    <a href="support.html" style="font-size:8px;letter-spacing:3px;color:var(--text-muted);text-decoration:none;text-transform:uppercase;transition:color 0.2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-muted)'">Support</a>
+    <a href="forge.html" style="font-size:8px;letter-spacing:3px;color:var(--text-muted);text-decoration:none;text-transform:uppercase;transition:color 0.2s" onmouseover="this.style.color='var(--accent)'" onmouseout="this.style.color='var(--text-muted)'">App</a>
+  </div>
+  <div class="footer-copy">© 2026 FORGE · All Rights Reserved</div>
 </footer>
 
 <script>
@@ -994,7 +1001,11 @@
     const email = document.getElementById('lp-coach-email').value.trim();
     const goal  = document.getElementById('lp-coach-goal').value;
     const msg   = document.getElementById('lp-coach-message').value.trim();
-    if(!name || !email) { alert('Name and email required'); return; }
+    if(!name || !email) {
+      document.getElementById('lp-coach-btn').textContent = 'NAME AND EMAIL REQUIRED';
+      setTimeout(() => { document.getElementById('lp-coach-btn').textContent = 'SEND REQUEST →'; }, 2000);
+      return;
+    }
     const btn = document.getElementById('lp-coach-btn');
     btn.textContent = 'SENDING...'; btn.disabled = true;
     try {
@@ -1009,8 +1020,8 @@
         document.getElementById('lp-coach-sent').style.display = 'block';
       } else { throw new Error(); }
     } catch {
-      btn.textContent = 'SEND REQUEST →'; btn.disabled = false;
-      alert('Failed to send — please try again');
+      btn.textContent = 'FAILED — TRY AGAIN'; btn.disabled = false;
+      setTimeout(() => { btn.textContent = 'SEND REQUEST →'; }, 3000);
     }
   }
 </script>

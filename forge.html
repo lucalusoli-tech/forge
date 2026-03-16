@@ -17,8 +17,8 @@
 
   :root {
     --black: #080808; --deep: #0f0f0f; --surface: #141414; --card: #1a1a1a;
-    --border: #242424; --border-light: #333; --text: #e8e2d9; --text-muted: #6b6560;
-    --text-dim: #333; --accent: #c9a96e; --accent-dim: #7a5f38;
+    --border: #242424; --border-light: #333; --text: #e8e2d9; --text-muted: #8c8480;
+    --text-dim: #555; --accent: #c9a96e; --accent-dim: #7a5f38;
     --accent-glow: rgba(201,169,110,0.1); --red: #c94040; --green: #5a8a5a;
     --nav-h: 64px; --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
@@ -147,7 +147,7 @@
 
   /* Sparkline */
   .spark-row { padding: 0 14px 10px; }
-  .spark-label { font-size: 8px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; margin-bottom: 6px; }
+  .spark-label { font-size: 8px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
   .spark-svg { display: block; width: 100%; height: 36px; }
 
   .sets-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
@@ -155,7 +155,7 @@
   .set-num { font-size: 8px; letter-spacing: 1px; color: var(--text-muted); text-transform: uppercase; }
   .set-field { width: 58px; background: var(--surface); border: 1px solid var(--border-light); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 500; padding: 8px 6px; text-align: center; outline: none; -webkit-appearance: none; border-radius: 0; }
   .set-field:focus { border-color: var(--accent); background: var(--card); }
-  .set-field::placeholder { color: #4a4540; font-size: 10px; }
+  .set-field::placeholder { color: #6b6560; font-size: 10px; }
   .set-field.reps { color: #d4cec7; font-size: 14px; font-weight: 400; }
   .set-divider { font-size: 10px; color: var(--text-dim); align-self: center; margin-top: 16px; }
 
@@ -260,7 +260,7 @@
 
   .field-section { padding: 16px 20px; border-bottom: 1px solid var(--border); }
   .field-label { font-size: 9px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
-  .field-sublabel { font-size: 8px; letter-spacing: 1px; color: var(--text-dim); text-transform: none; }
+  .field-sublabel { font-size: 8px; letter-spacing: 1px; color: var(--text-muted); text-transform: none; }
 
   .name-field { width: 100%; background: var(--deep); border: 1px solid var(--border); color: var(--text); font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 4px; padding: 10px 14px; outline: none; -webkit-appearance: none; border-radius: 0; }
   .name-field:focus { border-color: var(--accent); }
@@ -507,9 +507,6 @@
     <button class="auth-btn-primary" onclick="showAuthScreen('login')">SIGN IN</button>
     <div class="auth-divider"><div class="auth-divider-line"></div><div class="auth-divider-text">OR</div><div class="auth-divider-line"></div></div>
     <button class="auth-btn-ghost" onclick="showAuthScreen('signup')">CREATE ACCOUNT</button>
-    <div class="auth-switch" style="margin-top:4px">
-      <span onclick="startApp(true)">Continue without account →</span>
-    </div>
   </div>
 </div>
 
@@ -586,6 +583,7 @@
       <div class="signout-email" id="signout-sheet-email"></div>
       <button class="upgrade-cta" id="signout-upgrade-btn" onclick="closeSignOutSheet();openUpgrade()" style="width:100%;margin-bottom:10px;display:none">UPGRADE TO PREMIUM ✦</button>
       <button class="signout-btn" onclick="handleSignOut()">Sign Out</button>
+      <a href="support.html" style="display:block;text-align:center;font-size:9px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;text-decoration:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">Support →</a>
     </div>
   </div>
   <div class="topbar">
@@ -629,7 +627,6 @@
         </div>
         <div id="home-fixed-sections"></div>
         <div id="home-day-cards"></div>
-        <button class="seed-btn" onclick="seedDemoData()" id="seed-btn">⬡ Seed demo data — visualise progress</button>
       </div>
       <div id="home-empty-state" style="display:none">
         <div class="home-empty-wrap">
@@ -639,7 +636,12 @@
           <button class="home-empty-cta" onclick="navigate('builder')">BUILD A BLOCK →</button>
         </div>
       </div>
-      <div style="height:20px"></div>
+      <div style="height:1px;background:var(--border);margin:8px 0"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 20px">
+        <span style="font-size:8px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase">FORGE · 2026</span>
+        <a href="support.html" style="font-size:8px;letter-spacing:2px;color:var(--text-muted);text-transform:uppercase;text-decoration:none">Support →</a>
+      </div>
+      <div style="height:8px"></div>
     </div>
 
     <!-- LOG -->
@@ -1074,6 +1076,11 @@ const EXERCISES = [
   {id:'bwf-adv-tuck-pl-pu',name:'Adv Tuck PL PU',tags:['calisthenics','push','skill'],sets:'3×5',target:'Anterior Delt, Serratus, Triceps',intensity:'Very hard',cue:'Adv tuck position throughout press',video:'https://www.youtube.com/results?search_query=advanced+tuck+planche+push+up',desc:'Push-up in advanced tuck planche.'},
   {id:'bwf-str-planche',name:'Str Planche',tags:['calisthenics','push','skill'],sets:'5×5-10s',target:'Full Anterior Chain, Serratus, Wrists',intensity:'Elite',cue:'Straight body horizontal, extreme forward lean, protract fully',video:'https://www.youtube.com/results?search_query=straddle+planche+tutorial',desc:'Straddle planche — between advanced tuck and full planche. Massive skill.'},
   {id:'bwf-full-planche',name:'Full Planche',tags:['calisthenics','push','skill'],sets:'5×5-10s',target:'Full Anterior Chain, Serratus, Wrists, Core',intensity:'Elite',cue:'Body perfectly horizontal, legs together, arms locked, maximum protraction',video:'https://www.youtube.com/results?search_query=full+planche+tutorial',desc:'Full planche — legs together, body horizontal, arms straight. The pinnacle of pushing strength in calisthenics.'},
+
+  // ── BWF WARMUP ────────────────────────────────────────────────
+  {id:'bwf-scapular-pulls',name:'Scapular Pulls',tags:['warmup','calisthenics','pull'],sets:'2×10-15',target:'Serratus, Lower Traps, Scapular Stabilisers',intensity:'Easy',cue:'Dead hang, depress and retract scapula without bending arms — small controlled movement',video:'https://www.youtube.com/results?search_query=scapular+pull+tutorial',desc:'Scapular retraction and depression from a dead hang. Essential shoulder health drill that activates the serratus and lower traps before any pulling session.'},
+  {id:'bwf-wrist-circles',name:'Wrist Circles',tags:['warmup','calisthenics'],sets:'2×30s each',target:'Wrist Flexors, Extensors, Ligaments',intensity:'Easy',cue:'Full range clockwise and counter-clockwise rotation — slow and controlled, no pain',video:'https://www.youtube.com/results?search_query=wrist+circles+warm+up+calisthenics',desc:'Wrist mobility circles performed slowly in both directions. Critical warm-up for all pressing and skill work — planche, HSPU, push-up variations.'},
+  {id:'bwf-dead-hang',name:'Dead Hang',tags:['warmup','calisthenics','pull'],sets:'3×30-60s',target:'Shoulder Girdle, Grip, Thoracic Spine',intensity:'Easy',cue:'Full shoulder elevation, relax completely into the hang, breathe — no active shrug',video:'https://www.youtube.com/results?search_query=dead+hang+benefits+tutorial',desc:'Passive hang from a bar with shoulders fully elevated. Decompresses the spine, opens the shoulder girdle and builds grip endurance. A non-negotiable prep for all pulling and skill work.'},
 
   // ── BWF CORE / L-SIT ─────────────────────────────────────────
   {id:'bwf-foot-sup-l-sit',name:'Foot Sup L-Sit',tags:['warmup','calisthenics','core'],sets:'3×20-30s',target:'Hip Flexors, Triceps',intensity:'Easy',cue:'One foot on floor for support, other leg raised',video:'https://www.youtube.com/results?search_query=l-sit+foot+support',desc:'L-sit with one foot on floor. Entry-level compression work.'},
@@ -2945,17 +2952,14 @@ async function afterAuth(supaUser, isNew) {
   }
   localStorage.setItem('fw_user', JSON.stringify(currentUser));
   await loadFromCloud();
+  await loadAssignedBlocks();
   startApp(false);
 }
 
 function startApp(isGuest) {
+  // Guest mode removed — always require authentication
+  if(isGuest) { showAuthScreen('splash'); return; }
   document.querySelectorAll('.auth-screen').forEach(s => s.classList.add('hidden'));
-  if(isGuest) {
-    currentUser = null; isPremium = false;
-    localStorage.removeItem('fw_user');
-    localStorage.removeItem('fw_premium');
-    localStorage.setItem('fw_guest','1');
-  }
   updateUserBar();
   renderHomeDays();
   renderBuilderSaved();
@@ -2989,7 +2993,8 @@ supa.auth.getSession().then(async ({ data: { session }, error }) => {
       localStorage.setItem('fw_user', JSON.stringify(currentUser));
       updateUserBar();
     }
-  } else if(!currentUser && !isGuest) {
+  } else {
+    // No session — always show auth (guest mode removed)
     showAuthScreen('splash');
   }
 });
@@ -3070,7 +3075,10 @@ function activatePremium(tier='premium') {
     premium: 'https://pay.gocardless.com/BRT0004RAGN1D9Y',
     coached: 'https://pay.gocardless.com/BRT0004RAGQ08F0'
   };
-  window.location.href = urls[tier] || urls.premium;
+  const base = urls[tier] || urls.premium;
+  const email = currentUser.email || '';
+  const dest = email ? base + '?prefilled_customer[email]=' + encodeURIComponent(email) : base;
+  window.location.href = dest;
 }
 
 function checkBlockLimit() {
@@ -3210,6 +3218,105 @@ async function submitCoachingRequest() {
     btn.textContent = 'SEND REQUEST →'; btn.disabled = false;
     showToast('Failed to send — try again');
   }
+}
+
+// ─── ASSIGNED BLOCKS (coached tier) ───────────────────────────
+async function loadAssignedBlocks() {
+  if(!currentUser?.email) return;
+  try {
+    const { data, error } = await supa
+      .from('assigned_blocks')
+      .select('*')
+      .eq('client_email', currentUser.email)
+      .eq('status', 'pending')
+      .order('assigned_at', { ascending: false });
+    if(error || !data?.length) return;
+    showAssignedBlocksNotice(data);
+  } catch(e) { console.warn('Assigned blocks load failed:', e); }
+}
+
+function showAssignedBlocksNotice(blocks) {
+  // Remove any existing notice
+  document.getElementById('assigned-notice')?.remove();
+
+  const first = blocks[0];
+  const count = blocks.length;
+  const note = first.note ? `<div style="font-size:10px;color:var(--text-muted);letter-spacing:0.5px;font-style:italic;margin-bottom:16px;line-height:1.6;border-left:2px solid var(--accent-dim);padding-left:12px">"${first.note}"</div>` : '';
+
+  const overlay = document.createElement('div');
+  overlay.id = 'assigned-notice';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:600;display:flex;align-items:flex-end;opacity:0;transition:opacity 0.3s';
+
+  overlay.innerHTML = `
+    <div style="width:100%;background:var(--surface);border-top:1px solid var(--border);padding:28px 20px;padding-bottom:calc(28px + env(safe-area-inset-bottom,0px));transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.32,0.72,0,1)" id="assigned-sheet">
+      <div style="font-size:8px;letter-spacing:4px;color:var(--accent);text-transform:uppercase;margin-bottom:12px">
+        ${count > 1 ? count + ' New Blocks Assigned' : 'New Block Assigned'}
+      </div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;line-height:1;margin-bottom:4px">${first.block_name}</div>
+      <div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:16px">From ${first.coach_email}</div>
+      ${note}
+      <div style="display:flex;gap:8px">
+        <button onclick="acceptAssignedBlock('${first.id}')" style="flex:2;padding:14px;background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer">LOAD INTO APP →</button>
+        <button onclick="dismissAssignedNotice()" style="flex:1;padding:14px;background:none;border:1px solid var(--border);color:var(--text-muted);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer">Later</button>
+      </div>
+      ${count > 1 ? `<div style="font-size:9px;letter-spacing:1px;color:var(--text-dim);text-align:center;margin-top:12px">+${count-1} more block${count-1>1?'s':''} assigned</div>` : ''}
+    </div>`;
+
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => {
+    overlay.style.opacity = '1';
+    document.getElementById('assigned-sheet').style.transform = 'translateY(0)';
+  });
+}
+
+async function acceptAssignedBlock(assignmentId) {
+  const overlay = document.getElementById('assigned-notice');
+  try {
+    // Fetch the full assignment row
+    const { data: row, error } = await supa
+      .from('assigned_blocks')
+      .select('*')
+      .eq('id', assignmentId)
+      .single();
+    if(error || !row) { showToast('Failed to load block'); return; }
+
+    // Load the block data into the app
+    const block = row.block_data?.currentBlock;
+    if(block) {
+      const newBlock = {
+        ...block,
+        id: 'assigned_' + assignmentId,
+        name: row.block_name
+      };
+      if(!newBlock.warmup) newBlock.warmup = [];
+      if(!newBlock.skill)  newBlock.skill  = [];
+      customWorkouts.unshift(newBlock);
+      localStorage.setItem('fw_customs', JSON.stringify(customWorkouts));
+      syncBlocksToCloud();
+      renderBuilderSaved();
+    }
+
+    // Mark as accepted in Supabase
+    await supa
+      .from('assigned_blocks')
+      .update({ status: 'accepted', accepted_at: new Date().toISOString() })
+      .eq('id', assignmentId);
+
+    dismissAssignedNotice();
+    showToast('Block added to Builder ✦');
+    setTimeout(() => navigate('builder'), 600);
+  } catch(e) {
+    showToast('Something went wrong — try again');
+    dismissAssignedNotice();
+  }
+}
+
+function dismissAssignedNotice() {
+  const overlay = document.getElementById('assigned-notice');
+  if(!overlay) return;
+  overlay.style.opacity = '0';
+  document.getElementById('assigned-sheet').style.transform = 'translateY(100%)';
+  setTimeout(() => overlay.remove(), 350);
 }
 
 </script>
