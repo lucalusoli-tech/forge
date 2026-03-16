@@ -2815,19 +2815,16 @@ let trialStart = parseInt(localStorage.getItem('fw_trial_start')||'0');
 async function syncBlocksToCloud() {
   if(!currentUser?.id) return;
   try {
-    // Check if a row already exists
     const { data: existing } = await supa.from('blocks')
-      .select('id').eq('user_id', currentUser.id).eq('is_current', true).single();
+      .select('id').eq('user_id', currentUser.id).eq('is_current', true).maybeSingle();
     
     if(existing?.id) {
-      // Update existing row
       await supa.from('blocks').update({
         name: currentBlock.name || 'My Block',
         data: { currentBlock, customWorkouts, archivedBlocks, currentWeek },
         updated_at: new Date().toISOString()
       }).eq('id', existing.id);
     } else {
-      // Insert new row
       await supa.from('blocks').insert({
         user_id: currentUser.id,
         name: currentBlock.name || 'My Block',
@@ -2854,7 +2851,7 @@ async function loadFromCloud() {
   if(!currentUser?.id) return;
   try {
     const { data: blockRow } = await supa.from('blocks')
-      .select('data').eq('user_id', currentUser.id).eq('is_current', true).single();
+      .select('data').eq('user_id', currentUser.id).eq('is_current', true).maybeSingle();
     if(blockRow?.data) {
       const d = blockRow.data;
       if(d.currentBlock) {
@@ -2868,7 +2865,7 @@ async function loadFromCloud() {
       if(d.currentWeek)    { currentWeek = d.currentWeek;       localStorage.setItem('fw_week', currentWeek); }
     }
     const { data: logRow } = await supa.from('logs')
-      .select('data').eq('user_id', currentUser.id).single();
+      .select('data').eq('user_id', currentUser.id).maybeSingle();
     if(logRow?.data) {
       sessionLog = logRow.data;
       localStorage.setItem('fw_log', JSON.stringify(sessionLog));
