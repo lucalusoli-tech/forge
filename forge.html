@@ -2815,13 +2815,27 @@ let trialStart = parseInt(localStorage.getItem('fw_trial_start')||'0');
 async function syncBlocksToCloud() {
   if(!currentUser?.id) return;
   try {
-    await supa.from('blocks').upsert({
-      user_id: currentUser.id,
-      name: currentBlock.name || 'My Block',
-      data: { currentBlock, customWorkouts, archivedBlocks, currentWeek },
-      is_current: true,
-      updated_at: new Date().toISOString()
-    }, { onConflict: 'user_id,is_current' });
+    // Check if a row already exists
+    const { data: existing } = await supa.from('blocks')
+      .select('id').eq('user_id', currentUser.id).eq('is_current', true).single();
+    
+    if(existing?.id) {
+      // Update existing row
+      await supa.from('blocks').update({
+        name: currentBlock.name || 'My Block',
+        data: { currentBlock, customWorkouts, archivedBlocks, currentWeek },
+        updated_at: new Date().toISOString()
+      }).eq('id', existing.id);
+    } else {
+      // Insert new row
+      await supa.from('blocks').insert({
+        user_id: currentUser.id,
+        name: currentBlock.name || 'My Block',
+        data: { currentBlock, customWorkouts, archivedBlocks, currentWeek },
+        is_current: true,
+        updated_at: new Date().toISOString()
+      });
+    }
   } catch(e) { console.warn('Block sync failed:', e); }
 }
 
@@ -3063,9 +3077,11 @@ function activatePremium(tier='premium') {
 }
 
 function checkBlockLimit() {
-  if(isPremium) return true;
+  const tier = currentUser?.tier;
+  if(tier === 'premium' || tier === 'coached' || tier === 'admin') return true;
+  if(isPremium && tier !== 'free' && tier !== 'trial') return true;
   if(customWorkouts.length >= 1) { openUpgrade(); return false; }
-
+  return true;
 }
 
 // ─── COACHING ──────────────────────────────────────────────────
