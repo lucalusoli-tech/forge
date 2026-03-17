@@ -3209,12 +3209,11 @@ function populatePublishBlockSelector() {
     opt.textContent = w.name + (w.days?.length ? '  ·  ' + w.days.length + ' days' : '');
     sel.appendChild(opt);
   });
-  // Also add current active block if it has days
-  if(currentBlock.days?.length) {
+  if(!customWorkouts.length) {
     const opt = document.createElement('option');
-    opt.value = '__current__';
-    opt.textContent = (currentBlock.name || 'Current Block') + '  ·  ACTIVE';
-    sel.insertBefore(opt, sel.options[1]);
+    opt.disabled = true;
+    opt.textContent = 'No saved blocks — save a block in Builder first';
+    sel.appendChild(opt);
   }
 }
 
@@ -3227,14 +3226,9 @@ async function publishProgramme() {
   if(!blockId) { showToast('Select a block to publish'); return; }
 
   // Resolve the selected block data
-  let blockData;
-  if(blockId === '__current__') {
-    blockData = currentBlock;
-  } else {
-    const found = customWorkouts.find(w => w.id === blockId);
-    if(!found) { showToast('Block not found'); return; }
-    blockData = found;
-  }
+  const found = customWorkouts.find(w => w.id === blockId);
+  if(!found) { showToast('Block not found'); return; }
+  const blockData = found;
 
   const { data, error } = await supa.from('programmes').insert({
     title,
