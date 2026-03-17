@@ -2917,6 +2917,15 @@ async function handleSignup() {
 }
 
 async function afterAuth(supaUser, isNew) {
+  // If cached data belongs to a different user, wipe it before loading
+  const cachedUser = JSON.parse(localStorage.getItem('fw_user') || 'null');
+  if(cachedUser && cachedUser.id !== supaUser.id) {
+    ['fw_block','fw_customs','fw_archive','fw_log','fw_week',
+     'fw_premium','fw_trial_start'].forEach(k => localStorage.removeItem(k));
+    // Reset in-memory state
+    currentBlock = { name:'', methods:[], weeks:4, warmup:[], skill:[], days:[] };
+    customWorkouts = []; archivedBlocks = []; sessionLog = {}; currentWeek = 1;
+  }
   const user = {
     id: supaUser.id,
     email: supaUser.email,
@@ -2977,10 +2986,9 @@ function startApp(isGuest) {
 
 async function handleSignOut() {
   await supa.auth.signOut();
-  localStorage.removeItem('fw_user');
-  localStorage.removeItem('fw_premium');
-  localStorage.removeItem('fw_trial_start');
-  localStorage.removeItem('fw_guest');
+  // Wipe all local data so the next user on this device starts clean
+  ['fw_user','fw_premium','fw_trial_start','fw_guest',
+   'fw_block','fw_customs','fw_archive','fw_log','fw_week'].forEach(k => localStorage.removeItem(k));
   currentUser = null; isPremium = false; trialStart = 0;
   location.reload();
 }
