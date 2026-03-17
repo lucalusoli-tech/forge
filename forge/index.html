@@ -2500,9 +2500,9 @@ function saveBlockOnly() {
     customWorkouts.push(block);
   }
   localStorage.setItem('fw_customs',JSON.stringify(customWorkouts));
+  syncBlocksToCloud();
   resetBuilder();
   renderBuilderSaved();
-  
   showToast('Block saved ✓');
 }
 
@@ -2561,8 +2561,8 @@ function renderBuilderSaved(){
 function deleteSavedBlock(idx){
   customWorkouts.splice(idx,1);
   localStorage.setItem('fw_customs',JSON.stringify(customWorkouts));
+  syncBlocksToCloud();
   renderBuilderSaved();
-  
   showToast('Deleted');
 }
 
@@ -3031,10 +3031,17 @@ function updateUserBar() {
 
     if(tier === 'premium' || tier === 'coached' || tier === 'admin') {
       // Paid user — show tier badge, no upgrade prompt
-      upgradeBtn.textContent = tier === 'coached' ? '✦ COACHED' : '✦ PREMIUM';
-      upgradeBtn.style.color = 'var(--accent)';
-      upgradeBtn.style.cursor = 'default';
-      upgradeBtn.onclick = e => e.stopPropagation();
+      if(tier === 'admin') {
+        upgradeBtn.textContent = '⬡ ADMIN';
+        upgradeBtn.style.color = 'var(--accent)';
+        upgradeBtn.style.cursor = 'pointer';
+        upgradeBtn.onclick = e => { e.stopPropagation(); window.location.href = '/coach'; };
+      } else {
+        upgradeBtn.textContent = tier === 'coached' ? '✦ COACHED' : '✦ PREMIUM';
+        upgradeBtn.style.color = 'var(--accent)';
+        upgradeBtn.style.cursor = 'default';
+        upgradeBtn.onclick = e => e.stopPropagation();
+      }
 
     } else if(tier === 'trial') {
       // Trial user — show countdown
