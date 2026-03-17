@@ -2991,6 +2991,8 @@ function startApp(isGuest) {
   renderBuilderSaved();
   renderProgress();
   renderArchive();
+  // Check for assigned blocks after UI is ready
+  setTimeout(() => loadAssignedBlocks(), 1000);
 }
 
 async function handleSignOut() {
@@ -3327,6 +3329,94 @@ async function submitCoachingRequest() {
     btn.textContent = 'SEND REQUEST →'; btn.disabled = false;
     showToast('Failed to send — try again');
   }
+}
+
+// ─── ASSIGNED BLOCKS (coached / 1-2-1) ────────────────────────
+async function loadAssignedBlocks() {
+  if(!currentUser?.email) return;
+  try {
+    const { data, error } = await supa
+      .from('assigned_blocks')
+      .select('*')
+      .eq('client_email', currentUser.email)
+      .eq('status', 'pending')
+      .order('assigned_at', { ascending: false });
+    if(error || !data?.length) return;
+    showAssignedBlocksNotice(data);
+  } catch(e) { console.warn('Assigned blocks load failed:', e); }
+}
+
+function showAssignedBlocksNotice(blocks) {
+  document.getElementById('assigned-notice')?.remove();
+  const first = blocks[0];
+  const count = blocks.length;
+  const note = first.note ? `<div style="font-size:10px;color:var(--text-muted);letter-spacing:0.5px;font-style:italic;margin-bottom:16px;line-height:1.6;border-left:2px solid var(--accent-dim);padding-left:12px">"${first.note}"</div>` : '';
+
+  const overlay = document.createElement('div');
+  overlay.id = 'assigned-notice';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:600;display:flex;align-items:flex-end;opacity:0;transition:opacity 0.3s';
+  overlay.innerHTML = `
+    <div style="width:100%;background:var(--surface);border-top:1px solid var(--border);padding:28px 20px;padding-bottom:calc(28px + env(safe-area-inset-bottom,0px));transform:translateY(100%);transition:transform 0.35s cubic-bezier(0.32,0.72,0,1)" id="assigned-sheet">
+      <div style="font-size:8px;letter-spacing:4px;color:var(--accent);text-transform:uppercase;margin-bottom:12px">
+        ${count > 1 ? count + ' New Blocks Assigned' : 'New Block Assigned'}
+      </div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;line-height:1;margin-bottom:4px">${first.block_name}</div>
+      <div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:16px">From ${first.coach_email}</div>
+      ${note}
+      <div style="display:flex;gap:8px">
+        <button onclick="acceptAssignedBlock('${first.id}')" style="flex:2;padding:14px;background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer">LOAD INTO APP →</button>
+        <button onclick="dismissAssignedNotice()" style="flex:1;padding:14px;background:none;border:1px solid var(--border);color:var(--text-muted);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;cursor:pointer">Later</button>
+      </div>
+      ${count > 1 ? `<div style="font-size:9px;letter-spacing:1px;color:var(--text-dim);text-align:center;margin-top:12px">+${count-1} more block${count-1>1?'s':''} assigned</div>` : ''}
+    </div>`;
+
+  document.body.appendChild(overlay);
+  requestAnimationFrame(() => {
+    overlay.style.opacity = '1';
+    document.getElementById('assigned-sheet').style.transform = 'translateY(0)';
+  });
+}
+
+async function acceptAssignedBlock(assignmentId) {
+  try {
+    const { data: row, error } = await supa
+      .from('assigned_blocks')
+      .select('*')
+      .eq('id', assignmentId)
+      .single();
+    if(error || !row) { showToast('Failed to load block'); return; }
+
+    const block = row.block_data?.currentBlock;
+    if(block) {
+      const newBlock = { ...block, id: 'assigned_' + assignmentId, name: row.block_name };
+      if(!newBlock.warmup) newBlock.warmup = [];
+      if(!newBlock.skill)  newBlock.skill  = [];
+      customWorkouts.unshift(newBlock);
+      localStorage.setItem('fw_customs', JSON.stringify(customWorkouts));
+      syncBlocksToCloud();
+      renderBuilderSaved();
+    }
+
+    await supa
+      .from('assigned_blocks')
+      .update({ status: 'accepted', accepted_at: new Date().toISOString() })
+      .eq('id', assignmentId);
+
+    dismissAssignedNotice();
+    showToast('Block added to Builder ✦');
+    setTimeout(() => navigate('builder'), 600);
+  } catch(e) {
+    showToast('Something went wrong — try again');
+    dismissAssignedNotice();
+  }
+}
+
+function dismissAssignedNotice() {
+  const overlay = document.getElementById('assigned-notice');
+  if(!overlay) return;
+  overlay.style.opacity = '0';
+  document.getElementById('assigned-sheet').style.transform = 'translateY(100%)';
+  setTimeout(() => overlay.remove(), 350);
 }
 
 </script>
