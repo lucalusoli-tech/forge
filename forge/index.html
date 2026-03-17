@@ -833,7 +833,13 @@
           <input class="coaching-input" type="text" id="prog-title" placeholder="Programme title e.g. FORGE BLOCK 01">
           <input class="coaching-input" type="text" id="prog-month" placeholder="Month e.g. April 2026">
           <textarea class="coaching-textarea" id="prog-desc" placeholder="Short description — who it's for, what it focuses on..."></textarea>
-          <div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:8px;margin-top:4px">SELECT BLOCK TO PUBLISH</div>
+          <div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:8px;margin-top:4px">AUDIENCE</div>
+          <div style="display:flex;gap:8px;margin-bottom:14px" id="prog-type-chips">
+            <button class="day-ex-chip active" id="prog-type-coached" onclick="selectProgType('coached',this)" style="flex:1;text-align:center">✦ COACHED — All coached users</button>
+            <button class="day-ex-chip" id="prog-type-personal" onclick="selectProgType('personal',this)" style="flex:1;text-align:center">◉ PERSONAL — 1-2-1 only</button>
+          </div>
+          <input type="hidden" id="prog-type" value="coached">
+          <div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:8px">SELECT BLOCK TO PUBLISH</div>
           <select class="coaching-input" id="prog-block-select" style="-webkit-appearance:none;color:var(--text-muted);margin-bottom:10px">
             <option value="" disabled selected>Select a saved block...</option>
           </select>
@@ -3188,7 +3194,10 @@ async function loadProgrammes() {
 
   list.innerHTML = programmes.map(p => `
     <div style="border:1px solid var(--border);background:var(--card);margin-bottom:12px;padding:20px">
-      <div style="font-size:8px;letter-spacing:3px;color:var(--accent);margin-bottom:8px">${p.month||''}</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <div style="font-size:8px;letter-spacing:3px;color:var(--accent)">${p.month||''}</div>
+        ${isAdmin ? `<div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;padding:2px 8px;border:1px solid ${p.type==='personal'?'var(--accent-dim)':'var(--border)'};color:${p.type==='personal'?'var(--accent)':'var(--text-dim)'}">${p.type||'coached'}</div>` : ''}
+      </div>
       <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--text);margin-bottom:8px">${p.title}</div>
       <div style="font-size:10px;letter-spacing:1px;color:var(--text-muted);line-height:1.8;margin-bottom:16px">${p.description||''}</div>
       <button onclick="loadProgrammeAsBlock('${p.id}')" style="width:100%;padding:12px;background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer">LOAD INTO APP →</button>
@@ -3217,11 +3226,18 @@ function populatePublishBlockSelector() {
   }
 }
 
+function selectProgType(type, btn) {
+  document.getElementById('prog-type').value = type;
+  document.querySelectorAll('#prog-type-chips .day-ex-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
 async function publishProgramme() {
   const title   = document.getElementById('prog-title').value.trim();
   const month   = document.getElementById('prog-month').value.trim();
   const desc    = document.getElementById('prog-desc').value.trim();
   const blockId = document.getElementById('prog-block-select').value;
+  const type    = document.getElementById('prog-type').value || 'coached';
   if(!title || !month) { showToast('Title and month required'); return; }
   if(!blockId) { showToast('Select a block to publish'); return; }
 
@@ -3234,6 +3250,7 @@ async function publishProgramme() {
     title,
     month,
     description: desc,
+    type,
     data: { currentBlock: blockData },
     created_by: currentUser.id
   }).select().single();
@@ -3243,6 +3260,9 @@ async function publishProgramme() {
   document.getElementById('prog-month').value = '';
   document.getElementById('prog-desc').value = '';
   document.getElementById('prog-block-select').selectedIndex = 0;
+  document.getElementById('prog-type').value = 'coached';
+  document.querySelectorAll('#prog-type-chips .day-ex-chip').forEach(b => b.classList.remove('active'));
+  document.getElementById('prog-type-coached').classList.add('active');
   loadProgrammes();
 }
 
