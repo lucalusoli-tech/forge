@@ -831,10 +831,13 @@
         <div id="admin-publish-panel" style="display:none;margin:20px;border:1px solid var(--accent-dim);padding:20px;background:var(--surface)">
           <div style="font-size:8px;letter-spacing:4px;color:var(--accent);margin-bottom:16px">ADMIN — PUBLISH PROGRAMME</div>
           <input class="coaching-input" type="text" id="prog-title" placeholder="Programme title e.g. FORGE BLOCK 01">
-          <input class="coaching-input" type="text" id="prog-month" placeholder="Month e.g. March 2026">
+          <input class="coaching-input" type="text" id="prog-month" placeholder="Month e.g. April 2026">
           <textarea class="coaching-textarea" id="prog-desc" placeholder="Short description — who it's for, what it focuses on..."></textarea>
-          <div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:10px">BLOCK DATA — paste from current block or leave to use active block</div>
-          <button class="coaching-submit" onclick="publishProgramme()" style="margin-bottom:0">PUBLISH ACTIVE BLOCK AS PROGRAMME →</button>
+          <div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:8px;margin-top:4px">SELECT BLOCK TO PUBLISH</div>
+          <select class="coaching-input" id="prog-block-select" style="-webkit-appearance:none;color:var(--text-muted);margin-bottom:10px">
+            <option value="" disabled selected>Select a saved block...</option>
+          </select>
+          <button class="coaching-submit" onclick="publishProgramme()" style="margin-bottom:0">PUBLISH SELECTED BLOCK AS PROGRAMME →</button>
         </div>
 
         <!-- PROGRAMMES LIST -->
@@ -3138,11 +3141,30 @@ async function loadProgrammes() {
   const empty = document.getElementById('programmes-empty');
   if(!list) return;
 
-  // Show admin panel if admin
-  if(currentUser?.tier === 'admin' || isPremium) {
+  const userTier = currentUser?.tier;
+  const isAdmin   = userTier === 'admin';
+  const isCoached = userTier === 'coached' || isAdmin;
+
+  // Show admin publish panel only to admin
+  if(isAdmin) {
     const panel = document.getElementById('admin-publish-panel');
-    // Only show publish panel to admin
-    if(currentUser?.tier === 'admin') panel.style.display = 'block';
+    if(panel) {
+      panel.style.display = 'block';
+      populatePublishBlockSelector();
+    }
+  }
+
+  // Gate — trial and premium users see a locked state, not the programmes
+  if(!isCoached) {
+    if(empty) empty.style.display = 'none';
+    list.innerHTML = `
+      <div style="border:1px solid var(--border);background:var(--card);margin-bottom:12px;padding:32px 20px;text-align:center">
+        <div style="font-size:28px;margin-bottom:16px">✦</div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;margin-bottom:8px">COACHED TIER</div>
+        <div style="font-size:10px;letter-spacing:1px;color:var(--text-muted);line-height:1.8;margin-bottom:20px">New training programme every month — built by a certified L3 PT and loaded straight into your app.</div>
+        <button onclick="openUpgrade()" style="width:100%;padding:12px;background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer">UPGRADE TO COACHED £19.99 →</button>
+      </div>`;
+    return;
   }
 
   const { data: programmes, error } = await supa
@@ -3157,38 +3179,61 @@ async function loadProgrammes() {
 
   if(empty) empty.style.display = 'none';
 
-  const userTier = currentUser?.tier;
-  const isCoached = userTier === 'coached' || userTier === 'admin';
-  const isPremiumOnly = userTier === 'premium';
-
   list.innerHTML = programmes.map(p => `
     <div style="border:1px solid var(--border);background:var(--card);margin-bottom:12px;padding:20px">
       <div style="font-size:8px;letter-spacing:3px;color:var(--accent);margin-bottom:8px">${p.month||''}</div>
       <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--text);margin-bottom:8px">${p.title}</div>
       <div style="font-size:10px;letter-spacing:1px;color:var(--text-muted);line-height:1.8;margin-bottom:16px">${p.description||''}</div>
-      ${isCoached
-        ? `<button onclick="loadProgrammeAsBlock('${p.id}')" style="width:100%;padding:12px;background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer">LOAD INTO APP →</button>`
-        : isPremiumOnly
-          ? `<button onclick="closeUpgrade();openUpgrade()" style="width:100%;padding:12px;background:none;border:1px solid var(--accent-dim);color:var(--accent);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer">UPGRADE TO COACHED £19.99 →</button>`
-          : `<div style="padding:12px;border:1px solid var(--border);text-align:center;font-size:9px;letter-spacing:3px;color:var(--text-dim)">✦ COACHED TIER — £19.99/MO</div>`
-      }
-      ${userTier === 'admin' ? `
+      <button onclick="loadProgrammeAsBlock('${p.id}')" style="width:100%;padding:12px;background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer">LOAD INTO APP →</button>
+      ${isAdmin ? `
         <button onclick="deleteProgramme('${p.id}')" style="width:100%;margin-top:8px;padding:10px;background:none;border:1px solid var(--border);color:var(--text-dim);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;cursor:pointer">✕ DELETE</button>
       ` : ''}
     </div>
   `).join('');
 }
 
+function populatePublishBlockSelector() {
+  const sel = document.getElementById('prog-block-select');
+  if(!sel) return;
+  sel.innerHTML = '<option value="" disabled selected>Select a saved block...</option>';
+  customWorkouts.forEach(w => {
+    const opt = document.createElement('option');
+    opt.value = w.id;
+    opt.textContent = w.name + (w.days?.length ? '  ·  ' + w.days.length + ' days' : '');
+    sel.appendChild(opt);
+  });
+  // Also add current active block if it has days
+  if(currentBlock.days?.length) {
+    const opt = document.createElement('option');
+    opt.value = '__current__';
+    opt.textContent = (currentBlock.name || 'Current Block') + '  ·  ACTIVE';
+    sel.insertBefore(opt, sel.options[1]);
+  }
+}
+
 async function publishProgramme() {
-  const title = document.getElementById('prog-title').value.trim();
-  const month = document.getElementById('prog-month').value.trim();
-  const desc  = document.getElementById('prog-desc').value.trim();
+  const title   = document.getElementById('prog-title').value.trim();
+  const month   = document.getElementById('prog-month').value.trim();
+  const desc    = document.getElementById('prog-desc').value.trim();
+  const blockId = document.getElementById('prog-block-select').value;
   if(!title || !month) { showToast('Title and month required'); return; }
+  if(!blockId) { showToast('Select a block to publish'); return; }
+
+  // Resolve the selected block data
+  let blockData;
+  if(blockId === '__current__') {
+    blockData = currentBlock;
+  } else {
+    const found = customWorkouts.find(w => w.id === blockId);
+    if(!found) { showToast('Block not found'); return; }
+    blockData = found;
+  }
+
   const { data, error } = await supa.from('programmes').insert({
     title,
     month,
     description: desc,
-    data: { currentBlock },
+    data: { currentBlock: blockData },
     created_by: currentUser.id
   }).select().single();
   if(error) { showToast('Publish failed: ' + error.message); return; }
@@ -3196,6 +3241,7 @@ async function publishProgramme() {
   document.getElementById('prog-title').value = '';
   document.getElementById('prog-month').value = '';
   document.getElementById('prog-desc').value = '';
+  document.getElementById('prog-block-select').selectedIndex = 0;
   loadProgrammes();
 }
 
