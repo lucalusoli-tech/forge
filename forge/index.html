@@ -1302,18 +1302,15 @@ const EXERCISES = [
 // ─── CATEGORY / SUBCATEGORY TAXONOMY ──────────────────────────
 const EX_CATS = {
   all:         { label:'All',          subs:[] },
-  upper:       { label:'BW Upper Body', subs:['push','pull','core'] },
-  legs:        { label:'BW Legs',       subs:['quads','hamstrings','glutes','calves'] },
   skill:       { label:'Skills',       subs:['front-lever','back-lever','planche','handstand','l-sit','muscle-up'] },
-  calisthenics:{ label:'Calisthenics', subs:['bar','rings','floor'] },
+  calisthenics:{ label:'Calisthenics', subs:['push','pull','core','legs','glutes','bar','rings','floor'] },
   barbell:     { label:'Barbell',      subs:['bb-chest','bb-back','bb-shoulders','bb-legs','bb-arms'] },
   dumbbell:    { label:'Dumbbell',     subs:['db-chest','db-back','db-shoulders','db-legs','db-arms'] },
   machine:     { label:'Machine',      subs:['mach-chest','mach-back','mach-shoulders','mach-legs','mach-arms'] },
 };
 
 const SUB_LABELS = {
-  push:'Push', pull:'Pull', core:'Core',
-  quads:'Quads', hamstrings:'Hamstrings', glutes:'Glutes', calves:'Calves',
+  push:'Push', pull:'Pull', core:'Core', legs:'Legs', glutes:'Glutes',
   bar:'Bar', rings:'Rings', floor:'Floor / Ground',
   'front-lever':'Front Lever','back-lever':'Back Lever',planche:'Planche',
   handstand:'Handstand','l-sit':'L-Sit & Manna','muscle-up':'Muscle-Up',
@@ -1341,7 +1338,7 @@ const FLOOR_IDS = ['hollow-body','bwf-reverse-plank','bwf-shoulder-bridge','bwf-
 
 EXERCISES.forEach(ex => {
   const t = ex.tags;
-  let cat = 'upper', subcat = null;
+  let cat = 'calisthenics', subcat = null;
 
   if(t.includes('machine')) {
     cat = 'machine';
@@ -1361,12 +1358,14 @@ EXERCISES.forEach(ex => {
     const chestIds = ['db-bench-press','db-incline-press','db-fly','db-incline-fly','db-pullover'];
     const backIds  = ['db-one-arm-row','db-bent-row','db-shrug','db-rear-delt-fly','db-chest-supported-row','db-face-pull-db'];
     const shIds    = ['db-shoulder-press','db-arnold-press','db-lateral-raise','db-front-raise'];
-    const legsIds  = ['db-goblet-squat','db-split-squat','db-rdl','db-lunge','db-step-up','db-hip-thrust','db-calf-raise'];
+    const legsIds  = ['db-goblet-squat','db-split-squat','db-rdl','db-lunge','db-step-up','db-calf-raise'];
     const armsIds  = ['db-curl','db-hammer-curl','db-concentration-curl','db-incline-curl','db-tricep-overhead','db-kickback'];
+    const gluteIds = ['db-hip-thrust'];
     if(chestIds.includes(ex.id)) subcat='db-chest';
     else if(backIds.includes(ex.id)) subcat='db-back';
     else if(shIds.includes(ex.id)) subcat='db-shoulders';
     else if(legsIds.includes(ex.id)) subcat='db-legs';
+    else if(gluteIds.includes(ex.id)) subcat='db-legs';
     else if(armsIds.includes(ex.id)) subcat='db-arms';
 
   } else if(t.includes('barbell')) {
@@ -1374,11 +1373,13 @@ EXERCISES.forEach(ex => {
     const chestIds = ['bb-bench-press','bb-incline-bench','bb-decline-bench','bb-close-grip-bench'];
     const backIds  = ['bb-deadlift','bb-rdl','bb-bent-row','bb-pendlay-row','bb-rack-pull','bb-shrug'];
     const shIds    = ['bb-ohp','bb-push-press','bb-behind-neck-press'];
-    const legsIds  = ['bb-squat','bb-front-squat','bb-zercher-squat','bb-hip-thrust','bb-good-morning','bb-lunge'];
+    const legsIds  = ['bb-squat','bb-front-squat','bb-zercher-squat','bb-good-morning','bb-lunge'];
+    const gluteIds = ['bb-hip-thrust'];
     const armsIds  = ['bb-curl','bb-skull-crusher','bb-ez-curl'];
     if(chestIds.includes(ex.id)) subcat='bb-chest';
     else if(backIds.includes(ex.id)) subcat='bb-back';
     else if(shIds.includes(ex.id)) subcat='bb-shoulders';
+    else if(gluteIds.includes(ex.id)) subcat='bb-legs';
     else if(legsIds.includes(ex.id)) subcat='bb-legs';
     else if(armsIds.includes(ex.id)) subcat='bb-arms';
 
@@ -1388,29 +1389,25 @@ EXERCISES.forEach(ex => {
       if(ids.includes(ex.id)) { subcat = group; break; }
     }
 
-  } else if(t.includes('calisthenics')) {
+  } else if(t.includes('calisthenics') || t.includes('legs') || t.includes('core') || t.includes('push') || t.includes('pull')) {
     cat = 'calisthenics';
-    if(RING_IDS.includes(ex.id)) subcat = 'rings';
-    else if(FLOOR_IDS.includes(ex.id)) subcat = 'floor';
+    // Glutes first (bridges, hip thrusts)
+    const gluteIds = ['bwf-shoulder-bridge','bwf-table-bridge','bwf-angled-bridge','bwf-head-bridge','bwf-bridge-wheel','bwf-decline-bridge','bwf-one-leg-bridge','bwf-decline-ol-bridge','db-hip-thrust','bb-hip-thrust'];
+    // Legs
+    const legIds = ['bwf-split-squat','bwf-bulgarian-split-squat','bwf-step-up','bwf-deep-step-up','bwf-cossack-squat','bwf-partial-pistol','bwf-assisted-pistol','bwf-pistol-squat','bwf-beginner-shrimp','bwf-int-shrimp','bwf-shrimp-squat','bwf-two-hand-shrimp','bwf-elevated-2h-shrimp','bwf-weighted-pistol','bwf-nordic-curl-neg','bwf-nordic-curl','bwf-nordic-curl-overhead','bwf-tuck-ol-nordic','bwf-ol-nordic','bwf-elevated-friction-pistol','squat','squat-jump','rdl'];
+
+    if(gluteIds.includes(ex.id)) subcat = 'glutes';
+    else if(legIds.includes(ex.id) || t.includes('legs')) subcat = 'legs';
+    else if(RING_IDS.includes(ex.id)) subcat = 'rings';
+    else if(FLOOR_IDS.includes(ex.id)) {
+      // Core exercises on floor
+      if(t.includes('core') && !t.includes('push') && !t.includes('pull') && !t.includes('legs')) subcat = 'core';
+      else subcat = 'floor';
+    }
+    else if(t.includes('core') && !t.includes('push') && !t.includes('pull')) subcat = 'core';
+    else if(t.includes('push')) subcat = 'push';
+    else if(t.includes('pull')) subcat = 'pull';
     else subcat = 'bar';
-
-  } else if(t.includes('legs')) {
-    cat = 'legs';
-    const quadIds = ['squat','squat-jump','bwf-shoulder-bridge','bwf-one-leg-bridge'];
-    const hamIds  = ['rdl'];
-    const gluteIds= ['db-hip-thrust','bb-hip-thrust'];
-    const calfIds = ['db-calf-raise'];
-    if(hamIds.includes(ex.id)) subcat='hamstrings';
-    else if(gluteIds.includes(ex.id)) subcat='glutes';
-    else if(calfIds.includes(ex.id)) subcat='calves';
-    else subcat='quads';
-
-  } else if(t.includes('core')) {
-    cat = 'upper'; subcat = 'core';
-
-  } else if(t.includes('push') || t.includes('pull')) {
-    cat = 'upper';
-    subcat = t.includes('push') ? 'push' : 'pull';
   }
 
   EX_META[ex.id] = { cat, subcat };
@@ -2450,7 +2447,7 @@ function renderBuilderDays() {
       </div>
       ${isOpen?`<div class="day-builder-body">
         <div class="day-name-row">
-          <input class="day-name-input" type="text" value="${day.name}" placeholder="DAY NAME" maxlength="30"
+          <input class="day-name-input" type="text" value="${day.name}" placeholder="DAY NAME" maxlength="50"
             oninput="builderDays[${i}].name=this.value.toUpperCase();document.querySelector('#bday-card-${i} .day-builder-title').textContent=this.value.toUpperCase()||'DAY ${i+1}'">
         </div>
         ${filterHTML}
@@ -2543,8 +2540,12 @@ function resetBuilder(){
 
 function renderBuilderSaved(){
   const c=document.getElementById('builder-saved-list');
-  if(!customWorkouts.length){c.innerHTML=`<div class="empty-state">No saved blocks yet</div>`;return;}
-  c.innerHTML=customWorkouts.map((wk,wi)=>`
+  // Only show personal blocks — not programme or assigned blocks
+  const personal = customWorkouts.filter(wk => !wk.id?.startsWith('prog_') && !wk.id?.startsWith('assigned_'));
+  if(!personal.length){c.innerHTML=`<div class="empty-state">No saved blocks yet</div>`;return;}
+  c.innerHTML=personal.map((wk,wi)=>{
+    const realIdx = customWorkouts.indexOf(wk);
+    return `
     <div class="saved-wk-card">
       <div class="saved-wk-header">
         <div>
@@ -2554,14 +2555,15 @@ function renderBuilderSaved(){
         </div>
         <div class="saved-wk-actions">
           <button class="saved-wk-del" onclick="editSavedBlock('${wk.id}')" style="color:var(--accent);border-color:var(--accent-dim)">Edit</button>
-          <button class="saved-wk-del" onclick="deleteSavedBlock(${wi})">Delete</button>
+          <button class="saved-wk-del" onclick="deleteSavedBlock(${realIdx})">Delete</button>
         </div>
       </div>
       <div class="saved-wk-body">
         ${(wk.days||[]).map(d=>`<div class="saved-wk-day"><span>${d.name}</span><span class="saved-wk-day-count">${d.exercises?.length||0} ex</span></div>`).join('')}
         <button class="start-btn" style="margin:10px 0" onclick="setAsCurrentBlock('${wk.id}')">SET AS CURRENT →</button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
 
 function deleteSavedBlock(idx){
