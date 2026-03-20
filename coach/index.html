@@ -17,6 +17,9 @@
     --border: #242424; --border-light: #333; --text: #e8e2d9; --text-muted: #8c8480;
     --text-dim: #555; --accent: #c9a96e; --accent-dim: #7a5f38;
     --accent-glow: rgba(201,169,110,0.1); --red: #c94040; --green: #5a8a5a;
+    --s4: #6e9ac9; --s4-glow: rgba(110,154,201,0.12); --s4-dim: #3a5a7a;
+    --s8: #c9a96e; --s8-glow: rgba(201,169,110,0.12); --s8-dim: #7a5f38;
+    --s12: #c97a6e; --s12-glow: rgba(201,122,110,0.12); --s12-dim: #7a3a2a;
   }
 
   html, body {
@@ -195,6 +198,9 @@
   .tracker-filter { display: flex; gap: 6px; }
   .filter-chip { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; padding: 5px 12px; cursor: pointer; transition: all 0.15s; }
   .filter-chip.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+  .filter-chip.s4-chip.active { background: var(--s4-glow); border-color: var(--s4); color: var(--s4); }
+  .filter-chip.s8-chip.active { background: var(--s8-glow); border-color: var(--s8); color: var(--s8); }
+  .filter-chip.s12-chip.active { background: var(--s12-glow); border-color: var(--s12); color: var(--s12); }
   .add-client-btn { background: var(--accent-glow); border: 1px solid var(--accent); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; padding: 7px 14px; cursor: pointer; white-space: nowrap; }
   .add-client-btn:active { background: rgba(201,169,110,0.2); }
 
@@ -208,7 +214,27 @@
   .session-count-chips { display: flex; gap: 6px; align-items: center; margin-top: 10px; }
   .session-count-label { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-right: 4px; }
   .sc-chip { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; padding: 5px 14px; cursor: pointer; transition: all 0.15s; }
-  .sc-chip.selected { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+  .sc-chip.selected { font-weight: 500; }
+  .sc-chip.s4.selected { background: var(--s4-glow); border-color: var(--s4); color: var(--s4); }
+  .sc-chip.s8.selected { background: var(--s8-glow); border-color: var(--s8); color: var(--s8); }
+  .sc-chip.s12.selected { background: var(--s12-glow); border-color: var(--s12); color: var(--s12); }
+
+  /* Client card colour coding by session count */
+  .client-card.s4 { border-left: 3px solid var(--s4); }
+  .client-card.s8 { border-left: 3px solid var(--s8); }
+  .client-card.s12 { border-left: 3px solid var(--s12); }
+  .client-card.s4 .client-progress { color: var(--s4); }
+  .client-card.s8 .client-progress { color: var(--s8); }
+  .client-card.s12 .client-progress { color: var(--s12); }
+  .client-card.s4 .sbox.checked { background: var(--s4-glow); border-color: var(--s4); }
+  .client-card.s4 .sbox.checked::after { color: var(--s4); }
+  .client-card.s8 .sbox.checked { background: var(--s8-glow); border-color: var(--s8); }
+  .client-card.s8 .sbox.checked::after { color: var(--s8); }
+  .client-card.s12 .sbox.checked { background: var(--s12-glow); border-color: var(--s12); }
+  .client-card.s12 .sbox.checked::after { color: var(--s12); }
+  .client-card.s4 .client-done-badge { border-color: var(--s4); color: var(--s4); }
+  .client-card.s8 .client-done-badge { border-color: var(--s8); color: var(--s8); }
+  .client-card.s12 .client-done-badge { border-color: var(--s12); color: var(--s12); }
   .add-client-submit { width: 100%; margin-top: 10px; padding: 11px; background: var(--accent-glow); border: 1px solid var(--accent); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; }
 
   /* Client rows */
@@ -331,9 +357,9 @@
     <div class="tracker-controls">
       <div class="tracker-filter">
         <button class="filter-chip active" onclick="setTrackerFilter('all', this)">All</button>
-        <button class="filter-chip" onclick="setTrackerFilter('4', this)">4 Sessions</button>
-        <button class="filter-chip" onclick="setTrackerFilter('8', this)">8 Sessions</button>
-        <button class="filter-chip" onclick="setTrackerFilter('12', this)">12 Sessions</button>
+        <button class="filter-chip s4-chip" onclick="setTrackerFilter('4', this)">4 Sessions</button>
+        <button class="filter-chip s8-chip" onclick="setTrackerFilter('8', this)">8 Sessions</button>
+        <button class="filter-chip s12-chip" onclick="setTrackerFilter('12', this)">12 Sessions</button>
       </div>
       <button class="add-client-btn" onclick="toggleAddClientForm()">+ Add Client</button>
     </div>
@@ -346,9 +372,9 @@
       </div>
       <div class="session-count-chips">
         <span class="session-count-label">Sessions</span>
-        <button class="sc-chip selected" onclick="selectSessionCount(4, this)">4</button>
-        <button class="sc-chip" onclick="selectSessionCount(8, this)">8</button>
-        <button class="sc-chip" onclick="selectSessionCount(12, this)">12</button>
+        <button class="sc-chip s4 selected" onclick="selectSessionCount(4, this)">4</button>
+        <button class="sc-chip s8" onclick="selectSessionCount(8, this)">8</button>
+        <button class="sc-chip s12" onclick="selectSessionCount(12, this)">12</button>
       </div>
       <button class="add-client-submit" onclick="addClient()">ADD CLIENT →</button>
     </div>
@@ -700,7 +726,7 @@ function renderTracker() {
     }).join('');
 
     return `
-      <div class="client-card" id="cc-${c.id}">
+      <div class="client-card s${total}" id="cc-${c.id}">
         <div class="client-card-header">
           <div class="client-card-left">
             <div class="client-name">${c.client_name}</div>
