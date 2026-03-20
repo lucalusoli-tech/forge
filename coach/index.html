@@ -182,6 +182,61 @@
   .topbar-right { display: flex; align-items: center; gap: 12px; }
   .signout-link { font-size: 9px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; cursor: pointer; background: none; border: none; font-family: 'DM Mono', monospace; }
   .signout-link:hover { color: var(--text-muted); }
+
+  /* ── TABS ── */
+  .dash-tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--deep); }
+  .dash-tab { flex: 1; padding: 14px; background: transparent; border: none; color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
+  .dash-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .dash-panel { display: none; }
+  .dash-panel.active { display: block; }
+
+  /* ── SESSION TRACKER ── */
+  .tracker-controls { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .tracker-filter { display: flex; gap: 6px; }
+  .filter-chip { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; padding: 5px 12px; cursor: pointer; transition: all 0.15s; }
+  .filter-chip.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+  .add-client-btn { background: var(--accent-glow); border: 1px solid var(--accent); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; padding: 7px 14px; cursor: pointer; white-space: nowrap; }
+  .add-client-btn:active { background: rgba(201,169,110,0.2); }
+
+  /* Add client form */
+  .add-client-form { padding: 16px 20px; border-bottom: 1px solid var(--border); background: var(--deep); display: none; }
+  .add-client-form.open { display: block; }
+  .add-client-row { display: flex; gap: 8px; flex-wrap: wrap; }
+  .add-client-input { flex: 1; min-width: 140px; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 12px; padding: 10px 12px; outline: none; border-radius: 0; }
+  .add-client-input:focus { border-color: var(--accent); }
+  .add-client-input::placeholder { color: var(--text-dim); font-size: 10px; }
+  .session-count-chips { display: flex; gap: 6px; align-items: center; margin-top: 10px; }
+  .session-count-label { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-right: 4px; }
+  .sc-chip { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; padding: 5px 14px; cursor: pointer; transition: all 0.15s; }
+  .sc-chip.selected { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+  .add-client-submit { width: 100%; margin-top: 10px; padding: 11px; background: var(--accent-glow); border: 1px solid var(--accent); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; }
+
+  /* Client rows */
+  .tracker-list { padding: 0 20px 20px; }
+  .tracker-empty { padding: 32px 0; font-size: 10px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; text-align: center; }
+
+  .client-card { border: 1px solid var(--border); background: var(--card); margin-top: 12px; }
+  .client-card-header { padding: 12px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); gap: 10px; }
+  .client-card-left { flex: 1; min-width: 0; }
+  .client-name { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px; line-height: 1; }
+  .client-meta { font-size: 9px; letter-spacing: 1px; color: var(--text-muted); margin-top: 3px; }
+  .client-progress { font-size: 9px; letter-spacing: 1px; color: var(--accent); margin-top: 2px; }
+  .client-done-badge { font-size: 8px; letter-spacing: 2px; color: var(--green); border: 1px solid var(--green); padding: 2px 8px; text-transform: uppercase; flex-shrink: 0; }
+  .client-delete-btn { background: none; border: none; color: var(--text-dim); font-size: 16px; cursor: pointer; padding: 0 4px; flex-shrink: 0; line-height: 1; }
+  .client-delete-btn:hover { color: var(--red); }
+
+  /* Session checkboxes */
+  .session-boxes { display: flex; flex-wrap: wrap; gap: 6px; padding: 12px 14px; }
+  .sbox {
+    width: 32px; height: 32px; border: 1px solid var(--border); background: var(--surface);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-size: 9px; color: var(--text-dim); letter-spacing: 0; transition: all 0.15s;
+    position: relative; flex-shrink: 0;
+  }
+  .sbox.checked { background: var(--accent-glow); border-color: var(--accent); }
+  .sbox.checked::after { content: '✓'; color: var(--accent); font-size: 13px; }
+  .sbox:not(.checked) { font-size: 8px; color: var(--text-dim); }
+  .sbox:hover:not(.checked) { border-color: var(--accent-dim); }
 </style>
 </head>
 <body>
@@ -224,8 +279,15 @@
     <div class="stat-cell"><div class="stat-label">Clients</div><div class="stat-value" id="stat-clients">—</div></div>
   </div>
 
-  <!-- ASSIGN BLOCK -->
-  <div class="section">
+  <!-- TABS -->
+  <div class="dash-tabs">
+    <button class="dash-tab active" onclick="switchTab('assign', this)">Assign Block</button>
+    <button class="dash-tab" onclick="switchTab('tracker', this)">Session Tracker</button>
+    <button class="dash-tab" onclick="switchTab('assigned', this)">Assigned</button>
+  </div>
+
+  <!-- PANEL: ASSIGN BLOCK -->
+  <div class="dash-panel active" id="dpanel-assign">
     <div class="section-header">
       <div class="section-title">ASSIGN BLOCK</div>
       <div class="section-sub">Send a training block to a client by email</div>
@@ -261,18 +323,48 @@
       <div class="assign-error" id="assign-error"></div>
       <button class="assign-btn" id="assign-btn" onclick="assignBlock()">ASSIGN TO CLIENT →</button>
     </div>
-  </div>
+  </div><!-- /dpanel-assign -->
 
-  <!-- ASSIGNED BLOCKS -->
-  <div class="section">
-    <div class="section-header">
-      <div class="section-title">ASSIGNED</div>
-      <div class="section-sub">All blocks sent to clients</div>
+  <!-- PANEL: SESSION TRACKER -->
+  <div class="dash-panel" id="dpanel-tracker">
+
+    <div class="tracker-controls">
+      <div class="tracker-filter">
+        <button class="filter-chip active" onclick="setTrackerFilter('all', this)">All</button>
+        <button class="filter-chip" onclick="setTrackerFilter('4', this)">4 Sessions</button>
+        <button class="filter-chip" onclick="setTrackerFilter('8', this)">8 Sessions</button>
+        <button class="filter-chip" onclick="setTrackerFilter('12', this)">12 Sessions</button>
+      </div>
+      <button class="add-client-btn" onclick="toggleAddClientForm()">+ Add Client</button>
     </div>
-    <div class="assigned-list" id="assigned-list">
+
+    <!-- Add client form -->
+    <div class="add-client-form" id="add-client-form">
+      <div class="add-client-row">
+        <input class="add-client-input" type="text" id="new-client-name" placeholder="Client name" autocomplete="off">
+        <input class="add-client-input" type="date" id="new-client-date" style="max-width:160px">
+      </div>
+      <div class="session-count-chips">
+        <span class="session-count-label">Sessions</span>
+        <button class="sc-chip selected" onclick="selectSessionCount(4, this)">4</button>
+        <button class="sc-chip" onclick="selectSessionCount(8, this)">8</button>
+        <button class="sc-chip" onclick="selectSessionCount(12, this)">12</button>
+      </div>
+      <button class="add-client-submit" onclick="addClient()">ADD CLIENT →</button>
+    </div>
+
+    <div class="tracker-list" id="tracker-list">
+      <div class="tracker-empty">Loading...</div>
+    </div>
+
+  </div><!-- /dpanel-tracker -->
+
+  <!-- PANEL: ASSIGNED BLOCKS -->
+  <div class="dash-panel" id="dpanel-assigned">
+    <div class="assigned-list" id="assigned-list" style="padding:0 20px 8px">
       <div class="loading-row">Loading...</div>
     </div>
-  </div>
+  </div><!-- /dpanel-assigned -->
 
 </div><!-- /main -->
 
@@ -338,6 +430,7 @@ function initDashboard() {
   document.getElementById('coach-name-badge').textContent = coachUser.name.toUpperCase();
   loadProgrammes();
   loadAssigned();
+  loadClients();
 }
 
 // ── PROGRAMMES → BLOCK SELECTOR ───────────────────────────────────────────
@@ -511,6 +604,153 @@ function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg; t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ── TABS ──────────────────────────────────────────────────────────────────
+function switchTab(tab, btn) {
+  document.querySelectorAll('.dash-tab').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.dash-panel').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('dpanel-' + tab).classList.add('active');
+  if(tab === 'tracker') renderTracker();
+  if(tab === 'assigned') loadAssigned();
+}
+
+// ── SESSION TRACKER ───────────────────────────────────────────────────────
+let clients = [];
+let trackerFilter = 'all';
+let newClientSessions = 4;
+
+function setTrackerFilter(val, btn) {
+  trackerFilter = val;
+  document.querySelectorAll('.tracker-filter .filter-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderTracker();
+}
+
+function toggleAddClientForm() {
+  const form = document.getElementById('add-client-form');
+  form.classList.toggle('open');
+  if(form.classList.contains('open')) {
+    document.getElementById('new-client-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('new-client-name').focus();
+  }
+}
+
+function selectSessionCount(n, btn) {
+  newClientSessions = n;
+  document.querySelectorAll('.sc-chip').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+}
+
+async function addClient() {
+  const name = document.getElementById('new-client-name').value.trim();
+  const date = document.getElementById('new-client-date').value;
+  if(!name) { showToast('Client name required'); return; }
+
+  const { data, error } = await supa.from('session_tracker').insert({
+    coach_id:       coachUser.id,
+    client_name:    name,
+    start_date:     date || new Date().toISOString().split('T')[0],
+    total_sessions: newClientSessions,
+    sessions_done:  [],
+  }).select().single();
+
+  if(error) { showToast('Failed: ' + error.message); return; }
+
+  clients.unshift(data);
+  document.getElementById('new-client-name').value = '';
+  document.getElementById('add-client-form').classList.remove('open');
+  showToast('Client added ✦');
+  renderTracker();
+}
+
+async function loadClients() {
+  const { data, error } = await supa
+    .from('session_tracker')
+    .select('*')
+    .eq('coach_id', coachUser.id)
+    .order('start_date', { ascending: false });
+  if(error) { console.warn('Tracker load failed:', error); return; }
+  clients = data || [];
+  renderTracker();
+}
+
+function renderTracker() {
+  const list = document.getElementById('tracker-list');
+  let filtered = trackerFilter === 'all'
+    ? clients
+    : clients.filter(c => String(c.total_sessions) === trackerFilter);
+
+  if(!filtered.length) {
+    list.innerHTML = `<div class="tracker-empty">${clients.length ? 'No clients match this filter' : 'No clients yet — add one above'}</div>`;
+    return;
+  }
+
+  list.innerHTML = filtered.map(c => {
+    const done = c.sessions_done || [];
+    const total = c.total_sessions || 8;
+    const count = done.length;
+    const isComplete = count >= total;
+    const date = c.start_date ? new Date(c.start_date).toLocaleDateString('en-GB', { day:'numeric', month:'short', year:'numeric' }) : '—';
+
+    const boxes = Array.from({ length: total }, (_, i) => {
+      const checked = done.includes(i);
+      return `<div class="sbox ${checked ? 'checked' : ''}" onclick="toggleSession('${c.id}', ${i})" title="Session ${i+1}">${checked ? '' : (i+1)}</div>`;
+    }).join('');
+
+    return `
+      <div class="client-card" id="cc-${c.id}">
+        <div class="client-card-header">
+          <div class="client-card-left">
+            <div class="client-name">${c.client_name}</div>
+            <div class="client-meta">Started ${date} · ${total} sessions</div>
+            <div class="client-progress">${count} / ${total} done${isComplete ? ' ✓' : ''}</div>
+          </div>
+          ${isComplete ? '<div class="client-done-badge">Complete</div>' : ''}
+          <button class="client-delete-btn" onclick="deleteClient('${c.id}')" title="Delete">✕</button>
+        </div>
+        <div class="session-boxes">${boxes}</div>
+      </div>`;
+  }).join('');
+}
+
+async function toggleSession(clientId, sessionIdx) {
+  const client = clients.find(c => c.id === clientId);
+  if(!client) return;
+
+  const done = [...(client.sessions_done || [])];
+  const pos = done.indexOf(sessionIdx);
+  if(pos > -1) done.splice(pos, 1);
+  else done.push(sessionIdx);
+  done.sort((a, b) => a - b);
+
+  // Optimistic update
+  client.sessions_done = done;
+  renderTracker();
+
+  const { error } = await supa
+    .from('session_tracker')
+    .update({ sessions_done: done })
+    .eq('id', clientId);
+
+  if(error) {
+    showToast('Save failed');
+    // Revert
+    if(pos > -1) done.splice(done.indexOf(sessionIdx), 1);
+    else done.push(sessionIdx);
+    client.sessions_done = done;
+    renderTracker();
+  }
+}
+
+async function deleteClient(clientId) {
+  if(!confirm('Delete this client? This cannot be undone.')) return;
+  const { error } = await supa.from('session_tracker').delete().eq('id', clientId);
+  if(error) { showToast('Failed to delete'); return; }
+  clients = clients.filter(c => c.id !== clientId);
+  renderTracker();
+  showToast('Client deleted');
 }
 
 // ── BOOT ──────────────────────────────────────────────────────────────────
