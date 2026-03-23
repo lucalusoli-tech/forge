@@ -2243,6 +2243,21 @@ function removeDay(i) {
   renderBuilderDays();
 }
 
+function duplicateDay(i) {
+  const original = builderDays[i];
+  const copy = {
+    id: 'bday_' + Date.now(),
+    name: original.name + ' (COPY)',
+    exercises: original.exercises.map(e => ({ ...e })),
+    filterCat: 'all',
+    filterSub: null
+  };
+  builderDays.splice(i + 1, 0, copy);
+  openDayIndex = i + 1;
+  renderBuilderDays();
+  showToast('Day duplicated ✦');
+}
+
 function toggleBuilderDay(i) {
   openDayIndex = openDayIndex===i ? null : i;
   renderBuilderDays();
@@ -2442,6 +2457,7 @@ function renderBuilderDays() {
       <div class="day-builder-header" onclick="toggleBuilderDay(${i})">
         <div class="day-builder-title">${day.name||'DAY '+(i+1)}</div>
         <span class="day-builder-count" id="bday-count-${i}">${day.exercises.length} ex</span>
+        <button class="day-builder-del" onclick="event.stopPropagation();duplicateDay(${i})" title="Duplicate day" style="font-size:13px">⧉</button>
         <button class="day-builder-del" onclick="event.stopPropagation();removeDay(${i})">✕</button>
         <span class="day-builder-chevron">›</span>
       </div>
