@@ -2268,6 +2268,8 @@ const INTENSITY_ORDER = { 'Easy':1, 'Moderate':2, 'Hard':3, 'Very hard':4, 'Elit
 function byIntensity(a, b) {
   return (INTENSITY_ORDER[a.intensity] || 99) - (INTENSITY_ORDER[b.intensity] || 99);
 }
+
+function renderDayExPicker(dayIdx) {
   const day = builderDays[dayIdx];
   const container = document.getElementById('bday-picker-'+dayIdx);
   if(!container) return;
