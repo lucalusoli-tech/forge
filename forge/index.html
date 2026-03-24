@@ -9,6 +9,11 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#080808">
+<meta name="description" content="Calisthenics & Strength Training OS — Build blocks, track progress, get coached.">
+<link rel="manifest" href="/forge/manifest.json">
+<link rel="icon" type="image/png" sizes="32x32" href="/forge/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/forge/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/forge/apple-touch-icon.png">
 <title>FORGE</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
@@ -2759,11 +2764,20 @@ let timerPaused = false;
 let currentTimerExName = '';
 const TIMER_CIRCUMFERENCE = 590.6;
 
-// Push notification support
-let notifPermission = Notification?.permission || 'default';
+// Push notification support (not available on iOS Safari)
+let notifPermission = 'default';
+try {
+  if ('Notification' in window && Notification.permission) {
+    notifPermission = Notification.permission;
+  }
+} catch(e) { /* iOS Safari throws on Notification access */ }
 
 function checkNotificationSupport() {
-  return 'Notification' in window;
+  try {
+    return 'Notification' in window && typeof Notification.requestPermission === 'function';
+  } catch(e) {
+    return false;
+  }
 }
 
 function updateNotifPrompt() {
@@ -2775,7 +2789,12 @@ function updateNotifPrompt() {
     return;
   }
   
-  notifPermission = Notification.permission;
+  try {
+    notifPermission = Notification.permission;
+  } catch(e) {
+    container.innerHTML = '';
+    return;
+  }
   
   if (notifPermission === 'granted') {
     container.innerHTML = '<div class="notif-status">✓ Notifications enabled</div>';
@@ -3605,6 +3624,15 @@ function dismissAssignedNotice() {
   overlay.style.opacity = '0';
   document.getElementById('assigned-sheet').style.transform = 'translateY(100%)';
   setTimeout(() => overlay.remove(), 350);
+}
+
+// ─── SERVICE WORKER ────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/forge/sw.js')
+      .then(reg => console.log('SW registered'))
+      .catch(err => console.log('SW registration failed:', err));
+  });
 }
 
 </script>
