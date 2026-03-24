@@ -1,0 +1,25 @@
+{
+  "name": "FORGE Coach",
+  "short_name": "Coach",
+  "description": "FORGE Coach Dashboard — Manage clients and programmes",
+  "start_url": "/coach/",
+  "scope": "/coach/",
+  "display": "standalone",
+  "background_color": "#080808",
+  "theme_color": "#080808",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/coach/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/coach/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
