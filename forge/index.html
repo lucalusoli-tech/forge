@@ -9,11 +9,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#080808">
-<meta name="description" content="Calisthenics & Strength Training OS — Build blocks, track progress, get coached.">
-<link rel="manifest" href="/forge/manifest.json">
-<link rel="icon" type="image/png" sizes="32x32" href="/forge/favicon-32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/forge/favicon-16.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/forge/apple-touch-icon.png">
 <title>FORGE</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
@@ -138,17 +133,6 @@
   .timer-duration-row { display: flex; gap: 8px; margin-top: 20px; }
   .timer-dur-btn { background: transparent; border: 1px solid var(--border); color: var(--text-dim); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; padding: 5px 12px; cursor: pointer; }
   .timer-dur-btn.active { border-color: var(--accent-dim); color: var(--accent); }
-
-  /* Notification permission prompt */
-  .notif-prompt { display: flex; align-items: center; gap: 8px; margin-top: 16px; padding: 10px 14px; background: var(--surface); border: 1px solid var(--border); }
-  .notif-prompt-text { font-size: 9px; letter-spacing: 1px; color: var(--text-muted); flex: 1; }
-  .notif-prompt-btn { background: var(--accent-glow); border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; padding: 6px 12px; cursor: pointer; }
-  .notif-prompt-btn:active { background: rgba(201,169,110,0.2); }
-  .notif-status { font-size: 9px; letter-spacing: 1px; color: var(--green); margin-top: 12px; text-align: center; }
-
-  /* Exercise history hint */
-  .ex-history { font-size: 9px; letter-spacing: 1px; color: var(--text-dim); padding: 0 20px 10px; margin-top: -6px; }
-  .ex-history span { color: var(--accent); }
 
   /* Timer toggle in log header */
   .timer-toggle { display: flex; align-items: center; gap: 6px; padding: 8px 20px; border-bottom: 1px solid var(--border); background: var(--deep); }
@@ -534,7 +518,7 @@
   </div>
   <div class="auth-form">
     <div class="auth-title">SIGN IN</div>
-    <input class="auth-input" type="email" id="login-email" placeholder="Email address" autocomplete="email">
+    <input class="auth-input" type="email" id="login-email" placeholder="Email address" autocomplete="username">
     <input class="auth-input" type="password" id="login-pass" placeholder="Password" autocomplete="current-password">
     <div class="auth-error" id="login-error"></div>
     <button class="auth-btn-primary" onclick="handleLogin()">SIGN IN →</button>
@@ -554,7 +538,7 @@
   <div class="auth-form">
     <div class="auth-title">CREATE ACCOUNT</div>
     <input class="auth-input" type="text" id="signup-name" placeholder="Your name" autocomplete="name">
-    <input class="auth-input" type="email" id="signup-email" placeholder="Email address" autocomplete="email">
+    <input class="auth-input" type="email" id="signup-email" placeholder="Email address" autocomplete="username">
     <input class="auth-input" type="password" id="signup-pass" placeholder="Password" autocomplete="new-password">
     <div class="auth-error" id="signup-error"></div>
     <button class="auth-btn-primary" onclick="handleSignup()">START FREE TRIAL →</button>
@@ -964,7 +948,6 @@
     <button class="timer-dur-btn" onclick="setTimerDuration(120,this)">2m</button>
     <button class="timer-dur-btn" onclick="setTimerDuration(180,this)">3m</button>
   </div>
-  <div id="notif-prompt-container"></div>
 </div>
 
 <!-- BLOCK END PROMPT -->
@@ -1736,91 +1719,6 @@ function startDay(dayId, overrideDay) {
   navigate('log');
 }
 
-function getExerciseHistory(exId) {
-  // Look for the most recent logged session for this exercise (excluding current week)
-  // Search across all days and past weeks
-  let lastSession = null;
-  
-  // Check current block's days
-  (currentBlock.days || []).forEach(d => {
-    if (!d.exercises.find(e => e.id === exId)) return;
-    
-    // Check all weeks up to current (but not current week on current day)
-    for (let w = currentBlock.weeks || 4; w >= 1; w--) {
-      const key = `${d.id}_${exId}_v${w}`;
-      const entry = sessionLog[key];
-      
-      // Skip if it's the current session we're logging
-      if (d.id === currentDayId && w === currentWeek) continue;
-      
-      if (entry) {
-        const sets = [];
-        for (let s = 1; s <= 8; s++) {
-          const weight = entry[`s${s}_w`];
-          const reps = entry[`s${s}_r`];
-          if (weight || reps) {
-            sets.push({ weight: weight || '-', reps: reps || '-' });
-          }
-        }
-        if (sets.length > 0 && !lastSession) {
-          lastSession = { week: w, day: d.name || d.id, sets };
-        }
-      }
-    }
-  });
-  
-  // Also check archived blocks for deeper history
-  if (!lastSession && archivedBlocks?.length) {
-    for (const block of archivedBlocks) {
-      if (lastSession) break;
-      (block.days || []).forEach(d => {
-        if (lastSession) return;
-        if (!d.exercises?.find(e => e.id === exId)) return;
-        
-        for (let w = block.weeks || 4; w >= 1; w--) {
-          const key = `${d.id}_${exId}_v${w}`;
-          const entry = sessionLog[key];
-          if (entry) {
-            const sets = [];
-            for (let s = 1; s <= 8; s++) {
-              const weight = entry[`s${s}_w`];
-              const reps = entry[`s${s}_r`];
-              if (weight || reps) {
-                sets.push({ weight: weight || '-', reps: reps || '-' });
-              }
-            }
-            if (sets.length > 0) {
-              lastSession = { week: w, day: d.name || d.id, sets, archived: true };
-              return;
-            }
-          }
-        }
-      });
-    }
-  }
-  
-  return lastSession;
-}
-
-function formatExerciseHistory(history) {
-  if (!history || !history.sets.length) return '';
-  
-  // Summarize: show the weight range and rep pattern
-  const weights = history.sets.map(s => parseFloat(s.weight)).filter(w => !isNaN(w));
-  const reps = history.sets.map(s => s.reps).filter(r => r !== '-');
-  
-  if (!weights.length && !reps.length) return '';
-  
-  const setCount = history.sets.length;
-  const weightStr = weights.length ? (Math.max(...weights) === Math.min(...weights) ? `${weights[0]}kg` : `${Math.min(...weights)}-${Math.max(...weights)}kg`) : '';
-  const repStr = reps.length ? (reps.every(r => r === reps[0]) ? reps[0] : reps.join('/')) : '';
-  
-  let summary = `${setCount}×${repStr}`;
-  if (weightStr) summary += ` @ <span>${weightStr}</span>`;
-  
-  return summary;
-}
-
 function renderLogExercises(exercises) {
   const c = document.getElementById('log-exercises-container');
   c.innerHTML = '';
@@ -1843,17 +1741,11 @@ function renderLogExercises(exercises) {
     // Build sparkline from past weeks
     const sparkSvg = buildSparkline(ex.id);
     const savedNote = saved['note']||'';
-    
-    // Get exercise history
-    const history = getExerciseHistory(ex.id);
-    const historyHtml = history ? `<div class="ex-history">Last: ${formatExerciseHistory(history)}</div>` : '';
-    
     c.innerHTML+=`<div class="log-ex-card">
       <div class="log-ex-header" onclick="openSheet('${exData.id}')">
         <div><div class="log-ex-name">${exData.name}</div><div class="log-ex-target">${ex.sets}×${ex.reps}</div></div>
         <div class="log-ex-note">${ex.note||''}</div>
       </div>
-      ${historyHtml}
       ${sparkSvg ? `<div class="spark-row"><div class="spark-label">Load trend</div>${sparkSvg}</div>` : ''}
       <div class="log-ex-body">
         <div style="font-size:8px;letter-spacing:2px;color:var(--text-muted);margin-bottom:8px">WEIGHT / REPS PER SET</div>
@@ -2761,93 +2653,7 @@ let timerDuration = 90;
 let timerRemaining = 90;
 let timerInterval = null;
 let timerPaused = false;
-let currentTimerExName = '';
 const TIMER_CIRCUMFERENCE = 590.6;
-
-// Push notification support (not available on iOS Safari)
-let notifPermission = 'default';
-try {
-  if ('Notification' in window && Notification.permission) {
-    notifPermission = Notification.permission;
-  }
-} catch(e) { /* iOS Safari throws on Notification access */ }
-
-function checkNotificationSupport() {
-  try {
-    return 'Notification' in window && typeof Notification.requestPermission === 'function';
-  } catch(e) {
-    return false;
-  }
-}
-
-function updateNotifPrompt() {
-  const container = document.getElementById('notif-prompt-container');
-  if (!container) return;
-  
-  if (!checkNotificationSupport()) {
-    container.innerHTML = '';
-    return;
-  }
-  
-  try {
-    notifPermission = Notification.permission;
-  } catch(e) {
-    container.innerHTML = '';
-    return;
-  }
-  
-  if (notifPermission === 'granted') {
-    container.innerHTML = '<div class="notif-status">✓ Notifications enabled</div>';
-  } else if (notifPermission === 'denied') {
-    container.innerHTML = '<div class="notif-prompt"><span class="notif-prompt-text">Notifications blocked — enable in browser settings</span></div>';
-  } else {
-    container.innerHTML = `
-      <div class="notif-prompt">
-        <span class="notif-prompt-text">Get notified when rest ends</span>
-        <button class="notif-prompt-btn" onclick="requestNotifPermission()">ENABLE</button>
-      </div>`;
-  }
-}
-
-async function requestNotifPermission() {
-  if (!checkNotificationSupport()) return;
-  
-  try {
-    const permission = await Notification.requestPermission();
-    notifPermission = permission;
-    updateNotifPrompt();
-    if (permission === 'granted') {
-      showToast('Notifications enabled ✓');
-    }
-  } catch (e) {
-    console.warn('Notification permission request failed:', e);
-  }
-}
-
-function sendTimerNotification(exName) {
-  if (!checkNotificationSupport() || Notification.permission !== 'granted') return;
-  
-  try {
-    const notif = new Notification('Rest Complete', {
-      body: exName ? `Time for your next set of ${exName}` : 'Time for your next set',
-      icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect fill="%23c9a96e" width="100" height="100" rx="20"/><text x="50" y="68" font-size="50" text-anchor="middle" fill="%23080808" font-family="sans-serif" font-weight="bold">F</text></svg>',
-      tag: 'forge-rest-timer',
-      requireInteraction: false,
-      silent: false
-    });
-    
-    // Auto-close after 4 seconds
-    setTimeout(() => notif.close(), 4000);
-    
-    // Focus app when notification clicked
-    notif.onclick = () => {
-      window.focus();
-      notif.close();
-    };
-  } catch (e) {
-    console.warn('Notification failed:', e);
-  }
-}
 
 function onSetBlur(wk, setNum, exName) {
   const r = document.getElementById(`${wk}_s${setNum}_r`);
@@ -2868,12 +2674,10 @@ function startTimer(exName) {
   clearInterval(timerInterval);
   timerRemaining = timerDuration;
   timerPaused = false;
-  currentTimerExName = exName || '';
   document.getElementById('timer-pause-btn').textContent = 'PAUSE';
-  document.getElementById('timer-ex-label').textContent = currentTimerExName;
+  document.getElementById('timer-ex-label').textContent = exName || '';
   document.getElementById('timer-overlay').classList.add('open');
   updateTimerDisplay();
-  updateNotifPrompt();
   timerInterval = setInterval(() => {
     if(timerPaused) return;
     timerRemaining--;
@@ -2881,7 +2685,6 @@ function startTimer(exName) {
     if(timerRemaining <= 0) {
       clearInterval(timerInterval);
       if(navigator.vibrate) navigator.vibrate([200,100,200]);
-      sendTimerNotification(currentTimerExName);
       setTimeout(() => closeTimer(), 800);
     }
   }, 1000);
@@ -3624,15 +3427,6 @@ function dismissAssignedNotice() {
   overlay.style.opacity = '0';
   document.getElementById('assigned-sheet').style.transform = 'translateY(100%)';
   setTimeout(() => overlay.remove(), 350);
-}
-
-// ─── SERVICE WORKER ────────────────────────────────────────────
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/forge/sw.js')
-      .then(reg => console.log('SW registered'))
-      .catch(err => console.log('SW registration failed:', err));
-  });
 }
 
 </script>
