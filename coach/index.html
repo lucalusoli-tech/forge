@@ -697,31 +697,57 @@ let crmClients = [];
 let selectedClient = null;
 
 async function loadCRMClients() {
-  // Get unique clients from assigned_blocks + profiles with pt/coached tier
+  // Get clients from coach_clients table
+  const { data: savedClients } = await supa
+    .from('coach_clients')
+    .select('name, email')
+    .eq('coach_id', coachUser.id);
+  
+  // Get assignment history
   const { data: assigned } = await supa
     .from('assigned_blocks')
     .select('client_email, block_name, status, assigned_at')
     .eq('coach_id', coachUser.id)
     .order('assigned_at', { ascending: false });
   
+  // Get profiles with pt/coached tier (users who signed up)
   const { data: profiles } = await supa
     .from('profiles')
     .select('email, name, tier')
     .in('tier', ['pt', 'coached']);
   
-  // Merge: all coached/pt profiles + any assigned client emails
+  // Merge all sources
   const clientMap = new Map();
   
-  // Add profiles first
-  (profiles || []).forEach(p => {
-    clientMap.set(p.email.toLowerCase(), {
-      email: p.email,
-      name: p.name || p.email.split('@')[0],
-      tier: p.tier,
+  // Add saved clients first
+  (savedClients || []).forEach(c => {
+    clientMap.set(c.email.toLowerCase(), {
+      email: c.email,
+      name: c.name,
+      tier: null,
       lastBlock: null,
       lastDate: null,
       pendingCount: 0
     });
+  });
+  
+  // Add/update from profiles (may have more info like tier)
+  (profiles || []).forEach(p => {
+    const email = p.email.toLowerCase();
+    if(clientMap.has(email)) {
+      const c = clientMap.get(email);
+      c.tier = p.tier;
+      if(p.name) c.name = p.name;
+    } else {
+      clientMap.set(email, {
+        email: p.email,
+        name: p.name || p.email.split('@')[0],
+        tier: p.tier,
+        lastBlock: null,
+        lastDate: null,
+        pendingCount: 0
+      });
+    }
   });
   
   // Enrich with assignment data
@@ -735,7 +761,7 @@ async function loadCRMClients() {
       }
       if(a.status === 'pending') c.pendingCount++;
     } else {
-      // Client not in profiles (assigned by email only)
+      // Client not in saved list or profiles
       clientMap.set(email, {
         email: a.client_email,
         name: a.client_email.split('@')[0],
@@ -800,21 +826,30 @@ async function addCRMClient() {
     return;
   }
   
-  // Add to local list (they'll appear in profiles when they sign up)
-  crmClients.unshift({
-    email: email,
+  // Save to Supabase
+  const { error } = await supa.from('coach_clients').insert({
+    coach_id: coachUser.id,
     name: name,
-    tier: null,
-    lastBlock: null,
-    lastDate: null,
-    pendingCount: 0
+    email: email
   });
   
-  renderCRMClients();
+  if(error) {
+    if(error.code === '23505') {
+      showToast('Client already exists');
+    } else {
+      showToast('Failed to add client');
+      console.error(error);
+    }
+    return;
+  }
+  
+  // Refresh list
+  await loadCRMClients();
+  
   document.getElementById('new-crm-client-name').value = '';
   document.getElementById('new-crm-client-email').value = '';
   document.getElementById('add-crm-client-form').classList.remove('open');
-  showToast('Client added');
+  showToast('Client added ✦');
 }
 
 // ── CLIENT SHEET ──────────────────────────────────────────────────────────
