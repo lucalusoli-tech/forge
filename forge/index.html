@@ -2548,16 +2548,17 @@ function resetBuilder(){
 
 function renderBuilderSaved(){
   const c=document.getElementById('builder-saved-list');
-  // Only show personal blocks — not programme or assigned blocks
-  const personal = customWorkouts.filter(wk => !wk.id?.startsWith('prog_') && !wk.id?.startsWith('assigned_'));
-  if(!personal.length){c.innerHTML=`<div class="empty-state">No saved blocks yet</div>`;return;}
-  c.innerHTML=personal.map((wk,wi)=>{
+  // Only hide programme blocks — show personal AND assigned blocks
+  const visible = customWorkouts.filter(wk => !wk.id?.startsWith('prog_'));
+  if(!visible.length){c.innerHTML=`<div class="empty-state">No saved blocks yet</div>`;return;}
+  c.innerHTML=visible.map((wk,wi)=>{
     const realIdx = customWorkouts.indexOf(wk);
+    const isAssigned = wk.id?.startsWith('assigned_');
     return `
-    <div class="saved-wk-card">
+    <div class="saved-wk-card" ${isAssigned ? 'style="border-left:2px solid var(--accent)"' : ''}>
       <div class="saved-wk-header">
         <div>
-          <div class="saved-wk-name">${wk.name}</div>
+          <div class="saved-wk-name">${wk.name} ${isAssigned ? '<span style="font-size:8px;color:var(--accent);letter-spacing:2px">◉ ASSIGNED</span>' : ''}</div>
           ${wk.methods?.length?`<div class="saved-wk-methods">${wk.methods.join(' · ')}</div>`:''}
           <div class="saved-wk-meta">${(wk.days||[]).length} days · ${wk.weeks||4} weeks</div>
         </div>
@@ -2973,7 +2974,7 @@ async function afterAuth(supaUser, isNew) {
       trialStart = new Date(profile.trial_start).getTime();
       localStorage.setItem('fw_trial_start', trialStart);
     }
-    if(profile.tier === 'premium' || profile.tier === 'coached' || profile.tier === 'admin') {
+    if(profile.tier === 'premium' || profile.tier === 'coached' || profile.tier === 'admin' || profile.tier === 'pt') {
       isPremium = true;
       localStorage.setItem('fw_premium', 'true');
     } else if(profile.tier === 'trial') {
@@ -3023,7 +3024,7 @@ supa.auth.getSession().then(async ({ data: { session }, error }) => {
     const { data: profile } = await supa.from('profiles').select('tier').eq('id', session.user.id).single();
     if(profile?.tier && currentUser) {
       currentUser.tier = profile.tier;
-      if(profile.tier === 'premium' || profile.tier === 'coached') {
+      if(profile.tier === 'premium' || profile.tier === 'coached' || profile.tier === 'pt') {
         isPremium = true;
         localStorage.setItem('fw_premium', 'true');
       }
@@ -3047,13 +3048,18 @@ function updateUserBar() {
     nameEl.textContent = currentUser.name.toUpperCase();
     const tier = currentUser.tier;
 
-    if(tier === 'premium' || tier === 'coached' || tier === 'admin') {
+    if(tier === 'premium' || tier === 'coached' || tier === 'admin' || tier === 'pt') {
       // Paid user — show tier badge, no upgrade prompt
       if(tier === 'admin') {
         upgradeBtn.textContent = '⬡ ADMIN';
         upgradeBtn.style.color = 'var(--accent)';
         upgradeBtn.style.cursor = 'pointer';
         upgradeBtn.onclick = e => { e.stopPropagation(); window.location.href = '/coach'; };
+      } else if(tier === 'pt') {
+        upgradeBtn.textContent = '◉ 1-2-1';
+        upgradeBtn.style.color = 'var(--accent)';
+        upgradeBtn.style.cursor = 'default';
+        upgradeBtn.onclick = e => e.stopPropagation();
       } else {
         upgradeBtn.textContent = tier === 'coached' ? '✦ COACHED' : '✦ PREMIUM';
         upgradeBtn.style.color = 'var(--accent)';
@@ -3108,7 +3114,7 @@ function openSignOutSheet() {
   const upgradeBtn = document.getElementById('signout-upgrade-btn');
   const tier = currentUser.tier;
   if(upgradeBtn) {
-    if(tier === 'coached' || tier === 'admin') {
+    if(tier === 'coached' || tier === 'admin' || tier === 'pt') {
       upgradeBtn.style.display = 'none';
     } else if(tier === 'premium') {
       upgradeBtn.textContent = 'UPGRADE TO COACHED £19.99 ✦';
@@ -3394,17 +3400,34 @@ async function acceptAssignedBlock(assignmentId) {
       .select('*')
       .eq('id', assignmentId)
       .single();
+    console.log('Assigned block row:', row);
     if(error || !row) { showToast('Failed to load block'); return; }
 
     const block = row.block_data?.currentBlock;
+    console.log('Block data:', block);
     if(block) {
-      const newBlock = { ...block, id: 'assigned_' + assignmentId, name: row.block_name };
+      const newId = 'assigned_' + assignmentId;
+      // Check if already added (prevent duplicates)
+      if(customWorkouts.some(w => w.id === newId)) {
+        console.log('Block already exists, skipping');
+        dismissAssignedNotice();
+        showToast('Block already in Builder');
+        return;
+      }
+      const newBlock = { ...block, id: newId, name: row.block_name };
       if(!newBlock.warmup) newBlock.warmup = [];
       if(!newBlock.skill)  newBlock.skill  = [];
+      console.log('New block to add:', newBlock);
+      console.log('customWorkouts before:', customWorkouts.length);
       customWorkouts.unshift(newBlock);
+      console.log('customWorkouts after:', customWorkouts.length);
       localStorage.setItem('fw_customs', JSON.stringify(customWorkouts));
       syncBlocksToCloud();
       renderBuilderSaved();
+    } else {
+      console.error('No block data found in row.block_data.currentBlock');
+      showToast('Block data missing');
+      return;
     }
 
     await supa
@@ -3416,6 +3439,7 @@ async function acceptAssignedBlock(assignmentId) {
     showToast('Block added to Builder ✦');
     setTimeout(() => navigate('builder'), 600);
   } catch(e) {
+    console.error('acceptAssignedBlock error:', e);
     showToast('Something went wrong — try again');
     dismissAssignedNotice();
   }
