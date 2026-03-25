@@ -1715,6 +1715,11 @@ function startDay(dayId, overrideDay) {
       tabContainer.appendChild(btn);
     }
   }
+  // Load session notes for this day/week (or clear if none)
+  const notesKey = `${dayId}_notes_v${currentWeek}`;
+  const notesEl = document.getElementById('session-notes');
+  if(notesEl) notesEl.value = sessionLog[notesKey] || '';
+  
   renderLogExercises(day.exercises);
   navigate('log');
 }
@@ -1821,6 +1826,10 @@ function selectWeek(w,btn) {
   btn.classList.add('active');
   const day=currentBlock.days.find(d=>d.id===currentDayId);
   if(day) renderLogExercises(day.exercises);
+  // Load session notes for this week
+  const notesKey = `${currentDayId}_notes_v${currentWeek}`;
+  const notesEl = document.getElementById('session-notes');
+  if(notesEl) notesEl.value = sessionLog[notesKey] || '';
 }
 
 function saveSession() {
