@@ -3399,17 +3399,26 @@ async function acceptAssignedBlock(assignmentId) {
       .select('*')
       .eq('id', assignmentId)
       .single();
+    console.log('Assigned block row:', row);
     if(error || !row) { showToast('Failed to load block'); return; }
 
     const block = row.block_data?.currentBlock;
+    console.log('Block data:', block);
     if(block) {
       const newBlock = { ...block, id: 'assigned_' + assignmentId, name: row.block_name };
       if(!newBlock.warmup) newBlock.warmup = [];
       if(!newBlock.skill)  newBlock.skill  = [];
+      console.log('New block to add:', newBlock);
+      console.log('customWorkouts before:', customWorkouts.length);
       customWorkouts.unshift(newBlock);
+      console.log('customWorkouts after:', customWorkouts.length);
       localStorage.setItem('fw_customs', JSON.stringify(customWorkouts));
       syncBlocksToCloud();
       renderBuilderSaved();
+    } else {
+      console.error('No block data found in row.block_data.currentBlock');
+      showToast('Block data missing');
+      return;
     }
 
     await supa
@@ -3421,6 +3430,7 @@ async function acceptAssignedBlock(assignmentId) {
     showToast('Block added to Builder ✦');
     setTimeout(() => navigate('builder'), 600);
   } catch(e) {
+    console.error('acceptAssignedBlock error:', e);
     showToast('Something went wrong — try again');
     dismissAssignedNotice();
   }
