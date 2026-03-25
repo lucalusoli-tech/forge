@@ -3050,6 +3050,10 @@ function updateUserBar() {
 
     if(tier === 'premium' || tier === 'coached' || tier === 'admin' || tier === 'pt') {
       // Paid user — show tier badge, no upgrade prompt
+      // Show/hide Programmes tab based on tier
+      const progNav = document.getElementById('nav-coaching');
+      if(progNav) progNav.style.display = (tier === 'pt') ? 'none' : 'flex';
+      
       if(tier === 'admin') {
         upgradeBtn.textContent = '⬡ ADMIN';
         upgradeBtn.style.color = 'var(--accent)';
