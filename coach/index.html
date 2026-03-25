@@ -6,11 +6,6 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#080808">
-<meta name="description" content="FORGE Coach Dashboard — Manage clients and programmes">
-<link rel="manifest" href="/coach/manifest.json">
-<link rel="icon" type="image/png" sizes="32x32" href="/coach/favicon-32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/coach/favicon-16.png">
-<link rel="apple-touch-icon" sizes="180x180" href="/coach/apple-touch-icon.png">
 <title>Coach Dashboard — FORGE</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
@@ -308,6 +303,50 @@
   .tax-line-val.green { color: var(--green); }
   .tax-line-val.accent { color: var(--accent); }
   .tax-disclaimer { font-size: 9px; letter-spacing: 1px; color: var(--text-dim); margin-top: 12px; line-height: 1.6; }
+
+  /* ── CLIENT CRM ── */
+  .client-crm-list { display: flex; flex-direction: column; gap: 8px; }
+  .crm-client-card {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    background: var(--card); border: 1px solid var(--border); padding: 16px;
+    cursor: pointer; transition: border-color 0.15s;
+  }
+  .crm-client-card:hover { border-color: var(--accent-dim); }
+  .crm-client-info { flex: 1; min-width: 0; }
+  .crm-client-name { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px; margin-bottom: 2px; }
+  .crm-client-email { font-size: 10px; letter-spacing: 1px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .crm-client-meta { font-size: 9px; letter-spacing: 1px; color: var(--text-dim); margin-top: 4px; }
+  .crm-client-badge { font-size: 8px; letter-spacing: 2px; padding: 4px 10px; border: 1px solid var(--accent-dim); color: var(--accent); text-transform: uppercase; }
+  .crm-client-arrow { font-size: 14px; color: var(--text-dim); }
+
+  /* ── CLIENT SHEET OVERLAY ── */
+  .client-sheet-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 100;
+    display: none; align-items: flex-end; justify-content: center;
+  }
+  .client-sheet-overlay.open { display: flex; }
+  .client-sheet {
+    width: 100%; max-width: 640px; max-height: 90vh; overflow-y: auto;
+    background: var(--surface); border-top: 1px solid var(--border);
+    padding: 24px 20px; padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  }
+  .client-sheet-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 24px; }
+  .client-sheet-name { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 3px; line-height: 1; }
+  .client-sheet-email { font-size: 11px; letter-spacing: 1px; color: var(--accent); margin-top: 4px; }
+  .client-sheet-close { background: none; border: none; color: var(--text-muted); font-size: 20px; cursor: pointer; padding: 4px 8px; }
+  .client-sheet-close:hover { color: var(--text); }
+  .client-sheet-section { margin-bottom: 24px; }
+  .client-sheet-label { font-size: 9px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px; }
+  .client-history-list { display: flex; flex-direction: column; gap: 8px; }
+  .client-history-item {
+    background: var(--card); border: 1px solid var(--border); padding: 12px 14px;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .client-history-name { font-size: 12px; letter-spacing: 1px; }
+  .client-history-date { font-size: 9px; letter-spacing: 1px; color: var(--text-dim); }
+  .client-history-status { font-size: 8px; letter-spacing: 2px; padding: 3px 8px; text-transform: uppercase; }
+  .client-history-status.pending { border: 1px solid var(--accent-dim); color: var(--accent); }
+  .client-history-status.accepted { border: 1px solid var(--green); color: var(--green); }
 </style>
 </head>
 <body>
@@ -352,14 +391,72 @@
 
   <!-- TABS -->
   <div class="dash-tabs">
-    <button class="dash-tab active" onclick="switchTab('assign', this)">Assign Block</button>
+    <button class="dash-tab active" onclick="switchTab('clients', this)">Clients</button>
     <button class="dash-tab" onclick="switchTab('tracker', this)">Session Tracker</button>
-    <button class="dash-tab" onclick="switchTab('assigned', this)">Assigned</button>
+    <button class="dash-tab" onclick="switchTab('assigned', this)">History</button>
     <button class="dash-tab" onclick="switchTab('finance', this)">Finance</button>
   </div>
 
-  <!-- PANEL: ASSIGN BLOCK -->
-  <div class="dash-panel active" id="dpanel-assign">
+  <!-- PANEL: CLIENTS (CRM) -->
+  <div class="dash-panel active" id="dpanel-clients">
+    <div class="section-header" style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <div class="section-title">CLIENTS</div>
+        <div class="section-sub">Select a client to assign a block</div>
+      </div>
+      <button class="add-client-btn" onclick="toggleAddCRMClientForm()">+ Add Client</button>
+    </div>
+
+    <!-- Add client form -->
+    <div class="add-client-form" id="add-crm-client-form">
+      <div class="add-client-row">
+        <input class="add-client-input" type="text" id="new-crm-client-name" placeholder="Client name" autocomplete="off">
+        <input class="add-client-input" type="email" id="new-crm-client-email" placeholder="Client email" autocomplete="off">
+      </div>
+      <button class="add-client-submit" onclick="addCRMClient()">ADD CLIENT →</button>
+    </div>
+
+    <div class="client-crm-list" id="client-crm-list" style="padding:0 20px 20px">
+      <div class="tracker-empty">Loading clients...</div>
+    </div>
+  </div><!-- /dpanel-clients -->
+
+  <!-- CLIENT DETAIL SHEET (overlay) -->
+  <div class="client-sheet-overlay" id="client-sheet-overlay" onclick="closeClientSheet()">
+    <div class="client-sheet" onclick="event.stopPropagation()">
+      <div class="client-sheet-header">
+        <div>
+          <div class="client-sheet-name" id="client-sheet-name">CLIENT NAME</div>
+          <div class="client-sheet-email" id="client-sheet-email">client@email.com</div>
+        </div>
+        <button class="client-sheet-close" onclick="closeClientSheet()">✕</button>
+      </div>
+
+      <div class="client-sheet-section">
+        <div class="client-sheet-label">ASSIGN NEW BLOCK</div>
+        <select class="assign-select" id="sheet-block-select" onchange="onSheetBlockSelect()">
+          <option value="" disabled selected>Select a block...</option>
+        </select>
+        <div class="block-preview" id="sheet-block-preview">
+          <div class="bp-name" id="sheet-bp-name">—</div>
+          <div class="bp-meta" id="sheet-bp-meta">—</div>
+        </div>
+        <textarea class="assign-textarea" id="sheet-coach-note" placeholder="Note to client (optional)..." style="margin-top:12px"></textarea>
+        <div class="assign-error" id="sheet-assign-error"></div>
+        <button class="assign-btn" id="sheet-assign-btn" onclick="assignBlockFromSheet()">ASSIGN BLOCK →</button>
+      </div>
+
+      <div class="client-sheet-section">
+        <div class="client-sheet-label">ASSIGNMENT HISTORY</div>
+        <div id="client-history-list" class="client-history-list">
+          <div class="tracker-empty">No blocks assigned yet</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PANEL: ASSIGN BLOCK (legacy, hidden) -->
+  <div class="dash-panel" id="dpanel-assign">
     <div class="section-header">
       <div class="section-title">ASSIGN BLOCK</div>
       <div class="section-sub">Send a training block to a client by email</div>
@@ -551,39 +648,299 @@ function initDashboard() {
   document.getElementById('main').classList.add('visible');
   document.getElementById('dash-coach-email').textContent = coachUser.email;
   document.getElementById('coach-name-badge').textContent = coachUser.name.toUpperCase();
-  loadProgrammes();
+  loadAdminBlocks();
+  loadCRMClients();
   loadAssigned();
   loadClients();
 }
 
-// ── PROGRAMMES → BLOCK SELECTOR ───────────────────────────────────────────
-async function loadProgrammes() {
-  const { data, error } = await supa.from('programmes').select('*').order('published_at', { ascending: false });
-  if(error || !data?.length) {
-    document.getElementById('block-select').innerHTML = '<option value="" disabled selected>No published blocks yet</option>';
+// ── ADMIN BLOCKS (from FORGE Builder) ─────────────────────────────────────
+let adminBlocks = [];
+
+async function loadAdminBlocks() {
+  // Load admin's saved blocks from the blocks table
+  const { data, error } = await supa.from('blocks')
+    .select('data')
+    .eq('user_id', coachUser.id)
+    .eq('is_current', true)
+    .maybeSingle();
+  
+  if(error || !data?.data?.customWorkouts) {
+    adminBlocks = [];
     return;
   }
-  programmes = data;
-  const sel = document.getElementById('block-select');
-  sel.innerHTML = '<option value="" disabled selected>Select a published block...</option>';
-  data.forEach(p => {
+  
+  adminBlocks = data.data.customWorkouts || [];
+  console.log('Loaded admin blocks:', adminBlocks.length);
+}
+
+function populateBlockSelector(selectId) {
+  const sel = document.getElementById(selectId);
+  if(!sel) return;
+  sel.innerHTML = '<option value="" disabled selected>Select a block...</option>';
+  
+  if(!adminBlocks.length) {
+    sel.innerHTML = '<option value="" disabled selected>No blocks saved — create in Builder</option>';
+    return;
+  }
+  
+  adminBlocks.forEach((b, i) => {
     const opt = document.createElement('option');
-    opt.value = p.id;
-    opt.textContent = p.title + (p.month ? '  ·  ' + p.month : '');
+    opt.value = i;
+    opt.textContent = b.name + ' · ' + (b.days?.length || 0) + ' days · ' + (b.weeks || 4) + ' weeks';
     sel.appendChild(opt);
   });
 }
 
-function onBlockSelect() {
-  const id = document.getElementById('block-select').value;
-  const prog = programmes.find(p => p.id === id);
-  const preview = document.getElementById('block-preview');
-  if(!prog) { preview.classList.remove('visible'); return; }
-  const days = prog.data?.currentBlock?.days?.length || 0;
-  const weeks = prog.data?.currentBlock?.weeks || 4;
-  document.getElementById('bp-name').textContent = prog.title;
-  document.getElementById('bp-meta').textContent = days + ' days · ' + weeks + ' weeks' + (prog.description ? '  ·  ' + prog.description.slice(0,80) : '');
+// ── CRM CLIENTS ───────────────────────────────────────────────────────────
+let crmClients = [];
+let selectedClient = null;
+
+async function loadCRMClients() {
+  // Get unique clients from assigned_blocks + profiles with pt/coached tier
+  const { data: assigned } = await supa
+    .from('assigned_blocks')
+    .select('client_email, block_name, status, assigned_at')
+    .eq('coach_id', coachUser.id)
+    .order('assigned_at', { ascending: false });
+  
+  const { data: profiles } = await supa
+    .from('profiles')
+    .select('email, name, tier')
+    .in('tier', ['pt', 'coached']);
+  
+  // Merge: all coached/pt profiles + any assigned client emails
+  const clientMap = new Map();
+  
+  // Add profiles first
+  (profiles || []).forEach(p => {
+    clientMap.set(p.email.toLowerCase(), {
+      email: p.email,
+      name: p.name || p.email.split('@')[0],
+      tier: p.tier,
+      lastBlock: null,
+      lastDate: null,
+      pendingCount: 0
+    });
+  });
+  
+  // Enrich with assignment data
+  (assigned || []).forEach(a => {
+    const email = a.client_email.toLowerCase();
+    if(clientMap.has(email)) {
+      const c = clientMap.get(email);
+      if(!c.lastDate || new Date(a.assigned_at) > new Date(c.lastDate)) {
+        c.lastBlock = a.block_name;
+        c.lastDate = a.assigned_at;
+      }
+      if(a.status === 'pending') c.pendingCount++;
+    } else {
+      // Client not in profiles (assigned by email only)
+      clientMap.set(email, {
+        email: a.client_email,
+        name: a.client_email.split('@')[0],
+        tier: null,
+        lastBlock: a.block_name,
+        lastDate: a.assigned_at,
+        pendingCount: a.status === 'pending' ? 1 : 0
+      });
+    }
+  });
+  
+  crmClients = Array.from(clientMap.values()).sort((a,b) => {
+    // Sort by last activity, then name
+    if(a.lastDate && b.lastDate) return new Date(b.lastDate) - new Date(a.lastDate);
+    if(a.lastDate) return -1;
+    if(b.lastDate) return 1;
+    return a.name.localeCompare(b.name);
+  });
+  
+  renderCRMClients();
+}
+
+function renderCRMClients() {
+  const list = document.getElementById('client-crm-list');
+  if(!crmClients.length) {
+    list.innerHTML = '<div class="tracker-empty">No clients yet. Add a client or assign a block to get started.</div>';
+    return;
+  }
+  
+  list.innerHTML = crmClients.map((c, i) => {
+    const tierBadge = c.tier === 'pt' ? '1-2-1' : c.tier === 'coached' ? 'COACHED' : '';
+    const pendingBadge = c.pendingCount > 0 ? `<span style="color:var(--accent);font-size:9px;margin-left:8px">● ${c.pendingCount} pending</span>` : '';
+    const lastInfo = c.lastBlock ? `Last: ${c.lastBlock}` : 'No blocks assigned';
+    
+    return `
+    <div class="crm-client-card" onclick="openClientSheet(${i})">
+      <div class="crm-client-info">
+        <div class="crm-client-name">${c.name.toUpperCase()}</div>
+        <div class="crm-client-email">${c.email}</div>
+        <div class="crm-client-meta">${lastInfo}${pendingBadge}</div>
+      </div>
+      ${tierBadge ? `<div class="crm-client-badge">${tierBadge}</div>` : ''}
+      <div class="crm-client-arrow">→</div>
+    </div>`;
+  }).join('');
+}
+
+function toggleAddCRMClientForm() {
+  document.getElementById('add-crm-client-form').classList.toggle('open');
+}
+
+async function addCRMClient() {
+  const name = document.getElementById('new-crm-client-name').value.trim();
+  const email = document.getElementById('new-crm-client-email').value.trim().toLowerCase();
+  
+  if(!name || !email) { showToast('Name and email required'); return; }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showToast('Invalid email'); return; }
+  
+  // Check if already exists
+  if(crmClients.some(c => c.email.toLowerCase() === email)) {
+    showToast('Client already exists');
+    return;
+  }
+  
+  // Add to local list (they'll appear in profiles when they sign up)
+  crmClients.unshift({
+    email: email,
+    name: name,
+    tier: null,
+    lastBlock: null,
+    lastDate: null,
+    pendingCount: 0
+  });
+  
+  renderCRMClients();
+  document.getElementById('new-crm-client-name').value = '';
+  document.getElementById('new-crm-client-email').value = '';
+  document.getElementById('add-crm-client-form').classList.remove('open');
+  showToast('Client added');
+}
+
+// ── CLIENT SHEET ──────────────────────────────────────────────────────────
+async function openClientSheet(index) {
+  selectedClient = crmClients[index];
+  if(!selectedClient) return;
+  
+  document.getElementById('client-sheet-name').textContent = selectedClient.name.toUpperCase();
+  document.getElementById('client-sheet-email').textContent = selectedClient.email;
+  
+  // Populate block selector
+  populateBlockSelector('sheet-block-select');
+  
+  // Clear form
+  document.getElementById('sheet-block-select').selectedIndex = 0;
+  document.getElementById('sheet-block-preview').classList.remove('visible');
+  document.getElementById('sheet-coach-note').value = '';
+  document.getElementById('sheet-assign-error').classList.remove('visible');
+  
+  // Load history
+  await loadClientHistory(selectedClient.email);
+  
+  document.getElementById('client-sheet-overlay').classList.add('open');
+}
+
+function closeClientSheet() {
+  document.getElementById('client-sheet-overlay').classList.remove('open');
+  selectedClient = null;
+}
+
+async function loadClientHistory(email) {
+  const list = document.getElementById('client-history-list');
+  
+  const { data, error } = await supa
+    .from('assigned_blocks')
+    .select('id, block_name, status, assigned_at')
+    .eq('client_email', email)
+    .eq('coach_id', coachUser.id)
+    .order('assigned_at', { ascending: false })
+    .limit(10);
+  
+  if(error || !data?.length) {
+    list.innerHTML = '<div class="tracker-empty" style="padding:12px 0">No blocks assigned yet</div>';
+    return;
+  }
+  
+  list.innerHTML = data.map(a => {
+    const date = new Date(a.assigned_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+    return `
+    <div class="client-history-item">
+      <div>
+        <div class="client-history-name">${a.block_name}</div>
+        <div class="client-history-date">${date}</div>
+      </div>
+      <div class="client-history-status ${a.status}">${a.status}</div>
+    </div>`;
+  }).join('');
+}
+
+function onSheetBlockSelect() {
+  const idx = document.getElementById('sheet-block-select').value;
+  const block = adminBlocks[idx];
+  const preview = document.getElementById('sheet-block-preview');
+  
+  if(!block) { preview.classList.remove('visible'); return; }
+  
+  document.getElementById('sheet-bp-name').textContent = block.name;
+  document.getElementById('sheet-bp-meta').textContent = (block.days?.length || 0) + ' days · ' + (block.weeks || 4) + ' weeks';
   preview.classList.add('visible');
+}
+
+async function assignBlockFromSheet() {
+  if(!selectedClient) return;
+  
+  const blockIdx = document.getElementById('sheet-block-select').value;
+  const note = document.getElementById('sheet-coach-note').value.trim();
+  const errEl = document.getElementById('sheet-assign-error');
+  errEl.classList.remove('visible');
+  
+  if(blockIdx === '' || blockIdx === null) {
+    errEl.textContent = 'Select a block to assign.';
+    errEl.classList.add('visible');
+    return;
+  }
+  
+  const block = adminBlocks[blockIdx];
+  if(!block) {
+    errEl.textContent = 'Block not found.';
+    errEl.classList.add('visible');
+    return;
+  }
+  
+  const btn = document.getElementById('sheet-assign-btn');
+  btn.textContent = 'ASSIGNING...'; btn.disabled = true;
+  
+  const { error } = await supa.from('assigned_blocks').insert({
+    coach_id: coachUser.id,
+    coach_email: coachUser.email,
+    client_email: selectedClient.email,
+    programme_id: null,
+    block_name: block.name,
+    block_data: { currentBlock: block },
+    note: note || null,
+    status: 'pending',
+    assigned_at: new Date().toISOString()
+  });
+  
+  btn.textContent = 'ASSIGN BLOCK →'; btn.disabled = false;
+  
+  if(error) {
+    errEl.textContent = 'Failed: ' + error.message;
+    errEl.classList.add('visible');
+    return;
+  }
+  
+  showToast('Block assigned to ' + selectedClient.name + ' ✦');
+  
+  // Refresh
+  await loadClientHistory(selectedClient.email);
+  await loadCRMClients();
+  loadAssigned();
+  
+  // Clear form
+  document.getElementById('sheet-block-select').selectedIndex = 0;
+  document.getElementById('sheet-block-preview').classList.remove('visible');
+  document.getElementById('sheet-coach-note').value = '';
 }
 
 // ── ASSIGN ────────────────────────────────────────────────────────────────
@@ -735,6 +1092,7 @@ function switchTab(tab, btn) {
   document.querySelectorAll('.dash-panel').forEach(p => p.classList.remove('active'));
   btn.classList.add('active');
   document.getElementById('dpanel-' + tab).classList.add('active');
+  if(tab === 'clients') loadCRMClients();
   if(tab === 'tracker') renderTracker();
   if(tab === 'assigned') loadAssigned();
   if(tab === 'finance') { loadFinanceEntries(); }
@@ -1124,15 +1482,6 @@ function renderFinanceTax() {
 
 // ── BOOT ──────────────────────────────────────────────────────────────────
 checkSession();
-
-// ── SERVICE WORKER ────────────────────────────────────────────
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/coach/sw.js')
-      .then(reg => console.log('Coach SW registered'))
-      .catch(err => console.log('Coach SW registration failed:', err));
-  });
-}
 </script>
 </body>
 </html>
