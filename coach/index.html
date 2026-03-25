@@ -347,6 +347,14 @@
   .client-history-status { font-size: 8px; letter-spacing: 2px; padding: 3px 8px; text-transform: uppercase; }
   .client-history-status.pending { border: 1px solid var(--accent-dim); color: var(--accent); }
   .client-history-status.accepted { border: 1px solid var(--green); color: var(--green); }
+
+  .delete-client-btn {
+    width: 100%; padding: 12px; background: none; border: 1px solid var(--red);
+    color: var(--red); font-family: 'DM Mono', monospace; font-size: 10px;
+    letter-spacing: 2px; text-transform: uppercase; cursor: pointer;
+    opacity: 0.7; transition: opacity 0.15s;
+  }
+  .delete-client-btn:hover { opacity: 1; }
 </style>
 </head>
 <body>
@@ -451,6 +459,10 @@
         <div id="client-history-list" class="client-history-list">
           <div class="tracker-empty">No blocks assigned yet</div>
         </div>
+      </div>
+
+      <div class="client-sheet-section" style="border-top:1px solid var(--border);padding-top:20px;margin-top:8px">
+        <button class="delete-client-btn" onclick="deleteClient()">REMOVE CLIENT</button>
       </div>
     </div>
   </div>
@@ -976,6 +988,29 @@ async function assignBlockFromSheet() {
   document.getElementById('sheet-block-select').selectedIndex = 0;
   document.getElementById('sheet-block-preview').classList.remove('visible');
   document.getElementById('sheet-coach-note').value = '';
+}
+
+async function deleteClient() {
+  if(!selectedClient) return;
+  
+  if(!confirm(`Remove ${selectedClient.name} from your client list?`)) return;
+  
+  // Delete from coach_clients table
+  const { error } = await supa
+    .from('coach_clients')
+    .delete()
+    .eq('coach_id', coachUser.id)
+    .eq('email', selectedClient.email);
+  
+  if(error) {
+    showToast('Failed to remove client');
+    console.error(error);
+    return;
+  }
+  
+  showToast('Client removed');
+  closeClientSheet();
+  await loadCRMClients();
 }
 
 // ── ASSIGN ────────────────────────────────────────────────────────────────
