@@ -3050,6 +3050,10 @@ function updateUserBar() {
 
     if(tier === 'premium' || tier === 'coached' || tier === 'admin' || tier === 'pt') {
       // Paid user — show tier badge, no upgrade prompt
+      // Show/hide Programmes tab based on tier
+      const progNav = document.getElementById('nav-coaching');
+      if(progNav) progNav.style.display = (tier === 'pt') ? 'none' : 'flex';
+      
       if(tier === 'admin') {
         upgradeBtn.textContent = '⬡ ADMIN';
         upgradeBtn.style.color = 'var(--accent)';
@@ -3406,7 +3410,15 @@ async function acceptAssignedBlock(assignmentId) {
     const block = row.block_data?.currentBlock;
     console.log('Block data:', block);
     if(block) {
-      const newBlock = { ...block, id: 'assigned_' + assignmentId, name: row.block_name };
+      const newId = 'assigned_' + assignmentId;
+      // Check if already added (prevent duplicates)
+      if(customWorkouts.some(w => w.id === newId)) {
+        console.log('Block already exists, skipping');
+        dismissAssignedNotice();
+        showToast('Block already in Builder');
+        return;
+      }
+      const newBlock = { ...block, id: newId, name: row.block_name };
       if(!newBlock.warmup) newBlock.warmup = [];
       if(!newBlock.skill)  newBlock.skill  = [];
       console.log('New block to add:', newBlock);
