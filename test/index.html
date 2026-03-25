@@ -2548,16 +2548,17 @@ function resetBuilder(){
 
 function renderBuilderSaved(){
   const c=document.getElementById('builder-saved-list');
-  // Only show personal blocks — not programme or assigned blocks
-  const personal = customWorkouts.filter(wk => !wk.id?.startsWith('prog_') && !wk.id?.startsWith('assigned_'));
-  if(!personal.length){c.innerHTML=`<div class="empty-state">No saved blocks yet</div>`;return;}
-  c.innerHTML=personal.map((wk,wi)=>{
+  // Only hide programme blocks — show personal AND assigned blocks
+  const visible = customWorkouts.filter(wk => !wk.id?.startsWith('prog_'));
+  if(!visible.length){c.innerHTML=`<div class="empty-state">No saved blocks yet</div>`;return;}
+  c.innerHTML=visible.map((wk,wi)=>{
     const realIdx = customWorkouts.indexOf(wk);
+    const isAssigned = wk.id?.startsWith('assigned_');
     return `
-    <div class="saved-wk-card">
+    <div class="saved-wk-card" ${isAssigned ? 'style="border-left:2px solid var(--accent)"' : ''}>
       <div class="saved-wk-header">
         <div>
-          <div class="saved-wk-name">${wk.name}</div>
+          <div class="saved-wk-name">${wk.name} ${isAssigned ? '<span style="font-size:8px;color:var(--accent);letter-spacing:2px">◉ ASSIGNED</span>' : ''}</div>
           ${wk.methods?.length?`<div class="saved-wk-methods">${wk.methods.join(' · ')}</div>`:''}
           <div class="saved-wk-meta">${(wk.days||[]).length} days · ${wk.weeks||4} weeks</div>
         </div>
