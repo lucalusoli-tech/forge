@@ -3437,28 +3437,29 @@ async function acceptAssignedBlock(assignmentId) {
       localStorage.setItem('fw_customs', JSON.stringify(customWorkouts));
       syncBlocksToCloud();
       renderBuilderSaved();
+
+      // Update status in Supabase
+      await supa
+        .from('assigned_blocks')
+        .update({ status: 'accepted', accepted_at: new Date().toISOString() })
+        .eq('id', assignmentId);
+
+      // Set as current block and go to home
+      currentBlock = { name: newBlock.name, methods: newBlock.methods || [], weeks: newBlock.weeks || 4, warmup: newBlock.warmup || [], skill: newBlock.skill || [], days: newBlock.days || [] };
+      currentWeek = 1;
+      localStorage.setItem('fw_week', '1');
+      saveCurrentBlock();
+      updateStats();
+      renderHomeDays();
+
+      dismissAssignedNotice();
+      showToast('Block ready — let\'s train ✦');
+      setTimeout(() => navigate('home'), 400);
     } else {
       console.error('No block data found in row.block_data.currentBlock');
       showToast('Block data missing');
       return;
     }
-
-    await supa
-      .from('assigned_blocks')
-      .update({ status: 'accepted', accepted_at: new Date().toISOString() })
-      .eq('id', assignmentId);
-
-    // Set as current block and go to home
-    currentBlock = { name: newBlock.name, methods: newBlock.methods || [], weeks: newBlock.weeks || 4, warmup: newBlock.warmup || [], skill: newBlock.skill || [], days: newBlock.days || [] };
-    currentWeek = 1;
-    localStorage.setItem('fw_week', '1');
-    saveCurrentBlock();
-    updateStats();
-    renderHomeDays();
-
-    dismissAssignedNotice();
-    showToast('Block ready — let\'s train ✦');
-    setTimeout(() => navigate('home'), 400);
   } catch(e) {
     console.error('acceptAssignedBlock error:', e);
     showToast('Something went wrong — try again');
