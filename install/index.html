@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#080808">
+<title>Install FORGE — Add to Home Screen</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --black: #080808;
+    --surface: #141414;
+    --border: #242424;
+    --text: #e8e2d9;
+    --text-muted: #8c8480;
+    --accent: #c9a96e;
+    --accent-dim: #7a5f38;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--black);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-weight: 300;
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* Grain overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.6;
+  }
+
+  .container {
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+
+  .back-link {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--accent);
+    text-decoration: none;
+    margin-bottom: 32px;
+  }
+  .back-link:hover { text-decoration: underline; }
+
+  .hero {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+
+  .hero-logo {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 48px;
+    letter-spacing: 8px;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+
+  .hero-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 4px;
+    line-height: 1.1;
+    margin-bottom: 16px;
+  }
+
+  .hero-sub {
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+  }
+
+  .step {
+    margin-bottom: 40px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+  }
+
+  .step-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .step-num {
+    width: 36px;
+    height: 36px;
+    background: var(--accent);
+    color: var(--black);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .step-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 2px;
+  }
+
+  .step-desc {
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+
+  .step-image {
+    width: 100%;
+    display: block;
+  }
+
+  .step-image img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+
+  .cta-section {
+    text-align: center;
+    padding: 40px 0;
+    border-top: 1px solid var(--border);
+    margin-top: 20px;
+  }
+
+  .cta-text {
+    font-size: 11px;
+    letter-spacing: 1px;
+    color: var(--text-muted);
+    margin-bottom: 20px;
+  }
+
+  .cta-btn {
+    display: inline-block;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--black);
+    background: var(--accent);
+    border: none;
+    padding: 16px 36px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: opacity 0.2s;
+  }
+  .cta-btn:hover { opacity: 0.85; }
+
+  .note {
+    margin-top: 40px;
+    padding: 20px;
+    border: 1px solid var(--border);
+    background: rgba(201,169,110,0.05);
+  }
+
+  .note-title {
+    font-size: 9px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .note-text {
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    color: var(--text-muted);
+    line-height: 1.7;
+  }
+
+  @media (max-width: 480px) {
+    .container { padding: 24px 16px 60px; }
+    .hero-logo { font-size: 36px; }
+    .hero-title { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+  <a href="/forge" class="back-link">← BACK TO APP</a>
+
+  <div class="hero">
+    <div class="hero-logo">FORGE</div>
+    <div class="hero-title">INSTALL ON<br>YOUR IPHONE</div>
+    <div class="hero-sub">Add FORGE to your home screen in 4 easy steps</div>
+  </div>
+
+  <!-- Step 1 -->
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">1</div>
+      <div>
+        <div class="step-title">OPEN IN SAFARI</div>
+        <div class="step-desc">Go to forgetraining.app in Safari. Tap the menu button (•••) at the bottom right.</div>
+      </div>
+    </div>
+    <div class="step-image">
+      <img src="step1.jpeg" alt="Open menu in Safari">
+    </div>
+  </div>
+
+  <!-- Step 2 -->
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">2</div>
+      <div>
+        <div class="step-title">TAP SHARE</div>
+        <div class="step-desc">In the menu, tap "Share" (Condividi) to open the share sheet.</div>
+      </div>
+    </div>
+    <div class="step-image">
+      <img src="step2.jpeg" alt="Tap Share">
+    </div>
+  </div>
+
+  <!-- Step 3 -->
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">3</div>
+      <div>
+        <div class="step-title">ADD TO HOME SCREEN</div>
+        <div class="step-desc">Scroll down and tap "Add to Home Screen" (Aggiungi alla schermata Home).</div>
+      </div>
+    </div>
+    <div class="step-image">
+      <img src="step3.jpeg" alt="Add to Home Screen">
+    </div>
+  </div>
+
+  <!-- Step 4 -->
+  <div class="step">
+    <div class="step-header">
+      <div class="step-num">4</div>
+      <div>
+        <div class="step-title">DONE!</div>
+        <div class="step-desc">FORGE now appears on your home screen like a native app. Tap to open and start training.</div>
+      </div>
+    </div>
+    <div class="step-image">
+      <img src="step4.jpeg" alt="FORGE on home screen">
+    </div>
+  </div>
+
+  <div class="cta-section">
+    <div class="cta-text">Ready to train?</div>
+    <a href="/forge" class="cta-btn">OPEN FORGE →</a>
+  </div>
+
+  <div class="note">
+    <div class="note-title">Why install?</div>
+    <div class="note-text">
+      Installing FORGE gives you fullscreen mode, faster loading, and a home screen icon — just like a real app. No app store required.
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
