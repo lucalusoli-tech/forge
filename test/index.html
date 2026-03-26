@@ -3542,6 +3542,7 @@ async function executePushUpdate() {
   // This will show as a new pending block for the client
   const { error } = await supa.from('assigned_blocks').insert({
     coach_id: currentUser.id,
+    coach_email: currentUser.email,
     client_email: clientEmail,
     block_name: block.name + ' (Updated)',
     block_data: { currentBlock: block },
