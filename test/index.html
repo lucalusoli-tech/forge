@@ -3538,64 +3538,16 @@ async function executePushUpdate() {
   const block = customWorkouts.find(w => w.id === pushBlockId);
   if(!block) { showToast('Block not found'); return; }
   
-  // Get client's profile to find their user ID
-  const { data: profile } = await supa
-    .from('profiles')
-    .select('id')
-    .eq('email', clientEmail)
-    .single();
-  
-  if(!profile) {
-    showToast('Client not found in system');
-    closePushModal();
-    return;
-  }
-  
-  // Get client's current blocks data
-  const { data: clientBlocks } = await supa
-    .from('blocks')
-    .select('data')
-    .eq('user_id', profile.id)
-    .single();
-  
-  if(!clientBlocks) {
-    showToast('Client has no blocks yet');
-    closePushModal();
-    return;
-  }
-  
-  // Find and update the matching block in their customWorkouts
-  let clientData = clientBlocks.data || {};
-  let clientCustom = clientData.customWorkouts || [];
-  
-  // Find block by name match (since IDs might differ)
-  const matchIdx = clientCustom.findIndex(w => w.name === block.name || w.id?.includes(pushBlockId.replace('cw_','')));
-  
-  if(matchIdx === -1) {
-    // No matching block — add it as new
-    const newBlock = { ...block, id: 'pushed_' + Date.now() };
-    clientCustom.unshift(newBlock);
-    
-    // Also set as their current block
-    clientData.currentBlock = { name: newBlock.name, methods: newBlock.methods || [], weeks: newBlock.weeks || 4, warmup: newBlock.warmup || [], skill: newBlock.skill || [], days: newBlock.days || [] };
-  } else {
-    // Update existing block structure (keep their ID)
-    const oldId = clientCustom[matchIdx].id;
-    clientCustom[matchIdx] = { ...block, id: oldId };
-    
-    // If it's their current block, update that too
-    if(clientData.currentBlock?.name === block.name) {
-      clientData.currentBlock = { ...clientData.currentBlock, days: block.days, warmup: block.warmup || [], skill: block.skill || [] };
-    }
-  }
-  
-  clientData.customWorkouts = clientCustom;
-  
-  // Save back to Supabase
-  const { error } = await supa
-    .from('blocks')
-    .update({ data: clientData })
-    .eq('user_id', profile.id);
+  // Create a new assignment with the updated block
+  // This will show as a new pending block for the client
+  const { error } = await supa.from('assigned_blocks').insert({
+    coach_id: currentUser.id,
+    client_email: clientEmail,
+    block_name: block.name + ' (Updated)',
+    block_data: { currentBlock: block },
+    coach_note: 'Updated version of your block',
+    status: 'pending'
+  });
   
   if(error) {
     console.error('Push update error:', error);
@@ -3604,7 +3556,7 @@ async function executePushUpdate() {
     return;
   }
   
-  showToast('Block pushed to ' + clientEmail.split('@')[0] + ' ✦');
+  showToast('Update sent to ' + clientEmail.split('@')[0] + ' ✦');
   closePushModal();
 }
 
