@@ -2560,9 +2560,11 @@ function renderBuilderSaved(){
   // Only hide programme blocks — show personal AND assigned blocks
   const visible = customWorkouts.filter(wk => !wk.id?.startsWith('prog_'));
   if(!visible.length){c.innerHTML=`<div class="empty-state">No saved blocks yet</div>`;return;}
+  const isAdmin = currentUser?.tier === 'admin';
   c.innerHTML=visible.map((wk,wi)=>{
     const realIdx = customWorkouts.indexOf(wk);
     const isAssigned = wk.id?.startsWith('assigned_');
+    const pushBtn = isAdmin ? `<button class="saved-wk-del" onclick="openPushUpdate('${wk.id}')" style="color:#7ae;border-color:#456">Push</button>` : '';
     return `
     <div class="saved-wk-card" ${isAssigned ? 'style="border-left:2px solid var(--accent)"' : ''}>
       <div class="saved-wk-header">
@@ -2572,6 +2574,7 @@ function renderBuilderSaved(){
           <div class="saved-wk-meta">${(wk.days||[]).length} days · ${wk.weeks||4} weeks</div>
         </div>
         <div class="saved-wk-actions">
+          ${pushBtn}
           <button class="saved-wk-del" onclick="editSavedBlock('${wk.id}')" style="color:var(--accent);border-color:var(--accent-dim)">Edit</button>
           <button class="saved-wk-del" onclick="deleteSavedBlock(${realIdx})">Delete</button>
         </div>
@@ -3473,6 +3476,89 @@ function dismissAssignedNotice() {
   overlay.style.opacity = '0';
   document.getElementById('assigned-sheet').style.transform = 'translateY(100%)';
   setTimeout(() => overlay.remove(), 350);
+}
+
+// ─── PUSH UPDATE (Admin only) ─────────────────────────────────
+let pushBlockId = null;
+
+async function openPushUpdate(blockId) {
+  if(currentUser?.tier !== 'admin') return;
+  pushBlockId = blockId;
+  
+  const block = customWorkouts.find(w => w.id === blockId);
+  if(!block) { showToast('Block not found'); return; }
+  
+  // Get clients who have been assigned blocks
+  const { data: clients } = await supa
+    .from('coach_clients')
+    .select('name, email')
+    .eq('coach_id', currentUser.id);
+  
+  if(!clients?.length) {
+    showToast('No clients found');
+    return;
+  }
+  
+  // Build modal
+  const modal = document.createElement('div');
+  modal.id = 'push-modal';
+  modal.innerHTML = `
+    <div style="position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" onclick="closePushModal()">
+      <div style="background:var(--surface);border:1px solid var(--border);max-width:360px;width:100%;padding:24px" onclick="event.stopPropagation()">
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:4px">PUSH UPDATE</div>
+        <div style="font-size:10px;color:var(--text-muted);letter-spacing:1px;margin-bottom:20px">${block.name}</div>
+        
+        <div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:8px">SELECT CLIENT</div>
+        <select id="push-client-select" style="width:100%;padding:12px;background:var(--deep);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:12px;margin-bottom:16px">
+          <option value="">Choose a client...</option>
+          ${clients.map(c => `<option value="${c.email}">${c.name} (${c.email})</option>`).join('')}
+        </select>
+        
+        <div style="display:flex;gap:12px">
+          <button onclick="closePushModal()" style="flex:1;padding:14px;background:none;border:1px solid var(--border);color:var(--text-muted);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;cursor:pointer">CANCEL</button>
+          <button onclick="executePushUpdate()" style="flex:1;padding:14px;background:var(--accent);border:none;color:var(--black);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;cursor:pointer">PUSH →</button>
+        </div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+function closePushModal() {
+  const modal = document.getElementById('push-modal');
+  if(modal) modal.remove();
+  pushBlockId = null;
+}
+
+async function executePushUpdate() {
+  const clientEmail = document.getElementById('push-client-select').value;
+  if(!clientEmail) { showToast('Select a client'); return; }
+  if(!pushBlockId) { showToast('No block selected'); return; }
+  
+  const block = customWorkouts.find(w => w.id === pushBlockId);
+  if(!block) { showToast('Block not found'); return; }
+  
+  // Create a new assignment with the updated block
+  // This will show as a new pending block for the client
+  const { error } = await supa.from('assigned_blocks').insert({
+    coach_id: currentUser.id,
+    coach_email: currentUser.email,
+    client_email: clientEmail,
+    block_name: block.name + ' (Updated)',
+    block_data: { currentBlock: block },
+    note: 'Updated version of your block',
+    status: 'pending'
+  });
+  
+  if(error) {
+    console.error('Push update error:', error);
+    showToast('Failed to push update');
+    closePushModal();
+    return;
+  }
+  
+  showToast('Update sent to ' + clientEmail.split('@')[0] + ' ✦');
+  closePushModal();
 }
 
 </script>
