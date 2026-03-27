@@ -1816,6 +1816,10 @@ document.addEventListener('click', e => {
     const res = document.getElementById('add-ex-results');
     if(res) res.classList.remove('open');
   }
+  // iOS keyboard dismiss — blur inputs when tapping outside
+  if(!e.target.matches('input, textarea, select')) {
+    document.activeElement?.blur();
+  }
 });
 
 function populateAddSelect() { /* replaced by search */ }
