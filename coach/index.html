@@ -682,7 +682,9 @@ async function loadAdminBlocks() {
     return;
   }
   
-  adminBlocks = data.data.customWorkouts || [];
+  // Filter out programme blocks (prog_) — only show Builder blocks
+  const allBlocks = data.data.customWorkouts || [];
+  adminBlocks = allBlocks.filter(b => !b.id?.startsWith('prog_'));
   console.log('Loaded admin blocks:', adminBlocks.length);
 }
 
