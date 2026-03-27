@@ -462,7 +462,7 @@
       </div>
 
       <div class="client-sheet-section" style="border-top:1px solid var(--border);padding-top:20px;margin-top:8px">
-        <button class="delete-client-btn" onclick="deleteClient()">REMOVE CLIENT</button>
+        <button class="delete-client-btn" onclick="deleteCRMClient()">REMOVE CLIENT</button>
       </div>
     </div>
   </div>
@@ -990,7 +990,7 @@ async function assignBlockFromSheet() {
   document.getElementById('sheet-coach-note').value = '';
 }
 
-async function deleteClient() {
+async function deleteCRMClient() {
   if(!selectedClient) return;
   
   if(!confirm(`Remove ${selectedClient.name} from your client list?`)) return;
