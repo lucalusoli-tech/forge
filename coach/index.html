@@ -274,10 +274,10 @@
 
   /* ── FINANCE ── */
   .finance-summary { display: grid; grid-template-columns: repeat(3,1fr); border: 1px solid var(--border); margin: 16px 20px 0; }
-  .fin-cell { padding: 14px 12px; border-right: 1px solid var(--border); }
+  .fin-cell { padding: 14px 8px; border-right: 1px solid var(--border); overflow: hidden; }
   .fin-cell:last-child { border-right: none; }
   .fin-label { font-size: 8px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
-  .fin-value { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px; line-height: 1; }
+  .fin-value { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 1px; line-height: 1; white-space: nowrap; }
   .fin-value.income { color: var(--green); }
   .fin-value.expense { color: var(--red); }
   .fin-value.profit { color: var(--accent); }
