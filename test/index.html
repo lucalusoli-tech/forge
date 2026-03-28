@@ -3164,8 +3164,8 @@ function closeUpgrade() { document.getElementById('upgrade-overlay').classList.r
 function activatePremium(tier='premium') {
   if(!currentUser) { showToast('Sign in to upgrade'); return; }
   const urls = {
-    premium: 'https://buy.stripe.com/3cIcN40W9g5IgiSbxDgMw0j',
-    coached: 'https://buy.stripe.com/9B69AS9sFf1EaYy6djgMw0k'
+    premium: 'https://buy.stripe.com/test_6oU8wOcERdXA6Ii45bgMw01',
+    coached: 'https://buy.stripe.com/test_8x27sKdIV1aO8QqfNTgMw00'
   };
   const base = urls[tier] || urls.premium;
   const email = currentUser.email || '';
