@@ -3020,6 +3020,7 @@ function startApp(isGuest) {
   if(isGuest) { showAuthScreen('splash'); return; }
   document.querySelectorAll('.auth-screen').forEach(s => s.classList.add('hidden'));
   updateUserBar();
+  updateStats();
   renderHomeDays();
   renderBuilderSaved();
   renderProgress();
