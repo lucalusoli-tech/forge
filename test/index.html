@@ -1488,6 +1488,34 @@ function updateStats() {
   const m = currentBlock.methods || [];
   document.getElementById('home-sub').textContent = m.length ? m.join(' · ') : 'Current Block';
   document.getElementById('current-block-label').textContent = currentBlock.name || 'Current Block';
+
+  // Count logged sessions from sessionLog
+  // A "session" = a unique day+week combo that has at least one exercise with real data
+  const days = currentBlock.days || [];
+  const loggedSessions = new Set();
+  let lastDay = null, lastWeek = 0;
+  days.forEach(d => {
+    for(let w = 1; w <= total; w++) {
+      const hasData = d.exercises && d.exercises.some(ex => {
+        const entry = sessionLog[`${d.id}_${ex.id}_v${w}`];
+        if(!entry) return false;
+        // Check if any set has actual weight or rep data
+        for(let s = 1; s <= 10; s++) {
+          if(entry[`s${s}_w`] && entry[`s${s}_w`] !== '' ) return true;
+          if(entry[`s${s}_r`] && entry[`s${s}_r`] !== '' ) return true;
+        }
+        return false;
+      });
+      if(hasData) {
+        loggedSessions.add(`${d.id}_v${w}`);
+        if(w > lastWeek || (w === lastWeek && days.indexOf(d) > days.indexOf(lastDay))) {
+          lastWeek = w; lastDay = d;
+        }
+      }
+    }
+  });
+  document.getElementById('dash-sessions').textContent = loggedSessions.size;
+  document.getElementById('dash-last').textContent = lastDay ? lastDay.name.split('—')[0].trim() : '—';
 }
 
 function cycleWeek() {
