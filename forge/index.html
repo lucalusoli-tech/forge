@@ -867,8 +867,8 @@
         <!-- DIVIDER -->
         <div style="border-top:1px solid var(--border);margin:0 20px"></div>
 
-        <!-- AI PROGRAMME GENERATOR -->
-        <div id="ai-programme-section" style="padding:20px">
+        <!-- AI PROGRAMME GENERATOR (admin only for now) -->
+        <div id="ai-programme-section" style="padding:20px;display:none">
           <div class="coaching-eyebrow" style="padding-top:8px">AI-Powered</div>
           <div class="coaching-title" style="font-size:32px;margin-bottom:8px">BUILD MY<br>PROGRAMME</div>
           <div class="coaching-desc" style="margin-bottom:20px">Answer a few questions about your level and goals. FORGE AI builds a complete training block — designed using real coaching methodology.</div>
@@ -3526,6 +3526,8 @@ async function loadProgrammes() {
       panel.style.display = 'block';
       populatePublishBlockSelector();
     }
+    const aiSection = document.getElementById('ai-programme-section');
+    if(aiSection) aiSection.style.display = 'block';
   }
 
   // Gate — trial and premium users see a locked state, not the programmes
