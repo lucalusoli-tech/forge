@@ -1887,9 +1887,10 @@ function renderLogExercises(exercises) {
     for(let s=1;s<=ex.sets;s++){
       cols+=`<div class="set-col">
         <div class="set-num">S${s}</div>
-        <input class="set-field" type="text" inputmode="decimal" placeholder="kg" value="${saved[`s${s}_w`]||''}" id="${wk}_s${s}_w"
-          oninput="autoSaveSet('${wk}',${s})">
-        <input class="set-field reps" type="text" inputmode="numeric" placeholder="reps" value="${saved[`s${s}_r`]||''}" id="${wk}_s${s}_r"
+        <input class="set-field" type="text" inputmode="decimal" placeholder="kg" value="${saved[`s${s}_w`]||''}" id="${wk}_s${s}_w" autocomplete="off"
+          oninput="autoSaveSet('${wk}',${s})"
+          onkeydown="if(event.key==='Enter'){event.preventDefault();document.getElementById('${wk}_s${s}_r').focus();}">
+        <input class="set-field reps" type="text" inputmode="numeric" placeholder="reps" value="${saved[`s${s}_r`]||''}" id="${wk}_s${s}_r" autocomplete="off"
           oninput="autoSaveSet('${wk}',${s})"
           onblur="onSetBlur('${wk}',${s},'${exData.name}')">
       </div>`;
@@ -3068,6 +3069,16 @@ function aiLoadBlock() {
   const block = window._aiGeneratedBlock;
   if (!block) { showToast('No programme to load'); return; }
 
+  // Archive current block with its session logs before replacing
+  if (currentBlock.name && currentBlock.days && currentBlock.days.length > 0) {
+    archivedBlocks.unshift({
+      ...currentBlock,
+      archivedAt: new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
+      sessionLog: {...sessionLog},
+    });
+    localStorage.setItem('fw_archive', JSON.stringify(archivedBlocks));
+  }
+
   currentBlock = {
     name: block.name || 'AI Programme',
     methods: block.methods || [],
@@ -3077,15 +3088,15 @@ function aiLoadBlock() {
     days: block.days || []
   };
   currentWeek = 1;
-  sessionLog = {};
+  // Don't wipe sessionLog — old keys won't conflict with new day IDs
   localStorage.setItem('fw_block', JSON.stringify(currentBlock));
   localStorage.setItem('fw_week', '1');
-  localStorage.setItem('fw_log', JSON.stringify(sessionLog));
   saveCurrentBlock();
   updateStats();
   renderHomeDays();
   renderBuilderDays();
   renderBuilderSaved();
+  renderArchive();
   navigate('home');
   showToast('Programme loaded ✓');
 }
