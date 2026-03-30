@@ -1488,6 +1488,33 @@ function updateStats() {
   const m = currentBlock.methods || [];
   document.getElementById('home-sub').textContent = m.length ? m.join(' · ') : 'Current Block';
   document.getElementById('current-block-label').textContent = currentBlock.name || 'Current Block';
+
+  // Count logged sessions from sessionLog
+  const days = currentBlock.days || [];
+  const loggedSessions = new Set();
+  let lastDay = null, lastWeek = 0;
+  days.forEach(d => {
+    for(let w = 1; w <= total; w++) {
+      const hasData = d.exercises && d.exercises.some(ex => {
+        const entry = sessionLog[`${d.id}_${ex.id}_v${w}`];
+        if(!entry) return false;
+        for(let s = 1; s <= 10; s++) {
+          const wv = entry[`s${s}_w`], rv = entry[`s${s}_r`];
+          if(wv && wv !== '' && wv !== '0') return true;
+          if(rv && rv !== '' && rv !== '0') return true;
+        }
+        return false;
+      });
+      if(hasData) {
+        loggedSessions.add(`${d.id}_v${w}`);
+        if(w > lastWeek || (w === lastWeek && days.indexOf(d) > days.indexOf(lastDay))) {
+          lastWeek = w; lastDay = d;
+        }
+      }
+    }
+  });
+  document.getElementById('dash-sessions').textContent = loggedSessions.size;
+  document.getElementById('dash-last').textContent = lastDay ? lastDay.name.split('—')[0].trim() : '—';
 }
 
 function cycleWeek() {
@@ -2028,8 +2055,8 @@ function renderProgress(){
         const entry=sessionLog[key];
         let display='—',cls='empty';
         if(entry){
-          const ws=[1,2,3,4,5].map(s=>parseFloat(entry[`s${s}_w`])).filter(v=>!isNaN(v));
-          const rs=[1,2,3,4,5].map(s=>parseFloat(entry[`s${s}_r`])).filter(v=>!isNaN(v));
+          const ws=[1,2,3,4,5].map(s=>parseFloat(entry[`s${s}_w`])).filter(v=>!isNaN(v)&&v>0);
+          const rs=[1,2,3,4,5].map(s=>parseFloat(entry[`s${s}_r`])).filter(v=>!isNaN(v)&&v>0);
           if(ws.length){display=ws[0]+'kg';cls=prev!==null?(ws[0]>prev?'up':ws[0]<prev?'down':''):'';prev=ws[0];}
           else if(rs.length){display=rs[0]+'r';cls='';}
           if(w===currentWeek) cls+=' current';
@@ -2764,7 +2791,7 @@ function buildSparkline(exId) {
     for(let w=1; w<=total; w++) {
       const entry = sessionLog[`${d.id}_${exId}_v${w}`];
       if(entry) {
-        const ws = [1,2,3,4,5].map(s=>parseFloat(entry[`s${s}_w`])).filter(v=>!isNaN(v));
+        const ws = [1,2,3,4,5].map(s=>parseFloat(entry[`s${s}_w`])).filter(v=>!isNaN(v)&&v>0);
         if(ws.length) points.push({w, val: Math.max(...ws)});
       }
     }
