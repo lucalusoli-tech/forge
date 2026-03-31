@@ -2789,21 +2789,62 @@ function startTimer(exName) {
   clearInterval(timerInterval);
   timerRemaining = timerDuration;
   timerPaused = false;
+  timerEndTime = Date.now() + (timerDuration * 1000);
   document.getElementById('timer-pause-btn').textContent = 'PAUSE';
   document.getElementById('timer-ex-label').textContent = exName || '';
   document.getElementById('timer-overlay').classList.add('open');
   updateTimerDisplay();
+
+  // Request notification permission on first timer use
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission();
+  }
+
   timerInterval = setInterval(() => {
     if(timerPaused) return;
-    timerRemaining--;
+    // Calculate remaining from end time (survives screen lock better)
+    timerRemaining = Math.max(0, Math.round((timerEndTime - Date.now()) / 1000));
     updateTimerDisplay();
     if(timerRemaining <= 0) {
       clearInterval(timerInterval);
       if(navigator.vibrate) navigator.vibrate([200,100,200]);
+      // Send notification if app is in background
+      if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
+        try {
+          new Notification('FORGE', { body: 'Rest over — next set', icon: 'https://forgetraining.app/icon-192.png', tag: 'forge-timer', requireInteraction: true });
+        } catch(e) { /* notifications not supported in this context */ }
+      }
+      // Also play a sound if available
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.frequency.value = 880;
+        gain.gain.value = 0.3;
+        osc.start(); osc.stop(audioCtx.currentTime + 0.15);
+        setTimeout(() => { const o2 = audioCtx.createOscillator(); const g2 = audioCtx.createGain(); o2.connect(g2); g2.connect(audioCtx.destination); o2.frequency.value = 1100; g2.gain.value = 0.3; o2.start(); o2.stop(audioCtx.currentTime + 0.15); }, 200);
+      } catch(e) {}
+      setTimeout(() => closeTimer(), 1200);
+    }
+  }, 250); // Check 4x per second for faster catch-up after screen wake
+}
+
+// Track timer end time for background accuracy
+let timerEndTime = 0;
+
+// When page becomes visible again, recalculate timer
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && timerEndTime > 0 && !timerPaused && timerRemaining > 0) {
+    timerRemaining = Math.max(0, Math.round((timerEndTime - Date.now()) / 1000));
+    updateTimerDisplay();
+    if (timerRemaining <= 0) {
+      clearInterval(timerInterval);
+      if(navigator.vibrate) navigator.vibrate([200,100,200]);
       setTimeout(() => closeTimer(), 800);
     }
-  }, 1000);
-}
+  }
+});
 
 function updateTimerDisplay() {
   const m = Math.floor(timerRemaining/60);
@@ -2816,6 +2857,13 @@ function updateTimerDisplay() {
 
 function toggleTimerPause() {
   timerPaused = !timerPaused;
+  if (timerPaused) {
+    // Store remaining time when pausing
+    timerRemaining = Math.max(0, Math.round((timerEndTime - Date.now()) / 1000));
+  } else {
+    // Recalculate end time when resuming
+    timerEndTime = Date.now() + (timerRemaining * 1000);
+  }
   document.getElementById('timer-pause-btn').textContent = timerPaused ? 'RESUME' : 'PAUSE';
 }
 
@@ -2827,6 +2875,7 @@ function skipTimer() {
 function closeTimer() {
   document.getElementById('timer-overlay').classList.remove('open');
   clearInterval(timerInterval);
+  timerEndTime = 0;
 }
 
 function setTimerDuration(secs, btn) {
