@@ -544,8 +544,8 @@
   </div>
   <div class="auth-form">
     <div class="auth-title">SIGN IN</div>
-    <input class="auth-input" type="email" id="login-email" placeholder="Email address" autocomplete="username">
-    <input class="auth-input" type="password" id="login-pass" placeholder="Password" autocomplete="current-password">
+    <input class="auth-input" type="email" id="login-email" placeholder="Email address" autocomplete="email">
+    <input class="auth-input" type="password" id="login-pass" placeholder="Password" autocomplete="off" data-1p-ignore data-lpignore="true">
     <div class="auth-error" id="login-error"></div>
     <button class="auth-btn-primary" onclick="handleLogin()">SIGN IN →</button>
     <div class="auth-divider"><div class="auth-divider-line"></div><div class="auth-divider-text">NO ACCOUNT?</div><div class="auth-divider-line"></div></div>
@@ -880,33 +880,9 @@
         <!-- DIVIDER -->
         <div style="border-top:1px solid var(--border);margin:0 20px"></div>
 
-        <!-- AI PROGRAMME GENERATOR (admin only) -->
-        <div id="ai-programme-section" style="display:none;padding:20px">
-          <div class="coaching-eyebrow" style="padding-top:8px">AI Coach</div>
-          <div class="coaching-title" style="font-size:32px;margin-bottom:8px;cursor:pointer" onclick="if(!document.getElementById('ai-chat').hasChildNodes())aiStartChat()">BUILD MY<br>PROGRAMME</div>
-
-          <!-- Chat container -->
-          <div id="ai-chat" class="ai-chat">
-            <!-- Messages get injected here -->
-          </div>
-
-          <!-- Quick reply chips (shown contextually) -->
-          <div id="ai-replies" class="ai-replies"></div>
-
-          <!-- Text input for free-text questions -->
-          <div id="ai-input-wrap" class="ai-input-wrap" style="display:none">
-            <input class="ai-text-input" type="text" id="ai-text-input" placeholder="Type your answer..." autocomplete="off" onkeydown="if(event.key==='Enter')aiSendText()">
-            <button class="ai-send-btn" onclick="aiSendText()">→</button>
-          </div>
-
-          <!-- Result preview -->
-          <div id="ai-result" style="display:none">
-            <div id="ai-result-days"></div>
-            <div style="display:flex;gap:10px;margin-top:20px">
-              <button class="coaching-submit" id="ai-restart-btn" style="flex:1;background:transparent;border-color:var(--border);color:var(--text-muted)" onclick="aiRestart()">START OVER</button>
-              <button class="coaching-submit" style="flex:2" onclick="aiLoadBlock()">LOAD AS CURRENT BLOCK →</button>
-            </div>
-          </div>
+        <!-- AI PROGRAMME LINK (admin only) -->
+        <div id="ai-programme-link" style="display:none;padding:20px">
+          <button class="coaching-submit" onclick="navigate('ai')">AI COACH — BUILD MY PROGRAMME →</button>
         </div>
 
         <!-- DIVIDER -->
@@ -939,6 +915,30 @@
           <div class="coaching-sent" id="coaching-sent">✓ Request sent — I'll be in touch within 24h</div>
         </div>
         <div style="height:20px"></div>
+      </div>
+
+      <!-- AI COACH PAGE (hidden, admin only) -->
+      <div class="page" id="page-ai">
+        <div style="padding:20px">
+          <button class="back-btn" style="display:flex;margin-bottom:16px" onclick="navigate('coaching')">← BACK</button>
+          <div class="coaching-eyebrow">AI Coach</div>
+          <div class="coaching-title" style="font-size:32px;margin-bottom:16px">BUILD MY<br>PROGRAMME</div>
+
+          <div id="ai-chat" class="ai-chat"></div>
+          <div id="ai-replies" class="ai-replies"></div>
+          <div id="ai-input-wrap" class="ai-input-wrap" style="display:none">
+            <input class="ai-text-input" type="text" id="ai-text-input" placeholder="Type your answer..." autocomplete="off" onkeydown="if(event.key==='Enter')aiSendText()">
+            <button class="ai-send-btn" onclick="aiSendText()">→</button>
+          </div>
+
+          <div id="ai-result" style="display:none">
+            <div id="ai-result-days"></div>
+            <div style="display:flex;gap:10px;margin-top:20px">
+              <button class="coaching-submit" id="ai-restart-btn" style="flex:1;background:transparent;border-color:var(--border);color:var(--text-muted)" onclick="aiRestart()">START OVER</button>
+              <button class="coaching-submit" style="flex:2" onclick="aiLoadBlock()">LOAD AS CURRENT BLOCK →</button>
+            </div>
+          </div>
+        </div>
       </div>
 
   </div><!-- end scroll-area -->
@@ -1622,10 +1622,10 @@ function navigate(page, push=true) {
   if (page==='progress') renderProgress();
   if (page==='coaching') {
     loadProgrammes();
-    // Start AI chat for admin
-    const aiSection = document.getElementById('ai-programme-section');
+  }
+  if (page==='ai') {
     const aiChat = document.getElementById('ai-chat');
-    if(aiSection && aiSection.style.display !== 'none' && aiChat && !aiChat.hasChildNodes()) aiStartChat();
+    if(aiChat && !aiChat.hasChildNodes()) aiStartChat();
   }
 }
 
@@ -3617,12 +3617,8 @@ async function loadProgrammes() {
       panel.style.display = 'block';
       populatePublishBlockSelector();
     }
-    const aiSection = document.getElementById('ai-programme-section');
-    if(aiSection) {
-      aiSection.style.display = 'block';
-      // Start chat if not already started
-      if(!document.getElementById('ai-chat').hasChildNodes()) aiStartChat();
-    }
+    const aiLink = document.getElementById('ai-programme-link');
+    if(aiLink) aiLink.style.display = 'block';
   }
 
   // Gate — trial and premium users see a locked state, not the programmes
