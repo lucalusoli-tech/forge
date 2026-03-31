@@ -883,7 +883,7 @@
         <!-- AI PROGRAMME GENERATOR (admin only) -->
         <div id="ai-programme-section" style="display:none;padding:20px">
           <div class="coaching-eyebrow" style="padding-top:8px">AI Coach</div>
-          <div class="coaching-title" style="font-size:32px;margin-bottom:8px">BUILD MY<br>PROGRAMME</div>
+          <div class="coaching-title" style="font-size:32px;margin-bottom:8px;cursor:pointer" onclick="if(!document.getElementById('ai-chat').hasChildNodes())aiStartChat()">BUILD MY<br>PROGRAMME</div>
 
           <!-- Chat container -->
           <div id="ai-chat" class="ai-chat">
@@ -1620,7 +1620,13 @@ function navigate(page, push=true) {
   document.getElementById('back-btn').classList.toggle('visible', isLog);
   document.getElementById('topbar-logo').style.display = isLog ? 'none' : 'block';
   if (page==='progress') renderProgress();
-  if (page==='coaching') loadProgrammes();
+  if (page==='coaching') {
+    loadProgrammes();
+    // Start AI chat for admin
+    const aiSection = document.getElementById('ai-programme-section');
+    const aiChat = document.getElementById('ai-chat');
+    if(aiSection && aiSection.style.display !== 'none' && aiChat && !aiChat.hasChildNodes()) aiStartChat();
+  }
 }
 
 function goBack() {
