@@ -2774,34 +2774,10 @@ let swRegistration = null;
 // Register service worker for lock-screen notifications
 (function registerTimerSW() {
   if ('serviceWorker' in navigator) {
-    const swCode = `
-      self.addEventListener('install', e => self.skipWaiting());
-      self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
-      self.addEventListener('message', e => {
-        if (e.data && e.data.type === 'TIMER_DONE') {
-          self.registration.showNotification('FORGE', {
-            body: 'Rest over — next set',
-            icon: 'https://forgetraining.app/icon-192.png',
-            tag: 'forge-timer',
-            requireInteraction: true,
-            vibrate: [200, 100, 200]
-          });
-        }
-      });
-      self.addEventListener('notificationclick', e => {
-        e.notification.close();
-        e.waitUntil(self.clients.matchAll({type:'window'}).then(cls => {
-          if (cls.length > 0) { cls[0].focus(); } else { self.clients.openWindow('/'); }
-        }));
-      });
-    `;
-    const blob = new Blob([swCode], { type: 'application/javascript' });
-    const swUrl = URL.createObjectURL(blob);
-    navigator.serviceWorker.register(swUrl, { scope: '/' }).then(reg => {
+    navigator.serviceWorker.register('/forge-sw.js').then(reg => {
       swRegistration = reg;
       console.log('[FORGE] Timer SW registered');
     }).catch(err => {
-      // Blob SW may fail on some hosts — fall back to basic notifications
       console.warn('[FORGE] SW registration failed, using fallback notifications', err);
     });
   }
