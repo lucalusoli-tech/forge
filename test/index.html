@@ -2782,6 +2782,18 @@ let swRegistration = null;
     });
   }
 })();
+
+// Tell the SW to schedule/cancel its own notification timeout
+function swTimerStart(durationSecs) {
+  if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({ type: 'TIMER_START', duration: durationSecs });
+  }
+}
+function swTimerCancel() {
+  if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({ type: 'TIMER_CANCEL' });
+  }
+}
 const TIMER_CIRCUMFERENCE = 590.6;
 
 function onSetBlur(wk, setNum, exName) {
@@ -2800,6 +2812,8 @@ function autoSaveSet(wk, setNum) {
 }
 
 function fireTimerAlert() {
+  // Cancel SW scheduled notification (page caught it first — prevent double)
+  swTimerCancel();
   // Vibrate
   if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
   // Notification via Service Worker (better lock-screen delivery)
@@ -2848,6 +2862,9 @@ function startTimer(exName) {
   if ('Notification' in window && Notification.permission === 'default') {
     Notification.requestPermission();
   }
+
+  // Tell SW to independently schedule the notification
+  swTimerStart(timerDuration);
 
   // Backup timeout — fires even if setInterval is throttled during screen lock
   timerBackupTimeout = setTimeout(() => {
@@ -2906,6 +2923,7 @@ function toggleTimerPause() {
     timerRemaining = Math.max(0, Math.round((timerEndTime - Date.now()) / 1000));
     // Clear backup timeout while paused
     if (timerBackupTimeout) { clearTimeout(timerBackupTimeout); timerBackupTimeout = null; }
+    swTimerCancel();
   } else {
     // Recalculate end time when resuming
     timerEndTime = Date.now() + (timerRemaining * 1000);
@@ -2918,6 +2936,7 @@ function toggleTimerPause() {
       fireTimerAlert();
       setTimeout(() => closeTimer(), 1200);
     }, timerRemaining * 1000 + 500);
+    swTimerStart(timerRemaining);
   }
   document.getElementById('timer-pause-btn').textContent = timerPaused ? 'RESUME' : 'PAUSE';
 }
@@ -2931,6 +2950,7 @@ function closeTimer() {
   document.getElementById('timer-overlay').classList.remove('open');
   clearInterval(timerInterval);
   if (timerBackupTimeout) { clearTimeout(timerBackupTimeout); timerBackupTimeout = null; }
+  swTimerCancel();
   timerEndTime = 0;
 }
 
@@ -2947,6 +2967,7 @@ function setTimerDuration(secs, btn) {
     clearInterval(timerInterval);
     if (timerBackupTimeout) { clearTimeout(timerBackupTimeout); timerBackupTimeout = null; }
     timerEndTime = Date.now() + (secs * 1000);
+    swTimerStart(secs);
     timerBackupTimeout = setTimeout(() => {
       if (timerPaused || timerEndTime === 0) return;
       timerRemaining = 0;
