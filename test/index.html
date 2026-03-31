@@ -1584,6 +1584,7 @@ function cycleWeek() {
   currentWeek++;
   localStorage.setItem('fw_week', currentWeek);
   updateStats();
+  scheduleSync();
   document.querySelectorAll('.w-tab').forEach((b,i) => b.classList.toggle('active', i+1===currentWeek));
 }
 
@@ -1922,7 +1923,7 @@ document.addEventListener('click', e => {
 function populateAddSelect() { /* replaced by search */ }
 
 function selectWeek(w,btn) {
-  currentWeek=w; updateStats();
+  currentWeek=w; updateStats(); scheduleSync();
   document.querySelectorAll('.w-tab').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   const day=currentBlock.days.find(d=>d.id===currentDayId);
@@ -3208,6 +3209,7 @@ function weekBack() {
   currentWeek--;
   localStorage.setItem('fw_week', currentWeek);
   updateStats();
+  scheduleSync();
   showToast('← W'+currentWeek);
 }
 
