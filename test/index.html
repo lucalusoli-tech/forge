@@ -2966,6 +2966,31 @@ function setTimerDuration(secs, btn) {
   // update label
   const label = secs < 120 ? secs+'s' : (secs/60)+'m';
   document.querySelector('.timer-toggle-label').textContent = 'Auto rest timer · '+label;
+  // If timer is actively running, restart with new duration
+  if (timerEndTime > 0 && !timerPaused) {
+    clearInterval(timerInterval);
+    if (timerBackupTimeout) { clearTimeout(timerBackupTimeout); timerBackupTimeout = null; }
+    timerEndTime = Date.now() + (secs * 1000);
+    timerBackupTimeout = setTimeout(() => {
+      if (timerPaused || timerEndTime === 0) return;
+      timerRemaining = 0;
+      updateTimerDisplay();
+      clearInterval(timerInterval);
+      fireTimerAlert();
+      setTimeout(() => closeTimer(), 1200);
+    }, secs * 1000 + 500);
+    timerInterval = setInterval(() => {
+      if(timerPaused) return;
+      timerRemaining = Math.max(0, Math.round((timerEndTime - Date.now()) / 1000));
+      updateTimerDisplay();
+      if(timerRemaining <= 0) {
+        clearInterval(timerInterval);
+        if (timerBackupTimeout) { clearTimeout(timerBackupTimeout); timerBackupTimeout = null; }
+        fireTimerAlert();
+        setTimeout(() => closeTimer(), 1200);
+      }
+    }, 250);
+  }
   updateTimerDisplay();
 }
 
