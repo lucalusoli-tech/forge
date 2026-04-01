@@ -75,6 +75,16 @@
   .weekly-cta { background: var(--accent-glow); border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; padding: 14px 28px; cursor: pointer; width: 100%; }
   .weekly-cta:active { background: rgba(201,169,110,0.2); }
 
+  /* ── CHANGELOG ── */
+  .changelog-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9997; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .changelog-card { background: var(--deep); border: 1px solid var(--border); max-width: 320px; width: 100%; padding: 32px 24px; animation: obFadeIn 0.35s ease; }
+  .changelog-badge { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; margin-bottom: 16px; text-align: center; }
+  .changelog-title { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 4px; color: var(--text); margin-bottom: 20px; text-align: center; line-height: 1.1; }
+  .changelog-list { list-style: none; padding: 0; margin: 0 0 24px; }
+  .changelog-list li { font-size: 11px; letter-spacing: 0.5px; color: var(--text-muted); line-height: 1.6; padding: 6px 0; border-bottom: 1px solid var(--border); }
+  .changelog-list li:last-child { border-bottom: none; }
+  .changelog-list li::before { content: '✦ '; color: var(--accent); }
+
   .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(--border); }
   .stat-cell { padding: 16px 20px; border-right: 1px solid var(--border); }
   .stat-cell:last-child { border-right: none; }
@@ -567,6 +577,16 @@
   @keyframes obLoad { 0% { width: 0%; } 60% { width: 85%; } 100% { width: 100%; } }</style>
 </head>
 <body>
+
+<!-- ── CHANGELOG OVERLAY ── -->
+<div class="changelog-overlay" id="changelog-overlay" style="display:none" onclick="if(event.target===this)closeChangelog()">
+  <div class="changelog-card">
+    <div class="changelog-badge">What's new</div>
+    <div class="changelog-title" id="changelog-title">FORGE UPDATE</div>
+    <ul class="changelog-list" id="changelog-list"></ul>
+    <button class="weekly-cta" onclick="closeChangelog()">GOT IT</button>
+  </div>
+</div>
 
 <!-- ── WEEKLY SUMMARY OVERLAY ── -->
 <div class="weekly-overlay" id="weekly-overlay" style="display:none" onclick="if(event.target===this)closeWeeklySummary()">
@@ -1855,6 +1875,37 @@ function switchBuildTab(tab) {
   document.getElementById('btab-'+tab).classList.add('active');
   document.getElementById('bpanel-'+tab).classList.add('active');
   document.getElementById('scroll-area').scrollTop = 0;
+}
+
+// ─── CHANGELOG ─────────────────────────────────────────────────
+const FORGE_VERSION = '1.4.0';
+const FORGE_CHANGELOG = [
+  'Onboarding flow — guided first block setup for new users',
+  'Session streaks — track your consecutive training days',
+  'Weekly recap — summary popup at the start of each week',
+  'Block end flow — prompts next steps when your block finishes',
+  'FORGE+ tier — coach programmes + AI generator',
+  'Timer notifications — improved background alerts',
+  'Exercise database — difficulty levels cleaned up'
+];
+
+function checkChangelog() {
+  const lastSeen = localStorage.getItem('fw_changelog_version') || '';
+  if (lastSeen === FORGE_VERSION) return;
+  if (!lastSeen) {
+    // First time user — don't show changelog, just mark as seen
+    localStorage.setItem('fw_changelog_version', FORGE_VERSION);
+    return;
+  }
+  // Returning user with new version — show changelog
+  const list = document.getElementById('changelog-list');
+  list.innerHTML = FORGE_CHANGELOG.map(item => `<li>${item}</li>`).join('');
+  document.getElementById('changelog-overlay').style.display = 'flex';
+  localStorage.setItem('fw_changelog_version', FORGE_VERSION);
+}
+
+function closeChangelog() {
+  document.getElementById('changelog-overlay').style.display = 'none';
 }
 
 // ─── STREAKS & WEEKLY SUMMARY ──────────────────────────────────
@@ -4250,8 +4301,10 @@ function startApp(isGuest) {
   updateStreakDisplay();
   // Check for assigned blocks after UI is ready
   setTimeout(() => loadAssignedBlocks(), 1000);
+  // Changelog popup (show before weekly summary)
+  setTimeout(() => checkChangelog(), 500);
   // Weekly summary popup (after a brief delay so UI settles)
-  setTimeout(() => checkWeeklySummary(), 800);
+  setTimeout(() => checkWeeklySummary(), 1200);
   // Auto-trigger onboarding for new users with no block
   const hasBlock = currentBlock.days?.length > 0;
   const onboarded = localStorage.getItem('fw_onboarded') === '1';
