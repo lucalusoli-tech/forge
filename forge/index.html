@@ -518,9 +518,117 @@
   .ai-result-ex:last-child { border-bottom: none; }
   .ai-result-ex-name { color: var(--text); }
   .ai-result-ex-scheme { color: var(--text-muted); font-size: 12px; }
-  .coaching-sent { text-align: center; padding: 24px; font-size: 10px; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; display: none; }</style>
+  .coaching-sent { text-align: center; padding: 24px; font-size: 10px; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; display: none; }
+
+  /* ── ONBOARDING ── */
+  .onboard-overlay { position: fixed; inset: 0; background: #080808; z-index: 9999; display: flex; flex-direction: column; overflow: hidden; }
+  .onboard-progress { display: flex; gap: 6px; padding: 20px 24px 0; justify-content: center; }
+  .onboard-dot { width: 32px; height: 3px; background: var(--border); transition: background 0.3s; }
+  .onboard-dot.active { background: var(--accent); }
+  .onboard-dot.done { background: var(--accent-dim); }
+  .onboard-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 28px; text-align: center; }
+  .onboard-step { display: none; flex-direction: column; align-items: center; width: 100%; max-width: 360px; animation: obFadeIn 0.35s ease; }
+  .onboard-step.active { display: flex; }
+  @keyframes obFadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .onboard-icon { font-size: 32px; color: var(--accent); margin-bottom: 24px; opacity: 0.7; }
+  .onboard-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 5px; color: var(--text); margin-bottom: 8px; line-height: 1.1; }
+  .onboard-sub { font-size: 11px; letter-spacing: 1px; color: var(--text-muted); line-height: 1.7; margin-bottom: 36px; max-width: 280px; }
+  .onboard-options { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+  .onboard-opt { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; padding: 16px 20px; cursor: pointer; text-align: center; transition: all 0.2s; }
+  .onboard-opt:active, .onboard-opt.selected { border-color: var(--accent-dim); color: var(--accent); background: var(--accent-glow); }
+  .onboard-freq { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
+  .onboard-freq-opt { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; padding: 20px 0; cursor: pointer; text-align: center; transition: all 0.2s; }
+  .onboard-freq-opt span { display: block; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; }
+  .onboard-freq-opt:active, .onboard-freq-opt.selected { border-color: var(--accent-dim); color: var(--accent); background: var(--accent-glow); }
+  .onboard-cta { background: var(--accent-glow); border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; padding: 16px 32px; cursor: pointer; margin-top: 8px; }
+  .onboard-cta:active { background: rgba(201,169,110,0.2); }
+  .onboard-footer { padding: 0 24px 32px; display: flex; justify-content: center; }
+  .onboard-back { background: none; border: none; color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; cursor: pointer; padding: 12px; text-transform: uppercase; }
+  .onboard-back:active { color: var(--accent); }
+  .onboard-loading-bar { width: 120px; height: 2px; background: var(--border); margin-top: 32px; overflow: hidden; border-radius: 1px; }
+  .onboard-loading-fill { width: 0%; height: 100%; background: var(--accent); animation: obLoad 1.8s ease forwards; }
+  @keyframes obLoad { 0% { width: 0%; } 60% { width: 85%; } 100% { width: 100%; } }</style>
 </head>
 <body>
+
+<!-- ── ONBOARDING OVERLAY ── -->
+<div class="onboard-overlay" id="onboard-overlay" style="display:none">
+  <div class="onboard-progress" id="onboard-progress">
+    <div class="onboard-dot active"></div>
+    <div class="onboard-dot"></div>
+    <div class="onboard-dot"></div>
+    <div class="onboard-dot"></div>
+    <div class="onboard-dot"></div>
+  </div>
+  <div class="onboard-body">
+
+    <!-- Step 0: Welcome -->
+    <div class="onboard-step active" data-step="0">
+      <div class="onboard-icon">✦</div>
+      <div class="onboard-title">WELCOME TO FORGE</div>
+      <div class="onboard-sub">Let's set up your first training block — takes 30 seconds</div>
+      <button class="onboard-cta" onclick="onboardNext()">GET STARTED</button>
+    </div>
+
+    <!-- Step 1: Goal -->
+    <div class="onboard-step" data-step="1">
+      <div class="onboard-title">WHAT'S YOUR GOAL?</div>
+      <div class="onboard-sub">Pick the one that matters most right now</div>
+      <div class="onboard-options">
+        <button class="onboard-opt" onclick="onboardSelect('goal',this)">Build Strength</button>
+        <button class="onboard-opt" onclick="onboardSelect('goal',this)">Body Composition</button>
+        <button class="onboard-opt" onclick="onboardSelect('goal',this)">General Fitness</button>
+        <button class="onboard-opt" onclick="onboardSelect('goal',this)">Mobility & Movement</button>
+        <button class="onboard-opt" onclick="onboardSelect('goal',this)">Learning Skill</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Experience -->
+    <div class="onboard-step" data-step="2">
+      <div class="onboard-title">YOUR EXPERIENCE</div>
+      <div class="onboard-sub">How long have you been training?</div>
+      <div class="onboard-options">
+        <button class="onboard-opt" onclick="onboardSelect('level',this)">Beginner · 0–1 year</button>
+        <button class="onboard-opt" onclick="onboardSelect('level',this)">Intermediate · 1–3 years</button>
+        <button class="onboard-opt" onclick="onboardSelect('level',this)">Advanced · 3+ years</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Equipment -->
+    <div class="onboard-step" data-step="3">
+      <div class="onboard-title">TRAINING STYLE</div>
+      <div class="onboard-sub">What equipment will you be using?</div>
+      <div class="onboard-options">
+        <button class="onboard-opt" onclick="onboardSelect('equipment',this)">Gym Floor</button>
+        <button class="onboard-opt" onclick="onboardSelect('equipment',this)">Calisthenics</button>
+        <button class="onboard-opt" onclick="onboardSelect('equipment',this)">Both</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Frequency -->
+    <div class="onboard-step" data-step="4">
+      <div class="onboard-title">DAYS PER WEEK</div>
+      <div class="onboard-sub">How many days can you commit to?</div>
+      <div class="onboard-freq">
+        <button class="onboard-freq-opt" onclick="onboardSelect('days',this)">2<span>days</span></button>
+        <button class="onboard-freq-opt" onclick="onboardSelect('days',this)">3<span>days</span></button>
+        <button class="onboard-freq-opt" onclick="onboardSelect('days',this)">4<span>days</span></button>
+      </div>
+    </div>
+
+    <!-- Step 5: Loading -->
+    <div class="onboard-step" data-step="5">
+      <div class="onboard-icon">⚒</div>
+      <div class="onboard-title">BUILDING YOUR<br>PROGRAMME</div>
+      <div class="onboard-sub" id="onboard-summary"></div>
+      <div class="onboard-loading-bar"><div class="onboard-loading-fill"></div></div>
+    </div>
+
+  </div>
+  <div class="onboard-footer">
+    <button class="onboard-back" id="onboard-back-btn" onclick="onboardBack()" style="visibility:hidden">← BACK</button>
+  </div>
+</div>
 
 <!-- ── AUTH: SPLASH ── -->
 <div class="auth-screen" id="auth-splash">
@@ -659,7 +767,7 @@
           <div class="home-empty-icon">✦</div>
           <div class="home-empty-title">No block yet</div>
           <div class="home-empty-sub">Build your first training block to get started</div>
-          <button class="home-empty-cta" onclick="navigate('builder')">BUILD A BLOCK →</button>
+          <button class="home-empty-cta" onclick="showOnboarding()">GET STARTED →</button>
         </div>
       </div>
       <div style="height:20px"></div>
@@ -1024,15 +1132,15 @@
 // ─── EXERCISES ─────────────────────────────────────────────────
 const EXERCISES = [
   // ── YOUR TRAINING EXERCISES ──────────────────────────────────
-  {id:'muscle-up',name:'Muscle-Up',tags:['calisthenics','pull','skill'],sets:'5×8-2',target:'Lats, Triceps, Core',intensity:'80-90%',cue:'False grip, explosive pull, punch through',video:'https://www.youtube.com/results?search_query=muscle+up+tutorial',desc:'King of bar calisthenics. Combines a pull-up with a dip in one explosive movement.'},
-  {id:'weighted-dips',name:'Weighted Dips',tags:['push'],sets:'3×5',target:'Pectorals, Triceps, Anterior Delt',intensity:'85-90%',cue:'Slight forward lean, full depth, control the negative',video:'https://www.youtube.com/results?search_query=weighted+dips+form',desc:'Upper body mass builder. Load progressively. Lean forward for chest, upright for triceps.'},
-  {id:'chin-ups',name:'Chin-Ups',tags:['calisthenics','pull'],sets:'3×8',target:'Biceps, Lats, Rear Delt',intensity:'70-80%',cue:'Supinated grip, dead hang start, chin over bar',video:'https://www.youtube.com/results?search_query=chin+up+tutorial',desc:'Supinated vertical pull. Superior bicep activation over pull-ups.'},
+  {id:'muscle-up',name:'Muscle-Up',tags:['calisthenics','pull','skill'],sets:'5×8-2',target:'Lats, Triceps, Core',intensity:'Elite',cue:'False grip, explosive pull, punch through',video:'https://www.youtube.com/results?search_query=muscle+up+tutorial',desc:'King of bar calisthenics. Combines a pull-up with a dip in one explosive movement.'},
+  {id:'weighted-dips',name:'Weighted Dips',tags:['push'],sets:'3×5',target:'Pectorals, Triceps, Anterior Delt',intensity:'Hard',cue:'Slight forward lean, full depth, control the negative',video:'https://www.youtube.com/results?search_query=weighted+dips+form',desc:'Upper body mass builder. Load progressively. Lean forward for chest, upright for triceps.'},
+  {id:'chin-ups',name:'Chin-Ups',tags:['calisthenics','pull'],sets:'3×8',target:'Biceps, Lats, Rear Delt',intensity:'Moderate',cue:'Supinated grip, dead hang start, chin over bar',video:'https://www.youtube.com/results?search_query=chin+up+tutorial',desc:'Supinated vertical pull. Superior bicep activation over pull-ups.'},
   {id:'pppu',name:'Pseudo Planche Push-Up',tags:['push','skill','calisthenics'],sets:'3×8-12',target:'Anterior Deltoid, Pectorals, Core',intensity:'Moderate',cue:'6" stop at the top, lean forward aggressively',video:'https://www.youtube.com/results?search_query=pseudo+planche+push+up',desc:'Planche progression disguised as a push-up. Lean dramatically forward, protract scapula.'},
   {id:'adv-pl-rows',name:'Adv Tuck FL Rows',tags:['pull','skill','calisthenics'],sets:'3×8',target:'Lats, Mid-Back, Rhomboids',intensity:'Moderate',cue:'Horizontal body, pull to chest, pause at top',video:'https://www.youtube.com/results?search_query=advanced+tuck+front+lever+row',desc:'Horizontal pull in advanced tuck front lever position. Bridges rows and front lever work.'},
   {id:'l-sit',name:'L-Sit',tags:['core','skill','calisthenics'],sets:'1 min total',target:'Hip Flexors, Triceps, Core',intensity:'Bodyweight',cue:'Depress scapula, point toes, full leg extension',video:'https://www.youtube.com/results?search_query=l-sit+tutorial',desc:'Isometric compression. More demanding than it looks. Work toward parallel bars.'},
   {id:'hollow-body',name:'Hollow Body Hold',tags:['warmup','core','calisthenics'],sets:'1 min',target:'Core, Anterior Chain',intensity:'Bodyweight',cue:'Lower back flat, ribs down, arms forward',video:'https://www.youtube.com/results?search_query=hollow+body+hold+tutorial',desc:'Foundation of calisthenics body tension. Master this and every skill becomes easier.'},
   {id:'front-lever',name:'Front Lever',tags:['pull','skill','calisthenics'],sets:'5×5-10s',target:'Lats, Core, Shoulder Girdle',intensity:'Skill work',cue:'Depress lats, posterior pelvic tilt, look down',video:'https://www.youtube.com/results?search_query=front+lever+tutorial',desc:'Advanced static hold. Progressions: tuck → straddle → full.'},
-  {id:'squat',name:'Squat / BSS',tags:['legs'],sets:'3×8',target:'Quads, Glutes, Hamstrings',intensity:'70-80%',cue:'Braced core, knees track toes, sit into hip',video:'https://www.youtube.com/results?search_query=squat+form',desc:'Bilateral strength base. Pair with BSS for single-leg stability.'},
+  {id:'squat',name:'Squat / BSS',tags:['legs'],sets:'3×8',target:'Quads, Glutes, Hamstrings',intensity:'Moderate',cue:'Braced core, knees track toes, sit into hip',video:'https://www.youtube.com/results?search_query=squat+form',desc:'Bilateral strength base. Pair with BSS for single-leg stability.'},
   {id:'rdl',name:'RDL / Hamstring Curl',tags:['legs'],sets:'3×8-12',target:'Hamstrings, Glutes, Erectors',intensity:'Moderate',cue:'Hip hinge, soft knees, bar close to body',video:'https://www.youtube.com/results?search_query=romanian+deadlift+form',desc:'Posterior chain cornerstone. Eccentric hamstring loading.'},
   {id:'bar-dips',name:'Bar Dips',tags:['calisthenics','push','pull'],sets:'3×6+3',target:'Full Upper Body',intensity:'Fast',cue:'Explosive dip then immediate row',video:'https://www.youtube.com/results?search_query=bar+dips',desc:'Antagonist superset. Push then immediately pull.'},
   {id:'leg-raises',name:'Leg Raises',tags:['core','calisthenics'],sets:'3×10-15',target:'Hip Flexors, Core, Obliques',intensity:'Bodyweight',cue:'Dead hang start, posterior tilt, control down',video:'https://www.youtube.com/results?search_query=hanging+leg+raises',desc:'Hanging core work. Key for L-sit and front lever compression.'},
@@ -1258,28 +1366,28 @@ const EXERCISES = [
   {id:'bwf-elevated-friction-pistol',name:'Elevated Friction Pistol',tags:['calisthenics','legs'],sets:'3×3-5',target:'Quads, Glutes, Balance',intensity:'Elite',cue:'Front foot elevated on high surface, maximum ROM pistol',video:'https://www.youtube.com/results?search_query=elevated+pistol+squat',desc:'Elevated friction pistol squat. Maximum range of motion pistol on elevated surface. Elite leg strength.'},
 
   // ── BARBELL — CHEST ───────────────────────────────────────────
-  {id:'bb-bench-press',name:'Barbell Bench Press',tags:['barbell','push'],sets:'4×5-8',target:'Pectorals, Triceps, Anterior Delt',intensity:'75-85%',cue:'Retract scapula, bar to lower chest, leg drive',video:'https://www.youtube.com/results?search_query=barbell+bench+press+form',desc:'The horizontal pressing standard. Arch the back, drive feet into floor, controlled descent.'},
-  {id:'bb-incline-bench',name:'Incline Barbell Bench',tags:['barbell','push'],sets:'4×6-10',target:'Upper Chest, Anterior Delt, Triceps',intensity:'70-80%',cue:'30-45° incline, bar to upper chest, elbows at 45°',video:'https://www.youtube.com/results?search_query=incline+barbell+bench+press',desc:'Upper chest emphasis. Keep the angle moderate — too steep becomes a shoulder press.'},
-  {id:'bb-decline-bench',name:'Decline Barbell Bench',tags:['barbell','push'],sets:'3×8-12',target:'Lower Chest, Triceps',intensity:'70-80%',cue:'Feet secured, bar to lower chest, elbows track naturally',video:'https://www.youtube.com/results?search_query=decline+barbell+bench+press',desc:'Lower chest emphasis. Reduces anterior delt involvement vs flat bench.'},
-  {id:'bb-close-grip-bench',name:'Close Grip Bench',tags:['barbell','push'],sets:'3×6-10',target:'Triceps, Inner Chest',intensity:'65-75%',cue:'Hands shoulder-width, elbows tucked close to body',video:'https://www.youtube.com/results?search_query=close+grip+bench+press',desc:'Tricep-dominant bench press variation. Key accessory for pressing strength.'},
+  {id:'bb-bench-press',name:'Barbell Bench Press',tags:['barbell','push'],sets:'4×5-8',target:'Pectorals, Triceps, Anterior Delt',intensity:'Hard',cue:'Retract scapula, bar to lower chest, leg drive',video:'https://www.youtube.com/results?search_query=barbell+bench+press+form',desc:'The horizontal pressing standard. Arch the back, drive feet into floor, controlled descent.'},
+  {id:'bb-incline-bench',name:'Incline Barbell Bench',tags:['barbell','push'],sets:'4×6-10',target:'Upper Chest, Anterior Delt, Triceps',intensity:'Moderate',cue:'30-45° incline, bar to upper chest, elbows at 45°',video:'https://www.youtube.com/results?search_query=incline+barbell+bench+press',desc:'Upper chest emphasis. Keep the angle moderate — too steep becomes a shoulder press.'},
+  {id:'bb-decline-bench',name:'Decline Barbell Bench',tags:['barbell','push'],sets:'3×8-12',target:'Lower Chest, Triceps',intensity:'Moderate',cue:'Feet secured, bar to lower chest, elbows track naturally',video:'https://www.youtube.com/results?search_query=decline+barbell+bench+press',desc:'Lower chest emphasis. Reduces anterior delt involvement vs flat bench.'},
+  {id:'bb-close-grip-bench',name:'Close Grip Bench',tags:['barbell','push'],sets:'3×6-10',target:'Triceps, Inner Chest',intensity:'Moderate',cue:'Hands shoulder-width, elbows tucked close to body',video:'https://www.youtube.com/results?search_query=close+grip+bench+press',desc:'Tricep-dominant bench press variation. Key accessory for pressing strength.'},
 
   // ── BARBELL — BACK ────────────────────────────────────────────
-  {id:'bb-deadlift',name:'Deadlift',tags:['barbell','pull','legs'],sets:'3-5×1-5',target:'Full Posterior Chain, Quads, Core',intensity:'80-90%',cue:'Bar over mid-foot, hinge then squat, lockout glutes',video:'https://www.youtube.com/results?search_query=deadlift+form+tutorial',desc:'The king of all lifts. Trains the entire posterior chain under maximum load. Respect it.'},
-  {id:'bb-rdl',name:'Barbell RDL',tags:['barbell','legs'],sets:'3×8-12',target:'Hamstrings, Glutes, Erectors',intensity:'65-75%',cue:'Hip hinge, bar close to legs, feel the hamstring stretch',video:'https://www.youtube.com/results?search_query=barbell+romanian+deadlift',desc:'Eccentric hamstring loader. Keep a slight knee bend, never round the lower back.'},
-  {id:'bb-bent-row',name:'Barbell Bent-Over Row',tags:['barbell','pull'],sets:'4×6-10',target:'Lats, Rhomboids, Rear Delt, Biceps',intensity:'70-80%',cue:'Hip hinge 45°, pull to navel, lead with elbows',video:'https://www.youtube.com/results?search_query=barbell+bent+over+row+form',desc:'Mass builder for the entire back. Overhand or underhand grip changes emphasis.'},
-  {id:'bb-pendlay-row',name:'Pendlay Row',tags:['barbell','pull'],sets:'4×5-6',target:'Lats, Mid-Back, Rear Delt',intensity:'75-80%',cue:'Bar returns to floor each rep, horizontal torso, explosive pull',video:'https://www.youtube.com/results?search_query=pendlay+row+tutorial',desc:'Strict horizontal row from the floor. More back emphasis than standard bent row.'},
-  {id:'bb-rack-pull',name:'Rack Pull',tags:['barbell','pull'],sets:'3×3-6',target:'Traps, Erectors, Glutes',intensity:'85-95%',cue:'Bar set at knee height, drive hips through, squeeze traps at top',video:'https://www.youtube.com/results?search_query=rack+pull+tutorial',desc:'Partial deadlift from pins. Overloads the lockout and builds trap thickness.'},
+  {id:'bb-deadlift',name:'Deadlift',tags:['barbell','pull','legs'],sets:'3-5×1-5',target:'Full Posterior Chain, Quads, Core',intensity:'Hard',cue:'Bar over mid-foot, hinge then squat, lockout glutes',video:'https://www.youtube.com/results?search_query=deadlift+form+tutorial',desc:'The king of all lifts. Trains the entire posterior chain under maximum load. Respect it.'},
+  {id:'bb-rdl',name:'Barbell RDL',tags:['barbell','legs'],sets:'3×8-12',target:'Hamstrings, Glutes, Erectors',intensity:'Moderate',cue:'Hip hinge, bar close to legs, feel the hamstring stretch',video:'https://www.youtube.com/results?search_query=barbell+romanian+deadlift',desc:'Eccentric hamstring loader. Keep a slight knee bend, never round the lower back.'},
+  {id:'bb-bent-row',name:'Barbell Bent-Over Row',tags:['barbell','pull'],sets:'4×6-10',target:'Lats, Rhomboids, Rear Delt, Biceps',intensity:'Moderate',cue:'Hip hinge 45°, pull to navel, lead with elbows',video:'https://www.youtube.com/results?search_query=barbell+bent+over+row+form',desc:'Mass builder for the entire back. Overhand or underhand grip changes emphasis.'},
+  {id:'bb-pendlay-row',name:'Pendlay Row',tags:['barbell','pull'],sets:'4×5-6',target:'Lats, Mid-Back, Rear Delt',intensity:'Hard',cue:'Bar returns to floor each rep, horizontal torso, explosive pull',video:'https://www.youtube.com/results?search_query=pendlay+row+tutorial',desc:'Strict horizontal row from the floor. More back emphasis than standard bent row.'},
+  {id:'bb-rack-pull',name:'Rack Pull',tags:['barbell','pull'],sets:'3×3-6',target:'Traps, Erectors, Glutes',intensity:'Hard',cue:'Bar set at knee height, drive hips through, squeeze traps at top',video:'https://www.youtube.com/results?search_query=rack+pull+tutorial',desc:'Partial deadlift from pins. Overloads the lockout and builds trap thickness.'},
   {id:'bb-shrug',name:'Barbell Shrug',tags:['barbell','pull'],sets:'3×10-15',target:'Upper Traps',intensity:'Moderate',cue:'No roll, straight up, hold 1s at top',video:'https://www.youtube.com/results?search_query=barbell+shrug+form',desc:'Direct trap isolation. Don\'t roll the shoulders — pure vertical movement.'},
 
   // ── BARBELL — SHOULDERS ───────────────────────────────────────
-  {id:'bb-ohp',name:'Barbell Overhead Press',tags:['barbell','push'],sets:'4×5-8',target:'Anterior & Lateral Delt, Triceps, Upper Traps',intensity:'70-80%',cue:'Bar from rack, stack joints, press around head not in front',video:'https://www.youtube.com/results?search_query=barbell+overhead+press+form',desc:'The vertical pressing standard. Teaches full-body tension and shoulder integrity.'},
-  {id:'bb-push-press',name:'Push Press',tags:['barbell','push'],sets:'4×4-6',target:'Anterior Delt, Triceps, Legs, Core',intensity:'80-90%',cue:'Dip and drive with legs, press overhead, lock out',video:'https://www.youtube.com/results?search_query=push+press+tutorial',desc:'Leg-assisted overhead press. Allows heavier loads than strict OHP. Power development.'},
-  {id:'bb-behind-neck-press',name:'Behind Neck Press',tags:['barbell','push'],sets:'3×8-12',target:'Lateral Delt, Rear Delt, Triceps',intensity:'60-70%',cue:'Wide grip, lower to base of skull, upright torso',video:'https://www.youtube.com/results?search_query=behind+neck+press',desc:'Lateral delt emphasis overhead press. Requires healthy shoulder mobility.'},
+  {id:'bb-ohp',name:'Barbell Overhead Press',tags:['barbell','push'],sets:'4×5-8',target:'Anterior & Lateral Delt, Triceps, Upper Traps',intensity:'Moderate',cue:'Bar from rack, stack joints, press around head not in front',video:'https://www.youtube.com/results?search_query=barbell+overhead+press+form',desc:'The vertical pressing standard. Teaches full-body tension and shoulder integrity.'},
+  {id:'bb-push-press',name:'Push Press',tags:['barbell','push'],sets:'4×4-6',target:'Anterior Delt, Triceps, Legs, Core',intensity:'Hard',cue:'Dip and drive with legs, press overhead, lock out',video:'https://www.youtube.com/results?search_query=push+press+tutorial',desc:'Leg-assisted overhead press. Allows heavier loads than strict OHP. Power development.'},
+  {id:'bb-behind-neck-press',name:'Behind Neck Press',tags:['barbell','push'],sets:'3×8-12',target:'Lateral Delt, Rear Delt, Triceps',intensity:'Moderate',cue:'Wide grip, lower to base of skull, upright torso',video:'https://www.youtube.com/results?search_query=behind+neck+press',desc:'Lateral delt emphasis overhead press. Requires healthy shoulder mobility.'},
 
   // ── BARBELL — LEGS ────────────────────────────────────────────
-  {id:'bb-squat',name:'Barbell Back Squat',tags:['barbell','legs'],sets:'4×5-8',target:'Quads, Glutes, Hamstrings, Core',intensity:'75-85%',cue:'Bar on traps, brace, sit between heels, drive knees out',video:'https://www.youtube.com/results?search_query=barbell+back+squat+form',desc:'The lower body cornerstone. High bar or low bar — both valid. Depth is non-negotiable.'},
-  {id:'bb-front-squat',name:'Barbell Front Squat',tags:['barbell','legs'],sets:'4×5-8',target:'Quads, Core, Upper Back',intensity:'65-75%',cue:'Elbows up, torso vertical, knees track toes',video:'https://www.youtube.com/results?search_query=barbell+front+squat+form',desc:'Quad-dominant squat with greater core demand. Unforgiving of poor mobility.'},
-  {id:'bb-zercher-squat',name:'Zercher Squat',tags:['barbell','legs'],sets:'3×6-10',target:'Quads, Core, Upper Back, Biceps',intensity:'65-75%',cue:'Bar in elbow crease, upright torso, sit deep',video:'https://www.youtube.com/results?search_query=zercher+squat+tutorial',desc:'Unusual but brutal. Bar held in elbows forces upright torso and massive core demand.'},
+  {id:'bb-squat',name:'Barbell Back Squat',tags:['barbell','legs'],sets:'4×5-8',target:'Quads, Glutes, Hamstrings, Core',intensity:'Hard',cue:'Bar on traps, brace, sit between heels, drive knees out',video:'https://www.youtube.com/results?search_query=barbell+back+squat+form',desc:'The lower body cornerstone. High bar or low bar — both valid. Depth is non-negotiable.'},
+  {id:'bb-front-squat',name:'Barbell Front Squat',tags:['barbell','legs'],sets:'4×5-8',target:'Quads, Core, Upper Back',intensity:'Moderate',cue:'Elbows up, torso vertical, knees track toes',video:'https://www.youtube.com/results?search_query=barbell+front+squat+form',desc:'Quad-dominant squat with greater core demand. Unforgiving of poor mobility.'},
+  {id:'bb-zercher-squat',name:'Zercher Squat',tags:['barbell','legs'],sets:'3×6-10',target:'Quads, Core, Upper Back, Biceps',intensity:'Moderate',cue:'Bar in elbow crease, upright torso, sit deep',video:'https://www.youtube.com/results?search_query=zercher+squat+tutorial',desc:'Unusual but brutal. Bar held in elbows forces upright torso and massive core demand.'},
   {id:'bb-hip-thrust',name:'Barbell Hip Thrust',tags:['barbell','legs'],sets:'3×8-15',target:'Glutes, Hamstrings',intensity:'Moderate',cue:'Bar over hip crease, shoulders on bench, drive hips up, squeeze glutes',video:'https://www.youtube.com/results?search_query=barbell+hip+thrust+form',desc:'Peak glute isolator. Full hip extension with loaded barbell. Superior glute activation.'},
   {id:'bb-good-morning',name:'Good Morning',tags:['barbell','legs'],sets:'3×8-12',target:'Hamstrings, Erectors, Glutes',intensity:'Light-Moderate',cue:'Bar on traps, hinge at hip, soft knees, flat back',video:'https://www.youtube.com/results?search_query=good+morning+exercise+form',desc:'Posterior chain hinge movement. Builds hamstring and lower back strength.'},
   {id:'bb-lunge',name:'Barbell Lunge',tags:['barbell','legs'],sets:'3×8-12',target:'Quads, Glutes, Hamstrings',intensity:'Moderate',cue:'Step long, torso upright, back knee near floor, drive through front heel',video:'https://www.youtube.com/results?search_query=barbell+lunge+form',desc:'Loaded unilateral leg work. Forward, reverse, or walking variations.'},
@@ -1641,6 +1749,306 @@ function switchBuildTab(tab) {
   document.getElementById('btab-'+tab).classList.add('active');
   document.getElementById('bpanel-'+tab).classList.add('active');
   document.getElementById('scroll-area').scrollTop = 0;
+}
+
+// ─── ONBOARDING ────────────────────────────────────────────────
+let onboardStep = 0;
+const onboardData = { goal: '', level: '', equipment: '', days: '' };
+
+function showOnboarding() {
+  document.getElementById('onboard-overlay').style.display = 'flex';
+  onboardStep = 0;
+  onboardData.goal = ''; onboardData.level = ''; onboardData.equipment = ''; onboardData.days = '';
+  updateOnboardStep();
+}
+
+function updateOnboardStep() {
+  document.querySelectorAll('.onboard-step').forEach(s => s.classList.remove('active'));
+  const step = document.querySelector(`.onboard-step[data-step="${onboardStep}"]`);
+  if (step) step.classList.add('active');
+
+  // Progress dots
+  document.querySelectorAll('.onboard-dot').forEach((d, i) => {
+    d.classList.remove('active', 'done');
+    if (i === onboardStep) d.classList.add('active');
+    else if (i < onboardStep) d.classList.add('done');
+  });
+
+  // Back button visibility
+  const backBtn = document.getElementById('onboard-back-btn');
+  backBtn.style.visibility = (onboardStep > 0 && onboardStep < 5) ? 'visible' : 'hidden';
+}
+
+function onboardNext() {
+  onboardStep++;
+  updateOnboardStep();
+}
+
+function onboardBack() {
+  if (onboardStep > 0) {
+    onboardStep--;
+    updateOnboardStep();
+  }
+}
+
+function onboardSelect(field, btn) {
+  // Store value
+  if (field === 'days') {
+    onboardData.days = btn.textContent.trim().charAt(0); // "2", "3", or "4"
+  } else {
+    onboardData[field] = btn.textContent.trim().split('·')[0].trim(); // strip "· 0-1 year" etc
+  }
+
+  // Visual feedback
+  const parent = btn.parentElement;
+  parent.querySelectorAll('.onboard-opt, .onboard-freq-opt').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+
+  // Auto-advance after brief delay
+  setTimeout(() => {
+    if (onboardStep < 4) {
+      onboardNext();
+    } else {
+      // Final step — show loading and build programme
+      onboardStep = 5;
+      updateOnboardStep();
+      document.getElementById('onboard-summary').textContent =
+        `${onboardData.goal} · ${onboardData.level} · ${onboardData.equipment} · ${onboardData.days}x/week`;
+      setTimeout(() => finishOnboarding(), 2200);
+    }
+  }, 300);
+}
+
+function finishOnboarding() {
+  // Load the matching template block
+  const template = getOnboardingTemplate(onboardData.goal, onboardData.level, onboardData.days, onboardData.equipment);
+  if (template) {
+    currentBlock = template;
+    localStorage.setItem('fw_block', JSON.stringify(currentBlock));
+    scheduleSync();
+  }
+  // Store that onboarding is complete
+  localStorage.setItem('fw_onboarded', '1');
+  // Close overlay and render
+  document.getElementById('onboard-overlay').style.display = 'none';
+  renderHomeDays();
+  renderBuilderDays();
+}
+
+function getOnboardingTemplate(goal, level, days, equipment) {
+  const d = parseInt(days) || 3;
+  const blockName = `${goal} · ${level} · ${d}x/week`;
+
+  // ── Equipment filter ──
+  function matchesEquipment(ex) {
+    const t = ex.tags;
+    if (t.includes('warmup')) return false;
+    if (equipment === 'Calisthenics') return t.includes('calisthenics');
+    if (equipment === 'Gym Floor') return !t.includes('calisthenics') && (t.includes('barbell') || t.includes('dumbbell') || t.includes('machine') || t.includes('pull') || t.includes('push') || t.includes('legs'));
+    return true; // Both
+  }
+
+  // ── Helper: pick first match by id from EXERCISES ──
+  function exById(id) { return EXERCISES.find(e => e.id === id); }
+
+  // ── Exercise pools by role + equipment ──
+  function pool(role) {
+    return EXERCISES.filter(ex => {
+      if (!matchesEquipment(ex)) return false;
+      if (ex.tags.includes('warmup')) return false;
+      return ex.tags.includes(role);
+    });
+  }
+
+  // ── Difficulty ranking: pick appropriate progression ──
+  // beginner = easiest, intermediate = middle, advanced = hardest (non-skill)
+  function pickByDifficulty(list, lvl, count) {
+    // Remove high-end skill moves for free tier
+    let filtered = list.filter(e => {
+      const t = e.tags;
+      // Skip elite/advanced skill moves from free templates
+      if (t.includes('skill')) {
+        if (['Elite','Very hard','Max skill','Max'].includes(e.intensity)) return false;
+      }
+      return true;
+    });
+    if (filtered.length === 0) filtered = list;
+
+    // Sort by rough difficulty
+    const diffOrder = {'Easy':1,'Easy-Moderate':2,'Passive stretch':1,'Assisted BW':1,'Bodyweight':2,'Light':2,'Light-Moderate':2.5,'Moderate':3,'Moderate-Heavy':3.5,'Skill':3,'Skill work':3,'Explosive':3,'Fast':3,'Hard':4,'Very hard':5,'Elite':6,'Max skill':7,'Max':7};
+    filtered.sort((a,b) => (diffOrder[a.intensity]||3) - (diffOrder[b.intensity]||3));
+
+    let startIdx = 0;
+    if (lvl === 'Intermediate') startIdx = Math.floor(filtered.length * 0.3);
+    if (lvl === 'Advanced') startIdx = Math.floor(filtered.length * 0.55);
+    startIdx = Math.min(startIdx, Math.max(0, filtered.length - count));
+
+    const picked = [];
+    const used = new Set();
+    for (let i = startIdx; i < filtered.length && picked.length < count; i++) {
+      if (!used.has(filtered[i].id)) { picked.push(filtered[i]); used.add(filtered[i].id); }
+    }
+    // Fill from beginning if not enough
+    for (let i = 0; i < filtered.length && picked.length < count; i++) {
+      if (!used.has(filtered[i].id)) { picked.push(filtered[i]); used.add(filtered[i].id); }
+    }
+    return picked;
+  }
+
+  // ── Sets/reps by level ──
+  let compoundSets, accessorySets, compoundReps, accessoryReps, method;
+  if (level === 'Beginner') {
+    compoundSets = 2; accessorySets = 2; compoundReps = '5-8'; accessoryReps = '8-12'; method = 'Short Linear';
+  } else if (level === 'Intermediate') {
+    compoundSets = 3; accessorySets = 3; compoundReps = '8-12'; accessoryReps = '8-12'; method = 'DUP';
+  } else {
+    compoundSets = 4; accessorySets = 3; compoundReps = '5-8'; accessoryReps = '8-12'; method = 'DUP';
+  }
+
+  // ── Goal adjustments ──
+  if (goal === 'Build Strength') {
+    compoundReps = level === 'Beginner' ? '3-5' : '3-6';
+  } else if (goal === 'Body Composition') {
+    compoundReps = '8-12'; accessoryReps = '10-15';
+    if (level !== 'Beginner') { accessorySets = Math.min(accessorySets + 1, 4); }
+  }
+
+  // ── Pick deep pools — enough for rotation across days ──
+  const pullPool = pickByDifficulty(pool('pull'), level, Math.max(6, d * 2));
+  const pushPool = pickByDifficulty(pool('push'), level, Math.max(6, d * 2));
+  const legPool = pickByDifficulty(pool('legs'), level, Math.max(6, d * 2));
+  const coreRaw = EXERCISES.filter(ex => matchesEquipment(ex) && ex.tags.includes('core') && !ex.tags.includes('warmup'));
+  const corePool = pickByDifficulty(coreRaw, level, Math.max(3, d));
+  const isoRaw = EXERCISES.filter(ex => {
+    if (!matchesEquipment(ex)) return false;
+    return ex.id === 'lateral-raises' || ex.id === 'bicep-curl' ||
+           ex.tags.includes('machine') || (ex.tags.includes('dumbbell') && ['Light'].includes(ex.intensity));
+  });
+  const isoPool = isoRaw.length > 0 ? isoRaw : pickByDifficulty(coreRaw, level, 3);
+
+  // ── Rotate picker: grab `count` items starting at offset, wrapping ──
+  function rotateFrom(arr, offset, count) {
+    const result = [];
+    for (let i = 0; i < count && arr.length > 0; i++) {
+      result.push(arr[(offset + i) % arr.length]);
+    }
+    return result;
+  }
+
+  // ── Build exercise entry ──
+  function makeEx(ex, sets, reps) {
+    return { id: ex.id, sets: sets, reps: reps, note: '' };
+  }
+
+  // ── Full body day: 2 pull, 2 push, 2 legs, 1 core, 1 iso — alternate pull/push ──
+  function buildFullBody(dayIdx) {
+    const exercises = [];
+    const p = rotateFrom(pullPool, dayIdx * 2, 2);
+    const pu = rotateFrom(pushPool, dayIdx * 2, 2);
+    const lg = rotateFrom(legPool, dayIdx * 2, 2);
+    const cr = rotateFrom(corePool, dayIdx, 1);
+    const is = rotateFrom(isoPool, dayIdx, 1);
+    // Heavy compounds first, alternating pull/push
+    if (p[0]) exercises.push(makeEx(p[0], compoundSets, compoundReps));
+    if (pu[0]) exercises.push(makeEx(pu[0], compoundSets, compoundReps));
+    if (p[1]) exercises.push(makeEx(p[1], accessorySets, accessoryReps));
+    if (pu[1]) exercises.push(makeEx(pu[1], accessorySets, accessoryReps));
+    if (lg[0]) exercises.push(makeEx(lg[0], compoundSets, compoundReps));
+    if (lg[1]) exercises.push(makeEx(lg[1], accessorySets, accessoryReps));
+    if (cr[0]) exercises.push(makeEx(cr[0], accessorySets, accessoryReps));
+    if (is[0]) exercises.push(makeEx(is[0], accessorySets, accessoryReps));
+    return exercises;
+  }
+
+  // ── Upper day: 2 pull, 2 push, 1 core, 1 iso ──
+  function buildUpper(dayIdx) {
+    const exercises = [];
+    const p = rotateFrom(pullPool, dayIdx * 2, 2);
+    const pu = rotateFrom(pushPool, dayIdx * 2, 2);
+    const cr = rotateFrom(corePool, dayIdx, 1);
+    const is = rotateFrom(isoPool, dayIdx, 1);
+    if (p[0]) exercises.push(makeEx(p[0], compoundSets, compoundReps));
+    if (pu[0]) exercises.push(makeEx(pu[0], compoundSets, compoundReps));
+    if (p[1]) exercises.push(makeEx(p[1], accessorySets, accessoryReps));
+    if (pu[1]) exercises.push(makeEx(pu[1], accessorySets, accessoryReps));
+    if (cr[0]) exercises.push(makeEx(cr[0], accessorySets, accessoryReps));
+    if (is[0]) exercises.push(makeEx(is[0], accessorySets, accessoryReps));
+    return exercises;
+  }
+
+  // ── Lower day: 4 legs, 1 core, 1 posterior chain ──
+  function buildLower(dayIdx) {
+    const exercises = [];
+    const lg = rotateFrom(legPool, dayIdx * 2, 4);
+    const cr = rotateFrom(corePool, dayIdx, 1);
+    if (lg[0]) exercises.push(makeEx(lg[0], compoundSets, compoundReps));
+    if (lg[1]) exercises.push(makeEx(lg[1], compoundSets, compoundReps));
+    if (lg[2]) exercises.push(makeEx(lg[2], accessorySets, accessoryReps));
+    if (lg[3]) exercises.push(makeEx(lg[3], accessorySets, accessoryReps));
+    if (cr[0]) exercises.push(makeEx(cr[0], accessorySets, accessoryReps));
+    // Add a bridge or posterior chain movement
+    const bridges = EXERCISES.filter(e => matchesEquipment(e) && (e.id.includes('bridge') || e.id.includes('nordic') || e.id === 'rdl'));
+    const bridgePool = pickByDifficulty(bridges.length > 0 ? bridges : pool('legs'), level, 2);
+    const br = rotateFrom(bridgePool, dayIdx, 1);
+    if (br[0]) exercises.push(makeEx(br[0], accessorySets, accessoryReps));
+    return exercises;
+  }
+
+  // ── Determine split ──
+  const useUpperLower = (level === 'Intermediate' && d === 4) || (level === 'Advanced' && d === 4);
+
+  // ── Build days ──
+  const blockDays = [];
+  for (let i = 0; i < d; i++) {
+    const dayId = 'day' + (i + 1);
+    let dayName, exercises;
+    if (useUpperLower) {
+      if (i % 2 === 0) {
+        dayName = `Day ${i + 1} — Upper`;
+        exercises = buildUpper(i);
+      } else {
+        dayName = `Day ${i + 1} — Lower`;
+        exercises = buildLower(i);
+      }
+    } else {
+      dayName = `Day ${i + 1} — Full Body`;
+      exercises = buildFullBody(i);
+    }
+    blockDays.push({ id: dayId, name: dayName, exercises: exercises });
+  }
+
+  // ── Warmup — always include standard warmup ──
+  const warmup = [
+    { id: 'bwf-shoulder-band-warmup', sets: 1, reps: '5-10', note: '' },
+    { id: 'bwf-squat-sky-reaches', sets: 1, reps: '5-10', note: '' },
+    { id: 'bwf-gmb-wrist-prep', sets: 1, reps: '10+', note: '' },
+    { id: 'bwf-deadbugs', sets: 1, reps: '30s', note: '' }
+  ];
+
+  // ── Skill work — goal specific ──
+  const skill = [];
+  if (goal === 'Learning Skill') {
+    // Foundational skills only — no MU/HS/FL
+    const skillPool = ['bwf-frog-stand', 'bwf-tuck-l-sit', 'bwf-tuck-skin-cat', 'l-sit'];
+    const available = skillPool.map(id => exById(id)).filter(Boolean);
+    const picked = pickByDifficulty(available.length > 0 ? available : coreRaw, level, 2);
+    picked.forEach(ex => skill.push({ id: ex.id, sets: 3, reps: '15-30s', note: 'Skill work' }));
+  } else if (goal === 'Mobility & Movement') {
+    const mobPool = ['bwf-reverse-plank', 'bwf-shoulder-bridge', 'bwf-table-bridge', 'bwf-dead-hang'];
+    const available = mobPool.map(id => exById(id)).filter(Boolean);
+    available.slice(0, 2).forEach(ex => skill.push({ id: ex.id, sets: 2, reps: '20-30s', note: 'Mobility' }));
+  }
+
+  // ── Assemble block ──
+  return {
+    name: blockName,
+    weeks: 6,
+    currentWeek: 1,
+    methods: [method],
+    days: blockDays,
+    warmup: warmup,
+    skill: skill
+  };
 }
 
 // ─── HOME ──────────────────────────────────────────────────────
@@ -2774,38 +3182,26 @@ let swRegistration = null;
 // Register service worker for lock-screen notifications
 (function registerTimerSW() {
   if ('serviceWorker' in navigator) {
-    const swCode = `
-      self.addEventListener('install', e => self.skipWaiting());
-      self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
-      self.addEventListener('message', e => {
-        if (e.data && e.data.type === 'TIMER_DONE') {
-          self.registration.showNotification('FORGE', {
-            body: 'Rest over — next set',
-            icon: 'https://forgetraining.app/icon-192.png',
-            tag: 'forge-timer',
-            requireInteraction: true,
-            vibrate: [200, 100, 200]
-          });
-        }
-      });
-      self.addEventListener('notificationclick', e => {
-        e.notification.close();
-        e.waitUntil(self.clients.matchAll({type:'window'}).then(cls => {
-          if (cls.length > 0) { cls[0].focus(); } else { self.clients.openWindow('/'); }
-        }));
-      });
-    `;
-    const blob = new Blob([swCode], { type: 'application/javascript' });
-    const swUrl = URL.createObjectURL(blob);
-    navigator.serviceWorker.register(swUrl, { scope: '/' }).then(reg => {
+    navigator.serviceWorker.register('./forge-sw.js').then(reg => {
       swRegistration = reg;
       console.log('[FORGE] Timer SW registered');
     }).catch(err => {
-      // Blob SW may fail on some hosts — fall back to basic notifications
       console.warn('[FORGE] SW registration failed, using fallback notifications', err);
     });
   }
 })();
+
+// Tell the SW to schedule/cancel its own notification timeout
+function swTimerStart(durationSecs) {
+  if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({ type: 'TIMER_START', duration: durationSecs });
+  }
+}
+function swTimerCancel() {
+  if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({ type: 'TIMER_CANCEL' });
+  }
+}
 const TIMER_CIRCUMFERENCE = 590.6;
 
 function onSetBlur(wk, setNum, exName) {
@@ -2824,6 +3220,8 @@ function autoSaveSet(wk, setNum) {
 }
 
 function fireTimerAlert() {
+  // Cancel SW scheduled notification (page caught it first — prevent double)
+  swTimerCancel();
   // Vibrate
   if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
   // Notification via Service Worker (better lock-screen delivery)
@@ -2838,7 +3236,6 @@ function fireTimerAlert() {
         silent: false
       });
     } catch(e) {
-      // Fallback to basic notification
       try { new Notification('FORGE', { body: 'Rest over — next set', tag: 'forge-timer', requireInteraction: true }); } catch(e2) {}
     }
   } else if ('Notification' in window && Notification.permission === 'granted') {
@@ -2873,6 +3270,9 @@ function startTimer(exName) {
     Notification.requestPermission();
   }
 
+  // Tell SW to independently schedule the notification
+  swTimerStart(timerDuration);
+
   // Backup timeout — fires even if setInterval is throttled during screen lock
   timerBackupTimeout = setTimeout(() => {
     if (timerPaused || timerEndTime === 0) return;
@@ -2881,11 +3281,10 @@ function startTimer(exName) {
     clearInterval(timerInterval);
     fireTimerAlert();
     setTimeout(() => closeTimer(), 1200);
-  }, timerDuration * 1000 + 500); // +500ms buffer
+  }, timerDuration * 1000 + 500);
 
   timerInterval = setInterval(() => {
     if(timerPaused) return;
-    // Calculate remaining from end time (survives screen lock better)
     timerRemaining = Math.max(0, Math.round((timerEndTime - Date.now()) / 1000));
     updateTimerDisplay();
     if(timerRemaining <= 0) {
@@ -2894,7 +3293,7 @@ function startTimer(exName) {
       fireTimerAlert();
       setTimeout(() => closeTimer(), 1200);
     }
-  }, 250); // Check 4x per second for faster catch-up after screen wake
+  }, 250);
 }
 
 // Track timer end time for background accuracy
@@ -2926,14 +3325,11 @@ function updateTimerDisplay() {
 function toggleTimerPause() {
   timerPaused = !timerPaused;
   if (timerPaused) {
-    // Store remaining time when pausing
     timerRemaining = Math.max(0, Math.round((timerEndTime - Date.now()) / 1000));
-    // Clear backup timeout while paused
     if (timerBackupTimeout) { clearTimeout(timerBackupTimeout); timerBackupTimeout = null; }
+    swTimerCancel();
   } else {
-    // Recalculate end time when resuming
     timerEndTime = Date.now() + (timerRemaining * 1000);
-    // Reset backup timeout for remaining duration
     timerBackupTimeout = setTimeout(() => {
       if (timerPaused || timerEndTime === 0) return;
       timerRemaining = 0;
@@ -2942,6 +3338,7 @@ function toggleTimerPause() {
       fireTimerAlert();
       setTimeout(() => closeTimer(), 1200);
     }, timerRemaining * 1000 + 500);
+    swTimerStart(timerRemaining);
   }
   document.getElementById('timer-pause-btn').textContent = timerPaused ? 'RESUME' : 'PAUSE';
 }
@@ -2955,6 +3352,7 @@ function closeTimer() {
   document.getElementById('timer-overlay').classList.remove('open');
   clearInterval(timerInterval);
   if (timerBackupTimeout) { clearTimeout(timerBackupTimeout); timerBackupTimeout = null; }
+  swTimerCancel();
   timerEndTime = 0;
 }
 
@@ -2963,14 +3361,13 @@ function setTimerDuration(secs, btn) {
   timerRemaining = secs;
   document.querySelectorAll('.timer-dur-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  // update label
   const label = secs < 120 ? secs+'s' : (secs/60)+'m';
   document.querySelector('.timer-toggle-label').textContent = 'Auto rest timer · '+label;
-  // If timer is actively running, restart with new duration
   if (timerEndTime > 0 && !timerPaused) {
     clearInterval(timerInterval);
     if (timerBackupTimeout) { clearTimeout(timerBackupTimeout); timerBackupTimeout = null; }
     timerEndTime = Date.now() + (secs * 1000);
+    swTimerStart(secs);
     timerBackupTimeout = setTimeout(() => {
       if (timerPaused || timerEndTime === 0) return;
       timerRemaining = 0;
@@ -3596,6 +3993,12 @@ function startApp(isGuest) {
   renderArchive();
   // Check for assigned blocks after UI is ready
   setTimeout(() => loadAssignedBlocks(), 1000);
+  // Auto-trigger onboarding for new users with no block
+  const hasBlock = currentBlock.days?.length > 0;
+  const onboarded = localStorage.getItem('fw_onboarded') === '1';
+  if (!hasBlock && !onboarded) {
+    setTimeout(() => showOnboarding(), 400);
+  }
 }
 
 async function handleSignOut() {
