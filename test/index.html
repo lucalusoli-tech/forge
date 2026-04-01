@@ -59,6 +59,8 @@
   .home-sub { font-size: 10px; letter-spacing: 2px; color: var(--text-muted); margin-top: 4px; }
   .home-streak { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--accent); margin-top: 10px; text-transform: uppercase; display: none; }
   .home-streak.visible { display: block; }
+  .home-lastweek { display: none; margin-top: 12px; padding: 10px 14px; background: var(--accent-glow); border: 1px solid var(--accent-dim); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; color: var(--accent); cursor: pointer; }
+  .home-lastweek.visible { display: block; }
 
   /* ── WEEKLY SUMMARY ── */
   .weekly-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9998; display: flex; align-items: center; justify-content: center; padding: 24px; }
@@ -777,6 +779,7 @@
         <div class="home-title" id="home-title">READY<br>TO TRAIN</div>
         <div class="home-sub" id="home-sub">DUP · Emphasised Concurrent</div>
         <div class="home-streak" id="home-streak"></div>
+        <div class="home-lastweek" id="home-lastweek"></div>
       </div>
       <div class="stats-row" id="home-stats-row">
         <div class="stat-cell">
@@ -1156,9 +1159,9 @@
 <div class="confirm-overlay" id="blockend-overlay">
   <div class="confirm-sheet">
     <div class="confirm-title" id="blockend-title">BLOCK COMPLETE</div>
-    <div class="confirm-desc" id="blockend-desc">You've reached the final week of this block. Archive it and move on — or stay and keep training.</div>
-    <button class="confirm-yes" onclick="closeBlockEndPrompt();openArchiveConfirm()">Archive This Block →</button>
-    <button class="confirm-no" onclick="closeBlockEndPrompt()">Stay on Final Week</button>
+    <div class="confirm-desc" id="blockend-desc"></div>
+    <div id="blockend-actions"></div>
+    <button class="confirm-no" onclick="closeBlockEndPrompt()" style="margin-top:4px">Stay on Final Week</button>
   </div>
 </div>
 
@@ -1746,8 +1749,54 @@ function setBuilderWeeks(n, btn) {
 
 function openBlockEndPrompt() {
   const total = currentBlock.weeks || 4;
-  document.getElementById('blockend-title').textContent = currentBlock.name + ' — WEEK ' + total + ' COMPLETE';
+  const tier = currentUser?.tier || '';
+  const isForge = (tier === 'premium' || tier === 'admin' || tier === 'pt');
+  const isForgePlus = (tier === 'coached');
+
+  document.getElementById('blockend-title').textContent = 'BLOCK COMPLETE';
+  
+  const desc = document.getElementById('blockend-desc');
+  const actions = document.getElementById('blockend-actions');
+  actions.innerHTML = '';
+
+  if (isForgePlus) {
+    // FORGE+ tier — AI + coached programme
+    desc.textContent = 'Nice work finishing ' + (currentBlock.name || 'this block') + '. Ready for what\'s next?';
+    actions.innerHTML = `
+      <button class="confirm-yes" onclick="closeBlockEndPrompt();openArchiveConfirm();setTimeout(()=>navigate('ai'),600)">Generate Next Block with AI →</button>
+      <button class="confirm-yes" style="background:transparent;border-color:var(--border);color:var(--text-muted);margin-top:4px" onclick="closeBlockEndPrompt();repeatBlock()">Repeat This Block</button>
+      <button class="confirm-yes" style="background:transparent;border-color:var(--border);color:var(--text-muted);margin-top:4px" onclick="closeBlockEndPrompt();openArchiveConfirm()">Archive & Build New</button>
+    `;
+  } else if (isForge) {
+    // FORGE tier — self-service
+    desc.textContent = 'You\'ve completed ' + (currentBlock.name || 'this block') + '. Archive it and build your next one, or repeat.';
+    actions.innerHTML = `
+      <button class="confirm-yes" onclick="closeBlockEndPrompt();openArchiveConfirm();setTimeout(()=>navigate('builder'),600)">Archive & Build New Block →</button>
+      <button class="confirm-yes" style="background:transparent;border-color:var(--border);color:var(--text-muted);margin-top:4px" onclick="closeBlockEndPrompt();repeatBlock()">Repeat This Block</button>
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);text-align:center">
+        <div style="font-size:9px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px">Want AI-built programmes + coach programming?</div>
+        <button class="confirm-yes" style="border-color:var(--accent)" onclick="closeBlockEndPrompt();openUpgrade()">Upgrade to FORGE+ →</button>
+      </div>
+    `;
+  } else {
+    // Free / trial
+    desc.textContent = 'You\'ve finished ' + (currentBlock.name || 'your block') + '. Upgrade to keep building and unlock coached programmes.';
+    actions.innerHTML = `
+      <button class="confirm-yes" onclick="closeBlockEndPrompt();repeatBlock()">Repeat This Block</button>
+      <button class="confirm-yes" style="border-color:var(--accent);margin-top:4px" onclick="closeBlockEndPrompt();openUpgrade()">Upgrade to FORGE →</button>
+    `;
+  }
+
   document.getElementById('blockend-overlay').classList.add('open');
+}
+
+function repeatBlock() {
+  currentWeek = 1;
+  localStorage.setItem('fw_week', currentWeek);
+  updateStats();
+  renderHomeDays();
+  scheduleSync();
+  showToast('Block reset to Week 1');
 }
 function closeBlockEndPrompt() {
   document.getElementById('blockend-overlay').classList.remove('open');
@@ -2247,6 +2296,17 @@ function renderHomeDays() {
   }
 
   heroTitle.innerHTML = (hasActiveBlock || hasFixed) ? currentBlock.name || 'READY<br>TO TRAIN' : 'READY<br>TO TRAIN';
+
+  // Last week reminder
+  const lastWeekEl = document.getElementById('home-lastweek');
+  const total = currentBlock.weeks || 4;
+  if (hasActiveBlock && currentWeek >= total) {
+    lastWeekEl.textContent = 'Final week of this block — tap to plan what\'s next →';
+    lastWeekEl.onclick = () => openBlockEndPrompt();
+    lastWeekEl.classList.add('visible');
+  } else {
+    lastWeekEl.classList.remove('visible');
+  }
 
   renderHomeFixedSections();
 
