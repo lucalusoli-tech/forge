@@ -1832,7 +1832,7 @@ function finishOnboarding() {
   // Close overlay and render
   document.getElementById('onboard-overlay').style.display = 'none';
   renderHomeDays();
-  renderBuilder();
+  renderBuilderDays();
 }
 
 function getOnboardingTemplate(goal, level, days, equipment) {
