@@ -1911,22 +1911,21 @@ function getOnboardingTemplate(goal, level, days, equipment) {
     if (level !== 'Beginner') { accessorySets = Math.min(accessorySets + 1, 4); }
   }
 
-  // ── Pick exercises ──
-  const pulls = pool('pull');
-  const pushes = pool('push');
-  const legs = pool('legs');
-  const cores = EXERCISES.filter(ex => matchesEquipment(ex) && ex.tags.includes('core') && !ex.tags.includes('warmup'));
-  const isos = EXERCISES.filter(ex => {
-    if (!matchesEquipment(ex)) return false;
-    return ex.id === 'lateral-raises' || ex.id === 'bicep-curl' ||
-           ex.tags.includes('machine') || (ex.tags.includes('dumbbell') && ['Light'].includes(ex.intensity));
-  });
+  // ── Pick deep pools — enough for rotation across days ──
+  const pullPool = pickByDifficulty(pulls, level, Math.max(6, d * 2));
+  const pushPool = pickByDifficulty(pushes, level, Math.max(6, d * 2));
+  const legPool = pickByDifficulty(legs, level, Math.max(6, d * 2));
+  const corePool = pickByDifficulty(cores, level, Math.max(3, d));
+  const isoPool = isos.length > 0 ? isos : pickByDifficulty(cores, level, 3);
 
-  const pull2 = pickByDifficulty(pulls, level, 2);
-  const push2 = pickByDifficulty(pushes, level, 2);
-  const leg2 = pickByDifficulty(legs, level, 2);
-  const core1 = pickByDifficulty(cores, level, 1);
-  const iso1 = isos.length > 0 ? [isos[Math.floor(Math.random() * isos.length)]] : pickByDifficulty(cores, level, 1);
+  // ── Rotate picker: grab `count` items starting at offset, wrapping ──
+  function rotateFrom(arr, offset, count) {
+    const result = [];
+    for (let i = 0; i < count && arr.length > 0; i++) {
+      result.push(arr[(offset + i) % arr.length]);
+    }
+    return result;
+  }
 
   // ── Build exercise entry ──
   function makeEx(ex, sets, reps) {
@@ -1934,46 +1933,56 @@ function getOnboardingTemplate(goal, level, days, equipment) {
   }
 
   // ── Full body day: 2 pull, 2 push, 2 legs, 1 core, 1 iso — alternate pull/push ──
-  function buildFullBody(dayNum) {
+  function buildFullBody(dayIdx) {
     const exercises = [];
+    const p = rotateFrom(pullPool, dayIdx * 2, 2);
+    const pu = rotateFrom(pushPool, dayIdx * 2, 2);
+    const lg = rotateFrom(legPool, dayIdx * 2, 2);
+    const cr = rotateFrom(corePool, dayIdx, 1);
+    const is = rotateFrom(isoPool, dayIdx, 1);
     // Heavy compounds first, alternating pull/push
-    if (pull2[0]) exercises.push(makeEx(pull2[0], compoundSets, compoundReps));
-    if (push2[0]) exercises.push(makeEx(push2[0], compoundSets, compoundReps));
-    if (pull2[1]) exercises.push(makeEx(pull2[1], accessorySets, accessoryReps));
-    if (push2[1]) exercises.push(makeEx(push2[1], accessorySets, accessoryReps));
-    if (leg2[0]) exercises.push(makeEx(leg2[0], compoundSets, compoundReps));
-    if (leg2[1]) exercises.push(makeEx(leg2[1], accessorySets, accessoryReps));
-    if (core1[0]) exercises.push(makeEx(core1[0], accessorySets, accessoryReps));
-    if (iso1[0]) exercises.push(makeEx(iso1[0], accessorySets, accessoryReps));
+    if (p[0]) exercises.push(makeEx(p[0], compoundSets, compoundReps));
+    if (pu[0]) exercises.push(makeEx(pu[0], compoundSets, compoundReps));
+    if (p[1]) exercises.push(makeEx(p[1], accessorySets, accessoryReps));
+    if (pu[1]) exercises.push(makeEx(pu[1], accessorySets, accessoryReps));
+    if (lg[0]) exercises.push(makeEx(lg[0], compoundSets, compoundReps));
+    if (lg[1]) exercises.push(makeEx(lg[1], accessorySets, accessoryReps));
+    if (cr[0]) exercises.push(makeEx(cr[0], accessorySets, accessoryReps));
+    if (is[0]) exercises.push(makeEx(is[0], accessorySets, accessoryReps));
     return exercises;
   }
 
   // ── Upper day: 2 pull, 2 push, 1 core, 1 iso ──
-  function buildUpper(dayNum) {
+  function buildUpper(dayIdx) {
     const exercises = [];
-    if (pull2[0]) exercises.push(makeEx(pull2[0], compoundSets, compoundReps));
-    if (push2[0]) exercises.push(makeEx(push2[0], compoundSets, compoundReps));
-    if (pull2[1]) exercises.push(makeEx(pull2[1], accessorySets, accessoryReps));
-    if (push2[1]) exercises.push(makeEx(push2[1], accessorySets, accessoryReps));
-    if (core1[0]) exercises.push(makeEx(core1[0], accessorySets, accessoryReps));
-    if (iso1[0]) exercises.push(makeEx(iso1[0], accessorySets, accessoryReps));
+    const p = rotateFrom(pullPool, dayIdx * 2, 2);
+    const pu = rotateFrom(pushPool, dayIdx * 2, 2);
+    const cr = rotateFrom(corePool, dayIdx, 1);
+    const is = rotateFrom(isoPool, dayIdx, 1);
+    if (p[0]) exercises.push(makeEx(p[0], compoundSets, compoundReps));
+    if (pu[0]) exercises.push(makeEx(pu[0], compoundSets, compoundReps));
+    if (p[1]) exercises.push(makeEx(p[1], accessorySets, accessoryReps));
+    if (pu[1]) exercises.push(makeEx(pu[1], accessorySets, accessoryReps));
+    if (cr[0]) exercises.push(makeEx(cr[0], accessorySets, accessoryReps));
+    if (is[0]) exercises.push(makeEx(is[0], accessorySets, accessoryReps));
     return exercises;
   }
 
-  // ── Lower day: 2 legs, 1 core, 1 hinge, extras ──
-  function buildLower(dayNum) {
+  // ── Lower day: 4 legs, 1 core, 1 posterior chain ──
+  function buildLower(dayIdx) {
     const exercises = [];
-    if (leg2[0]) exercises.push(makeEx(leg2[0], compoundSets, compoundReps));
-    if (leg2[1]) exercises.push(makeEx(leg2[1], compoundSets, compoundReps));
-    // Add extra leg work
-    const extraLegs = pickByDifficulty(legs, level, 4);
-    if (extraLegs[2]) exercises.push(makeEx(extraLegs[2], accessorySets, accessoryReps));
-    if (extraLegs[3]) exercises.push(makeEx(extraLegs[3], accessorySets, accessoryReps));
-    if (core1[0]) exercises.push(makeEx(core1[0], accessorySets, accessoryReps));
+    const lg = rotateFrom(legPool, dayIdx * 2, 4);
+    const cr = rotateFrom(corePool, dayIdx, 1);
+    if (lg[0]) exercises.push(makeEx(lg[0], compoundSets, compoundReps));
+    if (lg[1]) exercises.push(makeEx(lg[1], compoundSets, compoundReps));
+    if (lg[2]) exercises.push(makeEx(lg[2], accessorySets, accessoryReps));
+    if (lg[3]) exercises.push(makeEx(lg[3], accessorySets, accessoryReps));
+    if (cr[0]) exercises.push(makeEx(cr[0], accessorySets, accessoryReps));
     // Add a bridge or posterior chain movement
     const bridges = EXERCISES.filter(e => matchesEquipment(e) && (e.id.includes('bridge') || e.id.includes('nordic') || e.id === 'rdl'));
-    const bridge1 = pickByDifficulty(bridges.length > 0 ? bridges : legs, level, 1);
-    if (bridge1[0]) exercises.push(makeEx(bridge1[0], accessorySets, accessoryReps));
+    const bridgePool = pickByDifficulty(bridges.length > 0 ? bridges : legs, level, 2);
+    const br = rotateFrom(bridgePool, dayIdx, 1);
+    if (br[0]) exercises.push(makeEx(br[0], accessorySets, accessoryReps));
     return exercises;
   }
 
@@ -1982,19 +1991,19 @@ function getOnboardingTemplate(goal, level, days, equipment) {
 
   // ── Build days ──
   const blockDays = [];
-  for (let i = 1; i <= d; i++) {
-    const dayId = 'day' + i;
+  for (let i = 0; i < d; i++) {
+    const dayId = 'day' + (i + 1);
     let dayName, exercises;
     if (useUpperLower) {
-      if (i % 2 === 1) {
-        dayName = `Day ${i} — Upper`;
+      if (i % 2 === 0) {
+        dayName = `Day ${i + 1} — Upper`;
         exercises = buildUpper(i);
       } else {
-        dayName = `Day ${i} — Lower`;
+        dayName = `Day ${i + 1} — Lower`;
         exercises = buildLower(i);
       }
     } else {
-      dayName = `Day ${i} — Full Body`;
+      dayName = `Day ${i + 1} — Full Body`;
       exercises = buildFullBody(i);
     }
     blockDays.push({ id: dayId, name: dayName, exercises: exercises });
