@@ -3994,6 +3994,10 @@ let trialStart = parseInt(localStorage.getItem('fw_trial_start')||'0');
 // ─── SYNC ──────────────────────────────────────────────────────
 async function syncBlocksToCloud() {
   if(!currentUser?.id) return;
+  // SAFETY: never overwrite cloud data with an empty block
+  if(!currentBlock.days || currentBlock.days.length === 0) {
+    if(!customWorkouts.length && !archivedBlocks.length) return;
+  }
   try {
     const { data: existing } = await supa.from('blocks')
       .select('id').eq('user_id', currentUser.id).eq('is_current', true).maybeSingle();
