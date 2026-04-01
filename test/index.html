@@ -1804,7 +1804,7 @@ function openBlockEndPrompt() {
     // FORGE+ tier — AI + coached programme
     desc.textContent = 'Nice work finishing ' + (currentBlock.name || 'this block') + '. Ready for what\'s next?';
     actions.innerHTML = `
-      <button class="confirm-yes" onclick="closeBlockEndPrompt();openArchiveConfirm();setTimeout(()=>navigate('ai'),600)">Generate Next Block with AI →</button>
+      <button class="confirm-yes" onclick="closeBlockEndPrompt();openArchiveConfirm();setTimeout(()=>aiAutoProgress(),600)">Generate Next Block with AI →</button>
       <button class="confirm-yes" style="background:transparent;border-color:var(--border);color:var(--text-muted);margin-top:4px" onclick="closeBlockEndPrompt();repeatBlock()">Repeat This Block</button>
       <button class="confirm-yes" style="background:transparent;border-color:var(--border);color:var(--text-muted);margin-top:4px" onclick="closeBlockEndPrompt();openArchiveConfirm()">Archive & Build New</button>
     `;
@@ -1878,15 +1878,13 @@ function switchBuildTab(tab) {
 }
 
 // ─── CHANGELOG ─────────────────────────────────────────────────
-const FORGE_VERSION = '1.4.0';
+const FORGE_VERSION = '1.6.0';
 const FORGE_CHANGELOG = [
-  'Onboarding flow — guided first block setup for new users',
-  'Session streaks — track your consecutive training days',
-  'Weekly recap — summary popup at the start of each week',
-  'Block end flow — prompts next steps when your block finishes',
-  'FORGE+ tier — coach programmes + AI generator',
-  'Timer notifications — improved background alerts',
-  'Exercise database — difficulty levels cleaned up'
+  'AI Auto-Progression — finish a block and AI builds your next one from your actual performance data',
+  'Progress-aware generation — weights, reps, and trends from your session log feed into the next programme',
+  'Quick follow-up flow — 3 questions instead of full reassessment when progressing',
+  'AI Chat Branching — follow-up questions adapt to your goal',
+  'Calisthenics, Strength, Hypertrophy & Fitness paths — tailored assessment per goal'
 ];
 
 function checkChangelog() {
@@ -3978,6 +3976,7 @@ function aiStartChat() {
   aiStep = 0;
   aiFlow = [...AI_BASE_START]; // start with base, branch gets added after goal
   Object.keys(aiData).forEach(k => delete aiData[k]);
+  window._aiProgressData = null; // clear any auto-progression data
   document.getElementById('ai-chat').innerHTML = '';
   document.getElementById('ai-result').style.display = 'none';
   aiHideInputs();
@@ -4009,7 +4008,10 @@ async function aiGenerate() {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + (await supa.auth.getSession()).data.session?.access_token
       },
-      body: JSON.stringify({ assessment: aiData })
+      body: JSON.stringify({
+        assessment: aiData,
+        progress: window._aiProgressData || null
+      })
     });
 
     // Remove spinner
@@ -4026,6 +4028,7 @@ async function aiGenerate() {
     if (!data.block) throw new Error('No block returned');
 
     window._aiGeneratedBlock = data.block;
+    window._aiProgressData = null; // clear after use
 
     // Success message
     const blockName = data.block.name || 'Your Programme';
@@ -4140,6 +4143,125 @@ function aiLoadBlock() {
 
 function aiRestart() {
   aiStartChat();
+}
+
+// ─── AUTO-PROGRESSION ──────────────────────────────────────────
+function gatherProgressData() {
+  const block = currentBlock;
+  const total = block.weeks || 4;
+  const progress = {
+    blockName: block.name || 'Unknown',
+    weeks: total,
+    methods: block.methods || [],
+    exercises: []
+  };
+
+  // Gather all unique exercise IDs across days
+  const seen = new Set();
+  (block.days || []).forEach(day => {
+    (day.exercises || []).forEach(ex => {
+      if (seen.has(ex.id)) return;
+      seen.add(ex.id);
+
+      const exData = EXERCISES.find(e => e.id === ex.id);
+      const exProgress = {
+        id: ex.id,
+        name: exData ? exData.name : ex.id,
+        scheme: ex.sets + '×' + ex.reps,
+        weeklyData: []
+      };
+
+      // Collect data for each week across all days this exercise appears
+      for (let w = 1; w <= total; w++) {
+        let bestWeight = null;
+        let bestReps = null;
+        let setsLogged = 0;
+
+        (block.days || []).forEach(d => {
+          if (!d.exercises.find(e => e.id === ex.id)) return;
+          const key = `${d.id}_${ex.id}_v${w}`;
+          const entry = sessionLog[key];
+          if (!entry) return;
+
+          for (let s = 1; s <= 5; s++) {
+            const wVal = parseFloat(entry[`s${s}_w`]);
+            const rVal = parseFloat(entry[`s${s}_r`]);
+            if (!isNaN(wVal) && wVal > 0) {
+              if (bestWeight === null || wVal > bestWeight) bestWeight = wVal;
+              setsLogged++;
+            }
+            if (!isNaN(rVal) && rVal > 0) {
+              if (bestReps === null || rVal > bestReps) bestReps = rVal;
+              if (isNaN(wVal) || wVal <= 0) setsLogged++;
+            }
+          }
+        });
+
+        if (setsLogged > 0) {
+          const weekEntry = { week: w };
+          if (bestWeight !== null) weekEntry.topWeight = bestWeight + 'kg';
+          if (bestReps !== null) weekEntry.topReps = bestReps;
+          weekEntry.sets = setsLogged;
+          exProgress.weeklyData.push(weekEntry);
+        }
+      }
+
+      if (exProgress.weeklyData.length > 0) {
+        progress.exercises.push(exProgress);
+      }
+    });
+  });
+
+  return progress;
+}
+
+function aiAutoProgress() {
+  const progressData = gatherProgressData();
+
+  // Navigate to AI page
+  navigate('ai');
+
+  // Clear chat and show progress-aware flow
+  setTimeout(() => {
+    aiStep = 0;
+    aiFlow = [];
+    Object.keys(aiData).forEach(k => delete aiData[k]);
+    document.getElementById('ai-chat').innerHTML = '';
+    document.getElementById('ai-result').style.display = 'none';
+    aiHideInputs();
+
+    // Store progress data for generation
+    window._aiProgressData = progressData;
+
+    // Show intro message
+    aiAddCoachMsg("I've reviewed your progress from <strong>" + progressData.blockName + "</strong>. Let me check a couple of things before building your next block.");
+
+    // Build a short follow-up flow (not the full assessment)
+    const progressFlow = [
+      {
+        key: 'progressFeel',
+        msg: "How did the last block feel overall?",
+        type: 'chips',
+        options: ['Too easy — need more', 'About right', 'Challenging but doable', 'Too hard — struggled']
+      },
+      {
+        key: 'progressGoal',
+        msg: "Same goal, or shifting focus?",
+        type: 'chips',
+        options: ['Same goal — keep progressing', 'Shift focus slightly', 'New direction entirely']
+      },
+      {
+        key: 'progressNotes',
+        msg: "Anything else? Injuries, schedule changes, something you want more or less of?",
+        type: 'text',
+        placeholder: "e.g. shoulder feels off, want more leg work, only 3 days now, or type 'nothing'"
+      }
+    ];
+
+    aiFlow = progressFlow;
+
+    setTimeout(() => aiAskNext(), 600);
+  }, 400);
 }
 
 // ─── WEEK BACK (long press) ─────────────────────────────────────
