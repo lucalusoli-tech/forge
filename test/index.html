@@ -4319,7 +4319,7 @@ function updateUserBar() {
         upgradeBtn.style.cursor = 'default';
         upgradeBtn.onclick = e => e.stopPropagation();
       } else {
-        upgradeBtn.textContent = tier === 'coached' ? '✦ COACHED' : '✦ PREMIUM';
+        upgradeBtn.textContent = tier === 'coached' ? '✦ FORGE+' : '✦ FORGE';
         upgradeBtn.style.color = 'var(--accent)';
         upgradeBtn.style.cursor = 'default';
         upgradeBtn.onclick = e => e.stopPropagation();
@@ -4375,10 +4375,10 @@ function openSignOutSheet() {
     if(tier === 'coached' || tier === 'admin' || tier === 'pt') {
       upgradeBtn.style.display = 'none';
     } else if(tier === 'premium') {
-      upgradeBtn.textContent = 'UPGRADE TO COACHED £19.99 ✦';
+      upgradeBtn.textContent = 'UPGRADE TO FORGE+ ✦';
       upgradeBtn.style.display = 'block';
     } else {
-      upgradeBtn.textContent = 'UPGRADE TO PREMIUM ✦';
+      upgradeBtn.textContent = 'UPGRADE ✦';
       upgradeBtn.style.display = 'block';
     }
   }
@@ -4482,9 +4482,9 @@ async function loadProgrammes() {
     list.innerHTML = `
       <div style="border:1px solid var(--border);background:var(--card);margin-bottom:12px;padding:32px 20px;text-align:center">
         <div style="font-size:28px;margin-bottom:16px">✦</div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;margin-bottom:8px">COACHED TIER</div>
-        <div style="font-size:10px;letter-spacing:1px;color:var(--text-muted);line-height:1.8;margin-bottom:20px">New training programme every month — built by a certified L3 PT and loaded straight into your app.</div>
-        <button onclick="openUpgrade()" style="width:100%;padding:12px;background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer">UPGRADE TO COACHED £19.99 →</button>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;margin-bottom:8px">FORGE+</div>
+        <div style="font-size:10px;letter-spacing:1px;color:var(--text-muted);line-height:1.8;margin-bottom:20px">New training programme every month — built by a certified L3 PT and loaded straight into your app. Plus AI-generated blocks on demand.</div>
+        <button onclick="openUpgrade()" style="width:100%;padding:12px;background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer">UPGRADE TO FORGE+ →</button>
       </div>`;
     return;
   }
