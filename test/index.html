@@ -518,9 +518,104 @@
   .ai-result-ex:last-child { border-bottom: none; }
   .ai-result-ex-name { color: var(--text); }
   .ai-result-ex-scheme { color: var(--text-muted); font-size: 12px; }
-  .coaching-sent { text-align: center; padding: 24px; font-size: 10px; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; display: none; }</style>
+  .coaching-sent { text-align: center; padding: 24px; font-size: 10px; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; display: none; }
+
+  /* ── ONBOARDING ── */
+  .onboard-overlay { position: fixed; inset: 0; background: #080808; z-index: 9999; display: flex; flex-direction: column; overflow: hidden; }
+  .onboard-progress { display: flex; gap: 6px; padding: 20px 24px 0; justify-content: center; }
+  .onboard-dot { width: 32px; height: 3px; background: var(--border); transition: background 0.3s; }
+  .onboard-dot.active { background: var(--accent); }
+  .onboard-dot.done { background: var(--accent-dim); }
+  .onboard-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 28px; text-align: center; }
+  .onboard-step { display: none; flex-direction: column; align-items: center; width: 100%; max-width: 360px; animation: obFadeIn 0.35s ease; }
+  .onboard-step.active { display: flex; }
+  @keyframes obFadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .onboard-icon { font-size: 32px; color: var(--accent); margin-bottom: 24px; opacity: 0.7; }
+  .onboard-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 5px; color: var(--text); margin-bottom: 8px; line-height: 1.1; }
+  .onboard-sub { font-size: 11px; letter-spacing: 1px; color: var(--text-muted); line-height: 1.7; margin-bottom: 36px; max-width: 280px; }
+  .onboard-options { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+  .onboard-opt { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; padding: 16px 20px; cursor: pointer; text-align: center; transition: all 0.2s; }
+  .onboard-opt:active, .onboard-opt.selected { border-color: var(--accent-dim); color: var(--accent); background: var(--accent-glow); }
+  .onboard-freq { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
+  .onboard-freq-opt { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; padding: 20px 0; cursor: pointer; text-align: center; transition: all 0.2s; }
+  .onboard-freq-opt span { display: block; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; }
+  .onboard-freq-opt:active, .onboard-freq-opt.selected { border-color: var(--accent-dim); color: var(--accent); background: var(--accent-glow); }
+  .onboard-cta { background: var(--accent-glow); border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; padding: 16px 32px; cursor: pointer; margin-top: 8px; }
+  .onboard-cta:active { background: rgba(201,169,110,0.2); }
+  .onboard-footer { padding: 0 24px 32px; display: flex; justify-content: center; }
+  .onboard-back { background: none; border: none; color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; cursor: pointer; padding: 12px; text-transform: uppercase; }
+  .onboard-back:active { color: var(--accent); }
+  .onboard-loading-bar { width: 120px; height: 2px; background: var(--border); margin-top: 32px; overflow: hidden; border-radius: 1px; }
+  .onboard-loading-fill { width: 0%; height: 100%; background: var(--accent); animation: obLoad 1.8s ease forwards; }
+  @keyframes obLoad { 0% { width: 0%; } 60% { width: 85%; } 100% { width: 100%; } }</style>
 </head>
 <body>
+
+<!-- ── ONBOARDING OVERLAY ── -->
+<div class="onboard-overlay" id="onboard-overlay" style="display:none">
+  <div class="onboard-progress" id="onboard-progress">
+    <div class="onboard-dot active"></div>
+    <div class="onboard-dot"></div>
+    <div class="onboard-dot"></div>
+    <div class="onboard-dot"></div>
+  </div>
+  <div class="onboard-body">
+
+    <!-- Step 0: Welcome -->
+    <div class="onboard-step active" data-step="0">
+      <div class="onboard-icon">✦</div>
+      <div class="onboard-title">WELCOME TO FORGE</div>
+      <div class="onboard-sub">Let's set up your first training block — takes 30 seconds</div>
+      <button class="onboard-cta" onclick="onboardNext()">GET STARTED</button>
+    </div>
+
+    <!-- Step 1: Goal -->
+    <div class="onboard-step" data-step="1">
+      <div class="onboard-title">WHAT'S YOUR GOAL?</div>
+      <div class="onboard-sub">Pick the one that matters most right now</div>
+      <div class="onboard-options">
+        <button class="onboard-opt" onclick="onboardSelect('goal',this)">Build Strength</button>
+        <button class="onboard-opt" onclick="onboardSelect('goal',this)">Body Composition</button>
+        <button class="onboard-opt" onclick="onboardSelect('goal',this)">General Fitness</button>
+        <button class="onboard-opt" onclick="onboardSelect('goal',this)">Mobility & Movement</button>
+      </div>
+    </div>
+
+    <!-- Step 2: Experience -->
+    <div class="onboard-step" data-step="2">
+      <div class="onboard-title">YOUR EXPERIENCE</div>
+      <div class="onboard-sub">How long have you been training?</div>
+      <div class="onboard-options">
+        <button class="onboard-opt" onclick="onboardSelect('level',this)">Beginner · 0–1 year</button>
+        <button class="onboard-opt" onclick="onboardSelect('level',this)">Intermediate · 1–3 years</button>
+        <button class="onboard-opt" onclick="onboardSelect('level',this)">Advanced · 3+ years</button>
+      </div>
+    </div>
+
+    <!-- Step 3: Frequency -->
+    <div class="onboard-step" data-step="3">
+      <div class="onboard-title">DAYS PER WEEK</div>
+      <div class="onboard-sub">How many days can you commit to?</div>
+      <div class="onboard-freq">
+        <button class="onboard-freq-opt" onclick="onboardSelect('days',this)">2<span>days</span></button>
+        <button class="onboard-freq-opt" onclick="onboardSelect('days',this)">3<span>days</span></button>
+        <button class="onboard-freq-opt" onclick="onboardSelect('days',this)">4<span>days</span></button>
+      </div>
+    </div>
+
+    <!-- Step 4: Loading -->
+    <div class="onboard-step" data-step="4">
+      <div class="onboard-icon">⚒</div>
+      <div class="onboard-title">BUILDING YOUR<br>PROGRAMME</div>
+      <div class="onboard-sub" id="onboard-summary"></div>
+      <div class="onboard-loading-bar"><div class="onboard-loading-fill"></div></div>
+    </div>
+
+  </div>
+  <div class="onboard-footer">
+    <button class="onboard-back" id="onboard-back-btn" onclick="onboardBack()" style="visibility:hidden">← BACK</button>
+  </div>
+</div>
 
 <!-- ── AUTH: SPLASH ── -->
 <div class="auth-screen" id="auth-splash">
@@ -659,7 +754,7 @@
           <div class="home-empty-icon">✦</div>
           <div class="home-empty-title">No block yet</div>
           <div class="home-empty-sub">Build your first training block to get started</div>
-          <button class="home-empty-cta" onclick="navigate('builder')">BUILD A BLOCK →</button>
+          <button class="home-empty-cta" onclick="showOnboarding()">GET STARTED →</button>
         </div>
       </div>
       <div style="height:20px"></div>
@@ -1641,6 +1736,127 @@ function switchBuildTab(tab) {
   document.getElementById('btab-'+tab).classList.add('active');
   document.getElementById('bpanel-'+tab).classList.add('active');
   document.getElementById('scroll-area').scrollTop = 0;
+}
+
+// ─── ONBOARDING ────────────────────────────────────────────────
+let onboardStep = 0;
+const onboardData = { goal: '', level: '', days: '' };
+
+function showOnboarding() {
+  document.getElementById('onboard-overlay').style.display = 'flex';
+  onboardStep = 0;
+  onboardData.goal = ''; onboardData.level = ''; onboardData.days = '';
+  updateOnboardStep();
+}
+
+function updateOnboardStep() {
+  document.querySelectorAll('.onboard-step').forEach(s => s.classList.remove('active'));
+  const step = document.querySelector(`.onboard-step[data-step="${onboardStep}"]`);
+  if (step) step.classList.add('active');
+
+  // Progress dots
+  document.querySelectorAll('.onboard-dot').forEach((d, i) => {
+    d.classList.remove('active', 'done');
+    if (i === onboardStep) d.classList.add('active');
+    else if (i < onboardStep) d.classList.add('done');
+  });
+
+  // Back button visibility
+  const backBtn = document.getElementById('onboard-back-btn');
+  backBtn.style.visibility = (onboardStep > 0 && onboardStep < 4) ? 'visible' : 'hidden';
+}
+
+function onboardNext() {
+  onboardStep++;
+  updateOnboardStep();
+}
+
+function onboardBack() {
+  if (onboardStep > 0) {
+    onboardStep--;
+    updateOnboardStep();
+  }
+}
+
+function onboardSelect(field, btn) {
+  // Store value
+  if (field === 'days') {
+    onboardData.days = btn.textContent.trim().charAt(0); // "2", "3", or "4"
+  } else {
+    onboardData[field] = btn.textContent.trim().split('·')[0].trim(); // strip "· 0-1 year" etc
+  }
+
+  // Visual feedback
+  const parent = btn.parentElement;
+  parent.querySelectorAll('.onboard-opt, .onboard-freq-opt').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+
+  // Auto-advance after brief delay
+  setTimeout(() => {
+    if (onboardStep < 3) {
+      onboardNext();
+    } else {
+      // Final step — show loading and build programme
+      onboardStep = 4;
+      updateOnboardStep();
+      document.getElementById('onboard-summary').textContent =
+        `${onboardData.goal} · ${onboardData.level} · ${onboardData.days}x/week`;
+      setTimeout(() => finishOnboarding(), 2200);
+    }
+  }, 300);
+}
+
+function finishOnboarding() {
+  // Load the matching template block
+  const template = getOnboardingTemplate(onboardData.goal, onboardData.level, onboardData.days);
+  if (template) {
+    currentBlock = template;
+    localStorage.setItem('fw_block', JSON.stringify(currentBlock));
+    scheduleSync();
+  }
+  // Store that onboarding is complete
+  localStorage.setItem('fw_onboarded', '1');
+  // Close overlay and render
+  document.getElementById('onboard-overlay').style.display = 'none';
+  renderHomeDays();
+  renderBuilder();
+}
+
+function getOnboardingTemplate(goal, level, days) {
+  // Template lookup — returns a block object
+  // Keys: goal (Build Strength, Body Composition, General Fitness, Mobility & Movement)
+  //        level (Beginner, Intermediate, Advanced)
+  //        days (2, 3, 4)
+  // For now: returns a placeholder block — templates to be filled in
+  const d = parseInt(days) || 3;
+  const blockName = `${goal} · ${level} · ${d}x/week`;
+
+  // Placeholder structure — will be replaced with real coach-designed templates
+  const block = {
+    name: blockName,
+    weeks: 6,
+    currentWeek: 1,
+    days: [],
+    warmup: [
+      { name: 'Shoulder Band Warmup', sets: 2, reps: '15', type: 'warmup' },
+      { name: 'Squat Sky Reaches', sets: 2, reps: '10', type: 'warmup' },
+      { name: 'GMB Wrist Prep', sets: 1, reps: '10 each', type: 'warmup' },
+      { name: 'Deadbugs', sets: 2, reps: '8 each', type: 'warmup' }
+    ],
+    skill: []
+  };
+
+  // Generate day structure based on frequency
+  for (let i = 1; i <= d; i++) {
+    block.days.push({
+      name: d <= 3 ? `Day ${i} — Full Body` : (i <= 2 ? `Day ${i} — Upper` : `Day ${i} — Lower`),
+      exercises: [
+        { name: 'Loading template...', sets: 3, reps: '—', type: 'strength' }
+      ]
+    });
+  }
+
+  return block;
 }
 
 // ─── HOME ──────────────────────────────────────────────────────
@@ -2768,32 +2984,6 @@ let timerDuration = 90;
 let timerRemaining = 90;
 let timerInterval = null;
 let timerPaused = false;
-let timerBackupTimeout = null;
-let swRegistration = null;
-
-// Register service worker for lock-screen notifications
-(function registerTimerSW() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/forge-sw.js').then(reg => {
-      swRegistration = reg;
-      console.log('[FORGE] Timer SW registered');
-    }).catch(err => {
-      console.warn('[FORGE] SW registration failed, using fallback notifications', err);
-    });
-  }
-})();
-
-// Tell the SW to schedule/cancel its own notification timeout
-function swTimerStart(durationSecs) {
-  if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-    navigator.serviceWorker.controller.postMessage({ type: 'TIMER_START', duration: durationSecs });
-  }
-}
-function swTimerCancel() {
-  if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-    navigator.serviceWorker.controller.postMessage({ type: 'TIMER_CANCEL' });
-  }
-}
 const TIMER_CIRCUMFERENCE = 590.6;
 
 function onSetBlur(wk, setNum, exName) {
@@ -2811,45 +3001,8 @@ function autoSaveSet(wk, setNum) {
   scheduleSync();
 }
 
-function fireTimerAlert() {
-  // Cancel SW scheduled notification (page caught it first — prevent double)
-  swTimerCancel();
-  // Vibrate
-  if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
-  // Notification via Service Worker (better lock-screen delivery)
-  if (swRegistration && Notification.permission === 'granted') {
-    try {
-      swRegistration.showNotification('FORGE', {
-        body: 'Rest over — next set',
-        icon: 'https://forgetraining.app/icon-192.png',
-        tag: 'forge-timer',
-        requireInteraction: true,
-        vibrate: [200, 100, 200, 100, 200],
-        silent: false
-      });
-    } catch(e) {
-      // Fallback to basic notification
-      try { new Notification('FORGE', { body: 'Rest over — next set', tag: 'forge-timer', requireInteraction: true }); } catch(e2) {}
-    }
-  } else if ('Notification' in window && Notification.permission === 'granted') {
-    try { new Notification('FORGE', { body: 'Rest over — next set', tag: 'forge-timer', requireInteraction: true }); } catch(e) {}
-  }
-  // Audio beep
-  try {
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.frequency.value = 880;
-    gain.gain.value = 0.3;
-    osc.start(); osc.stop(audioCtx.currentTime + 0.15);
-    setTimeout(() => { const o2 = audioCtx.createOscillator(); const g2 = audioCtx.createGain(); o2.connect(g2); g2.connect(audioCtx.destination); o2.frequency.value = 1100; g2.gain.value = 0.3; o2.start(); o2.stop(audioCtx.currentTime + 0.15); }, 200);
-  } catch(e) {}
-}
-
 function startTimer(exName) {
   clearInterval(timerInterval);
-  if (timerBackupTimeout) clearTimeout(timerBackupTimeout);
   timerRemaining = timerDuration;
   timerPaused = false;
   timerEndTime = Date.now() + (timerDuration * 1000);
@@ -2863,19 +3016,6 @@ function startTimer(exName) {
     Notification.requestPermission();
   }
 
-  // Tell SW to independently schedule the notification
-  swTimerStart(timerDuration);
-
-  // Backup timeout — fires even if setInterval is throttled during screen lock
-  timerBackupTimeout = setTimeout(() => {
-    if (timerPaused || timerEndTime === 0) return;
-    timerRemaining = 0;
-    updateTimerDisplay();
-    clearInterval(timerInterval);
-    fireTimerAlert();
-    setTimeout(() => closeTimer(), 1200);
-  }, timerDuration * 1000 + 500); // +500ms buffer
-
   timerInterval = setInterval(() => {
     if(timerPaused) return;
     // Calculate remaining from end time (survives screen lock better)
@@ -2883,8 +3023,24 @@ function startTimer(exName) {
     updateTimerDisplay();
     if(timerRemaining <= 0) {
       clearInterval(timerInterval);
-      if (timerBackupTimeout) { clearTimeout(timerBackupTimeout); timerBackupTimeout = null; }
-      fireTimerAlert();
+      if(navigator.vibrate) navigator.vibrate([200,100,200]);
+      // Send notification if app is in background
+      if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
+        try {
+          new Notification('FORGE', { body: 'Rest over — next set', icon: 'https://forgetraining.app/icon-192.png', tag: 'forge-timer', requireInteraction: true });
+        } catch(e) { /* notifications not supported in this context */ }
+      }
+      // Also play a sound if available
+      try {
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.frequency.value = 880;
+        gain.gain.value = 0.3;
+        osc.start(); osc.stop(audioCtx.currentTime + 0.15);
+        setTimeout(() => { const o2 = audioCtx.createOscillator(); const g2 = audioCtx.createGain(); o2.connect(g2); g2.connect(audioCtx.destination); o2.frequency.value = 1100; g2.gain.value = 0.3; o2.start(); o2.stop(audioCtx.currentTime + 0.15); }, 200);
+      } catch(e) {}
       setTimeout(() => closeTimer(), 1200);
     }
   }, 250); // Check 4x per second for faster catch-up after screen wake
@@ -2895,13 +3051,12 @@ let timerEndTime = 0;
 
 // When page becomes visible again, recalculate timer
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden && timerEndTime > 0 && !timerPaused) {
+  if (!document.hidden && timerEndTime > 0 && !timerPaused && timerRemaining > 0) {
     timerRemaining = Math.max(0, Math.round((timerEndTime - Date.now()) / 1000));
     updateTimerDisplay();
     if (timerRemaining <= 0) {
       clearInterval(timerInterval);
-      if (timerBackupTimeout) { clearTimeout(timerBackupTimeout); timerBackupTimeout = null; }
-      fireTimerAlert();
+      if(navigator.vibrate) navigator.vibrate([200,100,200]);
       setTimeout(() => closeTimer(), 800);
     }
   }
@@ -2921,22 +3076,9 @@ function toggleTimerPause() {
   if (timerPaused) {
     // Store remaining time when pausing
     timerRemaining = Math.max(0, Math.round((timerEndTime - Date.now()) / 1000));
-    // Clear backup timeout while paused
-    if (timerBackupTimeout) { clearTimeout(timerBackupTimeout); timerBackupTimeout = null; }
-    swTimerCancel();
   } else {
     // Recalculate end time when resuming
     timerEndTime = Date.now() + (timerRemaining * 1000);
-    // Reset backup timeout for remaining duration
-    timerBackupTimeout = setTimeout(() => {
-      if (timerPaused || timerEndTime === 0) return;
-      timerRemaining = 0;
-      updateTimerDisplay();
-      clearInterval(timerInterval);
-      fireTimerAlert();
-      setTimeout(() => closeTimer(), 1200);
-    }, timerRemaining * 1000 + 500);
-    swTimerStart(timerRemaining);
   }
   document.getElementById('timer-pause-btn').textContent = timerPaused ? 'RESUME' : 'PAUSE';
 }
@@ -2949,8 +3091,6 @@ function skipTimer() {
 function closeTimer() {
   document.getElementById('timer-overlay').classList.remove('open');
   clearInterval(timerInterval);
-  if (timerBackupTimeout) { clearTimeout(timerBackupTimeout); timerBackupTimeout = null; }
-  swTimerCancel();
   timerEndTime = 0;
 }
 
@@ -2962,32 +3102,6 @@ function setTimerDuration(secs, btn) {
   // update label
   const label = secs < 120 ? secs+'s' : (secs/60)+'m';
   document.querySelector('.timer-toggle-label').textContent = 'Auto rest timer · '+label;
-  // If timer is actively running, restart with new duration
-  if (timerEndTime > 0 && !timerPaused) {
-    clearInterval(timerInterval);
-    if (timerBackupTimeout) { clearTimeout(timerBackupTimeout); timerBackupTimeout = null; }
-    timerEndTime = Date.now() + (secs * 1000);
-    swTimerStart(secs);
-    timerBackupTimeout = setTimeout(() => {
-      if (timerPaused || timerEndTime === 0) return;
-      timerRemaining = 0;
-      updateTimerDisplay();
-      clearInterval(timerInterval);
-      fireTimerAlert();
-      setTimeout(() => closeTimer(), 1200);
-    }, secs * 1000 + 500);
-    timerInterval = setInterval(() => {
-      if(timerPaused) return;
-      timerRemaining = Math.max(0, Math.round((timerEndTime - Date.now()) / 1000));
-      updateTimerDisplay();
-      if(timerRemaining <= 0) {
-        clearInterval(timerInterval);
-        if (timerBackupTimeout) { clearTimeout(timerBackupTimeout); timerBackupTimeout = null; }
-        fireTimerAlert();
-        setTimeout(() => closeTimer(), 1200);
-      }
-    }, 250);
-  }
   updateTimerDisplay();
 }
 
@@ -3593,6 +3707,12 @@ function startApp(isGuest) {
   renderArchive();
   // Check for assigned blocks after UI is ready
   setTimeout(() => loadAssignedBlocks(), 1000);
+  // Auto-trigger onboarding for new users with no block
+  const hasBlock = currentBlock.days?.length > 0;
+  const onboarded = localStorage.getItem('fw_onboarded') === '1';
+  if (!hasBlock && !onboarded) {
+    setTimeout(() => showOnboarding(), 400);
+  }
 }
 
 async function handleSignOut() {
