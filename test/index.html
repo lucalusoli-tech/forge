@@ -558,6 +558,7 @@
     <div class="onboard-dot"></div>
     <div class="onboard-dot"></div>
     <div class="onboard-dot"></div>
+    <div class="onboard-dot"></div>
   </div>
   <div class="onboard-body">
 
@@ -578,6 +579,7 @@
         <button class="onboard-opt" onclick="onboardSelect('goal',this)">Body Composition</button>
         <button class="onboard-opt" onclick="onboardSelect('goal',this)">General Fitness</button>
         <button class="onboard-opt" onclick="onboardSelect('goal',this)">Mobility & Movement</button>
+        <button class="onboard-opt" onclick="onboardSelect('goal',this)">Learning Skill</button>
       </div>
     </div>
 
@@ -592,8 +594,19 @@
       </div>
     </div>
 
-    <!-- Step 3: Frequency -->
+    <!-- Step 3: Equipment -->
     <div class="onboard-step" data-step="3">
+      <div class="onboard-title">TRAINING STYLE</div>
+      <div class="onboard-sub">What equipment will you be using?</div>
+      <div class="onboard-options">
+        <button class="onboard-opt" onclick="onboardSelect('equipment',this)">Gym Floor</button>
+        <button class="onboard-opt" onclick="onboardSelect('equipment',this)">Calisthenics</button>
+        <button class="onboard-opt" onclick="onboardSelect('equipment',this)">Both</button>
+      </div>
+    </div>
+
+    <!-- Step 4: Frequency -->
+    <div class="onboard-step" data-step="4">
       <div class="onboard-title">DAYS PER WEEK</div>
       <div class="onboard-sub">How many days can you commit to?</div>
       <div class="onboard-freq">
@@ -603,8 +616,8 @@
       </div>
     </div>
 
-    <!-- Step 4: Loading -->
-    <div class="onboard-step" data-step="4">
+    <!-- Step 5: Loading -->
+    <div class="onboard-step" data-step="5">
       <div class="onboard-icon">⚒</div>
       <div class="onboard-title">BUILDING YOUR<br>PROGRAMME</div>
       <div class="onboard-sub" id="onboard-summary"></div>
@@ -1740,12 +1753,12 @@ function switchBuildTab(tab) {
 
 // ─── ONBOARDING ────────────────────────────────────────────────
 let onboardStep = 0;
-const onboardData = { goal: '', level: '', days: '' };
+const onboardData = { goal: '', level: '', equipment: '', days: '' };
 
 function showOnboarding() {
   document.getElementById('onboard-overlay').style.display = 'flex';
   onboardStep = 0;
-  onboardData.goal = ''; onboardData.level = ''; onboardData.days = '';
+  onboardData.goal = ''; onboardData.level = ''; onboardData.equipment = ''; onboardData.days = '';
   updateOnboardStep();
 }
 
@@ -1763,7 +1776,7 @@ function updateOnboardStep() {
 
   // Back button visibility
   const backBtn = document.getElementById('onboard-back-btn');
-  backBtn.style.visibility = (onboardStep > 0 && onboardStep < 4) ? 'visible' : 'hidden';
+  backBtn.style.visibility = (onboardStep > 0 && onboardStep < 5) ? 'visible' : 'hidden';
 }
 
 function onboardNext() {
@@ -1793,14 +1806,14 @@ function onboardSelect(field, btn) {
 
   // Auto-advance after brief delay
   setTimeout(() => {
-    if (onboardStep < 3) {
+    if (onboardStep < 4) {
       onboardNext();
     } else {
       // Final step — show loading and build programme
-      onboardStep = 4;
+      onboardStep = 5;
       updateOnboardStep();
       document.getElementById('onboard-summary').textContent =
-        `${onboardData.goal} · ${onboardData.level} · ${onboardData.days}x/week`;
+        `${onboardData.goal} · ${onboardData.level} · ${onboardData.equipment} · ${onboardData.days}x/week`;
       setTimeout(() => finishOnboarding(), 2200);
     }
   }, 300);
@@ -1808,7 +1821,7 @@ function onboardSelect(field, btn) {
 
 function finishOnboarding() {
   // Load the matching template block
-  const template = getOnboardingTemplate(onboardData.goal, onboardData.level, onboardData.days);
+  const template = getOnboardingTemplate(onboardData.goal, onboardData.level, onboardData.days, onboardData.equipment);
   if (template) {
     currentBlock = template;
     localStorage.setItem('fw_block', JSON.stringify(currentBlock));
@@ -1819,44 +1832,206 @@ function finishOnboarding() {
   // Close overlay and render
   document.getElementById('onboard-overlay').style.display = 'none';
   renderHomeDays();
-  renderBuilder();
+  renderBuilderDays();
 }
 
-function getOnboardingTemplate(goal, level, days) {
-  // Template lookup — returns a block object
-  // Keys: goal (Build Strength, Body Composition, General Fitness, Mobility & Movement)
-  //        level (Beginner, Intermediate, Advanced)
-  //        days (2, 3, 4)
-  // For now: returns a placeholder block — templates to be filled in
+function getOnboardingTemplate(goal, level, days, equipment) {
   const d = parseInt(days) || 3;
   const blockName = `${goal} · ${level} · ${d}x/week`;
 
-  // Placeholder structure — will be replaced with real coach-designed templates
-  const block = {
-    name: blockName,
-    weeks: 6,
-    currentWeek: 1,
-    days: [],
-    warmup: [
-      { name: 'Shoulder Band Warmup', sets: 2, reps: '15', type: 'warmup' },
-      { name: 'Squat Sky Reaches', sets: 2, reps: '10', type: 'warmup' },
-      { name: 'GMB Wrist Prep', sets: 1, reps: '10 each', type: 'warmup' },
-      { name: 'Deadbugs', sets: 2, reps: '8 each', type: 'warmup' }
-    ],
-    skill: []
-  };
+  // ── Equipment filter ──
+  function matchesEquipment(ex) {
+    const t = ex.tags;
+    if (t.includes('warmup')) return false;
+    if (equipment === 'Calisthenics') return t.includes('calisthenics');
+    if (equipment === 'Gym Floor') return !t.includes('calisthenics') && (t.includes('barbell') || t.includes('dumbbell') || t.includes('machine') || t.includes('pull') || t.includes('push') || t.includes('legs'));
+    return true; // Both
+  }
 
-  // Generate day structure based on frequency
-  for (let i = 1; i <= d; i++) {
-    block.days.push({
-      name: d <= 3 ? `Day ${i} — Full Body` : (i <= 2 ? `Day ${i} — Upper` : `Day ${i} — Lower`),
-      exercises: [
-        { name: 'Loading template...', sets: 3, reps: '—', type: 'strength' }
-      ]
+  // ── Helper: pick first match by id from EXERCISES ──
+  function exById(id) { return EXERCISES.find(e => e.id === id); }
+
+  // ── Exercise pools by role + equipment ──
+  function pool(role) {
+    return EXERCISES.filter(ex => {
+      if (!matchesEquipment(ex)) return false;
+      if (ex.tags.includes('warmup')) return false;
+      return ex.tags.includes(role);
     });
   }
 
-  return block;
+  // ── Difficulty ranking: pick appropriate progression ──
+  // beginner = easiest, intermediate = middle, advanced = hardest (non-skill)
+  function pickByDifficulty(list, lvl, count) {
+    // Remove high-end skill moves for free tier
+    let filtered = list.filter(e => {
+      const t = e.tags;
+      // Skip elite skill moves
+      if (t.includes('skill') && ['Elite','Very hard','Max skill','Advanced skill'].includes(e.intensity)) return false;
+      return true;
+    });
+    if (filtered.length === 0) filtered = list;
+
+    // Sort by rough difficulty
+    const diffOrder = {'Easy':1,'Easy-Moderate':2,'Passive stretch':1,'Bodyweight':2,'Moderate':3,'Light':3,'Skill':3,'Skill work':3,'Hard':4,'Very hard':5,'Elite':6,'Max':7};
+    filtered.sort((a,b) => (diffOrder[a.intensity]||3) - (diffOrder[b.intensity]||3));
+
+    let startIdx = 0;
+    if (lvl === 'Intermediate') startIdx = Math.floor(filtered.length * 0.3);
+    if (lvl === 'Advanced') startIdx = Math.floor(filtered.length * 0.55);
+    startIdx = Math.min(startIdx, Math.max(0, filtered.length - count));
+
+    const picked = [];
+    const used = new Set();
+    for (let i = startIdx; i < filtered.length && picked.length < count; i++) {
+      if (!used.has(filtered[i].id)) { picked.push(filtered[i]); used.add(filtered[i].id); }
+    }
+    // Fill from beginning if not enough
+    for (let i = 0; i < filtered.length && picked.length < count; i++) {
+      if (!used.has(filtered[i].id)) { picked.push(filtered[i]); used.add(filtered[i].id); }
+    }
+    return picked;
+  }
+
+  // ── Sets/reps by level ──
+  let compoundSets, accessorySets, compoundReps, accessoryReps, method;
+  if (level === 'Beginner') {
+    compoundSets = 2; accessorySets = 2; compoundReps = '5×3'; accessoryReps = '8-12'; method = 'Short Linear';
+  } else if (level === 'Intermediate') {
+    compoundSets = 3; accessorySets = 3; compoundReps = '8-12'; accessoryReps = '8-12'; method = 'DUP';
+  } else {
+    compoundSets = 4; accessorySets = 3; compoundReps = '5-8'; accessoryReps = '8-12'; method = 'DUP';
+  }
+
+  // ── Goal adjustments ──
+  if (goal === 'Build Strength') {
+    compoundReps = level === 'Beginner' ? '5×3' : '3-6';
+  } else if (goal === 'Body Composition') {
+    compoundReps = '8-12'; accessoryReps = '10-15';
+    if (level !== 'Beginner') { accessorySets = Math.min(accessorySets + 1, 4); }
+  }
+
+  // ── Pick exercises ──
+  const pulls = pool('pull');
+  const pushes = pool('push');
+  const legs = pool('legs');
+  const cores = EXERCISES.filter(ex => matchesEquipment(ex) && ex.tags.includes('core') && !ex.tags.includes('warmup'));
+  const isos = EXERCISES.filter(ex => {
+    if (!matchesEquipment(ex)) return false;
+    return ex.id === 'lateral-raises' || ex.id === 'bicep-curl' ||
+           ex.tags.includes('machine') || (ex.tags.includes('dumbbell') && ['Light'].includes(ex.intensity));
+  });
+
+  const pull2 = pickByDifficulty(pulls, level, 2);
+  const push2 = pickByDifficulty(pushes, level, 2);
+  const leg2 = pickByDifficulty(legs, level, 2);
+  const core1 = pickByDifficulty(cores, level, 1);
+  const iso1 = isos.length > 0 ? [isos[Math.floor(Math.random() * isos.length)]] : pickByDifficulty(cores, level, 1);
+
+  // ── Build exercise entry ──
+  function makeEx(ex, sets, reps) {
+    return { id: ex.id, sets: sets, reps: reps, note: '' };
+  }
+
+  // ── Full body day: 2 pull, 2 push, 2 legs, 1 core, 1 iso — alternate pull/push ──
+  function buildFullBody(dayNum) {
+    const exercises = [];
+    // Heavy compounds first, alternating pull/push
+    if (pull2[0]) exercises.push(makeEx(pull2[0], compoundSets, compoundReps));
+    if (push2[0]) exercises.push(makeEx(push2[0], compoundSets, compoundReps));
+    if (pull2[1]) exercises.push(makeEx(pull2[1], accessorySets, accessoryReps));
+    if (push2[1]) exercises.push(makeEx(push2[1], accessorySets, accessoryReps));
+    if (leg2[0]) exercises.push(makeEx(leg2[0], compoundSets, compoundReps));
+    if (leg2[1]) exercises.push(makeEx(leg2[1], accessorySets, accessoryReps));
+    if (core1[0]) exercises.push(makeEx(core1[0], accessorySets, accessoryReps));
+    if (iso1[0]) exercises.push(makeEx(iso1[0], accessorySets, accessoryReps));
+    return exercises;
+  }
+
+  // ── Upper day: 2 pull, 2 push, 1 core, 1 iso ──
+  function buildUpper(dayNum) {
+    const exercises = [];
+    if (pull2[0]) exercises.push(makeEx(pull2[0], compoundSets, compoundReps));
+    if (push2[0]) exercises.push(makeEx(push2[0], compoundSets, compoundReps));
+    if (pull2[1]) exercises.push(makeEx(pull2[1], accessorySets, accessoryReps));
+    if (push2[1]) exercises.push(makeEx(push2[1], accessorySets, accessoryReps));
+    if (core1[0]) exercises.push(makeEx(core1[0], accessorySets, accessoryReps));
+    if (iso1[0]) exercises.push(makeEx(iso1[0], accessorySets, accessoryReps));
+    return exercises;
+  }
+
+  // ── Lower day: 2 legs, 1 core, 1 hinge, extras ──
+  function buildLower(dayNum) {
+    const exercises = [];
+    if (leg2[0]) exercises.push(makeEx(leg2[0], compoundSets, compoundReps));
+    if (leg2[1]) exercises.push(makeEx(leg2[1], compoundSets, compoundReps));
+    // Add extra leg work
+    const extraLegs = pickByDifficulty(legs, level, 4);
+    if (extraLegs[2]) exercises.push(makeEx(extraLegs[2], accessorySets, accessoryReps));
+    if (extraLegs[3]) exercises.push(makeEx(extraLegs[3], accessorySets, accessoryReps));
+    if (core1[0]) exercises.push(makeEx(core1[0], accessorySets, accessoryReps));
+    // Add a bridge or posterior chain movement
+    const bridges = EXERCISES.filter(e => matchesEquipment(e) && (e.id.includes('bridge') || e.id.includes('nordic') || e.id === 'rdl'));
+    const bridge1 = pickByDifficulty(bridges.length > 0 ? bridges : legs, level, 1);
+    if (bridge1[0]) exercises.push(makeEx(bridge1[0], accessorySets, accessoryReps));
+    return exercises;
+  }
+
+  // ── Determine split ──
+  const useUpperLower = (level === 'Intermediate' && d === 4) || (level === 'Advanced' && d === 4);
+
+  // ── Build days ──
+  const blockDays = [];
+  for (let i = 1; i <= d; i++) {
+    const dayId = 'day' + i;
+    let dayName, exercises;
+    if (useUpperLower) {
+      if (i % 2 === 1) {
+        dayName = `Day ${i} — Upper`;
+        exercises = buildUpper(i);
+      } else {
+        dayName = `Day ${i} — Lower`;
+        exercises = buildLower(i);
+      }
+    } else {
+      dayName = `Day ${i} — Full Body`;
+      exercises = buildFullBody(i);
+    }
+    blockDays.push({ id: dayId, name: dayName, exercises: exercises });
+  }
+
+  // ── Warmup — always include standard warmup ──
+  const warmup = [
+    { id: 'bwf-shoulder-band-warmup', sets: 1, reps: '5-10', note: '' },
+    { id: 'bwf-squat-sky-reaches', sets: 1, reps: '5-10', note: '' },
+    { id: 'bwf-gmb-wrist-prep', sets: 1, reps: '10+', note: '' },
+    { id: 'bwf-deadbugs', sets: 1, reps: '30s', note: '' }
+  ];
+
+  // ── Skill work — goal specific ──
+  const skill = [];
+  if (goal === 'Learning Skill') {
+    // Foundational skills only — no MU/HS/FL
+    const skillPool = ['bwf-frog-stand', 'bwf-tuck-l-sit', 'bwf-tuck-skin-cat', 'l-sit'];
+    const available = skillPool.map(id => exById(id)).filter(Boolean);
+    const picked = pickByDifficulty(available.length > 0 ? available : cores, level, 2);
+    picked.forEach(ex => skill.push({ id: ex.id, sets: 3, reps: '15-30s', note: 'Skill work' }));
+  } else if (goal === 'Mobility & Movement') {
+    const mobPool = ['bwf-reverse-plank', 'bwf-shoulder-bridge', 'bwf-table-bridge', 'bwf-dead-hang'];
+    const available = mobPool.map(id => exById(id)).filter(Boolean);
+    available.slice(0, 2).forEach(ex => skill.push({ id: ex.id, sets: 2, reps: '20-30s', note: 'Mobility' }));
+  }
+
+  // ── Assemble block ──
+  return {
+    name: blockName,
+    weeks: 6,
+    currentWeek: 1,
+    methods: [method],
+    days: blockDays,
+    warmup: warmup,
+    skill: skill
+  };
 }
 
 // ─── HOME ──────────────────────────────────────────────────────
