@@ -59,6 +59,8 @@
   .home-sub { font-size: 10px; letter-spacing: 2px; color: var(--text-muted); margin-top: 4px; }
   .home-streak { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--accent); margin-top: 10px; text-transform: uppercase; display: none; }
   .home-streak.visible { display: block; }
+  .home-lastweek { display: none; margin-top: 12px; padding: 10px 14px; background: var(--accent-glow); border: 1px solid var(--accent-dim); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; color: var(--accent); cursor: pointer; }
+  .home-lastweek.visible { display: block; }
 
   /* ── WEEKLY SUMMARY ── */
   .weekly-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9998; display: flex; align-items: center; justify-content: center; padding: 24px; }
@@ -719,20 +721,41 @@
 <!-- ── UPGRADE MODAL ── -->
 <div class="upgrade-overlay" id="upgrade-overlay">
   <div class="upgrade-sheet">
-    <div class="upgrade-title">FORGE<br>PREMIUM</div>
-    <div class="upgrade-sub">UNLOCK THE FULL SYSTEM</div>
-    <div class="upgrade-features">
-      <div class="upgrade-feat"><span class="upgrade-feat-icon">✦</span><span>Unlimited training blocks — build, save, and switch freely</span></div>
-      <div class="upgrade-feat"><span class="upgrade-feat-icon">◉</span><span>Full progress tracking across all weeks and exercises</span></div>
-      <div class="upgrade-feat"><span class="upgrade-feat-icon">◌</span><span>Sparkline trends, archive history, and session notes</span></div>
-      <div class="upgrade-feat"><span class="upgrade-feat-icon">⬡</span><span>198-exercise library with calisthenics, barbell, dumbbell and machine</span></div>
-      <div class="upgrade-feat"><span class="upgrade-feat-icon">↺</span><span>Rest timer, week navigation, and all future features</span></div>
+    <div class="upgrade-title">UPGRADE<br>YOUR TRAINING</div>
+    <div class="upgrade-sub">CHOOSE YOUR PATH</div>
+
+    <!-- FORGE tier -->
+    <div id="upgrade-forge-tier" style="border:1px solid var(--border);padding:20px;margin-bottom:12px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;margin-bottom:4px">FORGE</div>
+      <div style="font-size:10px;letter-spacing:1px;color:var(--text-muted);margin-bottom:14px">The full training system</div>
+      <div class="upgrade-features" style="margin-bottom:14px">
+        <div class="upgrade-feat"><span class="upgrade-feat-icon">✦</span><span>Unlimited training blocks</span></div>
+        <div class="upgrade-feat"><span class="upgrade-feat-icon">◉</span><span>Full progress tracking & sparklines</span></div>
+        <div class="upgrade-feat"><span class="upgrade-feat-icon">⬡</span><span>198-exercise library</span></div>
+        <div class="upgrade-feat"><span class="upgrade-feat-icon">↺</span><span>Rest timer, notes, archive & all features</span></div>
+      </div>
+      <button class="upgrade-cta" id="upgrade-cta-btn" onclick="activatePremium('premium')">FORGE · £9.99/mo →</button>
     </div>
-    <div style="display:flex;gap:8px;margin-bottom:12px">
-      <button class="upgrade-cta" id="upgrade-cta-btn" onclick="activatePremium('premium')" style="flex:1">PREMIUM £9.99/mo →</button>
-      <button class="upgrade-cta" id="upgrade-coached-btn" onclick="activatePremium('coached')" style="flex:1;background:transparent;border:1px solid var(--accent);color:var(--accent)">COACHED £19.99/mo →</button>
+
+    <!-- FORGE+ tier -->
+    <div id="upgrade-plus-tier" style="border:1px solid var(--accent-dim);padding:20px;margin-bottom:12px;background:var(--accent-glow)">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--accent);margin-bottom:4px">FORGE+</div>
+      <div style="font-size:10px;letter-spacing:1px;color:var(--text-muted);margin-bottom:14px">Coach programming + AI</div>
+      <div class="upgrade-features" style="margin-bottom:14px">
+        <div class="upgrade-feat"><span class="upgrade-feat-icon">✦</span><span>Everything in FORGE</span></div>
+        <div class="upgrade-feat"><span class="upgrade-feat-icon">◉</span><span>Monthly coached programme — auto-delivered</span></div>
+        <div class="upgrade-feat"><span class="upgrade-feat-icon">⬡</span><span>AI programme generator — personalised blocks on demand</span></div>
+        <div class="upgrade-feat"><span class="upgrade-feat-icon">◌</span><span>Priority support & future features first</span></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <button class="upgrade-cta" id="upgrade-plus-monthly" onclick="selectPlusBilling('monthly')" style="flex:1;background:var(--accent);color:#080808;font-size:10px;padding:14px 8px">£39.99/mo</button>
+        <button class="upgrade-cta" id="upgrade-plus-yearly" onclick="selectPlusBilling('yearly')" style="flex:1;background:transparent;border:1px solid var(--accent);color:var(--accent);font-size:10px;padding:14px 8px">£31.99/mo · yearly</button>
+      </div>
+      <div style="font-size:9px;letter-spacing:1px;color:var(--text-dim);text-align:center;margin-bottom:10px" id="upgrade-plus-save"></div>
+      <button class="upgrade-cta" id="upgrade-plus-btn" onclick="activatePremium('coached')" style="background:var(--accent);color:#080808">GET FORGE+ →</button>
     </div>
-    <div class="upgrade-trial">✓ 7-day free trial · cancel anytime · Direct Debit</div>
+
+    <div class="upgrade-trial">✓ 7-day free trial · cancel anytime</div>
     <button class="upgrade-dismiss" onclick="closeUpgrade()">Maybe later</button>
   </div>
 </div>
@@ -741,7 +764,7 @@
   <div class="status-bar"></div>
   <div class="user-bar" id="user-bar" onclick="openSignOutSheet()">
     <span class="user-name" id="user-bar-name">GUEST</span>
-    <button class="upgrade-link" id="upgrade-link-btn">Upgrade to Premium ✦</button>
+    <button class="upgrade-link" id="upgrade-link-btn">Upgrade ✦</button>
   </div>
 
   <!-- Sign out sheet -->
@@ -750,7 +773,7 @@
     <div class="signout-card">
       <div class="signout-name" id="signout-sheet-name"></div>
       <div class="signout-email" id="signout-sheet-email"></div>
-      <button class="upgrade-cta" id="signout-upgrade-btn" onclick="closeSignOutSheet();openUpgrade()" style="width:100%;margin-bottom:10px;display:none">UPGRADE TO PREMIUM ✦</button>
+      <button class="upgrade-cta" id="signout-upgrade-btn" onclick="closeSignOutSheet();openUpgrade()" style="width:100%;margin-bottom:10px;display:none">UPGRADE ✦</button>
       <button class="signout-btn" onclick="handleSignOut()">Sign Out</button>
       <a href="/support" style="display:block;text-align:center;font-size:9px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;text-decoration:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">Support →</a>
     </div>
@@ -777,6 +800,7 @@
         <div class="home-title" id="home-title">READY<br>TO TRAIN</div>
         <div class="home-sub" id="home-sub">DUP · Emphasised Concurrent</div>
         <div class="home-streak" id="home-streak"></div>
+        <div class="home-lastweek" id="home-lastweek"></div>
       </div>
       <div class="stats-row" id="home-stats-row">
         <div class="stat-cell">
@@ -1156,9 +1180,9 @@
 <div class="confirm-overlay" id="blockend-overlay">
   <div class="confirm-sheet">
     <div class="confirm-title" id="blockend-title">BLOCK COMPLETE</div>
-    <div class="confirm-desc" id="blockend-desc">You've reached the final week of this block. Archive it and move on — or stay and keep training.</div>
-    <button class="confirm-yes" onclick="closeBlockEndPrompt();openArchiveConfirm()">Archive This Block →</button>
-    <button class="confirm-no" onclick="closeBlockEndPrompt()">Stay on Final Week</button>
+    <div class="confirm-desc" id="blockend-desc"></div>
+    <div id="blockend-actions"></div>
+    <button class="confirm-no" onclick="closeBlockEndPrompt()" style="margin-top:4px">Stay on Final Week</button>
   </div>
 </div>
 
@@ -1746,8 +1770,54 @@ function setBuilderWeeks(n, btn) {
 
 function openBlockEndPrompt() {
   const total = currentBlock.weeks || 4;
-  document.getElementById('blockend-title').textContent = currentBlock.name + ' — WEEK ' + total + ' COMPLETE';
+  const tier = currentUser?.tier || '';
+  const isForge = (tier === 'premium' || tier === 'admin' || tier === 'pt');
+  const isForgePlus = (tier === 'coached');
+
+  document.getElementById('blockend-title').textContent = 'BLOCK COMPLETE';
+  
+  const desc = document.getElementById('blockend-desc');
+  const actions = document.getElementById('blockend-actions');
+  actions.innerHTML = '';
+
+  if (isForgePlus) {
+    // FORGE+ tier — AI + coached programme
+    desc.textContent = 'Nice work finishing ' + (currentBlock.name || 'this block') + '. Ready for what\'s next?';
+    actions.innerHTML = `
+      <button class="confirm-yes" onclick="closeBlockEndPrompt();openArchiveConfirm();setTimeout(()=>navigate('ai'),600)">Generate Next Block with AI →</button>
+      <button class="confirm-yes" style="background:transparent;border-color:var(--border);color:var(--text-muted);margin-top:4px" onclick="closeBlockEndPrompt();repeatBlock()">Repeat This Block</button>
+      <button class="confirm-yes" style="background:transparent;border-color:var(--border);color:var(--text-muted);margin-top:4px" onclick="closeBlockEndPrompt();openArchiveConfirm()">Archive & Build New</button>
+    `;
+  } else if (isForge) {
+    // FORGE tier — self-service
+    desc.textContent = 'You\'ve completed ' + (currentBlock.name || 'this block') + '. Archive it and build your next one, or repeat.';
+    actions.innerHTML = `
+      <button class="confirm-yes" onclick="closeBlockEndPrompt();openArchiveConfirm();setTimeout(()=>navigate('builder'),600)">Archive & Build New Block →</button>
+      <button class="confirm-yes" style="background:transparent;border-color:var(--border);color:var(--text-muted);margin-top:4px" onclick="closeBlockEndPrompt();repeatBlock()">Repeat This Block</button>
+      <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);text-align:center">
+        <div style="font-size:9px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px">Want AI-built programmes + coach programming?</div>
+        <button class="confirm-yes" style="border-color:var(--accent)" onclick="closeBlockEndPrompt();openUpgrade()">Upgrade to FORGE+ →</button>
+      </div>
+    `;
+  } else {
+    // Free / trial
+    desc.textContent = 'You\'ve finished ' + (currentBlock.name || 'your block') + '. Upgrade to keep building and unlock coached programmes.';
+    actions.innerHTML = `
+      <button class="confirm-yes" onclick="closeBlockEndPrompt();repeatBlock()">Repeat This Block</button>
+      <button class="confirm-yes" style="border-color:var(--accent);margin-top:4px" onclick="closeBlockEndPrompt();openUpgrade()">Upgrade to FORGE →</button>
+    `;
+  }
+
   document.getElementById('blockend-overlay').classList.add('open');
+}
+
+function repeatBlock() {
+  currentWeek = 1;
+  localStorage.setItem('fw_week', currentWeek);
+  updateStats();
+  renderHomeDays();
+  scheduleSync();
+  showToast('Block reset to Week 1');
 }
 function closeBlockEndPrompt() {
   document.getElementById('blockend-overlay').classList.remove('open');
@@ -2247,6 +2317,17 @@ function renderHomeDays() {
   }
 
   heroTitle.innerHTML = (hasActiveBlock || hasFixed) ? currentBlock.name || 'READY<br>TO TRAIN' : 'READY<br>TO TRAIN';
+
+  // Last week reminder
+  const lastWeekEl = document.getElementById('home-lastweek');
+  const total = currentBlock.weeks || 4;
+  if (hasActiveBlock && currentWeek >= total) {
+    lastWeekEl.textContent = 'Final week of this block — tap to plan what\'s next →';
+    lastWeekEl.onclick = () => openBlockEndPrompt();
+    lastWeekEl.classList.add('visible');
+  } else {
+    lastWeekEl.classList.remove('visible');
+  }
 
   renderHomeFixedSections();
 
@@ -4238,7 +4319,7 @@ function updateUserBar() {
         upgradeBtn.style.cursor = 'default';
         upgradeBtn.onclick = e => e.stopPropagation();
       } else {
-        upgradeBtn.textContent = tier === 'coached' ? '✦ COACHED' : '✦ PREMIUM';
+        upgradeBtn.textContent = tier === 'coached' ? '✦ FORGE+' : '✦ FORGE';
         upgradeBtn.style.color = 'var(--accent)';
         upgradeBtn.style.cursor = 'default';
         upgradeBtn.onclick = e => e.stopPropagation();
@@ -4294,10 +4375,10 @@ function openSignOutSheet() {
     if(tier === 'coached' || tier === 'admin' || tier === 'pt') {
       upgradeBtn.style.display = 'none';
     } else if(tier === 'premium') {
-      upgradeBtn.textContent = 'UPGRADE TO COACHED £19.99 ✦';
+      upgradeBtn.textContent = 'UPGRADE TO FORGE+ ✦';
       upgradeBtn.style.display = 'block';
     } else {
-      upgradeBtn.textContent = 'UPGRADE TO PREMIUM ✦';
+      upgradeBtn.textContent = 'UPGRADE ✦';
       upgradeBtn.style.display = 'block';
     }
   }
@@ -4310,21 +4391,52 @@ function closeSignOutSheet() {
 
 function openUpgrade() {
   const tier = currentUser?.tier;
-  const premiumBtn = document.getElementById('upgrade-cta-btn');
-  const coachedBtn = document.getElementById('upgrade-coached-btn');
-  if(premiumBtn) premiumBtn.style.display = (tier === 'premium' || tier === 'coached' || tier === 'admin') ? 'none' : 'block';
-  if(coachedBtn) coachedBtn.style.display = (tier === 'coached' || tier === 'admin') ? 'none' : 'block';
+  const forgeTier = document.getElementById('upgrade-forge-tier');
+  const plusTier = document.getElementById('upgrade-plus-tier');
+  // If already on FORGE, only show FORGE+ upgrade
+  if (tier === 'premium') {
+    forgeTier.style.display = 'none';
+    plusTier.style.display = 'block';
+  } else if (tier === 'coached' || tier === 'admin') {
+    // Already on FORGE+ or admin — nothing to upgrade
+    showToast('You\'re on the top tier ✦');
+    return;
+  } else {
+    forgeTier.style.display = 'block';
+    plusTier.style.display = 'block';
+  }
   document.getElementById('upgrade-overlay').classList.add('open');
 }
 function closeUpgrade() { document.getElementById('upgrade-overlay').classList.remove('open'); }
+
+let plusBilling = 'monthly';
+
+function selectPlusBilling(period) {
+  plusBilling = period;
+  const monthlyBtn = document.getElementById('upgrade-plus-monthly');
+  const yearlyBtn = document.getElementById('upgrade-plus-yearly');
+  const saveLabel = document.getElementById('upgrade-plus-save');
+  if (period === 'monthly') {
+    monthlyBtn.style.background = 'var(--accent)'; monthlyBtn.style.color = '#080808'; monthlyBtn.style.border = 'none';
+    yearlyBtn.style.background = 'transparent'; yearlyBtn.style.color = 'var(--accent)'; yearlyBtn.style.border = '1px solid var(--accent)';
+    saveLabel.textContent = '';
+  } else {
+    yearlyBtn.style.background = 'var(--accent)'; yearlyBtn.style.color = '#080808'; yearlyBtn.style.border = 'none';
+    monthlyBtn.style.background = 'transparent'; monthlyBtn.style.color = 'var(--accent)'; monthlyBtn.style.border = '1px solid var(--accent)';
+    saveLabel.textContent = 'Save 20% — £383.90 billed yearly';
+  }
+}
 
 function activatePremium(tier='premium') {
   if(!currentUser) { showToast('Sign in to upgrade'); return; }
   const urls = {
     premium: 'https://buy.stripe.com/3cIcN40W9g5IgiSbxDgMw0j',
-    coached: 'https://buy.stripe.com/9B69AS9sFf1EaYy6djgMw0k'
+    coached: 'https://buy.stripe.com/fZu9ASgV78DgfeO0SZgMw0l',
+    coached_yearly: 'https://buy.stripe.com/28EaEW34hf1EeaK1X3gMw0m'
   };
-  const base = urls[tier] || urls.premium;
+  let key = tier;
+  if (tier === 'coached' && plusBilling === 'yearly') key = 'coached_yearly';
+  const base = urls[key] || urls.premium;
   const email = currentUser.email || '';
   const dest = email ? base + '?prefilled_customer[email]=' + encodeURIComponent(email) : base;
   window.location.href = dest;
@@ -4370,9 +4482,9 @@ async function loadProgrammes() {
     list.innerHTML = `
       <div style="border:1px solid var(--border);background:var(--card);margin-bottom:12px;padding:32px 20px;text-align:center">
         <div style="font-size:28px;margin-bottom:16px">✦</div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;margin-bottom:8px">COACHED TIER</div>
-        <div style="font-size:10px;letter-spacing:1px;color:var(--text-muted);line-height:1.8;margin-bottom:20px">New training programme every month — built by a certified L3 PT and loaded straight into your app.</div>
-        <button onclick="openUpgrade()" style="width:100%;padding:12px;background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer">UPGRADE TO COACHED £19.99 →</button>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;margin-bottom:8px">FORGE+</div>
+        <div style="font-size:10px;letter-spacing:1px;color:var(--text-muted);line-height:1.8;margin-bottom:20px">New training programme every month — built by a certified L3 PT and loaded straight into your app. Plus AI-generated blocks on demand.</div>
+        <button onclick="openUpgrade()" style="width:100%;padding:12px;background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer">UPGRADE TO FORGE+ →</button>
       </div>`;
     return;
   }
