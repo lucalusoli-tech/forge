@@ -1898,7 +1898,7 @@ function getOnboardingTemplate(goal, level, days, equipment) {
   // ── Sets/reps by level ──
   let compoundSets, accessorySets, compoundReps, accessoryReps, method;
   if (level === 'Beginner') {
-    compoundSets = 2; accessorySets = 2; compoundReps = '5×3'; accessoryReps = '8-12'; method = 'Short Linear';
+    compoundSets = 2; accessorySets = 2; compoundReps = '5-8'; accessoryReps = '8-12'; method = 'Short Linear';
   } else if (level === 'Intermediate') {
     compoundSets = 3; accessorySets = 3; compoundReps = '8-12'; accessoryReps = '8-12'; method = 'DUP';
   } else {
@@ -1907,7 +1907,7 @@ function getOnboardingTemplate(goal, level, days, equipment) {
 
   // ── Goal adjustments ──
   if (goal === 'Build Strength') {
-    compoundReps = level === 'Beginner' ? '5×3' : '3-6';
+    compoundReps = level === 'Beginner' ? '3-5' : '3-6';
   } else if (goal === 'Body Composition') {
     compoundReps = '8-12'; accessoryReps = '10-15';
     if (level !== 'Beginner') { accessorySets = Math.min(accessorySets + 1, 4); }
