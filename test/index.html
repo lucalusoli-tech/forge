@@ -747,7 +747,12 @@
         <div class="upgrade-feat"><span class="upgrade-feat-icon">⬡</span><span>AI programme generator — personalised blocks on demand</span></div>
         <div class="upgrade-feat"><span class="upgrade-feat-icon">◌</span><span>Priority support & future features first</span></div>
       </div>
-      <button class="upgrade-cta" id="upgrade-plus-btn" onclick="activatePremium('coached')" style="background:var(--accent);color:#080808">FORGE+ · £39.99/mo →</button>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <button class="upgrade-cta" id="upgrade-plus-monthly" onclick="selectPlusBilling('monthly')" style="flex:1;background:var(--accent);color:#080808;font-size:10px;padding:14px 8px">£39.99/mo</button>
+        <button class="upgrade-cta" id="upgrade-plus-yearly" onclick="selectPlusBilling('yearly')" style="flex:1;background:transparent;border:1px solid var(--accent);color:var(--accent);font-size:10px;padding:14px 8px">£31.99/mo · yearly</button>
+      </div>
+      <div style="font-size:9px;letter-spacing:1px;color:var(--text-dim);text-align:center;margin-bottom:10px" id="upgrade-plus-save"></div>
+      <button class="upgrade-cta" id="upgrade-plus-btn" onclick="activatePremium('coached')" style="background:var(--accent);color:#080808">GET FORGE+ →</button>
     </div>
 
     <div class="upgrade-trial">✓ 7-day free trial · cancel anytime</div>
@@ -4404,13 +4409,34 @@ function openUpgrade() {
 }
 function closeUpgrade() { document.getElementById('upgrade-overlay').classList.remove('open'); }
 
+let plusBilling = 'monthly';
+
+function selectPlusBilling(period) {
+  plusBilling = period;
+  const monthlyBtn = document.getElementById('upgrade-plus-monthly');
+  const yearlyBtn = document.getElementById('upgrade-plus-yearly');
+  const saveLabel = document.getElementById('upgrade-plus-save');
+  if (period === 'monthly') {
+    monthlyBtn.style.background = 'var(--accent)'; monthlyBtn.style.color = '#080808'; monthlyBtn.style.border = 'none';
+    yearlyBtn.style.background = 'transparent'; yearlyBtn.style.color = 'var(--accent)'; yearlyBtn.style.border = '1px solid var(--accent)';
+    saveLabel.textContent = '';
+  } else {
+    yearlyBtn.style.background = 'var(--accent)'; yearlyBtn.style.color = '#080808'; yearlyBtn.style.border = 'none';
+    monthlyBtn.style.background = 'transparent'; monthlyBtn.style.color = 'var(--accent)'; monthlyBtn.style.border = '1px solid var(--accent)';
+    saveLabel.textContent = 'Save 20% — £383.90 billed yearly';
+  }
+}
+
 function activatePremium(tier='premium') {
   if(!currentUser) { showToast('Sign in to upgrade'); return; }
   const urls = {
     premium: 'https://buy.stripe.com/3cIcN40W9g5IgiSbxDgMw0j',
-    coached: 'https://buy.stripe.com/fZu9ASgV78DgfeO0SZgMw0l'
+    coached: 'https://buy.stripe.com/fZu9ASgV78DgfeO0SZgMw0l',
+    coached_yearly: 'https://buy.stripe.com/28EaEW34hf1EeaK1X3gMw0m'
   };
-  const base = urls[tier] || urls.premium;
+  let key = tier;
+  if (tier === 'coached' && plusBilling === 'yearly') key = 'coached_yearly';
+  const base = urls[key] || urls.premium;
   const email = currentUser.email || '';
   const dest = email ? base + '?prefilled_customer[email]=' + encodeURIComponent(email) : base;
   window.location.href = dest;
