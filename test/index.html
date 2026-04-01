@@ -57,6 +57,21 @@
   .home-greeting { font-size: 9px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
   .home-title { font-family: 'Bebas Neue', sans-serif; font-size: 38px; letter-spacing: 4px; line-height: 1; }
   .home-sub { font-size: 10px; letter-spacing: 2px; color: var(--text-muted); margin-top: 4px; }
+  .home-streak { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--accent); margin-top: 10px; text-transform: uppercase; display: none; }
+  .home-streak.visible { display: block; }
+
+  /* ── WEEKLY SUMMARY ── */
+  .weekly-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9998; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .weekly-card { background: var(--deep); border: 1px solid var(--border); max-width: 320px; width: 100%; padding: 32px 24px; text-align: center; animation: obFadeIn 0.35s ease; }
+  .weekly-label { font-size: 9px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 16px; }
+  .weekly-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 4px; color: var(--text); margin-bottom: 20px; line-height: 1.1; }
+  .weekly-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+  .weekly-stat { background: var(--surface); border: 1px solid var(--border); padding: 16px 12px; }
+  .weekly-stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; color: var(--accent); line-height: 1; }
+  .weekly-stat-lbl { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-top: 4px; }
+  .weekly-streak { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; color: var(--accent); margin-bottom: 24px; text-transform: uppercase; }
+  .weekly-cta { background: var(--accent-glow); border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; padding: 14px 28px; cursor: pointer; width: 100%; }
+  .weekly-cta:active { background: rgba(201,169,110,0.2); }
 
   .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(--border); }
   .stat-cell { padding: 16px 20px; border-right: 1px solid var(--border); }
@@ -551,6 +566,26 @@
 </head>
 <body>
 
+<!-- ── WEEKLY SUMMARY OVERLAY ── -->
+<div class="weekly-overlay" id="weekly-overlay" style="display:none" onclick="if(event.target===this)closeWeeklySummary()">
+  <div class="weekly-card">
+    <div class="weekly-label">Last week</div>
+    <div class="weekly-title" id="weekly-title">WEEK RECAP</div>
+    <div class="weekly-stats">
+      <div class="weekly-stat">
+        <div class="weekly-stat-val" id="weekly-days">0</div>
+        <div class="weekly-stat-lbl">Days trained</div>
+      </div>
+      <div class="weekly-stat">
+        <div class="weekly-stat-val" id="weekly-sets">0</div>
+        <div class="weekly-stat-lbl">Total sets</div>
+      </div>
+    </div>
+    <div class="weekly-streak" id="weekly-streak"></div>
+    <button class="weekly-cta" onclick="closeWeeklySummary()">LET'S GO</button>
+  </div>
+</div>
+
 <!-- ── ONBOARDING OVERLAY ── -->
 <div class="onboard-overlay" id="onboard-overlay" style="display:none">
   <div class="onboard-progress" id="onboard-progress">
@@ -741,6 +776,7 @@
         <div class="home-greeting" id="home-greeting">TODAY</div>
         <div class="home-title" id="home-title">READY<br>TO TRAIN</div>
         <div class="home-sub" id="home-sub">DUP · Emphasised Concurrent</div>
+        <div class="home-streak" id="home-streak"></div>
       </div>
       <div class="stats-row" id="home-stats-row">
         <div class="stat-cell">
@@ -1751,6 +1787,139 @@ function switchBuildTab(tab) {
   document.getElementById('scroll-area').scrollTop = 0;
 }
 
+// ─── STREAKS & WEEKLY SUMMARY ──────────────────────────────────
+let trainedDates = JSON.parse(localStorage.getItem('fw_trained_dates') || '[]');
+
+function todayStr() {
+  return new Date().toISOString().slice(0, 10); // "2026-04-01"
+}
+
+function recordTrainingDate() {
+  const today = todayStr();
+  if (!trainedDates.includes(today)) {
+    trainedDates.push(today);
+    // Keep last 365 days max
+    if (trainedDates.length > 365) trainedDates = trainedDates.slice(-365);
+    localStorage.setItem('fw_trained_dates', JSON.stringify(trainedDates));
+  }
+  updateStreakDisplay();
+}
+
+function calcStreak() {
+  if (trainedDates.length === 0) return 0;
+  const sorted = [...trainedDates].sort().reverse();
+  const today = new Date(todayStr());
+  const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+  // Streak must include today or yesterday
+  const latest = new Date(sorted[0]);
+  if (latest < yesterday) return 0;
+
+  let streak = 1;
+  for (let i = 0; i < sorted.length - 1; i++) {
+    const curr = new Date(sorted[i]);
+    const prev = new Date(sorted[i + 1]);
+    const diff = (curr - prev) / (1000 * 60 * 60 * 24);
+    if (diff === 1) {
+      streak++;
+    } else if (diff > 1) {
+      break;
+    }
+    // diff === 0 means same day, skip
+  }
+  return streak;
+}
+
+function updateStreakDisplay() {
+  const streak = calcStreak();
+  const el = document.getElementById('home-streak');
+  if (streak >= 2) {
+    el.textContent = '🔥 ' + streak + ' day streak';
+    el.classList.add('visible');
+  } else if (streak === 1) {
+    el.textContent = '🔥 1 session today';
+    el.classList.add('visible');
+  } else {
+    el.classList.remove('visible');
+  }
+}
+
+// ── Weekly summary ──
+function getWeekNumber(d) {
+  const date = new Date(d);
+  const start = new Date(date.getFullYear(), 0, 1);
+  const diff = (date - start + ((start.getTimezoneOffset() - date.getTimezoneOffset()) * 60000)) / 86400000;
+  return Math.floor((diff + start.getDay() + 1) / 7);
+}
+
+function checkWeeklySummary() {
+  const today = todayStr();
+  const currentWeekNum = getWeekNumber(today);
+  const currentYear = new Date(today).getFullYear();
+  const lastSummaryKey = localStorage.getItem('fw_last_summary') || '';
+  const thisKey = `${currentYear}-W${currentWeekNum}`;
+
+  if (lastSummaryKey === thisKey) return; // Already shown this week
+  if (trainedDates.length === 0) return; // No history
+
+  // Calculate last week's stats
+  const lastWeekDates = [];
+  const d = new Date(today);
+  // Go back to find last Monday–Sunday
+  const dayOfWeek = d.getDay() || 7; // Monday=1, Sunday=7
+  const lastSunday = new Date(d); lastSunday.setDate(d.getDate() - dayOfWeek);
+  const lastMonday = new Date(lastSunday); lastMonday.setDate(lastSunday.getDate() - 6);
+
+  trainedDates.forEach(dt => {
+    const date = new Date(dt);
+    if (date >= lastMonday && date <= lastSunday) {
+      lastWeekDates.push(dt);
+    }
+  });
+
+  if (lastWeekDates.length === 0) {
+    // They didn't train last week — still mark as shown so we don't keep triggering
+    localStorage.setItem('fw_last_summary', thisKey);
+    return;
+  }
+
+  const uniqueDays = new Set(lastWeekDates).size;
+
+  // Count total sets from last week's session log
+  let totalSets = 0;
+  const days = currentBlock.days || [];
+  const totalWeeks = currentBlock.weeks || 6;
+  days.forEach(day => {
+    day.exercises.forEach(ex => {
+      for (let w = 1; w <= totalWeeks; w++) {
+        const wk = `${day.id}_${ex.id}_v${w}`;
+        const entry = sessionLog[wk];
+        if (!entry) continue;
+        for (let s = 1; s <= 10; s++) {
+          if (entry[`s${s}_r`] && entry[`s${s}_r`] !== '') totalSets++;
+        }
+      }
+    });
+  });
+
+  // Show summary
+  const streak = calcStreak();
+  document.getElementById('weekly-title').textContent = 'WEEK RECAP';
+  document.getElementById('weekly-days').textContent = uniqueDays;
+  document.getElementById('weekly-sets').textContent = totalSets > 0 ? totalSets : '—';
+  const streakEl = document.getElementById('weekly-streak');
+  if (streak >= 2) {
+    streakEl.textContent = '🔥 ' + streak + ' day streak — keep it going';
+  } else {
+    streakEl.textContent = 'New week, fresh start';
+  }
+  document.getElementById('weekly-overlay').style.display = 'flex';
+  localStorage.setItem('fw_last_summary', thisKey);
+}
+
+function closeWeeklySummary() {
+  document.getElementById('weekly-overlay').style.display = 'none';
+}
+
 // ─── ONBOARDING ────────────────────────────────────────────────
 let onboardStep = 0;
 const onboardData = { goal: '', level: '', equipment: '', days: '' };
@@ -2363,6 +2532,7 @@ function saveSession() {
   const prev=parseInt(document.getElementById('dash-sessions').textContent)||0;
   document.getElementById('dash-sessions').textContent=prev+1;
   document.getElementById('dash-last').textContent=day.name.split('—')[0].trim();
+  recordTrainingDate();
   showToast('Saved ✓'); renderProgress();
   setTimeout(()=>navigate('home'),500);
 }
@@ -3991,8 +4161,11 @@ function startApp(isGuest) {
   renderBuilderSaved();
   renderProgress();
   renderArchive();
+  updateStreakDisplay();
   // Check for assigned blocks after UI is ready
   setTimeout(() => loadAssignedBlocks(), 1000);
+  // Weekly summary popup (after a brief delay so UI settles)
+  setTimeout(() => checkWeeklySummary(), 800);
   // Auto-trigger onboarding for new users with no block
   const hasBlock = currentBlock.days?.length > 0;
   const onboarded = localStorage.getItem('fw_onboarded') === '1';
