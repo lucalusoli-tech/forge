@@ -721,20 +721,36 @@
 <!-- ── UPGRADE MODAL ── -->
 <div class="upgrade-overlay" id="upgrade-overlay">
   <div class="upgrade-sheet">
-    <div class="upgrade-title">FORGE<br>PREMIUM</div>
-    <div class="upgrade-sub">UNLOCK THE FULL SYSTEM</div>
-    <div class="upgrade-features">
-      <div class="upgrade-feat"><span class="upgrade-feat-icon">✦</span><span>Unlimited training blocks — build, save, and switch freely</span></div>
-      <div class="upgrade-feat"><span class="upgrade-feat-icon">◉</span><span>Full progress tracking across all weeks and exercises</span></div>
-      <div class="upgrade-feat"><span class="upgrade-feat-icon">◌</span><span>Sparkline trends, archive history, and session notes</span></div>
-      <div class="upgrade-feat"><span class="upgrade-feat-icon">⬡</span><span>198-exercise library with calisthenics, barbell, dumbbell and machine</span></div>
-      <div class="upgrade-feat"><span class="upgrade-feat-icon">↺</span><span>Rest timer, week navigation, and all future features</span></div>
+    <div class="upgrade-title">UPGRADE<br>YOUR TRAINING</div>
+    <div class="upgrade-sub">CHOOSE YOUR PATH</div>
+
+    <!-- FORGE tier -->
+    <div id="upgrade-forge-tier" style="border:1px solid var(--border);padding:20px;margin-bottom:12px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;margin-bottom:4px">FORGE</div>
+      <div style="font-size:10px;letter-spacing:1px;color:var(--text-muted);margin-bottom:14px">The full training system</div>
+      <div class="upgrade-features" style="margin-bottom:14px">
+        <div class="upgrade-feat"><span class="upgrade-feat-icon">✦</span><span>Unlimited training blocks</span></div>
+        <div class="upgrade-feat"><span class="upgrade-feat-icon">◉</span><span>Full progress tracking & sparklines</span></div>
+        <div class="upgrade-feat"><span class="upgrade-feat-icon">⬡</span><span>198-exercise library</span></div>
+        <div class="upgrade-feat"><span class="upgrade-feat-icon">↺</span><span>Rest timer, notes, archive & all features</span></div>
+      </div>
+      <button class="upgrade-cta" id="upgrade-cta-btn" onclick="activatePremium('premium')">FORGE · £9.99/mo →</button>
     </div>
-    <div style="display:flex;gap:8px;margin-bottom:12px">
-      <button class="upgrade-cta" id="upgrade-cta-btn" onclick="activatePremium('premium')" style="flex:1">PREMIUM £9.99/mo →</button>
-      <button class="upgrade-cta" id="upgrade-coached-btn" onclick="activatePremium('coached')" style="flex:1;background:transparent;border:1px solid var(--accent);color:var(--accent)">COACHED £19.99/mo →</button>
+
+    <!-- FORGE+ tier -->
+    <div id="upgrade-plus-tier" style="border:1px solid var(--accent-dim);padding:20px;margin-bottom:12px;background:var(--accent-glow)">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--accent);margin-bottom:4px">FORGE+</div>
+      <div style="font-size:10px;letter-spacing:1px;color:var(--text-muted);margin-bottom:14px">Coach programming + AI</div>
+      <div class="upgrade-features" style="margin-bottom:14px">
+        <div class="upgrade-feat"><span class="upgrade-feat-icon">✦</span><span>Everything in FORGE</span></div>
+        <div class="upgrade-feat"><span class="upgrade-feat-icon">◉</span><span>Monthly coached programme — auto-delivered</span></div>
+        <div class="upgrade-feat"><span class="upgrade-feat-icon">⬡</span><span>AI programme generator — personalised blocks on demand</span></div>
+        <div class="upgrade-feat"><span class="upgrade-feat-icon">◌</span><span>Priority support & future features first</span></div>
+      </div>
+      <button class="upgrade-cta" id="upgrade-plus-btn" onclick="activatePremium('coached')" style="background:var(--accent);color:#080808">FORGE+ · £39.99/mo →</button>
     </div>
-    <div class="upgrade-trial">✓ 7-day free trial · cancel anytime · Direct Debit</div>
+
+    <div class="upgrade-trial">✓ 7-day free trial · cancel anytime</div>
     <button class="upgrade-dismiss" onclick="closeUpgrade()">Maybe later</button>
   </div>
 </div>
@@ -743,7 +759,7 @@
   <div class="status-bar"></div>
   <div class="user-bar" id="user-bar" onclick="openSignOutSheet()">
     <span class="user-name" id="user-bar-name">GUEST</span>
-    <button class="upgrade-link" id="upgrade-link-btn">Upgrade to Premium ✦</button>
+    <button class="upgrade-link" id="upgrade-link-btn">Upgrade ✦</button>
   </div>
 
   <!-- Sign out sheet -->
@@ -752,7 +768,7 @@
     <div class="signout-card">
       <div class="signout-name" id="signout-sheet-name"></div>
       <div class="signout-email" id="signout-sheet-email"></div>
-      <button class="upgrade-cta" id="signout-upgrade-btn" onclick="closeSignOutSheet();openUpgrade()" style="width:100%;margin-bottom:10px;display:none">UPGRADE TO PREMIUM ✦</button>
+      <button class="upgrade-cta" id="signout-upgrade-btn" onclick="closeSignOutSheet();openUpgrade()" style="width:100%;margin-bottom:10px;display:none">UPGRADE ✦</button>
       <button class="signout-btn" onclick="handleSignOut()">Sign Out</button>
       <a href="/support" style="display:block;text-align:center;font-size:9px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;text-decoration:none;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">Support →</a>
     </div>
@@ -4370,10 +4386,20 @@ function closeSignOutSheet() {
 
 function openUpgrade() {
   const tier = currentUser?.tier;
-  const premiumBtn = document.getElementById('upgrade-cta-btn');
-  const coachedBtn = document.getElementById('upgrade-coached-btn');
-  if(premiumBtn) premiumBtn.style.display = (tier === 'premium' || tier === 'coached' || tier === 'admin') ? 'none' : 'block';
-  if(coachedBtn) coachedBtn.style.display = (tier === 'coached' || tier === 'admin') ? 'none' : 'block';
+  const forgeTier = document.getElementById('upgrade-forge-tier');
+  const plusTier = document.getElementById('upgrade-plus-tier');
+  // If already on FORGE, only show FORGE+ upgrade
+  if (tier === 'premium') {
+    forgeTier.style.display = 'none';
+    plusTier.style.display = 'block';
+  } else if (tier === 'coached' || tier === 'admin') {
+    // Already on FORGE+ or admin — nothing to upgrade
+    showToast('You\'re on the top tier ✦');
+    return;
+  } else {
+    forgeTier.style.display = 'block';
+    plusTier.style.display = 'block';
+  }
   document.getElementById('upgrade-overlay').classList.add('open');
 }
 function closeUpgrade() { document.getElementById('upgrade-overlay').classList.remove('open'); }
@@ -4382,7 +4408,7 @@ function activatePremium(tier='premium') {
   if(!currentUser) { showToast('Sign in to upgrade'); return; }
   const urls = {
     premium: 'https://buy.stripe.com/3cIcN40W9g5IgiSbxDgMw0j',
-    coached: 'https://buy.stripe.com/9B69AS9sFf1EaYy6djgMw0k'
+    coached: 'https://buy.stripe.com/9B69AS9sFf1EaYy6djgMw0k'  // TODO: update to £39.99 Stripe link
   };
   const base = urls[tier] || urls.premium;
   const email = currentUser.email || '';
