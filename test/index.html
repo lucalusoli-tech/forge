@@ -4472,6 +4472,10 @@ async function loadProgrammes() {
       panel.style.display = 'block';
       populatePublishBlockSelector();
     }
+  }
+
+  // Show AI programme link for FORGE+ users (coached + admin)
+  if(isCoached) {
     const aiLink = document.getElementById('ai-programme-link');
     if(aiLink) aiLink.style.display = 'block';
   }
