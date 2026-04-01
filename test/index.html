@@ -2984,6 +2984,32 @@ let timerDuration = 90;
 let timerRemaining = 90;
 let timerInterval = null;
 let timerPaused = false;
+let timerBackupTimeout = null;
+let swRegistration = null;
+
+// Register service worker for lock-screen notifications
+(function registerTimerSW() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./forge-sw.js').then(reg => {
+      swRegistration = reg;
+      console.log('[FORGE] Timer SW registered');
+    }).catch(err => {
+      console.warn('[FORGE] SW registration failed, using fallback notifications', err);
+    });
+  }
+})();
+
+// Tell the SW to schedule/cancel its own notification timeout
+function swTimerStart(durationSecs) {
+  if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({ type: 'TIMER_START', duration: durationSecs });
+  }
+}
+function swTimerCancel() {
+  if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+    navigator.serviceWorker.controller.postMessage({ type: 'TIMER_CANCEL' });
+  }
+}
 const TIMER_CIRCUMFERENCE = 590.6;
 
 function onSetBlur(wk, setNum, exName) {
@@ -3001,8 +3027,44 @@ function autoSaveSet(wk, setNum) {
   scheduleSync();
 }
 
+function fireTimerAlert() {
+  // Cancel SW scheduled notification (page caught it first — prevent double)
+  swTimerCancel();
+  // Vibrate
+  if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
+  // Notification via Service Worker (better lock-screen delivery)
+  if (swRegistration && Notification.permission === 'granted') {
+    try {
+      swRegistration.showNotification('FORGE', {
+        body: 'Rest over — next set',
+        icon: 'https://forgetraining.app/icon-192.png',
+        tag: 'forge-timer',
+        requireInteraction: true,
+        vibrate: [200, 100, 200, 100, 200],
+        silent: false
+      });
+    } catch(e) {
+      try { new Notification('FORGE', { body: 'Rest over — next set', tag: 'forge-timer', requireInteraction: true }); } catch(e2) {}
+    }
+  } else if ('Notification' in window && Notification.permission === 'granted') {
+    try { new Notification('FORGE', { body: 'Rest over — next set', tag: 'forge-timer', requireInteraction: true }); } catch(e) {}
+  }
+  // Audio beep
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    osc.frequency.value = 880;
+    gain.gain.value = 0.3;
+    osc.start(); osc.stop(audioCtx.currentTime + 0.15);
+    setTimeout(() => { const o2 = audioCtx.createOscillator(); const g2 = audioCtx.createGain(); o2.connect(g2); g2.connect(audioCtx.destination); o2.frequency.value = 1100; g2.gain.value = 0.3; o2.start(); o2.stop(audioCtx.currentTime + 0.15); }, 200);
+  } catch(e) {}
+}
+
 function startTimer(exName) {
   clearInterval(timerInterval);
+  if (timerBackupTimeout) clearTimeout(timerBackupTimeout);
   timerRemaining = timerDuration;
   timerPaused = false;
   timerEndTime = Date.now() + (timerDuration * 1000);
@@ -3016,34 +3078,30 @@ function startTimer(exName) {
     Notification.requestPermission();
   }
 
+  // Tell SW to independently schedule the notification
+  swTimerStart(timerDuration);
+
+  // Backup timeout — fires even if setInterval is throttled during screen lock
+  timerBackupTimeout = setTimeout(() => {
+    if (timerPaused || timerEndTime === 0) return;
+    timerRemaining = 0;
+    updateTimerDisplay();
+    clearInterval(timerInterval);
+    fireTimerAlert();
+    setTimeout(() => closeTimer(), 1200);
+  }, timerDuration * 1000 + 500);
+
   timerInterval = setInterval(() => {
     if(timerPaused) return;
-    // Calculate remaining from end time (survives screen lock better)
     timerRemaining = Math.max(0, Math.round((timerEndTime - Date.now()) / 1000));
     updateTimerDisplay();
     if(timerRemaining <= 0) {
       clearInterval(timerInterval);
-      if(navigator.vibrate) navigator.vibrate([200,100,200]);
-      // Send notification if app is in background
-      if ('Notification' in window && Notification.permission === 'granted' && document.hidden) {
-        try {
-          new Notification('FORGE', { body: 'Rest over — next set', icon: 'https://forgetraining.app/icon-192.png', tag: 'forge-timer', requireInteraction: true });
-        } catch(e) { /* notifications not supported in this context */ }
-      }
-      // Also play a sound if available
-      try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.frequency.value = 880;
-        gain.gain.value = 0.3;
-        osc.start(); osc.stop(audioCtx.currentTime + 0.15);
-        setTimeout(() => { const o2 = audioCtx.createOscillator(); const g2 = audioCtx.createGain(); o2.connect(g2); g2.connect(audioCtx.destination); o2.frequency.value = 1100; g2.gain.value = 0.3; o2.start(); o2.stop(audioCtx.currentTime + 0.15); }, 200);
-      } catch(e) {}
+      if (timerBackupTimeout) { clearTimeout(timerBackupTimeout); timerBackupTimeout = null; }
+      fireTimerAlert();
       setTimeout(() => closeTimer(), 1200);
     }
-  }, 250); // Check 4x per second for faster catch-up after screen wake
+  }, 250);
 }
 
 // Track timer end time for background accuracy
@@ -3051,12 +3109,13 @@ let timerEndTime = 0;
 
 // When page becomes visible again, recalculate timer
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden && timerEndTime > 0 && !timerPaused && timerRemaining > 0) {
+  if (!document.hidden && timerEndTime > 0 && !timerPaused) {
     timerRemaining = Math.max(0, Math.round((timerEndTime - Date.now()) / 1000));
     updateTimerDisplay();
     if (timerRemaining <= 0) {
       clearInterval(timerInterval);
-      if(navigator.vibrate) navigator.vibrate([200,100,200]);
+      if (timerBackupTimeout) { clearTimeout(timerBackupTimeout); timerBackupTimeout = null; }
+      fireTimerAlert();
       setTimeout(() => closeTimer(), 800);
     }
   }
@@ -3074,11 +3133,20 @@ function updateTimerDisplay() {
 function toggleTimerPause() {
   timerPaused = !timerPaused;
   if (timerPaused) {
-    // Store remaining time when pausing
     timerRemaining = Math.max(0, Math.round((timerEndTime - Date.now()) / 1000));
+    if (timerBackupTimeout) { clearTimeout(timerBackupTimeout); timerBackupTimeout = null; }
+    swTimerCancel();
   } else {
-    // Recalculate end time when resuming
     timerEndTime = Date.now() + (timerRemaining * 1000);
+    timerBackupTimeout = setTimeout(() => {
+      if (timerPaused || timerEndTime === 0) return;
+      timerRemaining = 0;
+      updateTimerDisplay();
+      clearInterval(timerInterval);
+      fireTimerAlert();
+      setTimeout(() => closeTimer(), 1200);
+    }, timerRemaining * 1000 + 500);
+    swTimerStart(timerRemaining);
   }
   document.getElementById('timer-pause-btn').textContent = timerPaused ? 'RESUME' : 'PAUSE';
 }
@@ -3091,6 +3159,8 @@ function skipTimer() {
 function closeTimer() {
   document.getElementById('timer-overlay').classList.remove('open');
   clearInterval(timerInterval);
+  if (timerBackupTimeout) { clearTimeout(timerBackupTimeout); timerBackupTimeout = null; }
+  swTimerCancel();
   timerEndTime = 0;
 }
 
@@ -3099,9 +3169,33 @@ function setTimerDuration(secs, btn) {
   timerRemaining = secs;
   document.querySelectorAll('.timer-dur-btn').forEach(b => b.classList.remove('active'));
   btn.classList.add('active');
-  // update label
   const label = secs < 120 ? secs+'s' : (secs/60)+'m';
   document.querySelector('.timer-toggle-label').textContent = 'Auto rest timer · '+label;
+  if (timerEndTime > 0 && !timerPaused) {
+    clearInterval(timerInterval);
+    if (timerBackupTimeout) { clearTimeout(timerBackupTimeout); timerBackupTimeout = null; }
+    timerEndTime = Date.now() + (secs * 1000);
+    swTimerStart(secs);
+    timerBackupTimeout = setTimeout(() => {
+      if (timerPaused || timerEndTime === 0) return;
+      timerRemaining = 0;
+      updateTimerDisplay();
+      clearInterval(timerInterval);
+      fireTimerAlert();
+      setTimeout(() => closeTimer(), 1200);
+    }, secs * 1000 + 500);
+    timerInterval = setInterval(() => {
+      if(timerPaused) return;
+      timerRemaining = Math.max(0, Math.round((timerEndTime - Date.now()) / 1000));
+      updateTimerDisplay();
+      if(timerRemaining <= 0) {
+        clearInterval(timerInterval);
+        if (timerBackupTimeout) { clearTimeout(timerBackupTimeout); timerBackupTimeout = null; }
+        fireTimerAlert();
+        setTimeout(() => closeTimer(), 1200);
+      }
+    }, 250);
+  }
   updateTimerDisplay();
 }
 
