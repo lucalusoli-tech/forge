@@ -1832,7 +1832,7 @@ function calcStreak() {
 function updateStreakDisplay() {
   const streak = calcStreak();
   const el = document.getElementById('home-streak');
-  const fireIcon = '<svg width="13" height="15" viewBox="0 0 24 28" fill="currentColor" style="vertical-align:-2px;margin-right:4px"><path d="M12 0C12 0 4.5 9 4.5 16.5c0 4.14 3.36 7.5 7.5 7.5s7.5-3.36 7.5-7.5C19.5 9 12 0 12 0zM8.5 17c0-2.07.89-4.44 2.08-6.63.44-.8.91-1.56 1.42-2.28.51.72.98 1.48 1.42 2.28C14.61 12.56 15.5 14.93 15.5 17c0 1.93-1.57 3.5-3.5 3.5S8.5 18.93 8.5 17z"/></svg>';
+  const fireIcon = '<svg width="12" height="15" viewBox="0 0 16 20" fill="currentColor" style="vertical-align:-2px;margin-right:4px"><path d="M8 0S3 5.5 3 11a5 5 0 0010 0C13 5.5 8 0 8 0zm0 17.5A2.5 2.5 0 015.5 15c0-2.5 2.5-5.5 2.5-5.5s2.5 3 2.5 5.5A2.5 2.5 0 018 17.5z"/><path d="M10.5 5c0 0 1.5 2 1.5 4a2 2 0 01-4 0c0-2 2.5-4 2.5-4z" opacity="0.4"/></svg>';
   if (streak >= 2) {
     el.innerHTML = fireIcon + streak + ' day streak';
     el.classList.add('visible');
@@ -1909,7 +1909,7 @@ function checkWeeklySummary() {
   document.getElementById('weekly-sets').textContent = totalSets > 0 ? totalSets : '—';
   const streakEl = document.getElementById('weekly-streak');
   if (streak >= 2) {
-    streakEl.innerHTML = '<svg width="13" height="15" viewBox="0 0 24 28" fill="currentColor" style="vertical-align:-2px;margin-right:4px"><path d="M12 0C12 0 4.5 9 4.5 16.5c0 4.14 3.36 7.5 7.5 7.5s7.5-3.36 7.5-7.5C19.5 9 12 0 12 0zM8.5 17c0-2.07.89-4.44 2.08-6.63.44-.8.91-1.56 1.42-2.28.51.72.98 1.48 1.42 2.28C14.61 12.56 15.5 14.93 15.5 17c0 1.93-1.57 3.5-3.5 3.5S8.5 18.93 8.5 17z"/></svg>' + streak + ' day streak — keep it going';
+    streakEl.innerHTML = '<svg width="12" height="15" viewBox="0 0 16 20" fill="currentColor" style="vertical-align:-2px;margin-right:4px"><path d="M8 0S3 5.5 3 11a5 5 0 0010 0C13 5.5 8 0 8 0zm0 17.5A2.5 2.5 0 015.5 15c0-2.5 2.5-5.5 2.5-5.5s2.5 3 2.5 5.5A2.5 2.5 0 018 17.5z"/><path d="M10.5 5c0 0 1.5 2 1.5 4a2 2 0 01-4 0c0-2 2.5-4 2.5-4z" opacity="0.4"/></svg>' + streak + ' day streak — keep it going';
   } else {
     streakEl.textContent = 'New week, fresh start';
   }
