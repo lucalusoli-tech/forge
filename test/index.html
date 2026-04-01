@@ -1912,11 +1912,17 @@ function getOnboardingTemplate(goal, level, days, equipment) {
   }
 
   // ── Pick deep pools — enough for rotation across days ──
-  const pullPool = pickByDifficulty(pulls, level, Math.max(6, d * 2));
-  const pushPool = pickByDifficulty(pushes, level, Math.max(6, d * 2));
-  const legPool = pickByDifficulty(legs, level, Math.max(6, d * 2));
-  const corePool = pickByDifficulty(cores, level, Math.max(3, d));
-  const isoPool = isos.length > 0 ? isos : pickByDifficulty(cores, level, 3);
+  const pullPool = pickByDifficulty(pool('pull'), level, Math.max(6, d * 2));
+  const pushPool = pickByDifficulty(pool('push'), level, Math.max(6, d * 2));
+  const legPool = pickByDifficulty(pool('legs'), level, Math.max(6, d * 2));
+  const coreRaw = EXERCISES.filter(ex => matchesEquipment(ex) && ex.tags.includes('core') && !ex.tags.includes('warmup'));
+  const corePool = pickByDifficulty(coreRaw, level, Math.max(3, d));
+  const isoRaw = EXERCISES.filter(ex => {
+    if (!matchesEquipment(ex)) return false;
+    return ex.id === 'lateral-raises' || ex.id === 'bicep-curl' ||
+           ex.tags.includes('machine') || (ex.tags.includes('dumbbell') && ['Light'].includes(ex.intensity));
+  });
+  const isoPool = isoRaw.length > 0 ? isoRaw : pickByDifficulty(coreRaw, level, 3);
 
   // ── Rotate picker: grab `count` items starting at offset, wrapping ──
   function rotateFrom(arr, offset, count) {
@@ -1980,7 +1986,7 @@ function getOnboardingTemplate(goal, level, days, equipment) {
     if (cr[0]) exercises.push(makeEx(cr[0], accessorySets, accessoryReps));
     // Add a bridge or posterior chain movement
     const bridges = EXERCISES.filter(e => matchesEquipment(e) && (e.id.includes('bridge') || e.id.includes('nordic') || e.id === 'rdl'));
-    const bridgePool = pickByDifficulty(bridges.length > 0 ? bridges : legs, level, 2);
+    const bridgePool = pickByDifficulty(bridges.length > 0 ? bridges : pool('legs'), level, 2);
     const br = rotateFrom(bridgePool, dayIdx, 1);
     if (br[0]) exercises.push(makeEx(br[0], accessorySets, accessoryReps));
     return exercises;
@@ -2023,7 +2029,7 @@ function getOnboardingTemplate(goal, level, days, equipment) {
     // Foundational skills only — no MU/HS/FL
     const skillPool = ['bwf-frog-stand', 'bwf-tuck-l-sit', 'bwf-tuck-skin-cat', 'l-sit'];
     const available = skillPool.map(id => exById(id)).filter(Boolean);
-    const picked = pickByDifficulty(available.length > 0 ? available : cores, level, 2);
+    const picked = pickByDifficulty(available.length > 0 ? available : coreRaw, level, 2);
     picked.forEach(ex => skill.push({ id: ex.id, sets: 3, reps: '15-30s', note: 'Skill work' }));
   } else if (goal === 'Mobility & Movement') {
     const mobPool = ['bwf-reverse-plank', 'bwf-shoulder-bridge', 'bwf-table-bridge', 'bwf-dead-hang'];
