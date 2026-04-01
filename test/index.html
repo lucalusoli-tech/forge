@@ -1791,8 +1791,8 @@ function setBuilderWeeks(n, btn) {
 function openBlockEndPrompt() {
   const total = currentBlock.weeks || 4;
   const tier = currentUser?.tier || '';
-  const isForge = (tier === 'premium' || tier === 'admin' || tier === 'pt');
-  const isForgePlus = (tier === 'coached');
+  const isForge = (tier === 'premium' || tier === 'pt');
+  const isForgePlus = (tier === 'coached' || tier === 'admin');
 
   document.getElementById('blockend-title').textContent = 'BLOCK COMPLETE';
   
