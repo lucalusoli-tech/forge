@@ -1034,6 +1034,16 @@
       <!-- COACHING -->
       <div class="page" id="page-coaching">
 
+        <!-- AI PROGRAMME HERO (FORGE+ / admin) — top of page -->
+        <div id="ai-programme-link" style="display:none">
+          <div style="padding:28px 20px 24px;border-bottom:1px solid var(--border);background:linear-gradient(180deg, rgba(201,169,110,0.06) 0%, transparent 100%)">
+            <div style="font-size:9px;letter-spacing:4px;color:var(--accent);text-transform:uppercase;margin-bottom:10px">✦ FORGE+ AI</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:4px;line-height:1;margin-bottom:10px;color:var(--text)">BUILD MY<br>PROGRAMME</div>
+            <div style="font-size:11px;letter-spacing:0.5px;color:var(--text-muted);line-height:1.7;margin-bottom:20px">Answer a few questions about your level and goals. The AI builds a complete training block — personalised exercises, sets, reps, and progression. Finish a block and it reads your data to build the next one smarter.</div>
+            <button class="coaching-submit" onclick="navigate('ai')" style="width:100%">START AI ASSESSMENT →</button>
+          </div>
+        </div>
+
         <!-- PROGRAMMES FEED -->
         <div class="coaching-hero">
           <div class="coaching-eyebrow">Monthly Drops</div>
@@ -1063,14 +1073,6 @@
         <!-- PROGRAMMES LIST -->
         <div id="programmes-list" style="padding:0 20px 20px">
           <div style="padding:32px 0;text-align:center;font-size:9px;letter-spacing:3px;color:var(--text-dim)" id="programmes-empty">Loading programmes...</div>
-        </div>
-
-        <!-- DIVIDER -->
-        <div style="border-top:1px solid var(--border);margin:0 20px"></div>
-
-        <!-- AI PROGRAMME LINK (admin only) -->
-        <div id="ai-programme-link" style="display:none;padding:20px">
-          <button class="coaching-submit" onclick="navigate('ai')">AI COACH — BUILD MY PROGRAMME →</button>
         </div>
 
         <!-- DIVIDER -->
@@ -1791,8 +1793,8 @@ function setBuilderWeeks(n, btn) {
 function openBlockEndPrompt() {
   const total = currentBlock.weeks || 4;
   const tier = currentUser?.tier || '';
-  const isForge = (tier === 'premium' || tier === 'admin' || tier === 'pt');
-  const isForgePlus = (tier === 'coached');
+  const isForge = (tier === 'premium' || tier === 'pt');
+  const isForgePlus = (tier === 'coached' || tier === 'admin');
 
   document.getElementById('blockend-title').textContent = 'BLOCK COMPLETE';
   
@@ -1804,7 +1806,7 @@ function openBlockEndPrompt() {
     // FORGE+ tier — AI + coached programme
     desc.textContent = 'Nice work finishing ' + (currentBlock.name || 'this block') + '. Ready for what\'s next?';
     actions.innerHTML = `
-      <button class="confirm-yes" onclick="closeBlockEndPrompt();openArchiveConfirm();setTimeout(()=>navigate('ai'),600)">Generate Next Block with AI →</button>
+      <button class="confirm-yes" onclick="closeBlockEndPrompt();openArchiveConfirm();setTimeout(()=>aiAutoProgress(),600)">Generate Next Block with AI →</button>
       <button class="confirm-yes" style="background:transparent;border-color:var(--border);color:var(--text-muted);margin-top:4px" onclick="closeBlockEndPrompt();repeatBlock()">Repeat This Block</button>
       <button class="confirm-yes" style="background:transparent;border-color:var(--border);color:var(--text-muted);margin-top:4px" onclick="closeBlockEndPrompt();openArchiveConfirm()">Archive & Build New</button>
     `;
@@ -1878,15 +1880,13 @@ function switchBuildTab(tab) {
 }
 
 // ─── CHANGELOG ─────────────────────────────────────────────────
-const FORGE_VERSION = '1.4.0';
+const FORGE_VERSION = '1.6.0';
 const FORGE_CHANGELOG = [
-  'Onboarding flow — guided first block setup for new users',
-  'Session streaks — track your consecutive training days',
-  'Weekly recap — summary popup at the start of each week',
-  'Block end flow — prompts next steps when your block finishes',
-  'FORGE+ tier — coach programmes + AI generator',
-  'Timer notifications — improved background alerts',
-  'Exercise database — difficulty levels cleaned up'
+  'AI Auto-Progression — finish a block and AI builds your next one from your actual performance data',
+  'Progress-aware generation — weights, reps, and trends from your session log feed into the next programme',
+  'Quick follow-up flow — 3 questions instead of full reassessment when progressing',
+  'AI Chat Branching — follow-up questions adapt to your goal',
+  'Calisthenics, Strength, Hypertrophy & Fitness paths — tailored assessment per goal'
 ];
 
 function checkChangelog() {
@@ -3733,8 +3733,10 @@ function buildSparkline(exId) {
 // ─── AI CONVERSATIONAL PROGRAMME GENERATOR ──────────────────────
 const aiData = {};
 let aiStep = 0;
+let aiFlow = []; // dynamically built per user
 
-const AI_FLOW = [
+// ── BASE QUESTIONS (shared across all goals) ──
+const AI_BASE_START = [
   {
     key: 'experience',
     msg: "Let's build your programme. How long have you been training?",
@@ -3752,13 +3754,10 @@ const AI_FLOW = [
     msg: "What's your main goal?",
     type: 'chips',
     options: ['Strength', 'Muscle / Hypertrophy', 'Calisthenics Skills', 'General Fitness']
-  },
-  {
-    key: 'focus',
-    msg: "Any specific focus? Something you want to prioritise — a movement, a muscle group, a skill. Or just say 'none'.",
-    type: 'text',
-    placeholder: 'e.g. muscle-up, glutes, shoulders, back, chest...'
-  },
+  }
+];
+
+const AI_BASE_END = [
   {
     key: 'days',
     msg: "How many days a week can you train?",
@@ -3802,6 +3801,90 @@ const AI_FLOW = [
     options: ["Can't do one", '1-3 strict', '4-8 strict', '8+ strict', 'Weighted / muscle-up']
   }
 ];
+
+// ── GOAL-SPECIFIC BRANCHES ──
+const AI_BRANCHES = {
+  'Calisthenics Skills': [
+    {
+      key: 'targetSkills',
+      msg: "Which skills are you working towards? Pick all that apply.",
+      type: 'chips',
+      options: ['Muscle-up', 'Front Lever', 'Planche', 'Handstand', 'Back Lever', 'Human Flag']
+    },
+    {
+      key: 'skillLevel',
+      msg: "Where are you with those skills right now?",
+      type: 'chips',
+      options: ["Can't attempt yet", 'Working on progressions', 'Can hold / do a few ugly reps', 'Solid — want to refine or add load']
+    },
+    {
+      key: 'focus',
+      msg: "Any other area you want to prioritise alongside your skill work?",
+      type: 'text',
+      placeholder: "e.g. pull strength, core, straight arm work, or type 'none'"
+    }
+  ],
+  'Muscle / Hypertrophy': [
+    {
+      key: 'weakPoints',
+      msg: "Any weak points or lagging muscle groups you want to bring up?",
+      type: 'text',
+      placeholder: 'e.g. chest, shoulders, glutes, arms, back...'
+    },
+    {
+      key: 'splitPref',
+      msg: "Do you have a preferred split style?",
+      type: 'chips',
+      options: ['Upper / Lower', 'Push / Pull / Legs', 'Full Body', 'No preference']
+    },
+    {
+      key: 'focus',
+      msg: "Anything else you want to prioritise — a specific lift, a look, a target?",
+      type: 'text',
+      placeholder: "e.g. bigger arms, bench press, V-taper, or type 'none'"
+    }
+  ],
+  'Strength': [
+    {
+      key: 'keyLifts',
+      msg: "Which lifts or movements do you want to get stronger on?",
+      type: 'text',
+      placeholder: 'e.g. squat, deadlift, bench, weighted pull-ups, dips...'
+    },
+    {
+      key: 'currentNumbers',
+      msg: "Any current numbers you know? Doesn't have to be exact.",
+      type: 'text',
+      placeholder: "e.g. squat 100kg, deadlift 120kg, or type 'not sure'"
+    },
+    {
+      key: 'focus',
+      msg: "Anything else you want to work on alongside your main lifts?",
+      type: 'text',
+      placeholder: "e.g. grip strength, mobility, explosiveness, or type 'none'"
+    }
+  ],
+  'General Fitness': [
+    {
+      key: 'activities',
+      msg: "Any activities you enjoy or want to include?",
+      type: 'text',
+      placeholder: "e.g. running, swimming, hiking, martial arts, or type 'none'"
+    },
+    {
+      key: 'focus',
+      msg: "Anything specific you want to improve — energy, posture, flexibility, body comp?",
+      type: 'text',
+      placeholder: "e.g. lose fat, feel stronger, better posture, or type 'none'"
+    }
+  ]
+};
+
+// Build the flow dynamically after goal is selected
+function aiBuildFlow(goal) {
+  const branch = AI_BRANCHES[goal] || AI_BRANCHES['General Fitness'];
+  aiFlow = [...AI_BASE_START, ...branch, ...AI_BASE_END];
+}
 
 function aiAddCoachMsg(text) {
   const chat = document.getElementById('ai-chat');
@@ -3858,13 +3941,19 @@ function aiAnswer(value) {
   aiHideInputs();
   aiAddUserMsg(value);
 
-  const step = AI_FLOW[aiStep];
+  const step = aiFlow[aiStep];
   aiData[step.key] = value;
   aiStep++;
 
+  // After goal is selected, build the branched flow
+  if (step.key === 'goal') {
+    aiBuildFlow(value);
+    // aiStep is now 3 (past BASE_START), which is where branch questions start — correct
+  }
+
   // Small delay before next question for natural feel
   setTimeout(() => {
-    if (aiStep < AI_FLOW.length) {
+    if (aiStep < aiFlow.length) {
       aiAskNext();
     } else {
       aiGenerate();
@@ -3873,7 +3962,7 @@ function aiAnswer(value) {
 }
 
 function aiAskNext() {
-  const step = AI_FLOW[aiStep];
+  const step = aiFlow[aiStep];
   aiAddCoachMsg(step.msg);
 
   setTimeout(() => {
@@ -3887,7 +3976,9 @@ function aiAskNext() {
 
 function aiStartChat() {
   aiStep = 0;
+  aiFlow = [...AI_BASE_START]; // start with base, branch gets added after goal
   Object.keys(aiData).forEach(k => delete aiData[k]);
+  window._aiProgressData = null; // clear any auto-progression data
   document.getElementById('ai-chat').innerHTML = '';
   document.getElementById('ai-result').style.display = 'none';
   aiHideInputs();
@@ -3919,7 +4010,10 @@ async function aiGenerate() {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ' + (await supa.auth.getSession()).data.session?.access_token
       },
-      body: JSON.stringify({ assessment: aiData })
+      body: JSON.stringify({
+        assessment: aiData,
+        progress: window._aiProgressData || null
+      })
     });
 
     // Remove spinner
@@ -3936,6 +4030,7 @@ async function aiGenerate() {
     if (!data.block) throw new Error('No block returned');
 
     window._aiGeneratedBlock = data.block;
+    window._aiProgressData = null; // clear after use
 
     // Success message
     const blockName = data.block.name || 'Your Programme';
@@ -4050,6 +4145,125 @@ function aiLoadBlock() {
 
 function aiRestart() {
   aiStartChat();
+}
+
+// ─── AUTO-PROGRESSION ──────────────────────────────────────────
+function gatherProgressData() {
+  const block = currentBlock;
+  const total = block.weeks || 4;
+  const progress = {
+    blockName: block.name || 'Unknown',
+    weeks: total,
+    methods: block.methods || [],
+    exercises: []
+  };
+
+  // Gather all unique exercise IDs across days
+  const seen = new Set();
+  (block.days || []).forEach(day => {
+    (day.exercises || []).forEach(ex => {
+      if (seen.has(ex.id)) return;
+      seen.add(ex.id);
+
+      const exData = EXERCISES.find(e => e.id === ex.id);
+      const exProgress = {
+        id: ex.id,
+        name: exData ? exData.name : ex.id,
+        scheme: ex.sets + '×' + ex.reps,
+        weeklyData: []
+      };
+
+      // Collect data for each week across all days this exercise appears
+      for (let w = 1; w <= total; w++) {
+        let bestWeight = null;
+        let bestReps = null;
+        let setsLogged = 0;
+
+        (block.days || []).forEach(d => {
+          if (!d.exercises.find(e => e.id === ex.id)) return;
+          const key = `${d.id}_${ex.id}_v${w}`;
+          const entry = sessionLog[key];
+          if (!entry) return;
+
+          for (let s = 1; s <= 5; s++) {
+            const wVal = parseFloat(entry[`s${s}_w`]);
+            const rVal = parseFloat(entry[`s${s}_r`]);
+            if (!isNaN(wVal) && wVal > 0) {
+              if (bestWeight === null || wVal > bestWeight) bestWeight = wVal;
+              setsLogged++;
+            }
+            if (!isNaN(rVal) && rVal > 0) {
+              if (bestReps === null || rVal > bestReps) bestReps = rVal;
+              if (isNaN(wVal) || wVal <= 0) setsLogged++;
+            }
+          }
+        });
+
+        if (setsLogged > 0) {
+          const weekEntry = { week: w };
+          if (bestWeight !== null) weekEntry.topWeight = bestWeight + 'kg';
+          if (bestReps !== null) weekEntry.topReps = bestReps;
+          weekEntry.sets = setsLogged;
+          exProgress.weeklyData.push(weekEntry);
+        }
+      }
+
+      if (exProgress.weeklyData.length > 0) {
+        progress.exercises.push(exProgress);
+      }
+    });
+  });
+
+  return progress;
+}
+
+function aiAutoProgress() {
+  const progressData = gatherProgressData();
+
+  // Navigate to AI page
+  navigate('ai');
+
+  // Clear chat and show progress-aware flow
+  setTimeout(() => {
+    aiStep = 0;
+    aiFlow = [];
+    Object.keys(aiData).forEach(k => delete aiData[k]);
+    document.getElementById('ai-chat').innerHTML = '';
+    document.getElementById('ai-result').style.display = 'none';
+    aiHideInputs();
+
+    // Store progress data for generation
+    window._aiProgressData = progressData;
+
+    // Show intro message
+    aiAddCoachMsg("I've reviewed your progress from <strong>" + progressData.blockName + "</strong>. Let me check a couple of things before building your next block.");
+
+    // Build a short follow-up flow (not the full assessment)
+    const progressFlow = [
+      {
+        key: 'progressFeel',
+        msg: "How did the last block feel overall?",
+        type: 'chips',
+        options: ['Too easy — need more', 'About right', 'Challenging but doable', 'Too hard — struggled']
+      },
+      {
+        key: 'progressGoal',
+        msg: "Same goal, or shifting focus?",
+        type: 'chips',
+        options: ['Same goal — keep progressing', 'Shift focus slightly', 'New direction entirely']
+      },
+      {
+        key: 'progressNotes',
+        msg: "Anything else? Injuries, schedule changes, something you want more or less of?",
+        type: 'text',
+        placeholder: "e.g. shoulder feels off, want more leg work, only 3 days now, or type 'nothing'"
+      }
+    ];
+
+    aiFlow = progressFlow;
+
+    setTimeout(() => aiAskNext(), 600);
+  }, 400);
 }
 
 // ─── WEEK BACK (long press) ─────────────────────────────────────
