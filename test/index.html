@@ -2576,11 +2576,35 @@ function renderLogExercises(exercises) {
     // Build sparkline from past weeks
     const sparkSvg = buildSparkline(ex.id);
     const savedNote = saved['note']||'';
+    // Build "last week" summary from previous week's data
+    let lastWeekHint = '';
+    if (currentWeek > 1) {
+      const prevKey = `${currentDayId}_${ex.id}_v${currentWeek - 1}`;
+      const prevEntry = sessionLog[prevKey] || {};
+      const prevWeights = [];
+      const prevReps = [];
+      for (let s = 1; s <= ex.sets; s++) {
+        const pw = parseFloat(prevEntry[`s${s}_w`]);
+        const pr = parseFloat(prevEntry[`s${s}_r`]);
+        if (!isNaN(pw) && pw > 0) prevWeights.push(pw);
+        if (!isNaN(pr) && pr > 0) prevReps.push(pr);
+      }
+      if (prevWeights.length > 0 || prevReps.length > 0) {
+        const topW = prevWeights.length ? Math.max(...prevWeights) : null;
+        const topR = prevReps.length ? Math.max(...prevReps) : null;
+        let hint = 'Last: ';
+        if (topW) hint += topW + 'kg';
+        if (topW && topR) hint += ' × ';
+        if (topR) hint += topR + 'r';
+        lastWeekHint = `<div style="font-size:9px;letter-spacing:1px;color:var(--accent-dim);padding:0 16px 4px">↳ ${hint}</div>`;
+      }
+    }
     c.innerHTML+=`<div class="log-ex-card">
       <div class="log-ex-header" onclick="openSheet('${exData.id}')">
         <div><div class="log-ex-name">${exData.name}</div><div class="log-ex-target">${ex.sets}×${ex.reps}</div></div>
         <div class="log-ex-note">${ex.note||''}</div>
       </div>
+      ${lastWeekHint}
       ${sparkSvg ? `<div class="spark-row"><div class="spark-label">Load trend</div>${sparkSvg}</div>` : ''}
       <div class="log-ex-body">
         <div style="font-size:8px;letter-spacing:2px;color:var(--text-muted);margin-bottom:8px">WEIGHT / REPS PER SET</div>
