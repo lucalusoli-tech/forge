@@ -1889,13 +1889,13 @@ function switchBuildTab(tab) {
 }
 
 // ─── CHANGELOG ─────────────────────────────────────────────────
-const FORGE_VERSION = '1.6.0';
+const FORGE_VERSION = '1.7.0';
 const FORGE_CHANGELOG = [
-  'AI Auto-Progression — finish a block and AI builds your next one from your actual performance data',
-  'Progress-aware generation — weights, reps, and trends from your session log feed into the next programme',
-  'Quick follow-up flow — 3 questions instead of full reassessment when progressing',
-  'AI Chat Branching — follow-up questions adapt to your goal',
-  'Calisthenics, Strength, Hypertrophy & Fitness paths — tailored assessment per goal'
+  'Data sync protection — session logs can no longer be accidentally wiped',
+  'Auto week progression — complete all sessions and get prompted to advance',
+  'Last week reference — see your previous weight and reps under each exercise',
+  'AI Coach hero — clearer entry point at the top of the Programme tab',
+  'Admin access — full FORGE+ features for admin accounts'
 ];
 
 function checkChangelog() {
@@ -2569,11 +2569,35 @@ function renderLogExercises(exercises) {
     // Build sparkline from past weeks
     const sparkSvg = buildSparkline(ex.id);
     const savedNote = saved['note']||'';
+    // Build "last week" summary from previous week's data
+    let lastWeekHint = '';
+    if (currentWeek > 1) {
+      const prevKey = `${currentDayId}_${ex.id}_v${currentWeek - 1}`;
+      const prevEntry = sessionLog[prevKey] || {};
+      const prevWeights = [];
+      const prevReps = [];
+      for (let s = 1; s <= ex.sets; s++) {
+        const pw = parseFloat(prevEntry[`s${s}_w`]);
+        const pr = parseFloat(prevEntry[`s${s}_r`]);
+        if (!isNaN(pw) && pw > 0) prevWeights.push(pw);
+        if (!isNaN(pr) && pr > 0) prevReps.push(pr);
+      }
+      if (prevWeights.length > 0 || prevReps.length > 0) {
+        const topW = prevWeights.length ? Math.max(...prevWeights) : null;
+        const topR = prevReps.length ? Math.max(...prevReps) : null;
+        let hint = 'Last: ';
+        if (topW) hint += topW + 'kg';
+        if (topW && topR) hint += ' × ';
+        if (topR) hint += topR + 'r';
+        lastWeekHint = `<div style="font-size:9px;letter-spacing:1px;color:var(--accent-dim);padding:0 16px 4px">↳ ${hint}</div>`;
+      }
+    }
     c.innerHTML+=`<div class="log-ex-card">
       <div class="log-ex-header" onclick="openSheet('${exData.id}')">
         <div><div class="log-ex-name">${exData.name}</div><div class="log-ex-target">${ex.sets}×${ex.reps}</div></div>
         <div class="log-ex-note">${ex.note||''}</div>
       </div>
+      ${lastWeekHint}
       ${sparkSvg ? `<div class="spark-row"><div class="spark-label">Load trend</div>${sparkSvg}</div>` : ''}
       <div class="log-ex-body">
         <div style="font-size:8px;letter-spacing:2px;color:var(--text-muted);margin-bottom:8px">WEIGHT / REPS PER SET</div>
