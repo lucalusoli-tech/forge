@@ -2554,13 +2554,20 @@ function renderLogExercises(exercises) {
     const exData = EXERCISES.find(e=>e.id===ex.id); if(!exData) return;
     const wk = `${currentDayId}_${ex.id}_v${currentWeek}`;
     const saved = sessionLog[wk]||{};
+    // Get previous week's data for placeholders
+    const prevWk = currentWeek > 1 ? `${currentDayId}_${ex.id}_v${currentWeek - 1}` : null;
+    const prev = prevWk ? (sessionLog[prevWk]||{}) : {};
     let cols='';
     for(let s=1;s<=ex.sets;s++){
+      const prevW = prev[`s${s}_w`] || '';
+      const prevR = prev[`s${s}_r`] || '';
+      const phW = prevW ? prevW : 'kg';
+      const phR = prevR ? prevR : 'reps';
       cols+=`<div class="set-col">
         <div class="set-num">S${s}</div>
-        <input class="set-field" type="text" inputmode="decimal" placeholder="kg" value="${saved[`s${s}_w`]||''}" id="${wk}_s${s}_w"
+        <input class="set-field" type="text" inputmode="decimal" placeholder="${phW}" value="${saved[`s${s}_w`]||''}" id="${wk}_s${s}_w"
           oninput="autoSaveSet('${wk}',${s})">
-        <input class="set-field reps" type="text" inputmode="numeric" placeholder="reps" value="${saved[`s${s}_r`]||''}" id="${wk}_s${s}_r"
+        <input class="set-field reps" type="text" inputmode="numeric" placeholder="${phR}" value="${saved[`s${s}_r`]||''}" id="${wk}_s${s}_r"
           oninput="autoSaveSet('${wk}',${s})"
           onblur="onSetBlur('${wk}',${s},'${exData.name}')">
       </div>`;
