@@ -4426,6 +4426,45 @@ const SUPA_URL = 'https://naxojfchohntrfpunbxg.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5heG9qZmNob2hudHJmcHVuYnhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1MTEwMTEsImV4cCI6MjA4OTA4NzAxMX0.LA8RsSCetWR3ShPcXLJp5YetE-aqMoEW64bUqRSmd-Q';
 const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
 
+// ─── IndexedDB session backup (survives iOS Safari storage eviction) ───
+const IDB_NAME = 'forge_auth'; const IDB_STORE = 'session';
+function idbOpen() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = () => req.result.createObjectStore(IDB_STORE);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function idbSet(key, val) {
+  try {
+    const db = await idbOpen();
+    const tx = db.transaction(IDB_STORE, 'readwrite');
+    tx.objectStore(IDB_STORE).put(val, key);
+    await new Promise((r, j) => { tx.oncomplete = r; tx.onerror = j; });
+    db.close();
+  } catch(e) { console.warn('[FORGE] IDB set failed:', e); }
+}
+async function idbGet(key) {
+  try {
+    const db = await idbOpen();
+    const tx = db.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).get(key);
+    const val = await new Promise((r, j) => { req.onsuccess = () => r(req.result); req.onerror = j; });
+    db.close();
+    return val || null;
+  } catch(e) { console.warn('[FORGE] IDB get failed:', e); return null; }
+}
+async function idbClear() {
+  try {
+    const db = await idbOpen();
+    const tx = db.transaction(IDB_STORE, 'readwrite');
+    tx.objectStore(IDB_STORE).clear();
+    await new Promise((r, j) => { tx.oncomplete = r; tx.onerror = j; });
+    db.close();
+  } catch(e) { console.warn('[FORGE] IDB clear failed:', e); }
+}
+
 let currentUser = JSON.parse(localStorage.getItem('fw_user')||'null');
 let isPremium = localStorage.getItem('fw_premium')==='true';
 let trialStart = parseInt(localStorage.getItem('fw_trial_start')||'0');
@@ -4614,6 +4653,15 @@ async function afterAuth(supaUser, isNew) {
     }
   }
   localStorage.setItem('fw_user', JSON.stringify(currentUser));
+  // Backup session to IndexedDB (survives iOS Safari localStorage eviction)
+  const { data: { session: freshSession } } = await supa.auth.getSession();
+  if (freshSession) {
+    await idbSet('supabase_session', {
+      access_token: freshSession.access_token,
+      refresh_token: freshSession.refresh_token
+    });
+    console.log('[FORGE] Session backed up to IndexedDB');
+  }
   await loadFromCloud();
   startApp(false);
 }
@@ -4645,6 +4693,7 @@ function startApp(isGuest) {
 
 async function handleSignOut() {
   await supa.auth.signOut();
+  await idbClear();
   // Wipe all local data so the next user on this device starts clean
   ['fw_user','fw_premium','fw_trial_start','fw_guest',
    'fw_block','fw_customs','fw_archive','fw_log','fw_week'].forEach(k => localStorage.removeItem(k));
@@ -4670,6 +4719,28 @@ async function handleSignOut() {
       session = refresh.data.session;
     } else {
       console.log('[FORGE] refreshSession() failed:', refresh.error?.message);
+    }
+  }
+
+  // iOS PWA fix: if both localStorage AND Supabase token are gone,
+  // try to restore from IndexedDB backup (survives Safari eviction)
+  if (!session) {
+    const idbSession = await idbGet('supabase_session');
+    if (idbSession?.refresh_token) {
+      console.log('[FORGE] localStorage wiped — restoring from IndexedDB');
+      const restored = await supa.auth.setSession({
+        access_token: idbSession.access_token,
+        refresh_token: idbSession.refresh_token
+      });
+      if (restored.data?.session) {
+        console.log('[FORGE] Session restored from IndexedDB ✓');
+        session = restored.data.session;
+      } else {
+        console.log('[FORGE] IndexedDB restore failed:', restored.error?.message);
+        await idbClear();
+      }
+    } else {
+      console.log('[FORGE] No IndexedDB backup found');
     }
   }
 
