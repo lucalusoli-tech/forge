@@ -4665,7 +4665,23 @@ supa.auth.getSession().then(async ({ data: { session }, error }) => {
   }
 });
 
-// Auth state changes handled by getSession on load
+// Listen for auth state changes (token refresh, sign in/out from another tab, PWA resume)
+supa.auth.onAuthStateChange(async (event, session) => {
+  if(event === 'SIGNED_IN' && session?.user && !currentUser) {
+    // Session restored (e.g. PWA reopened, token refreshed)
+    await afterAuth(session.user, false);
+  } else if(event === 'TOKEN_REFRESHED' && session?.user) {
+    // Token refreshed — update stored user silently
+    currentUser.id = session.user.id;
+    currentUser.email = session.user.email;
+    localStorage.setItem('fw_user', JSON.stringify(currentUser));
+  } else if(event === 'SIGNED_OUT') {
+    currentUser = null; isPremium = false;
+    localStorage.removeItem('fw_user');
+    localStorage.removeItem('fw_premium');
+    showAuthScreen('splash');
+  }
+});
 
 function updateUserBar() {
   const bar = document.getElementById('user-bar');
