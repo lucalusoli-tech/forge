@@ -2412,7 +2412,7 @@ function toggleDayCard(id) { document.getElementById('dc-'+id)?.classList.toggle
 function openArchiveConfirm() { document.getElementById('confirm-overlay').classList.add('open'); }
 function closeConfirm() { document.getElementById('confirm-overlay').classList.remove('open'); }
 
-function executeArchive() {
+async function executeArchive() {
   archivedBlocks.unshift({
     ...currentBlock,
     archivedAt: new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
@@ -2425,12 +2425,18 @@ function executeArchive() {
   } else {
     currentBlock = { name:'NEW BLOCK', methods:[], days:[] };
   }
-  currentWeek = 1; sessionLog = {};
-  localStorage.setItem('fw_log', JSON.stringify({}));
+  currentWeek = 1;
   localStorage.setItem('fw_week', '1');
+  // Sync the archive (with session log saved inside) BEFORE clearing the log
+  await syncBlocksToCloud();
+  // Now clear the session log
+  sessionLog = {};
+  localStorage.setItem('fw_log', JSON.stringify({}));
+  // Force sync the empty log (legitimate clear after archive)
+  await syncLogsToCloud(true);
   saveCurrentBlock();
   closeConfirm();
-  updateStats(); renderHomeDays();  renderProgress(); renderArchive();
+  updateStats(); renderHomeDays(); renderProgress(); renderArchive();
   showToast('Block archived ✓');
 }
 
@@ -4108,7 +4114,7 @@ function renderAiResult(block) {
   setTimeout(() => result.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
 }
 
-function aiLoadBlock() {
+async function aiLoadBlock() {
   const block = window._aiGeneratedBlock;
   if (!block) { showToast('No programme to load'); return; }
 
@@ -4120,6 +4126,8 @@ function aiLoadBlock() {
       sessionLog: {...sessionLog},
     });
     localStorage.setItem('fw_archive', JSON.stringify(archivedBlocks));
+    // Sync the archive (with session log saved inside) before clearing
+    await syncBlocksToCloud();
   }
 
   currentBlock = {
@@ -4131,8 +4139,12 @@ function aiLoadBlock() {
     days: block.days || []
   };
   currentWeek = 1;
+  // Clear session log for the new block
+  sessionLog = {};
   localStorage.setItem('fw_block', JSON.stringify(currentBlock));
   localStorage.setItem('fw_week', '1');
+  localStorage.setItem('fw_log', JSON.stringify({}));
+  await syncLogsToCloud(true); // force — legitimate clear after archive
   saveCurrentBlock();
   updateStats();
   renderHomeDays();
@@ -4367,8 +4379,13 @@ async function syncBlocksToCloud() {
   } catch(e) { console.warn('Block sync failed:', e); }
 }
 
-async function syncLogsToCloud() {
+async function syncLogsToCloud(force = false) {
   if(!currentUser?.id) return;
+  // SAFETY: never overwrite cloud log with empty data unless forced (e.g. after archive)
+  if(!force && (!sessionLog || Object.keys(sessionLog).length === 0)) {
+    console.log('Sync skipped: session log is empty, preserving cloud data');
+    return;
+  }
   try {
     await supa.from('logs').upsert({
       user_id: currentUser.id,
@@ -4385,20 +4402,39 @@ async function loadFromCloud() {
       .select('data').eq('user_id', currentUser.id).eq('is_current', true).maybeSingle();
     if(blockRow?.data) {
       const d = blockRow.data;
-      if(d.currentBlock) {
+      if(d.currentBlock && d.currentBlock.days && d.currentBlock.days.length > 0) {
         currentBlock = d.currentBlock;
         if(!currentBlock.warmup) currentBlock.warmup = [];
         if(!currentBlock.skill)  currentBlock.skill  = [];
         localStorage.setItem('fw_block', JSON.stringify(currentBlock));
       }
-      if(d.customWorkouts) { customWorkouts = d.customWorkouts; localStorage.setItem('fw_customs', JSON.stringify(customWorkouts)); }
-      if(d.archivedBlocks) { archivedBlocks = d.archivedBlocks; localStorage.setItem('fw_archive', JSON.stringify(archivedBlocks)); }
-      if(d.currentWeek)    { currentWeek = d.currentWeek;       localStorage.setItem('fw_week', currentWeek); }
+      if(d.customWorkouts && d.customWorkouts.length > 0) { customWorkouts = d.customWorkouts; localStorage.setItem('fw_customs', JSON.stringify(customWorkouts)); }
+      if(d.archivedBlocks && d.archivedBlocks.length > 0) {
+        // Merge: keep whichever has more archived blocks
+        if(d.archivedBlocks.length >= archivedBlocks.length) {
+          archivedBlocks = d.archivedBlocks;
+          localStorage.setItem('fw_archive', JSON.stringify(archivedBlocks));
+        }
+      }
+      if(d.currentWeek) { currentWeek = d.currentWeek; localStorage.setItem('fw_week', currentWeek); }
     }
     const { data: logRow } = await supa.from('logs')
       .select('data').eq('user_id', currentUser.id).maybeSingle();
-    if(logRow?.data) {
-      sessionLog = logRow.data;
+    if(logRow?.data && Object.keys(logRow.data).length > 0) {
+      // Merge cloud log with local log — cloud keys win on conflict, but local keys are preserved
+      const localLog = sessionLog || {};
+      const cloudLog = logRow.data;
+      const localKeys = Object.keys(localLog).length;
+      const cloudKeys = Object.keys(cloudLog).length;
+      
+      if(cloudKeys > 0 && localKeys > 0) {
+        // Merge: start with cloud, overlay local (local is more recent if user was logging)
+        sessionLog = { ...cloudLog, ...localLog };
+      } else if(cloudKeys > 0) {
+        // Cloud has data, local is empty — use cloud
+        sessionLog = cloudLog;
+      }
+      // If cloud is empty but local has data — keep local (don't overwrite)
       localStorage.setItem('fw_log', JSON.stringify(sessionLog));
     }
   } catch(e) { console.warn('Load from cloud failed:', e); }
