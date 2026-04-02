@@ -591,7 +591,7 @@
 <!-- ── WEEKLY SUMMARY OVERLAY ── -->
 <div class="weekly-overlay" id="weekly-overlay" style="display:none" onclick="if(event.target===this)closeWeeklySummary()">
   <div class="weekly-card">
-    <div class="weekly-label">Last week</div>
+    <div class="weekly-label">Block progress</div>
     <div class="weekly-title" id="weekly-title">WEEK RECAP</div>
     <div class="weekly-stats">
       <div class="weekly-stat">
@@ -1983,59 +1983,48 @@ function getWeekNumber(d) {
 }
 
 function checkWeeklySummary() {
-  const today = todayStr();
-  const currentWeekNum = getWeekNumber(today);
-  const currentYear = new Date(today).getFullYear();
-  const lastSummaryKey = localStorage.getItem('fw_last_summary') || '';
-  const thisKey = `${currentYear}-W${currentWeekNum}`;
-
-  if (lastSummaryKey === thisKey) return; // Already shown this week
-  if (trainedDates.length === 0) return; // No history
-
-  // Calculate last week's stats
-  const lastWeekDates = [];
-  const d = new Date(today);
-  // Go back to find last Monday–Sunday
-  const dayOfWeek = d.getDay() || 7; // Monday=1, Sunday=7
-  const lastSunday = new Date(d); lastSunday.setDate(d.getDate() - dayOfWeek);
-  const lastMonday = new Date(lastSunday); lastMonday.setDate(lastSunday.getDate() - 6);
-
-  trainedDates.forEach(dt => {
-    const date = new Date(dt);
-    if (date >= lastMonday && date <= lastSunday) {
-      lastWeekDates.push(dt);
-    }
-  });
-
-  if (lastWeekDates.length === 0) {
-    // They didn't train last week — still mark as shown so we don't keep triggering
-    localStorage.setItem('fw_last_summary', thisKey);
-    return;
-  }
-
-  const uniqueDays = new Set(lastWeekDates).size;
-
-  // Count total sets from last week's session log
-  let totalSets = 0;
+  // Only show if we're on week 2+ (there's a previous block week to recap)
+  if (currentWeek <= 1) return;
   const days = currentBlock.days || [];
-  const totalWeeks = currentBlock.weeks || 6;
+  if (!days.length) return;
+
+  // Use block week as the key so it shows once per block week transition
+  const summaryKey = `block_${currentBlock.name || 'x'}_w${currentWeek}`;
+  const lastSummaryKey = localStorage.getItem('fw_last_summary') || '';
+  if (lastSummaryKey === summaryKey) return;
+
+  const prevWeek = currentWeek - 1;
+
+  // Count days logged and total sets from previous block week
+  let daysLogged = 0;
+  let totalSets = 0;
+
   days.forEach(day => {
-    day.exercises.forEach(ex => {
-      for (let w = 1; w <= totalWeeks; w++) {
-        const wk = `${day.id}_${ex.id}_v${w}`;
-        const entry = sessionLog[wk];
-        if (!entry) continue;
-        for (let s = 1; s <= 10; s++) {
-          if (entry[`s${s}_r`] && entry[`s${s}_r`] !== '') totalSets++;
+    let dayHasData = false;
+    (day.exercises || []).forEach(ex => {
+      const wk = `${day.id}_${ex.id}_v${prevWeek}`;
+      const entry = sessionLog[wk];
+      if (!entry) return;
+      for (let s = 1; s <= 10; s++) {
+        const wv = entry[`s${s}_w`], rv = entry[`s${s}_r`];
+        if ((rv && rv !== '' && rv !== '0') || (wv && wv !== '' && wv !== '0')) {
+          totalSets++;
+          dayHasData = true;
         }
       }
     });
+    if (dayHasData) daysLogged++;
   });
+
+  if (daysLogged === 0) {
+    localStorage.setItem('fw_last_summary', summaryKey);
+    return;
+  }
 
   // Show summary
   const streak = calcStreak();
-  document.getElementById('weekly-title').textContent = 'WEEK RECAP';
-  document.getElementById('weekly-days').textContent = uniqueDays;
+  document.getElementById('weekly-title').textContent = 'WEEK ' + prevWeek + ' RECAP';
+  document.getElementById('weekly-days').textContent = daysLogged;
   document.getElementById('weekly-sets').textContent = totalSets > 0 ? totalSets : '—';
   const streakEl = document.getElementById('weekly-streak');
   if (streak >= 2) {
@@ -2044,7 +2033,7 @@ function checkWeeklySummary() {
     streakEl.textContent = 'New week, fresh start';
   }
   document.getElementById('weekly-overlay').style.display = 'flex';
-  localStorage.setItem('fw_last_summary', thisKey);
+  localStorage.setItem('fw_last_summary', summaryKey);
 }
 
 function closeWeeklySummary() {
