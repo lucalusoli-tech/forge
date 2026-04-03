@@ -885,7 +885,7 @@
       </div>
       <div class="notes-section">
         <div class="notes-label">Session Notes</div>
-        <textarea class="notes-input" id="session-notes" placeholder="Energy, recovery, technique notes..."></textarea>
+        <textarea class="notes-input" id="session-notes" placeholder="Energy, recovery, technique notes..." autocomplete="off"></textarea>
       </div>
       <div class="save-section"><button class="save-btn" onclick="saveSession()">SAVE SESSION ✓</button></div>
     </div>
@@ -2557,9 +2557,9 @@ function renderLogExercises(exercises) {
       cols+=`<div class="set-col">
         <div class="set-num">S${s}</div>
         <input class="set-field" type="text" inputmode="decimal" placeholder="kg" value="${saved[`s${s}_w`]||''}" id="${wk}_s${s}_w"
-          oninput="autoSaveSet('${wk}',${s})">
+          autocomplete="off" oninput="autoSaveSet('${wk}',${s})">
         <input class="set-field reps" type="text" inputmode="numeric" placeholder="reps" value="${saved[`s${s}_r`]||''}" id="${wk}_s${s}_r"
-          oninput="autoSaveSet('${wk}',${s})"
+          autocomplete="off" oninput="autoSaveSet('${wk}',${s})"
           onblur="onSetBlur('${wk}',${s},'${exData.name}')">
       </div>`;
       if(s<ex.sets) cols+=`<div class="set-divider">·</div>`;
@@ -2603,7 +2603,7 @@ function renderLogExercises(exercises) {
       </div>
       <div class="set-note-row">
         <input class="set-note-input" type="text" placeholder="Exercise note — technique, feel, load..." value="${savedNote}"
-          id="${wk}_note" onblur="autoSaveNote('${wk}')">
+          id="${wk}_note" autocomplete="off" onblur="autoSaveNote('${wk}')">
       </div>
     </div>`;
   });
