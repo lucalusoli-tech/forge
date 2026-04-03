@@ -591,7 +591,7 @@
 <!-- ── WEEKLY SUMMARY OVERLAY ── -->
 <div class="weekly-overlay" id="weekly-overlay" style="display:none" onclick="if(event.target===this)closeWeeklySummary()">
   <div class="weekly-card">
-    <div class="weekly-label">Block progress</div>
+    <div class="weekly-label">Last week</div>
     <div class="weekly-title" id="weekly-title">WEEK RECAP</div>
     <div class="weekly-stats">
       <div class="weekly-stat">
@@ -1983,48 +1983,57 @@ function getWeekNumber(d) {
 }
 
 function checkWeeklySummary() {
-  // Only show if we're on week 2+ (there's a previous block week to recap)
-  if (currentWeek <= 1) return;
-  const days = currentBlock.days || [];
-  if (!days.length) return;
-
-  // Use block week as the key so it shows once per block week transition
-  const summaryKey = `block_${currentBlock.name || 'x'}_w${currentWeek}`;
+  const today = todayStr();
+  const currentWeekNum = getWeekNumber(today);
+  const currentYear = new Date(today).getFullYear();
   const lastSummaryKey = localStorage.getItem('fw_last_summary') || '';
-  if (lastSummaryKey === summaryKey) return;
+  const thisKey = `${currentYear}-W${currentWeekNum}`;
 
-  const prevWeek = currentWeek - 1;
+  if (lastSummaryKey === thisKey) return; // Already shown this week
+  if (trainedDates.length === 0) return; // No history
 
-  // Count days logged and total sets from previous block week
-  let daysLogged = 0;
-  let totalSets = 0;
+  // Calculate last week's stats
+  const lastWeekDates = [];
+  const d = new Date(today);
+  // Go back to find last Monday–Sunday
+  const dayOfWeek = d.getDay() || 7; // Monday=1, Sunday=7
+  const lastSunday = new Date(d); lastSunday.setDate(d.getDate() - dayOfWeek);
+  const lastMonday = new Date(lastSunday); lastMonday.setDate(lastSunday.getDate() - 6);
 
-  days.forEach(day => {
-    let dayHasData = false;
-    (day.exercises || []).forEach(ex => {
-      const wk = `${day.id}_${ex.id}_v${prevWeek}`;
-      const entry = sessionLog[wk];
-      if (!entry) return;
-      for (let s = 1; s <= 10; s++) {
-        const wv = entry[`s${s}_w`], rv = entry[`s${s}_r`];
-        if ((rv && rv !== '' && rv !== '0') || (wv && wv !== '' && wv !== '0')) {
-          totalSets++;
-          dayHasData = true;
-        }
-      }
-    });
-    if (dayHasData) daysLogged++;
+  trainedDates.forEach(dt => {
+    const date = new Date(dt);
+    if (date >= lastMonday && date <= lastSunday) {
+      lastWeekDates.push(dt);
+    }
   });
 
-  if (daysLogged === 0) {
-    localStorage.setItem('fw_last_summary', summaryKey);
+  if (lastWeekDates.length === 0) {
+    // They didn't train last week — still mark as shown so we don't keep triggering
+    localStorage.setItem('fw_last_summary', thisKey);
     return;
   }
 
+  const uniqueDays = new Set(lastWeekDates).size;
+
+  // Count total sets from LAST WEEK's session log only
+  let totalSets = 0;
+  const days = currentBlock.days || [];
+  const lastWeekNum = currentWeek > 1 ? currentWeek - 1 : currentWeek;
+  days.forEach(day => {
+    day.exercises.forEach(ex => {
+      const wk = `${day.id}_${ex.id}_v${lastWeekNum}`;
+      const entry = sessionLog[wk];
+      if (!entry) return;
+      for (let s = 1; s <= 10; s++) {
+        if (entry[`s${s}_r`] && entry[`s${s}_r`] !== '') totalSets++;
+      }
+    });
+  });
+
   // Show summary
   const streak = calcStreak();
-  document.getElementById('weekly-title').textContent = 'WEEK ' + prevWeek + ' RECAP';
-  document.getElementById('weekly-days').textContent = daysLogged;
+  document.getElementById('weekly-title').textContent = 'WEEK RECAP';
+  document.getElementById('weekly-days').textContent = uniqueDays;
   document.getElementById('weekly-sets').textContent = totalSets > 0 ? totalSets : '—';
   const streakEl = document.getElementById('weekly-streak');
   if (streak >= 2) {
@@ -2033,7 +2042,7 @@ function checkWeeklySummary() {
     streakEl.textContent = 'New week, fresh start';
   }
   document.getElementById('weekly-overlay').style.display = 'flex';
-  localStorage.setItem('fw_last_summary', summaryKey);
+  localStorage.setItem('fw_last_summary', thisKey);
 }
 
 function closeWeeklySummary() {
@@ -4417,6 +4426,45 @@ const SUPA_URL = 'https://naxojfchohntrfpunbxg.supabase.co';
 const SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5heG9qZmNob2hudHJmcHVuYnhnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1MTEwMTEsImV4cCI6MjA4OTA4NzAxMX0.LA8RsSCetWR3ShPcXLJp5YetE-aqMoEW64bUqRSmd-Q';
 const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
 
+// ─── IndexedDB session backup (survives iOS Safari storage eviction) ───
+const IDB_NAME = 'forge_auth'; const IDB_STORE = 'session';
+function idbOpen() {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = () => req.result.createObjectStore(IDB_STORE);
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error);
+  });
+}
+async function idbSet(key, val) {
+  try {
+    const db = await idbOpen();
+    const tx = db.transaction(IDB_STORE, 'readwrite');
+    tx.objectStore(IDB_STORE).put(val, key);
+    await new Promise((r, j) => { tx.oncomplete = r; tx.onerror = j; });
+    db.close();
+  } catch(e) { console.warn('[FORGE] IDB set failed:', e); }
+}
+async function idbGet(key) {
+  try {
+    const db = await idbOpen();
+    const tx = db.transaction(IDB_STORE, 'readonly');
+    const req = tx.objectStore(IDB_STORE).get(key);
+    const val = await new Promise((r, j) => { req.onsuccess = () => r(req.result); req.onerror = j; });
+    db.close();
+    return val || null;
+  } catch(e) { console.warn('[FORGE] IDB get failed:', e); return null; }
+}
+async function idbClear() {
+  try {
+    const db = await idbOpen();
+    const tx = db.transaction(IDB_STORE, 'readwrite');
+    tx.objectStore(IDB_STORE).clear();
+    await new Promise((r, j) => { tx.oncomplete = r; tx.onerror = j; });
+    db.close();
+  } catch(e) { console.warn('[FORGE] IDB clear failed:', e); }
+}
+
 let currentUser = JSON.parse(localStorage.getItem('fw_user')||'null');
 let isPremium = localStorage.getItem('fw_premium')==='true';
 let trialStart = parseInt(localStorage.getItem('fw_trial_start')||'0');
@@ -4605,6 +4653,15 @@ async function afterAuth(supaUser, isNew) {
     }
   }
   localStorage.setItem('fw_user', JSON.stringify(currentUser));
+  // Backup session to IndexedDB (survives iOS Safari localStorage eviction)
+  const { data: { session: freshSession } } = await supa.auth.getSession();
+  if (freshSession) {
+    await idbSet('supabase_session', {
+      access_token: freshSession.access_token,
+      refresh_token: freshSession.refresh_token
+    });
+    console.log('[FORGE] Session backed up to IndexedDB');
+  }
   await loadFromCloud();
   startApp(false);
 }
@@ -4636,6 +4693,7 @@ function startApp(isGuest) {
 
 async function handleSignOut() {
   await supa.auth.signOut();
+  await idbClear();
   // Wipe all local data so the next user on this device starts clean
   ['fw_user','fw_premium','fw_trial_start','fw_guest',
    'fw_block','fw_customs','fw_archive','fw_log','fw_week'].forEach(k => localStorage.removeItem(k));
@@ -4644,15 +4702,54 @@ async function handleSignOut() {
 }
 
 // On load — check if already logged in via Supabase session
-supa.auth.getSession().then(async ({ data: { session }, error }) => {
-  const isGuest = localStorage.getItem('fw_guest') === '1';
-  if(session?.user) {
+(async function initSession() {
+  console.log('[FORGE] PWA cold start');
+  console.log('[FORGE] localStorage fw_user:', !!localStorage.getItem('fw_user'));
+  console.log('[FORGE] supabase auth token:', !!localStorage.getItem('sb-naxojfchohntrfpunbxg-auth-token'));
+
+  let { data: { session }, error } = await supa.auth.getSession();
+
+  // iOS PWA fix: if getSession returns null but we have a cached user,
+  // the token may just need refreshing (Safari didn't fully wipe it)
+  if (!session && localStorage.getItem('fw_user')) {
+    console.log('[FORGE] No session but fw_user exists — attempting refreshSession()');
+    const refresh = await supa.auth.refreshSession();
+    if (refresh.data?.session) {
+      console.log('[FORGE] refreshSession() recovered the session');
+      session = refresh.data.session;
+    } else {
+      console.log('[FORGE] refreshSession() failed:', refresh.error?.message);
+    }
+  }
+
+  // iOS PWA fix: if both localStorage AND Supabase token are gone,
+  // try to restore from IndexedDB backup (survives Safari eviction)
+  if (!session) {
+    const idbSession = await idbGet('supabase_session');
+    if (idbSession?.refresh_token) {
+      console.log('[FORGE] localStorage wiped — restoring from IndexedDB');
+      const restored = await supa.auth.setSession({
+        access_token: idbSession.access_token,
+        refresh_token: idbSession.refresh_token
+      });
+      if (restored.data?.session) {
+        console.log('[FORGE] Session restored from IndexedDB ✓');
+        session = restored.data.session;
+      } else {
+        console.log('[FORGE] IndexedDB restore failed:', restored.error?.message);
+        await idbClear();
+      }
+    } else {
+      console.log('[FORGE] No IndexedDB backup found');
+    }
+  }
+
+  if (session?.user) {
     await afterAuth(session.user, false);
-    // Refresh tier from database in case payment just completed
     const { data: profile } = await supa.from('profiles').select('tier').eq('id', session.user.id).single();
-    if(profile?.tier && currentUser) {
+    if (profile?.tier && currentUser) {
       currentUser.tier = profile.tier;
-      if(profile.tier === 'premium' || profile.tier === 'coached' || profile.tier === 'pt') {
+      if (profile.tier === 'premium' || profile.tier === 'coached' || profile.tier === 'pt') {
         isPremium = true;
         localStorage.setItem('fw_premium', 'true');
       }
@@ -4660,12 +4757,27 @@ supa.auth.getSession().then(async ({ data: { session }, error }) => {
       updateUserBar();
     }
   } else {
-    // No session — always show auth (guest mode removed)
+    console.log('[FORGE] No session recovered — showing auth screen');
+    localStorage.removeItem('fw_user');
+    showAuthScreen('splash');
+  }
+})();
+
+// Listen for auth state changes (token refresh, sign in/out from another tab, PWA resume)
+supa.auth.onAuthStateChange(async (event, session) => {
+  if (event === 'SIGNED_IN' && session?.user && !currentUser) {
+    await afterAuth(session.user, false);
+  } else if (event === 'TOKEN_REFRESHED' && session?.user) {
+    currentUser.id = session.user.id;
+    currentUser.email = session.user.email;
+    localStorage.setItem('fw_user', JSON.stringify(currentUser));
+  } else if (event === 'SIGNED_OUT') {
+    currentUser = null; isPremium = false;
+    localStorage.removeItem('fw_user');
+    localStorage.removeItem('fw_premium');
     showAuthScreen('splash');
   }
 });
-
-// Auth state changes handled by getSession on load
 
 function updateUserBar() {
   const bar = document.getElementById('user-bar');
