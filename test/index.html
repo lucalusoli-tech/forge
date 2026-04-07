@@ -723,12 +723,14 @@
   </div>
   <div class="auth-form">
     <div class="auth-title">SIGN IN</div>
-    <input class="auth-input" type="email" id="login-email" placeholder="Email address" autocomplete="username">
-    <input class="auth-input" type="password" id="login-pass" placeholder="Password" autocomplete="current-password">
-    <div class="auth-error" id="login-error"></div>
-    <button class="auth-btn-primary" onclick="handleLogin()">SIGN IN →</button>
+    <form id="login-form" onsubmit="event.preventDefault(); handleLogin(); return false;" action="#" method="post" style="display:contents">
+      <input class="auth-input" type="email" id="login-email" name="email" placeholder="Email address" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" inputmode="email">
+      <input class="auth-input" type="password" id="login-pass" name="password" placeholder="Password" autocomplete="current-password">
+      <div class="auth-error" id="login-error"></div>
+      <button class="auth-btn-primary" type="submit">SIGN IN →</button>
+    </form>
     <div class="auth-divider"><div class="auth-divider-line"></div><div class="auth-divider-text">NO ACCOUNT?</div><div class="auth-divider-line"></div></div>
-    <button class="auth-btn-ghost" onclick="showAuthScreen('signup')">CREATE ACCOUNT</button>
+    <button class="auth-btn-ghost" type="button" onclick="showAuthScreen('signup')">CREATE ACCOUNT</button>
     <div class="auth-switch"><span onclick="showAuthScreen('splash')">← Back</span></div>
   </div>
 </div>
@@ -738,15 +740,17 @@
   <div class="auth-grain"></div>
   <div class="auth-logo-wrap">
     <div class="auth-logo">FORGE</div>
-    <div class="auth-tagline" style="color:var(--accent);font-size:9px">7-DAY FREE TRIAL · THEN £4.99/MO</div>
+    <div class="auth-tagline" style="color:var(--accent);font-size:9px">7-DAY FREE TRIAL · THEN £9.99/MO</div>
   </div>
   <div class="auth-form">
     <div class="auth-title">CREATE ACCOUNT</div>
-    <input class="auth-input" type="text" id="signup-name" placeholder="Your name" autocomplete="name">
-    <input class="auth-input" type="email" id="signup-email" placeholder="Email address" autocomplete="username">
-    <input class="auth-input" type="password" id="signup-pass" placeholder="Password" autocomplete="new-password">
-    <div class="auth-error" id="signup-error"></div>
-    <button class="auth-btn-primary" onclick="handleSignup()">START FREE TRIAL →</button>
+    <form id="signup-form" onsubmit="event.preventDefault(); handleSignup(); return false;" action="#" method="post" style="display:contents">
+      <input class="auth-input" type="text" id="signup-name" name="name" placeholder="Your name" autocomplete="name">
+      <input class="auth-input" type="email" id="signup-email" name="email" placeholder="Email address" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" inputmode="email">
+      <input class="auth-input" type="password" id="signup-pass" name="password" placeholder="Password" autocomplete="new-password">
+      <div class="auth-error" id="signup-error"></div>
+      <button class="auth-btn-primary" type="submit">START FREE TRIAL →</button>
+    </form>
     <div class="auth-switch" style="font-size:10px;color:var(--text-dim)">No card required for trial</div>
     <div class="auth-switch"><span onclick="showAuthScreen('splash')">← Back</span></div>
   </div>
