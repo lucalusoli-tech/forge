@@ -4468,6 +4468,7 @@ async function idbClear() {
 let currentUser = JSON.parse(localStorage.getItem('fw_user')||'null');
 let isPremium = localStorage.getItem('fw_premium')==='true';
 let trialStart = parseInt(localStorage.getItem('fw_trial_start')||'0');
+let _authInProgress = false; // dedupes afterAuth between handleLogin and onAuthStateChange
 
 // ─── SYNC ──────────────────────────────────────────────────────
 async function syncBlocksToCloud() {
@@ -4582,9 +4583,14 @@ async function handleLogin() {
   const errEl = document.getElementById('login-error');
   if(!email || !pass) { errEl.textContent = 'Please fill in all fields'; return; }
   errEl.textContent = 'Signing in...';
-  const { data, error } = await supa.auth.signInWithPassword({ email, password: pass });
-  if(error) { errEl.textContent = error.message; return; }
-  await afterAuth(data.user, false);
+  _authInProgress = true;
+  try {
+    const { data, error } = await supa.auth.signInWithPassword({ email, password: pass });
+    if(error) { errEl.textContent = error.message; _authInProgress = false; return; }
+    await afterAuth(data.user, false);
+  } finally {
+    _authInProgress = false;
+  }
 }
 
 async function handleSignup() {
@@ -4595,9 +4601,14 @@ async function handleSignup() {
   if(!name || !email || !pass) { errEl.textContent = 'Please fill in all fields'; return; }
   if(pass.length < 6) { errEl.textContent = 'Password must be at least 6 characters'; return; }
   errEl.textContent = 'Creating account...';
-  const { data, error } = await supa.auth.signUp({ email, password: pass, options: { data: { name } } });
-  if(error) { errEl.textContent = error.message; return; }
-  await afterAuth(data.user, true);
+  _authInProgress = true;
+  try {
+    const { data, error } = await supa.auth.signUp({ email, password: pass, options: { data: { name } } });
+    if(error) { errEl.textContent = error.message; _authInProgress = false; return; }
+    await afterAuth(data.user, true);
+  } finally {
+    _authInProgress = false;
+  }
 }
 
 async function afterAuth(supaUser, isNew) {
@@ -4703,61 +4714,72 @@ async function handleSignOut() {
 
 // On load — check if already logged in via Supabase session
 (async function initSession() {
-  console.log('[FORGE] PWA cold start');
-  console.log('[FORGE] localStorage fw_user:', !!localStorage.getItem('fw_user'));
-  console.log('[FORGE] supabase auth token:', !!localStorage.getItem('sb-naxojfchohntrfpunbxg-auth-token'));
+  const t0 = performance.now();
+  const elapsed = () => `+${Math.round(performance.now() - t0)}ms`;
+  console.log(`[FORGE AUTH] 1/5 cold start ${elapsed()}`);
+  console.log(`[FORGE AUTH]     localStorage fw_user: ${!!localStorage.getItem('fw_user')}`);
+  console.log(`[FORGE AUTH]     supabase auth token:  ${!!localStorage.getItem('sb-naxojfchohntrfpunbxg-auth-token')}`);
+  console.log(`[FORGE AUTH]     standalone PWA mode:  ${window.matchMedia('(display-mode: standalone)').matches}`);
 
+  let recoveredVia = null;
+
+  // ── Tier 1: getSession() (normal path, localStorage intact)
   let { data: { session }, error } = await supa.auth.getSession();
+  console.log(`[FORGE AUTH] 2/5 getSession() → has session: ${!!session} ${elapsed()}`);
+  if (error) console.log(`[FORGE AUTH]     getSession error: ${error.message}`);
+  if (session) recoveredVia = 'getSession';
 
-  // iOS PWA fix: if getSession returns null but we have a cached user,
-  // the token may just need refreshing (Safari didn't fully wipe it)
+  // ── Tier 2: refreshSession() (token stale but recoverable)
   if (!session && localStorage.getItem('fw_user')) {
-    console.log('[FORGE] No session but fw_user exists — attempting refreshSession()');
+    console.log(`[FORGE AUTH] 3/5 attempting refreshSession() ${elapsed()}`);
     const refresh = await supa.auth.refreshSession();
     if (refresh.data?.session) {
-      console.log('[FORGE] refreshSession() recovered the session');
+      console.log(`[FORGE AUTH]     refreshSession() → recovered ✓ ${elapsed()}`);
       session = refresh.data.session;
+      recoveredVia = 'refreshSession';
     } else {
-      console.log('[FORGE] refreshSession() failed:', refresh.error?.message);
+      console.log(`[FORGE AUTH]     refreshSession() → failed: ${refresh.error?.message || 'no session returned'}`);
     }
+  } else if (!session) {
+    console.log(`[FORGE AUTH] 3/5 skipped refreshSession (no fw_user in localStorage — likely first launch or full eviction)`);
   }
 
-  // iOS PWA fix: if both localStorage AND Supabase token are gone,
-  // try to restore from IndexedDB backup (survives Safari eviction)
+  // ── Tier 3: IndexedDB restore (Safari wiped localStorage entirely)
   if (!session) {
+    console.log(`[FORGE AUTH] 4/5 attempting IndexedDB restore ${elapsed()}`);
     const idbSession = await idbGet('supabase_session');
     if (idbSession?.refresh_token) {
-      console.log('[FORGE] localStorage wiped — restoring from IndexedDB');
+      console.log(`[FORGE AUTH]     found IDB backup, calling setSession()`);
       const restored = await supa.auth.setSession({
         access_token: idbSession.access_token,
         refresh_token: idbSession.refresh_token
       });
       if (restored.data?.session) {
-        console.log('[FORGE] Session restored from IndexedDB ✓');
+        console.log(`[FORGE AUTH]     IndexedDB restore → recovered ✓ ${elapsed()}`);
         session = restored.data.session;
+        recoveredVia = 'indexedDB';
       } else {
-        console.log('[FORGE] IndexedDB restore failed:', restored.error?.message);
+        console.log(`[FORGE AUTH]     IndexedDB restore → failed: ${restored.error?.message || 'setSession returned no session'}`);
         await idbClear();
       }
     } else {
-      console.log('[FORGE] No IndexedDB backup found');
-    }
-  }
-
-  if (session?.user) {
-    await afterAuth(session.user, false);
-    const { data: profile } = await supa.from('profiles').select('tier').eq('id', session.user.id).single();
-    if (profile?.tier && currentUser) {
-      currentUser.tier = profile.tier;
-      if (profile.tier === 'premium' || profile.tier === 'coached' || profile.tier === 'pt') {
-        isPremium = true;
-        localStorage.setItem('fw_premium', 'true');
-      }
-      localStorage.setItem('fw_user', JSON.stringify(currentUser));
-      updateUserBar();
+      console.log(`[FORGE AUTH]     no IndexedDB backup found`);
     }
   } else {
-    console.log('[FORGE] No session recovered — showing auth screen');
+    console.log(`[FORGE AUTH] 4/5 skipped IndexedDB (already authenticated via ${recoveredVia})`);
+  }
+
+  // ── Final outcome
+  if (session?.user) {
+    _authInProgress = true;
+    try {
+      await afterAuth(session.user, false);
+    } finally {
+      _authInProgress = false;
+    }
+    console.log(`[FORGE AUTH] 5/5 ✅ AUTHENTICATED via ${recoveredVia} ${elapsed()}`);
+  } else {
+    console.log(`[FORGE AUTH] 5/5 ❌ LOGIN_REQUIRED — showing auth screen ${elapsed()}`);
     localStorage.removeItem('fw_user');
     showAuthScreen('splash');
   }
@@ -4765,12 +4787,37 @@ async function handleSignOut() {
 
 // Listen for auth state changes (token refresh, sign in/out from another tab, PWA resume)
 supa.auth.onAuthStateChange(async (event, session) => {
-  if (event === 'SIGNED_IN' && session?.user && !currentUser) {
-    await afterAuth(session.user, false);
+  console.log(`[FORGE AUTH] onAuthStateChange: ${event} (in_progress=${_authInProgress}, has_user=${!!currentUser})`);
+
+  if (event === 'SIGNED_IN' && session?.user) {
+    // Skip if handleLogin/handleSignup/initSession is already running afterAuth
+    if (_authInProgress) {
+      console.log('[FORGE AUTH]     skipping — auth already in progress');
+      return;
+    }
+    if (currentUser) {
+      console.log('[FORGE AUTH]     skipping — currentUser already set');
+      return;
+    }
+    _authInProgress = true;
+    try {
+      await afterAuth(session.user, false);
+    } finally {
+      _authInProgress = false;
+    }
   } else if (event === 'TOKEN_REFRESHED' && session?.user) {
-    currentUser.id = session.user.id;
-    currentUser.email = session.user.email;
-    localStorage.setItem('fw_user', JSON.stringify(currentUser));
+    console.log('[FORGE AUTH]     token refreshed, updating IDB backup');
+    // Update IndexedDB backup with the new tokens — critical for long-term persistence
+    await idbSet('supabase_session', {
+      access_token: session.access_token,
+      refresh_token: session.refresh_token
+    });
+    // Only touch currentUser if it actually exists (avoid null crash on early-fire)
+    if (currentUser) {
+      currentUser.id = session.user.id;
+      currentUser.email = session.user.email;
+      localStorage.setItem('fw_user', JSON.stringify(currentUser));
+    }
   } else if (event === 'SIGNED_OUT') {
     currentUser = null; isPremium = false;
     localStorage.removeItem('fw_user');
