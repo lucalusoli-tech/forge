@@ -10,6 +10,9 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#080808">
 <title>FORGE</title>
+<link rel="preconnect" href="https://naxojfchohntrfpunbxg.supabase.co" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -687,8 +690,17 @@
   </div>
 </div>
 
+<!-- ── AUTH: LOADER (visible by default — hides login flash on cold boot) ── -->
+<div class="auth-screen" id="auth-loader">
+  <div class="auth-grain"></div>
+  <div class="auth-logo-wrap" style="margin-bottom:0">
+    <div class="auth-logo">FORGE</div>
+    <div class="auth-tagline" style="opacity:0.5">Loading…</div>
+  </div>
+</div>
+
 <!-- ── AUTH: SPLASH ── -->
-<div class="auth-screen" id="auth-splash">
+<div class="auth-screen hidden" id="auth-splash">
   <div class="auth-grain"></div>
   <div class="auth-logo-wrap">
     <div class="auth-logo">FORGE</div>
@@ -4569,6 +4581,9 @@ function scheduleSync() {
 
 // ─── AUTH ──────────────────────────────────────────────────────
 function showAuthScreen(screen) {
+  // Hide loader and all auth screens, then show the requested one
+  const loader = document.getElementById('auth-loader');
+  if (loader) loader.classList.add('hidden');
   document.querySelectorAll('.auth-screen').forEach(s => s.classList.add('hidden'));
   document.getElementById('auth-'+screen).classList.remove('hidden');
   const le = document.getElementById('login-error');
