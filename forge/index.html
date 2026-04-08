@@ -10,6 +10,11 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#080808">
 <title>FORGE</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-startup-image" href="forge-splash.png">
+<link rel="preconnect" href="https://naxojfchohntrfpunbxg.supabase.co" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
@@ -687,8 +692,17 @@
   </div>
 </div>
 
+<!-- ── AUTH: LOADER (visible by default — hides login flash on cold boot) ── -->
+<div class="auth-screen" id="auth-loader">
+  <div class="auth-grain"></div>
+  <div class="auth-logo-wrap" style="margin-bottom:0">
+    <div class="auth-logo">FORGE</div>
+    <div class="auth-tagline" style="opacity:0.5">Loading…</div>
+  </div>
+</div>
+
 <!-- ── AUTH: SPLASH ── -->
-<div class="auth-screen" id="auth-splash">
+<div class="auth-screen hidden" id="auth-splash">
   <div class="auth-grain"></div>
   <div class="auth-logo-wrap">
     <div class="auth-logo">FORGE</div>
@@ -709,12 +723,14 @@
   </div>
   <div class="auth-form">
     <div class="auth-title">SIGN IN</div>
-    <input class="auth-input" type="email" id="login-email" placeholder="Email address" autocomplete="email">
-    <input class="auth-input" type="password" id="login-pass" placeholder="Password" autocomplete="off" data-1p-ignore data-lpignore="true">
-    <div class="auth-error" id="login-error"></div>
-    <button class="auth-btn-primary" onclick="handleLogin()">SIGN IN →</button>
+    <form id="login-form" onsubmit="event.preventDefault(); handleLogin(); return false;" action="#" method="post" style="display:contents">
+      <input class="auth-input" type="email" id="login-email" name="email" placeholder="Email address" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" inputmode="email">
+      <input class="auth-input" type="password" id="login-pass" name="password" placeholder="Password" autocomplete="current-password">
+      <div class="auth-error" id="login-error"></div>
+      <button class="auth-btn-primary" type="submit">SIGN IN →</button>
+    </form>
     <div class="auth-divider"><div class="auth-divider-line"></div><div class="auth-divider-text">NO ACCOUNT?</div><div class="auth-divider-line"></div></div>
-    <button class="auth-btn-ghost" onclick="showAuthScreen('signup')">CREATE ACCOUNT</button>
+    <button class="auth-btn-ghost" type="button" onclick="showAuthScreen('signup')">CREATE ACCOUNT</button>
     <div class="auth-switch"><span onclick="showAuthScreen('splash')">← Back</span></div>
   </div>
 </div>
@@ -724,15 +740,17 @@
   <div class="auth-grain"></div>
   <div class="auth-logo-wrap">
     <div class="auth-logo">FORGE</div>
-    <div class="auth-tagline" style="color:var(--accent);font-size:9px">7-DAY FREE TRIAL · THEN £4.99/MO</div>
+    <div class="auth-tagline" style="color:var(--accent);font-size:9px">7-DAY FREE TRIAL · THEN £9.99/MO</div>
   </div>
   <div class="auth-form">
     <div class="auth-title">CREATE ACCOUNT</div>
-    <input class="auth-input" type="text" id="signup-name" placeholder="Your name" autocomplete="name">
-    <input class="auth-input" type="email" id="signup-email" placeholder="Email address" autocomplete="username">
-    <input class="auth-input" type="password" id="signup-pass" placeholder="Password" autocomplete="new-password">
-    <div class="auth-error" id="signup-error"></div>
-    <button class="auth-btn-primary" onclick="handleSignup()">START FREE TRIAL →</button>
+    <form id="signup-form" onsubmit="event.preventDefault(); handleSignup(); return false;" action="#" method="post" style="display:contents">
+      <input class="auth-input" type="text" id="signup-name" name="name" placeholder="Your name" autocomplete="name">
+      <input class="auth-input" type="email" id="signup-email" name="email" placeholder="Email address" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" inputmode="email">
+      <input class="auth-input" type="password" id="signup-pass" name="password" placeholder="Password" autocomplete="new-password">
+      <div class="auth-error" id="signup-error"></div>
+      <button class="auth-btn-primary" type="submit">START FREE TRIAL →</button>
+    </form>
     <div class="auth-switch" style="font-size:10px;color:var(--text-dim)">No card required for trial</div>
     <div class="auth-switch"><span onclick="showAuthScreen('splash')">← Back</span></div>
   </div>
@@ -885,7 +903,7 @@
       </div>
       <div class="notes-section">
         <div class="notes-label">Session Notes</div>
-        <textarea class="notes-input" id="session-notes" placeholder="Energy, recovery, technique notes..."></textarea>
+        <textarea class="notes-input" id="session-notes" placeholder="Energy, recovery, technique notes..." autocomplete="off"></textarea>
       </div>
       <div class="save-section"><button class="save-btn" onclick="saveSession()">SAVE SESSION ✓</button></div>
     </div>
@@ -2557,9 +2575,9 @@ function renderLogExercises(exercises) {
       cols+=`<div class="set-col">
         <div class="set-num">S${s}</div>
         <input class="set-field" type="text" inputmode="decimal" placeholder="kg" value="${saved[`s${s}_w`]||''}" id="${wk}_s${s}_w"
-          oninput="autoSaveSet('${wk}',${s})">
+          autocomplete="off" oninput="autoSaveSet('${wk}',${s})">
         <input class="set-field reps" type="text" inputmode="numeric" placeholder="reps" value="${saved[`s${s}_r`]||''}" id="${wk}_s${s}_r"
-          oninput="autoSaveSet('${wk}',${s})"
+          autocomplete="off" oninput="autoSaveSet('${wk}',${s})"
           onblur="onSetBlur('${wk}',${s},'${exData.name}')">
       </div>`;
       if(s<ex.sets) cols+=`<div class="set-divider">·</div>`;
@@ -2603,7 +2621,7 @@ function renderLogExercises(exercises) {
       </div>
       <div class="set-note-row">
         <input class="set-note-input" type="text" placeholder="Exercise note — technique, feel, load..." value="${savedNote}"
-          id="${wk}_note" onblur="autoSaveNote('${wk}')">
+          id="${wk}_note" autocomplete="off" onblur="autoSaveNote('${wk}')">
       </div>
     </div>`;
   });
@@ -4468,6 +4486,7 @@ async function idbClear() {
 let currentUser = JSON.parse(localStorage.getItem('fw_user')||'null');
 let isPremium = localStorage.getItem('fw_premium')==='true';
 let trialStart = parseInt(localStorage.getItem('fw_trial_start')||'0');
+let _authInProgress = false; // dedupes afterAuth between handleLogin and onAuthStateChange
 
 // ─── SYNC ──────────────────────────────────────────────────────
 async function syncBlocksToCloud() {
@@ -4568,6 +4587,9 @@ function scheduleSync() {
 
 // ─── AUTH ──────────────────────────────────────────────────────
 function showAuthScreen(screen) {
+  // Hide loader and all auth screens, then show the requested one
+  const loader = document.getElementById('auth-loader');
+  if (loader) loader.classList.add('hidden');
   document.querySelectorAll('.auth-screen').forEach(s => s.classList.add('hidden'));
   document.getElementById('auth-'+screen).classList.remove('hidden');
   const le = document.getElementById('login-error');
@@ -4582,9 +4604,14 @@ async function handleLogin() {
   const errEl = document.getElementById('login-error');
   if(!email || !pass) { errEl.textContent = 'Please fill in all fields'; return; }
   errEl.textContent = 'Signing in...';
-  const { data, error } = await supa.auth.signInWithPassword({ email, password: pass });
-  if(error) { errEl.textContent = error.message; return; }
-  await afterAuth(data.user, false);
+  _authInProgress = true;
+  try {
+    const { data, error } = await supa.auth.signInWithPassword({ email, password: pass });
+    if(error) { errEl.textContent = error.message; _authInProgress = false; return; }
+    await afterAuth(data.user, false);
+  } finally {
+    _authInProgress = false;
+  }
 }
 
 async function handleSignup() {
@@ -4595,9 +4622,14 @@ async function handleSignup() {
   if(!name || !email || !pass) { errEl.textContent = 'Please fill in all fields'; return; }
   if(pass.length < 6) { errEl.textContent = 'Password must be at least 6 characters'; return; }
   errEl.textContent = 'Creating account...';
-  const { data, error } = await supa.auth.signUp({ email, password: pass, options: { data: { name } } });
-  if(error) { errEl.textContent = error.message; return; }
-  await afterAuth(data.user, true);
+  _authInProgress = true;
+  try {
+    const { data, error } = await supa.auth.signUp({ email, password: pass, options: { data: { name } } });
+    if(error) { errEl.textContent = error.message; _authInProgress = false; return; }
+    await afterAuth(data.user, true);
+  } finally {
+    _authInProgress = false;
+  }
 }
 
 async function afterAuth(supaUser, isNew) {
@@ -4703,61 +4735,72 @@ async function handleSignOut() {
 
 // On load — check if already logged in via Supabase session
 (async function initSession() {
-  console.log('[FORGE] PWA cold start');
-  console.log('[FORGE] localStorage fw_user:', !!localStorage.getItem('fw_user'));
-  console.log('[FORGE] supabase auth token:', !!localStorage.getItem('sb-naxojfchohntrfpunbxg-auth-token'));
+  const t0 = performance.now();
+  const elapsed = () => `+${Math.round(performance.now() - t0)}ms`;
+  console.log(`[FORGE AUTH] 1/5 cold start ${elapsed()}`);
+  console.log(`[FORGE AUTH]     localStorage fw_user: ${!!localStorage.getItem('fw_user')}`);
+  console.log(`[FORGE AUTH]     supabase auth token:  ${!!localStorage.getItem('sb-naxojfchohntrfpunbxg-auth-token')}`);
+  console.log(`[FORGE AUTH]     standalone PWA mode:  ${window.matchMedia('(display-mode: standalone)').matches}`);
 
+  let recoveredVia = null;
+
+  // ── Tier 1: getSession() (normal path, localStorage intact)
   let { data: { session }, error } = await supa.auth.getSession();
+  console.log(`[FORGE AUTH] 2/5 getSession() → has session: ${!!session} ${elapsed()}`);
+  if (error) console.log(`[FORGE AUTH]     getSession error: ${error.message}`);
+  if (session) recoveredVia = 'getSession';
 
-  // iOS PWA fix: if getSession returns null but we have a cached user,
-  // the token may just need refreshing (Safari didn't fully wipe it)
+  // ── Tier 2: refreshSession() (token stale but recoverable)
   if (!session && localStorage.getItem('fw_user')) {
-    console.log('[FORGE] No session but fw_user exists — attempting refreshSession()');
+    console.log(`[FORGE AUTH] 3/5 attempting refreshSession() ${elapsed()}`);
     const refresh = await supa.auth.refreshSession();
     if (refresh.data?.session) {
-      console.log('[FORGE] refreshSession() recovered the session');
+      console.log(`[FORGE AUTH]     refreshSession() → recovered ✓ ${elapsed()}`);
       session = refresh.data.session;
+      recoveredVia = 'refreshSession';
     } else {
-      console.log('[FORGE] refreshSession() failed:', refresh.error?.message);
+      console.log(`[FORGE AUTH]     refreshSession() → failed: ${refresh.error?.message || 'no session returned'}`);
     }
+  } else if (!session) {
+    console.log(`[FORGE AUTH] 3/5 skipped refreshSession (no fw_user in localStorage — likely first launch or full eviction)`);
   }
 
-  // iOS PWA fix: if both localStorage AND Supabase token are gone,
-  // try to restore from IndexedDB backup (survives Safari eviction)
+  // ── Tier 3: IndexedDB restore (Safari wiped localStorage entirely)
   if (!session) {
+    console.log(`[FORGE AUTH] 4/5 attempting IndexedDB restore ${elapsed()}`);
     const idbSession = await idbGet('supabase_session');
     if (idbSession?.refresh_token) {
-      console.log('[FORGE] localStorage wiped — restoring from IndexedDB');
+      console.log(`[FORGE AUTH]     found IDB backup, calling setSession()`);
       const restored = await supa.auth.setSession({
         access_token: idbSession.access_token,
         refresh_token: idbSession.refresh_token
       });
       if (restored.data?.session) {
-        console.log('[FORGE] Session restored from IndexedDB ✓');
+        console.log(`[FORGE AUTH]     IndexedDB restore → recovered ✓ ${elapsed()}`);
         session = restored.data.session;
+        recoveredVia = 'indexedDB';
       } else {
-        console.log('[FORGE] IndexedDB restore failed:', restored.error?.message);
+        console.log(`[FORGE AUTH]     IndexedDB restore → failed: ${restored.error?.message || 'setSession returned no session'}`);
         await idbClear();
       }
     } else {
-      console.log('[FORGE] No IndexedDB backup found');
-    }
-  }
-
-  if (session?.user) {
-    await afterAuth(session.user, false);
-    const { data: profile } = await supa.from('profiles').select('tier').eq('id', session.user.id).single();
-    if (profile?.tier && currentUser) {
-      currentUser.tier = profile.tier;
-      if (profile.tier === 'premium' || profile.tier === 'coached' || profile.tier === 'pt') {
-        isPremium = true;
-        localStorage.setItem('fw_premium', 'true');
-      }
-      localStorage.setItem('fw_user', JSON.stringify(currentUser));
-      updateUserBar();
+      console.log(`[FORGE AUTH]     no IndexedDB backup found`);
     }
   } else {
-    console.log('[FORGE] No session recovered — showing auth screen');
+    console.log(`[FORGE AUTH] 4/5 skipped IndexedDB (already authenticated via ${recoveredVia})`);
+  }
+
+  // ── Final outcome
+  if (session?.user) {
+    _authInProgress = true;
+    try {
+      await afterAuth(session.user, false);
+    } finally {
+      _authInProgress = false;
+    }
+    console.log(`[FORGE AUTH] 5/5 ✅ AUTHENTICATED via ${recoveredVia} ${elapsed()}`);
+  } else {
+    console.log(`[FORGE AUTH] 5/5 ❌ LOGIN_REQUIRED — showing auth screen ${elapsed()}`);
     localStorage.removeItem('fw_user');
     showAuthScreen('splash');
   }
@@ -4765,12 +4808,37 @@ async function handleSignOut() {
 
 // Listen for auth state changes (token refresh, sign in/out from another tab, PWA resume)
 supa.auth.onAuthStateChange(async (event, session) => {
-  if (event === 'SIGNED_IN' && session?.user && !currentUser) {
-    await afterAuth(session.user, false);
+  console.log(`[FORGE AUTH] onAuthStateChange: ${event} (in_progress=${_authInProgress}, has_user=${!!currentUser})`);
+
+  if (event === 'SIGNED_IN' && session?.user) {
+    // Skip if handleLogin/handleSignup/initSession is already running afterAuth
+    if (_authInProgress) {
+      console.log('[FORGE AUTH]     skipping — auth already in progress');
+      return;
+    }
+    if (currentUser) {
+      console.log('[FORGE AUTH]     skipping — currentUser already set');
+      return;
+    }
+    _authInProgress = true;
+    try {
+      await afterAuth(session.user, false);
+    } finally {
+      _authInProgress = false;
+    }
   } else if (event === 'TOKEN_REFRESHED' && session?.user) {
-    currentUser.id = session.user.id;
-    currentUser.email = session.user.email;
-    localStorage.setItem('fw_user', JSON.stringify(currentUser));
+    console.log('[FORGE AUTH]     token refreshed, updating IDB backup');
+    // Update IndexedDB backup with the new tokens — critical for long-term persistence
+    await idbSet('supabase_session', {
+      access_token: session.access_token,
+      refresh_token: session.refresh_token
+    });
+    // Only touch currentUser if it actually exists (avoid null crash on early-fire)
+    if (currentUser) {
+      currentUser.id = session.user.id;
+      currentUser.email = session.user.email;
+      localStorage.setItem('fw_user', JSON.stringify(currentUser));
+    }
   } else if (event === 'SIGNED_OUT') {
     currentUser = null; isPremium = false;
     localStorage.removeItem('fw_user');
