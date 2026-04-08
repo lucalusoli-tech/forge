@@ -1911,6 +1911,23 @@ function closeBlockEndPrompt() {
 
 // ─── NAVIGATION ────────────────────────────────────────────────
 function navigate(page, push=true) {
+  // If user taps Home while a session is still active (not saved), jump back into it
+  if (page === 'home') {
+    try {
+      const activeRaw = sessionStorage.getItem('forge:activeSession');
+      if (activeRaw) {
+        const active = JSON.parse(activeRaw);
+        const dayExists = currentBlock.days?.some(d => d.id === active.dayId);
+        // Only redirect if we're not already in the log view (avoid infinite loop)
+        const onLog = document.getElementById('page-log')?.classList.contains('active');
+        if (dayExists && !onLog) {
+          if (active.week && Number.isFinite(active.week)) currentWeek = active.week;
+          startDay(active.dayId);
+          return;
+        }
+      }
+    } catch(e) {}
+  }
   if (push && navHistory[navHistory.length-1] !== page) navHistory.push(page);
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
@@ -1931,6 +1948,12 @@ function navigate(page, push=true) {
 }
 
 function goBack() {
+  // If the user is backing out of an active session via the BACK button,
+  // that's explicit intent to leave — clear the marker so we don't bounce back in
+  const onLog = document.getElementById('page-log')?.classList.contains('active');
+  if (onLog) {
+    try { sessionStorage.removeItem('forge:activeSession'); } catch(e) {}
+  }
   navHistory.pop();
   navigate(navHistory[navHistory.length-1]||'home', false);
 }
@@ -2619,9 +2642,9 @@ function renderLogExercises(exercises) {
       cols+=`<div class="set-col">
         <div class="set-num">S${s}</div>
         <input class="set-field" type="text" inputmode="decimal" placeholder="kg" value="${saved[`s${s}_w`]||''}" id="${wk}_s${s}_w"
-          autocomplete="off" data-lpignore="true" data-form-type="other" oninput="autoSaveSet('${wk}',${s})">
+          autocomplete="one-time-code" data-lpignore="true" data-form-type="other" oninput="autoSaveSet('${wk}',${s})">
         <input class="set-field reps" type="text" inputmode="numeric" placeholder="reps" value="${saved[`s${s}_r`]||''}" id="${wk}_s${s}_r"
-          autocomplete="off" data-lpignore="true" data-form-type="other" oninput="autoSaveSet('${wk}',${s})"
+          autocomplete="one-time-code" data-lpignore="true" data-form-type="other" oninput="autoSaveSet('${wk}',${s})"
           onblur="onSetBlur('${wk}',${s},'${exData.name}')">
       </div>`;
       if(s<ex.sets) cols+=`<div class="set-divider">·</div>`;
