@@ -4913,6 +4913,24 @@ async function handleSignOut() {
   console.log(`[FORGE AUTH]     supabase auth token:  ${!!localStorage.getItem('sb-naxojfchohntrfpunbxg-auth-token')}`);
   console.log(`[FORGE AUTH]     standalone PWA mode:  ${window.matchMedia('(display-mode: standalone)').matches}`);
 
+  // ── Recovery link short-circuit
+  // If the URL contains a Supabase recovery hash, the user tapped a password
+  // reset email link. We must NOT route them to the home screen — show the
+  // new password form instead. Supabase JS will also fire PASSWORD_RECOVERY
+  // via onAuthStateChange, but we detect it here so the normal boot flow
+  // (getSession → afterAuth → home) can't race ahead of it.
+  const hash = window.location.hash || '';
+  const isRecoveryLink = hash.includes('type=recovery') || hash === '#recovery';
+  if (isRecoveryLink) {
+    console.log('[FORGE AUTH]     recovery link detected at boot — waiting for Supabase to parse hash');
+    // Let Supabase parse the hash and establish the recovery session, then
+    // show the newpass screen. The PASSWORD_RECOVERY event handler will
+    // also fire but showAuthScreen is idempotent so that's fine.
+    _authInProgress = true; // block SIGNED_IN handler from routing home
+    showAuthScreen('newpass');
+    return;
+  }
+
   let recoveredVia = null;
 
   // ── Tier 1: getSession() (normal path, localStorage intact)
