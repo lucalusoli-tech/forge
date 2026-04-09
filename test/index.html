@@ -4916,17 +4916,19 @@ async function handleSignOut() {
   // ── Recovery link short-circuit
   // If the URL contains a Supabase recovery hash, the user tapped a password
   // reset email link. We must NOT route them to the home screen — show the
-  // new password form instead. Supabase JS will also fire PASSWORD_RECOVERY
-  // via onAuthStateChange, but we detect it here so the normal boot flow
-  // (getSession → afterAuth → home) can't race ahead of it.
+  // new password form instead. We still need to let Supabase parse the hash
+  // and establish the recovery session, otherwise updateUser() will fail
+  // with "Auth session missing". So: call getSession() to trigger hash
+  // parsing, then show newpass and return WITHOUT calling afterAuth.
   const hash = window.location.hash || '';
   const isRecoveryLink = hash.includes('type=recovery') || hash === '#recovery';
   if (isRecoveryLink) {
-    console.log('[FORGE AUTH]     recovery link detected at boot — waiting for Supabase to parse hash');
-    // Let Supabase parse the hash and establish the recovery session, then
-    // show the newpass screen. The PASSWORD_RECOVERY event handler will
-    // also fire but showAuthScreen is idempotent so that's fine.
+    console.log('[FORGE AUTH]     recovery link detected at boot — parsing hash');
     _authInProgress = true; // block SIGNED_IN handler from routing home
+    // This call triggers Supabase's detectSessionInUrl, which parses the
+    // access_token from the hash and establishes the recovery session.
+    await supa.auth.getSession();
+    console.log('[FORGE AUTH]     recovery session established — showing newpass screen');
     showAuthScreen('newpass');
     return;
   }
