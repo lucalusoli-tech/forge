@@ -1967,12 +1967,11 @@ function switchBuildTab(tab) {
 }
 
 // ─── CHANGELOG ─────────────────────────────────────────────────
-const FORGE_VERSION = '1.8.0';
+const FORGE_VERSION = '1.9.0';
 const FORGE_CHANGELOG = [
-  'Face ID sign-in — your password now autofills like a native app',
-  'Faster app start — up to 3x quicker cold boot',
-  'Session stays signed in — fewer unexpected logouts between workouts',
-  'Home screen icon fixed — crisp FORGE logo when installed'
+  'Forgot your password? Reset it from the sign-in screen',
+  'Rest timer no longer double-alerts when reopening the app',
+  'Smoother return to your session after locking your phone'
 ];
 
 function checkChangelog() {
@@ -3654,6 +3653,7 @@ let timerInterval = null;
 let timerPaused = false;
 let timerBackupTimeout = null;
 let swRegistration = null;
+let timerFired = false; // guards fireTimerAlert against multi-firing on iOS resume
 
 // Register service worker for lock-screen notifications
 (function registerTimerSW() {
@@ -3696,6 +3696,15 @@ function autoSaveSet(wk, setNum) {
 }
 
 function fireTimerAlert() {
+  // Hard guard: only fire once per timer cycle, no matter how many resume
+  // events race in or how many fallback paths trigger on iOS resume.
+  if (timerFired) return;
+  timerFired = true;
+  // Clear timerEndTime immediately so any late resume events see "no active timer"
+  timerEndTime = 0;
+  // Kill any pending timers so they can't re-fire
+  clearInterval(timerInterval);
+  if (timerBackupTimeout) { clearTimeout(timerBackupTimeout); timerBackupTimeout = null; }
   // Cancel SW scheduled notification (page caught it first — prevent double)
   swTimerCancel();
   // Vibrate
@@ -3733,6 +3742,7 @@ function fireTimerAlert() {
 function startTimer(exName) {
   clearInterval(timerInterval);
   if (timerBackupTimeout) clearTimeout(timerBackupTimeout);
+  timerFired = false; // reset guard for new timer cycle
   timerRemaining = timerDuration;
   timerPaused = false;
   timerEndTime = Date.now() + (timerDuration * 1000);
@@ -3856,6 +3866,7 @@ function closeTimer() {
   if (timerBackupTimeout) { clearTimeout(timerBackupTimeout); timerBackupTimeout = null; }
   swTimerCancel();
   timerEndTime = 0;
+  timerFired = false;
 }
 
 function setTimerDuration(secs, btn) {
@@ -4732,8 +4743,9 @@ async function handleResetRequest() {
   const errEl = document.getElementById('reset-error');
   if(!email) { errEl.textContent = 'Please enter your email'; return; }
   errEl.textContent = 'Sending...';
-  // Redirect back to the same deployed URL with a hash marker we can detect
-  const redirectTo = window.location.origin + window.location.pathname + '#recovery';
+  // Plain URL — Supabase automatically appends #access_token=...&type=recovery
+  // Do NOT add a custom hash here; it will conflict with Supabase's tokens.
+  const redirectTo = window.location.origin + window.location.pathname;
   const { error } = await supa.auth.resetPasswordForEmail(email, { redirectTo });
   if (error) {
     errEl.textContent = error.message;
@@ -4900,6 +4912,41 @@ async function handleSignOut() {
   console.log(`[FORGE AUTH]     localStorage fw_user: ${!!localStorage.getItem('fw_user')}`);
   console.log(`[FORGE AUTH]     supabase auth token:  ${!!localStorage.getItem('sb-naxojfchohntrfpunbxg-auth-token')}`);
   console.log(`[FORGE AUTH]     standalone PWA mode:  ${window.matchMedia('(display-mode: standalone)').matches}`);
+
+  // ── Recovery link short-circuit
+  // Password reset flow is fragile on iOS Safari because:
+  //   1. Supabase's auto detectSessionInUrl races with our boot code
+  //   2. iOS Safari sometimes strips the URL fragment during the redirect
+  //   3. The hash tokens are one-shot: if we miss them, they're gone
+  // Fix: parse the tokens manually from the hash and call setSession()
+  // directly, which is synchronous and reliable.
+  const hash = window.location.hash || '';
+  const isRecoveryLink = hash.includes('type=recovery');
+  if (isRecoveryLink) {
+    console.log('[FORGE AUTH]     recovery link detected at boot — parsing hash manually');
+    _authInProgress = true; // block SIGNED_IN handler from routing home
+    try {
+      // Hash looks like: #access_token=xxx&refresh_token=yyy&type=recovery&...
+      const params = new URLSearchParams(hash.substring(1));
+      const access_token = params.get('access_token');
+      const refresh_token = params.get('refresh_token');
+      if (access_token && refresh_token) {
+        console.log('[FORGE AUTH]     tokens found, calling setSession()');
+        const { data, error } = await supa.auth.setSession({ access_token, refresh_token });
+        if (error) {
+          console.log('[FORGE AUTH]     setSession error:', error.message);
+        } else {
+          console.log('[FORGE AUTH]     recovery session established ✓');
+        }
+      } else {
+        console.log('[FORGE AUTH]     recovery hash present but tokens missing — iOS Safari may have stripped them');
+      }
+    } catch (e) {
+      console.log('[FORGE AUTH]     recovery parse error:', e.message);
+    }
+    showAuthScreen('newpass');
+    return;
+  }
 
   let recoveredVia = null;
 
