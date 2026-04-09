@@ -3654,6 +3654,7 @@ let timerInterval = null;
 let timerPaused = false;
 let timerBackupTimeout = null;
 let swRegistration = null;
+let timerFired = false; // guards fireTimerAlert against multi-firing on iOS resume
 
 // Register service worker for lock-screen notifications
 (function registerTimerSW() {
@@ -3696,6 +3697,15 @@ function autoSaveSet(wk, setNum) {
 }
 
 function fireTimerAlert() {
+  // Hard guard: only fire once per timer cycle, no matter how many resume
+  // events race in or how many fallback paths trigger on iOS resume.
+  if (timerFired) return;
+  timerFired = true;
+  // Clear timerEndTime immediately so any late resume events see "no active timer"
+  timerEndTime = 0;
+  // Kill any pending timers so they can't re-fire
+  clearInterval(timerInterval);
+  if (timerBackupTimeout) { clearTimeout(timerBackupTimeout); timerBackupTimeout = null; }
   // Cancel SW scheduled notification (page caught it first — prevent double)
   swTimerCancel();
   // Vibrate
@@ -3733,6 +3743,7 @@ function fireTimerAlert() {
 function startTimer(exName) {
   clearInterval(timerInterval);
   if (timerBackupTimeout) clearTimeout(timerBackupTimeout);
+  timerFired = false; // reset guard for new timer cycle
   timerRemaining = timerDuration;
   timerPaused = false;
   timerEndTime = Date.now() + (timerDuration * 1000);
@@ -3856,6 +3867,7 @@ function closeTimer() {
   if (timerBackupTimeout) { clearTimeout(timerBackupTimeout); timerBackupTimeout = null; }
   swTimerCancel();
   timerEndTime = 0;
+  timerFired = false;
 }
 
 function setTimerDuration(secs, btn) {
