@@ -3679,11 +3679,6 @@ function swTimerCancel() {
     navigator.serviceWorker.controller.postMessage({ type: 'TIMER_CANCEL' });
   }
 }
-function swTimerFireNow() {
-  if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-    navigator.serviceWorker.controller.postMessage({ type: 'TIMER_DONE' });
-  }
-}
 const TIMER_CIRCUMFERENCE = 590.6;
 
 function onSetBlur(wk, setNum, exName) {
@@ -3711,15 +3706,24 @@ function fireTimerAlert() {
   // Kill any pending timers so they can't re-fire
   clearInterval(timerInterval);
   if (timerBackupTimeout) { clearTimeout(timerBackupTimeout); timerBackupTimeout = null; }
+  // Cancel SW scheduled notification (page caught it first — prevent double)
+  swTimerCancel();
   // Vibrate
   if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
-  // SINGLE notification source: always route through the SW.
-  // TIMER_DONE in the SW cancels its own pending scheduled notification first,
-  // then shows one. This avoids iOS's failure to dedupe page-fired vs SW-fired
-  // notifications that share the same tag.
-  // Fallback to direct Notification only if SW is unavailable.
-  if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-    swTimerFireNow();
+  // Notification via Service Worker (better lock-screen delivery)
+  if (swRegistration && Notification.permission === 'granted') {
+    try {
+      swRegistration.showNotification('FORGE', {
+        body: 'Rest over — next set',
+        icon: 'https://forgetraining.app/icon-192.png',
+        tag: 'forge-timer',
+        requireInteraction: true,
+        vibrate: [200, 100, 200, 100, 200],
+        silent: false
+      });
+    } catch(e) {
+      try { new Notification('FORGE', { body: 'Rest over — next set', tag: 'forge-timer', requireInteraction: true }); } catch(e2) {}
+    }
   } else if ('Notification' in window && Notification.permission === 'granted') {
     try { new Notification('FORGE', { body: 'Rest over — next set', tag: 'forge-timer', requireInteraction: true }); } catch(e) {}
   }
