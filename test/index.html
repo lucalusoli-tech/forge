@@ -4744,8 +4744,9 @@ async function handleResetRequest() {
   const errEl = document.getElementById('reset-error');
   if(!email) { errEl.textContent = 'Please enter your email'; return; }
   errEl.textContent = 'Sending...';
-  // Redirect back to the same deployed URL with a hash marker we can detect
-  const redirectTo = window.location.origin + window.location.pathname + '#recovery';
+  // Plain URL — Supabase automatically appends #access_token=...&type=recovery
+  // Do NOT add a custom hash here; it will conflict with Supabase's tokens.
+  const redirectTo = window.location.origin + window.location.pathname;
   const { error } = await supa.auth.resetPasswordForEmail(email, { redirectTo });
   if (error) {
     errEl.textContent = error.message;
@@ -4914,21 +4915,36 @@ async function handleSignOut() {
   console.log(`[FORGE AUTH]     standalone PWA mode:  ${window.matchMedia('(display-mode: standalone)').matches}`);
 
   // ── Recovery link short-circuit
-  // If the URL contains a Supabase recovery hash, the user tapped a password
-  // reset email link. We must NOT route them to the home screen — show the
-  // new password form instead. We still need to let Supabase parse the hash
-  // and establish the recovery session, otherwise updateUser() will fail
-  // with "Auth session missing". So: call getSession() to trigger hash
-  // parsing, then show newpass and return WITHOUT calling afterAuth.
+  // Password reset flow is fragile on iOS Safari because:
+  //   1. Supabase's auto detectSessionInUrl races with our boot code
+  //   2. iOS Safari sometimes strips the URL fragment during the redirect
+  //   3. The hash tokens are one-shot: if we miss them, they're gone
+  // Fix: parse the tokens manually from the hash and call setSession()
+  // directly, which is synchronous and reliable.
   const hash = window.location.hash || '';
-  const isRecoveryLink = hash.includes('type=recovery') || hash === '#recovery';
+  const isRecoveryLink = hash.includes('type=recovery');
   if (isRecoveryLink) {
-    console.log('[FORGE AUTH]     recovery link detected at boot — parsing hash');
+    console.log('[FORGE AUTH]     recovery link detected at boot — parsing hash manually');
     _authInProgress = true; // block SIGNED_IN handler from routing home
-    // This call triggers Supabase's detectSessionInUrl, which parses the
-    // access_token from the hash and establishes the recovery session.
-    await supa.auth.getSession();
-    console.log('[FORGE AUTH]     recovery session established — showing newpass screen');
+    try {
+      // Hash looks like: #access_token=xxx&refresh_token=yyy&type=recovery&...
+      const params = new URLSearchParams(hash.substring(1));
+      const access_token = params.get('access_token');
+      const refresh_token = params.get('refresh_token');
+      if (access_token && refresh_token) {
+        console.log('[FORGE AUTH]     tokens found, calling setSession()');
+        const { data, error } = await supa.auth.setSession({ access_token, refresh_token });
+        if (error) {
+          console.log('[FORGE AUTH]     setSession error:', error.message);
+        } else {
+          console.log('[FORGE AUTH]     recovery session established ✓');
+        }
+      } else {
+        console.log('[FORGE AUTH]     recovery hash present but tokens missing — iOS Safari may have stripped them');
+      }
+    } catch (e) {
+      console.log('[FORGE AUTH]     recovery parse error:', e.message);
+    }
     showAuthScreen('newpass');
     return;
   }
