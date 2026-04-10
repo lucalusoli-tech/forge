@@ -1967,8 +1967,9 @@ function switchBuildTab(tab) {
 }
 
 // ─── CHANGELOG ─────────────────────────────────────────────────
-const FORGE_VERSION = '1.9.0';
+const FORGE_VERSION = '1.9.1';
 const FORGE_CHANGELOG = [
+  'FORGE+: home now guides you straight into your AI assessment',
   'Forgot your password? Reset it from the sign-in screen',
   'Rest timer no longer double-alerts when reopening the app',
   'Smoother return to your session after locking your phone'
@@ -2447,6 +2448,23 @@ function renderHomeDays() {
 
   if (!hasAnything) {
     heroTitle.innerHTML = 'BUILD<br>YOUR BLOCK';
+    // Tier-aware empty state: FORGE+ and admin go straight to AI assessment
+    const tier = currentUser?.tier || '';
+    const isForgePlus = (tier === 'coached' || tier === 'admin');
+    const emptyTitle = emptyState.querySelector('.home-empty-title');
+    const emptySub = emptyState.querySelector('.home-empty-sub');
+    const emptyCta = emptyState.querySelector('.home-empty-cta');
+    if (isForgePlus) {
+      emptyTitle.textContent = 'Start with your AI coach';
+      emptySub.textContent = 'Answer a few questions and FORGE AI will build your first programme — tailored to your level, goals, and schedule.';
+      emptyCta.textContent = 'ENTER THE FORGE →';
+      emptyCta.onclick = () => navigate('ai');
+    } else {
+      emptyTitle.textContent = 'No block yet';
+      emptySub.textContent = 'Build your first training block to get started';
+      emptyCta.textContent = 'GET STARTED →';
+      emptyCta.onclick = () => showOnboarding();
+    }
     return;
   }
 
