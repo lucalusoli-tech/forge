@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -21,572 +20,570 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-:root {
-–black: #080808; –deep: #0f0f0f; –surface: #141414; –card: #1a1a1a;
-–border: #242424; –border-light: #333; –text: #e8e2d9; –text-muted: #8c8480;
-–text-dim: #555; –accent: #c9a96e; –accent-dim: #7a5f38;
-–accent-glow: rgba(201,169,110,0.1); –red: #c94040; –green: #5a8a5a;
-–nav-h: 64px; –safe-bottom: env(safe-area-inset-bottom, 0px);
-}
+  :root {
+    --black: #080808; --deep: #0f0f0f; --surface: #141414; --card: #1a1a1a;
+    --border: #242424; --border-light: #333; --text: #e8e2d9; --text-muted: #8c8480;
+    --text-dim: #555; --accent: #c9a96e; --accent-dim: #7a5f38;
+    --accent-glow: rgba(201,169,110,0.1); --red: #c94040; --green: #5a8a5a;
+    --nav-h: 64px; --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
 
-html { background: #080808 !important; }
-html, body { height: 100%; overflow: hidden; background: #080808 !important; color: var(–text); font-family: ‘DM Mono’, monospace; }
+  html { background: #080808 !important; }
+  html, body { height: 100%; overflow: hidden; background: #080808 !important; color: var(--text); font-family: 'DM Mono', monospace; }
 
-body::after {
-content: ‘’; position: fixed; inset: 0; pointer-events: none; z-index: 9998;
-background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 200 200’ xmlns=‘http://www.w3.org/2000/svg’%3E%3Cfilter id=‘n’%3E%3CfeTurbulence type=‘fractalNoise’ baseFrequency=‘0.85’ numOctaves=‘4’ stitchTiles=‘stitch’/%3E%3C/filter%3E%3Crect width=‘100%25’ height=‘100%25’ filter=‘url(%23n)’ opacity=‘0.035’/%3E%3C/svg%3E”);
-}
+  body::after {
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9998;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
+  }
 
-.app { display: flex; flex-direction: column; height: 100dvh; background: #080808; }
-.status-bar { height: env(safe-area-inset-top, 0px); background: #080808; flex-shrink: 0; }
+  .app { display: flex; flex-direction: column; height: 100dvh; background: #080808; }
+  .status-bar { height: env(safe-area-inset-top, 0px); background: #080808; flex-shrink: 0; }
 
-.topbar { height: 52px; background: #080808; border-bottom: 1px solid var(–border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; z-index: 10; }
-.topbar-logo { font-family: ‘Bebas Neue’, sans-serif; font-size: 26px; letter-spacing: 5px; color: var(–accent); line-height: 1; }
-.week-pill { background: var(–accent-glow); border: 1px solid var(–accent-dim); color: var(–accent); font-size: 10px; letter-spacing: 2px; padding: 4px 10px; cursor: pointer; user-select: none; -webkit-user-select: none; }
-.week-pill:active { background: rgba(201,169,110,0.2); }
-.back-btn { background: none; border: none; color: var(–accent); font-family: ‘DM Mono’, monospace; font-size: 11px; letter-spacing: 1px; cursor: pointer; padding: 4px 0; display: none; align-items: center; gap: 6px; }
-.back-btn.visible { display: flex; }
+  .topbar { height: 52px; background: #080808; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; z-index: 10; }
+  .topbar-logo { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 5px; color: var(--accent); line-height: 1; }
+  .week-pill { background: var(--accent-glow); border: 1px solid var(--accent-dim); color: var(--accent); font-size: 10px; letter-spacing: 2px; padding: 4px 10px; cursor: pointer; user-select: none; -webkit-user-select: none; }
+  .week-pill:active { background: rgba(201,169,110,0.2); }
+  .back-btn { background: none; border: none; color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; cursor: pointer; padding: 4px 0; display: none; align-items: center; gap: 6px; }
+  .back-btn.visible { display: flex; }
 
-.scroll-area { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; background: #080808; }
+  .scroll-area { flex: 1; overflow-y: auto; overflow-x: hidden; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; background: #080808; }
 
-.bottom-nav { height: var(–nav-h); padding-bottom: var(–safe-bottom); background: var(–deep); border-top: 1px solid var(–border); display: flex; flex-shrink: 0; z-index: 10; }
-.nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: none; border: none; color: var(–text-muted); cursor: pointer; padding: 8px 0; transition: color 0.2s; }
-.nav-btn.active { color: var(–accent); }
-.nav-icon { font-size: 18px; line-height: 1; }
-.nav-label { font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase; }
+  .bottom-nav { height: var(--nav-h); padding-bottom: var(--safe-bottom); background: var(--deep); border-top: 1px solid var(--border); display: flex; flex-shrink: 0; z-index: 10; }
+  .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 8px 0; transition: color 0.2s; }
+  .nav-btn.active { color: var(--accent); }
+  .nav-icon { font-size: 18px; line-height: 1; }
+  .nav-label { font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase; }
 
-.page { display: none; background: #080808; }
-.page.active { display: block; }
+  .page { display: none; background: #080808; }
+  .page.active { display: block; }
 
-/* ── HOME ── */
-.home-hero { padding: 24px 20px 16px; border-bottom: 1px solid var(–border); }
-.home-greeting { font-size: 9px; letter-spacing: 3px; color: var(–text-muted); text-transform: uppercase; margin-bottom: 6px; }
-.home-title { font-family: ‘Bebas Neue’, sans-serif; font-size: 38px; letter-spacing: 4px; line-height: 1; }
-.home-sub { font-size: 10px; letter-spacing: 2px; color: var(–text-muted); margin-top: 4px; }
-.home-streak { font-family: ‘DM Mono’, monospace; font-size: 10px; letter-spacing: 2px; color: var(–accent); margin-top: 10px; text-transform: uppercase; display: none; }
-.home-streak.visible { display: block; }
-.home-lastweek { display: none; margin-top: 12px; padding: 10px 14px; background: var(–accent-glow); border: 1px solid var(–accent-dim); font-family: ‘DM Mono’, monospace; font-size: 10px; letter-spacing: 1px; color: var(–accent); cursor: pointer; }
-.home-lastweek.visible { display: block; }
+  /* ── HOME ── */
+  .home-hero { padding: 24px 20px 16px; border-bottom: 1px solid var(--border); }
+  .home-greeting { font-size: 9px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
+  .home-title { font-family: 'Bebas Neue', sans-serif; font-size: 38px; letter-spacing: 4px; line-height: 1; }
+  .home-sub { font-size: 10px; letter-spacing: 2px; color: var(--text-muted); margin-top: 4px; }
+  .home-streak { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--accent); margin-top: 10px; text-transform: uppercase; display: none; }
+  .home-streak.visible { display: block; }
+  .home-lastweek { display: none; margin-top: 12px; padding: 10px 14px; background: var(--accent-glow); border: 1px solid var(--accent-dim); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; color: var(--accent); cursor: pointer; }
+  .home-lastweek.visible { display: block; }
 
-/* ── WEEKLY SUMMARY ── */
-.weekly-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9998; display: flex; align-items: center; justify-content: center; padding: 24px; }
-.weekly-card { background: var(–deep); border: 1px solid var(–border); max-width: 320px; width: 100%; padding: 32px 24px; text-align: center; animation: obFadeIn 0.35s ease; }
-.weekly-label { font-size: 9px; letter-spacing: 3px; color: var(–text-muted); text-transform: uppercase; margin-bottom: 16px; }
-.weekly-title { font-family: ‘Bebas Neue’, sans-serif; font-size: 28px; letter-spacing: 4px; color: var(–text); margin-bottom: 20px; line-height: 1.1; }
-.weekly-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
-.weekly-stat { background: var(–surface); border: 1px solid var(–border); padding: 16px 12px; }
-.weekly-stat-val { font-family: ‘Bebas Neue’, sans-serif; font-size: 28px; letter-spacing: 2px; color: var(–accent); line-height: 1; }
-.weekly-stat-lbl { font-size: 9px; letter-spacing: 2px; color: var(–text-muted); text-transform: uppercase; margin-top: 4px; }
-.weekly-streak { font-family: ‘DM Mono’, monospace; font-size: 11px; letter-spacing: 2px; color: var(–accent); margin-bottom: 24px; text-transform: uppercase; }
-.weekly-cta { background: var(–accent-glow); border: 1px solid var(–accent-dim); color: var(–accent); font-family: ‘DM Mono’, monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; padding: 14px 28px; cursor: pointer; width: 100%; }
-.weekly-cta:active { background: rgba(201,169,110,0.2); }
+  /* ── WEEKLY SUMMARY ── */
+  .weekly-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9998; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .weekly-card { background: var(--deep); border: 1px solid var(--border); max-width: 320px; width: 100%; padding: 32px 24px; text-align: center; animation: obFadeIn 0.35s ease; }
+  .weekly-label { font-size: 9px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 16px; }
+  .weekly-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 4px; color: var(--text); margin-bottom: 20px; line-height: 1.1; }
+  .weekly-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+  .weekly-stat { background: var(--surface); border: 1px solid var(--border); padding: 16px 12px; }
+  .weekly-stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; color: var(--accent); line-height: 1; }
+  .weekly-stat-lbl { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-top: 4px; }
+  .weekly-streak { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; color: var(--accent); margin-bottom: 24px; text-transform: uppercase; }
+  .weekly-cta { background: var(--accent-glow); border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; padding: 14px 28px; cursor: pointer; width: 100%; }
+  .weekly-cta:active { background: rgba(201,169,110,0.2); }
 
-/* ── CHANGELOG ── */
-.changelog-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9997; display: flex; align-items: center; justify-content: center; padding: 24px; }
-.changelog-card { background: var(–deep); border: 1px solid var(–border); max-width: 320px; width: 100%; padding: 32px 24px; animation: obFadeIn 0.35s ease; }
-.changelog-badge { font-family: ‘DM Mono’, monospace; font-size: 9px; letter-spacing: 3px; color: var(–accent); text-transform: uppercase; margin-bottom: 16px; text-align: center; }
-.changelog-title { font-family: ‘Bebas Neue’, sans-serif; font-size: 26px; letter-spacing: 4px; color: var(–text); margin-bottom: 20px; text-align: center; line-height: 1.1; }
-.changelog-list { list-style: none; padding: 0; margin: 0 0 24px; }
-.changelog-list li { font-size: 11px; letter-spacing: 0.5px; color: var(–text-muted); line-height: 1.6; padding: 6px 0; border-bottom: 1px solid var(–border); }
-.changelog-list li:last-child { border-bottom: none; }
-.changelog-list li::before { content: ’✦ ’; color: var(–accent); }
+  /* ── CHANGELOG ── */
+  .changelog-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9997; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .changelog-card { background: var(--deep); border: 1px solid var(--border); max-width: 320px; width: 100%; padding: 32px 24px; animation: obFadeIn 0.35s ease; }
+  .changelog-badge { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; margin-bottom: 16px; text-align: center; }
+  .changelog-title { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 4px; color: var(--text); margin-bottom: 20px; text-align: center; line-height: 1.1; }
+  .changelog-list { list-style: none; padding: 0; margin: 0 0 24px; }
+  .changelog-list li { font-size: 11px; letter-spacing: 0.5px; color: var(--text-muted); line-height: 1.6; padding: 6px 0; border-bottom: 1px solid var(--border); }
+  .changelog-list li:last-child { border-bottom: none; }
+  .changelog-list li::before { content: '✦ '; color: var(--accent); }
 
-.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(–border); }
-.stat-cell { padding: 16px 20px; border-right: 1px solid var(–border); }
-.stat-cell:last-child { border-right: none; }
-.stat-label { font-size: 8px; letter-spacing: 2px; color: var(–text-muted); text-transform: uppercase; margin-bottom: 4px; }
-.stat-value { font-family: ‘Bebas Neue’, sans-serif; font-size: 26px; letter-spacing: 2px; color: var(–accent); line-height: 1; }
+  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(--border); }
+  .stat-cell { padding: 16px 20px; border-right: 1px solid var(--border); }
+  .stat-cell:last-child { border-right: none; }
+  .stat-label { font-size: 8px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
+  .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 2px; color: var(--accent); line-height: 1; }
 
-.section-label { padding: 16px 20px 10px; font-size: 9px; letter-spacing: 3px; color: var(–text-muted); text-transform: uppercase; border-bottom: 1px solid var(–border); }
+  .section-label { padding: 16px 20px 10px; font-size: 9px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; border-bottom: 1px solid var(--border); }
 
-.archive-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; border-bottom: 1px solid var(–border); background: var(–deep); }
-.archive-bar-label { font-size: 9px; letter-spacing: 2px; color: var(–text-muted); text-transform: uppercase; }
-.archive-btn { background: transparent; border: 1px solid var(–border); color: var(–text-muted); font-family: ‘DM Mono’, monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; padding: 5px 12px; cursor: pointer; }
-.archive-btn:active { border-color: var(–accent-dim); color: var(–accent); }
+  .archive-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; border-bottom: 1px solid var(--border); background: var(--deep); }
+  .archive-bar-label { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; }
+  .archive-btn { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; padding: 5px 12px; cursor: pointer; }
+  .archive-btn:active { border-color: var(--accent-dim); color: var(--accent); }
 
-.duration-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 20px; border-bottom: 1px solid var(–border); background: var(–black); }
-.duration-label { font-size: 8px; letter-spacing: 2px; color: var(–text-dim); text-transform: uppercase; }
-.duration-chips { display: flex; gap: 5px; }
-.dur-chip { background: transparent; border: 1px solid var(–border); color: var(–text-muted); font-family: ‘DM Mono’, monospace; font-size: 9px; letter-spacing: 1px; padding: 4px 10px; cursor: pointer; transition: all 0.15s; }
-.dur-chip.active { background: var(–accent-glow); border-color: var(–accent); color: var(–accent); }
+  .duration-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 20px; border-bottom: 1px solid var(--border); background: var(--black); }
+  .duration-label { font-size: 8px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; }
+  .duration-chips { display: flex; gap: 5px; }
+  .dur-chip { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; padding: 4px 10px; cursor: pointer; transition: all 0.15s; }
+  .dur-chip.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
 
-.day-card { border-bottom: 1px solid var(–border); }
-.day-card-header { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
-.day-card-left { flex: 1; }
-.day-tag { font-family: ‘Bebas Neue’, sans-serif; font-size: 20px; letter-spacing: 3px; line-height: 1; }
-.day-type { font-size: 9px; letter-spacing: 2px; color: var(–text-muted); text-transform: uppercase; margin-top: 3px; }
-.day-chevron { color: var(–accent); font-size: 14px; transition: transform 0.2s; }
-.day-card-exercises { display: none; padding: 0 20px 16px; }
-.day-card.open .day-card-exercises { display: block; }
-.day-card.open .day-chevron { transform: rotate(90deg); }
+  .day-card { border-bottom: 1px solid var(--border); }
+  .day-card-header { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+  .day-card-left { flex: 1; }
+  .day-tag { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 3px; line-height: 1; }
+  .day-type { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-top: 3px; }
+  .day-chevron { color: var(--accent); font-size: 14px; transition: transform 0.2s; }
+  .day-card-exercises { display: none; padding: 0 20px 16px; }
+  .day-card.open .day-card-exercises { display: block; }
+  .day-card.open .day-chevron { transform: rotate(90deg); }
 
-.ex-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(–border); }
-.ex-row:last-of-type { border-bottom: none; margin-bottom: 8px; }
-.ex-name { font-size: 12px; color: var(–text); }
-.ex-scheme { font-size: 11px; color: var(–accent); }
+  .ex-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+  .ex-row:last-of-type { border-bottom: none; margin-bottom: 8px; }
+  .ex-name { font-size: 12px; color: var(--text); }
+  .ex-scheme { font-size: 11px; color: var(--accent); }
 
-.start-btn { display: flex; align-items: center; justify-content: center; width: 100%; padding: 12px; background: var(–accent-glow); border: 1px solid var(–accent-dim); color: var(–accent); font-family: ‘DM Mono’, monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; margin-top: 4px; }
-.start-btn:active { background: rgba(201,169,110,0.2); }
+  .start-btn { display: flex; align-items: center; justify-content: center; width: 100%; padding: 12px; background: var(--accent-glow); border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; margin-top: 4px; }
+  .start-btn:active { background: rgba(201,169,110,0.2); }
 
-/* ── LOG ── */
-.log-header { padding: 20px 20px 16px; border-bottom: 1px solid var(–border); display: flex; align-items: flex-start; justify-content: space-between; }
-.log-title { font-family: ‘Bebas Neue’, sans-serif; font-size: 24px; letter-spacing: 3px; line-height: 1.1; max-width: 200px; }
-.week-tabs { display: flex; gap: 4px; }
-.w-tab { width: 34px; height: 28px; background: transparent; border: 1px solid var(–border); color: var(–text-muted); font-family: ‘DM Mono’, monospace; font-size: 9px; cursor: pointer; }
-.w-tab.active { background: var(–accent-glow); border-color: var(–accent); color: var(–accent); }
+  /* ── LOG ── */
+  .log-header { padding: 20px 20px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; }
+  .log-title { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 3px; line-height: 1.1; max-width: 200px; }
+  .week-tabs { display: flex; gap: 4px; }
+  .w-tab { width: 34px; height: 28px; background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 9px; cursor: pointer; }
+  .w-tab.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
 
-.log-ex-card { border-bottom: 1px solid var(–border); }
-.log-ex-header { padding: 14px 20px 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
-.log-ex-name { font-family: ‘Bebas Neue’, sans-serif; font-size: 18px; letter-spacing: 2px; }
-.log-ex-target { font-size: 10px; color: var(–text-muted); letter-spacing: 1px; margin-top: 2px; }
-.log-ex-note { font-size: 9px; color: var(–accent); letter-spacing: 1px; }
-.log-ex-body { padding: 0 20px 16px; }
+  .log-ex-card { border-bottom: 1px solid var(--border); }
+  .log-ex-header { padding: 14px 20px 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+  .log-ex-name { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px; }
+  .log-ex-target { font-size: 10px; color: var(--text-muted); letter-spacing: 1px; margin-top: 2px; }
+  .log-ex-note { font-size: 9px; color: var(--accent); letter-spacing: 1px; }
+  .log-ex-body { padding: 0 20px 16px; }
 
-/* Set note */
-.set-note-row { padding: 6px 20px 12px; }
-.set-note-input { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(–border); color: var(–text-muted); font-family: ‘DM Mono’, monospace; font-size: 11px; padding: 4px 0; outline: none; -webkit-appearance: none; border-radius: 0; }
-.set-note-input:focus { border-bottom-color: var(–accent); color: var(–text); }
-.set-note-input::placeholder { color: var(–text-dim); font-size: 10px; }
+  /* Set note */
+  .set-note-row { padding: 6px 20px 12px; }
+  .set-note-input { width: 100%; background: transparent; border: none; border-bottom: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 11px; padding: 4px 0; outline: none; -webkit-appearance: none; border-radius: 0; }
+  .set-note-input:focus { border-bottom-color: var(--accent); color: var(--text); }
+  .set-note-input::placeholder { color: var(--text-dim); font-size: 10px; }
 
-/* Rest timer overlay */
-.timer-overlay { position: fixed; inset: 0; background: rgba(8,8,8,0.96); z-index: 300; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
-.timer-overlay.open { opacity: 1; pointer-events: all; }
-.timer-label { font-size: 9px; letter-spacing: 4px; color: var(–text-muted); text-transform: uppercase; margin-bottom: 20px; }
-.timer-ring { position: relative; width: 200px; height: 200px; margin-bottom: 28px; }
-.timer-ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
-.timer-ring-bg { fill: none; stroke: var(–border); stroke-width: 2; }
-.timer-ring-fill { fill: none; stroke: var(–accent); stroke-width: 2; stroke-linecap: butt; transition: stroke-dashoffset 1s linear; }
-.timer-digits { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 4px; }
-.timer-time { font-family: ‘Bebas Neue’, sans-serif; font-size: 72px; letter-spacing: 4px; color: var(–text); line-height: 1; }
-.timer-ex-name { font-size: 9px; letter-spacing: 2px; color: var(–accent); text-transform: uppercase; }
-.timer-actions { display: flex; gap: 10px; }
-.timer-btn { background: transparent; border: 1px solid var(–border); color: var(–text-muted); font-family: ‘DM Mono’, monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 10px 20px; cursor: pointer; }
-.timer-btn.primary { border-color: var(–accent-dim); color: var(–accent); }
-.timer-btn:active { background: var(–surface); }
-.timer-duration-row { display: flex; gap: 8px; margin-top: 20px; }
-.timer-dur-btn { background: transparent; border: 1px solid var(–border); color: var(–text-dim); font-family: ‘DM Mono’, monospace; font-size: 9px; letter-spacing: 1px; padding: 5px 12px; cursor: pointer; }
-.timer-dur-btn.active { border-color: var(–accent-dim); color: var(–accent); }
+  /* Rest timer overlay */
+  .timer-overlay { position: fixed; inset: 0; background: rgba(8,8,8,0.96); z-index: 300; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .timer-overlay.open { opacity: 1; pointer-events: all; }
+  .timer-label { font-size: 9px; letter-spacing: 4px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 20px; }
+  .timer-ring { position: relative; width: 200px; height: 200px; margin-bottom: 28px; }
+  .timer-ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
+  .timer-ring-bg { fill: none; stroke: var(--border); stroke-width: 2; }
+  .timer-ring-fill { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: butt; transition: stroke-dashoffset 1s linear; }
+  .timer-digits { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 4px; }
+  .timer-time { font-family: 'Bebas Neue', sans-serif; font-size: 72px; letter-spacing: 4px; color: var(--text); line-height: 1; }
+  .timer-ex-name { font-size: 9px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; }
+  .timer-actions { display: flex; gap: 10px; }
+  .timer-btn { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 10px 20px; cursor: pointer; }
+  .timer-btn.primary { border-color: var(--accent-dim); color: var(--accent); }
+  .timer-btn:active { background: var(--surface); }
+  .timer-duration-row { display: flex; gap: 8px; margin-top: 20px; }
+  .timer-dur-btn { background: transparent; border: 1px solid var(--border); color: var(--text-dim); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; padding: 5px 12px; cursor: pointer; }
+  .timer-dur-btn.active { border-color: var(--accent-dim); color: var(--accent); }
 
-/* Timer toggle in log header */
-.timer-toggle { display: flex; align-items: center; gap: 6px; padding: 8px 20px; border-bottom: 1px solid var(–border); background: var(–deep); }
-.timer-toggle-label { font-size: 9px; letter-spacing: 2px; color: var(–text-muted); text-transform: uppercase; flex: 1; }
-.toggle-switch { position: relative; width: 36px; height: 20px; cursor: pointer; }
-.toggle-switch input { opacity: 0; width: 0; height: 0; }
-.toggle-track { position: absolute; inset: 0; background: var(–border); transition: background 0.2s; }
-.toggle-thumb { position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; background: var(–text-muted); transition: all 0.2s; }
-.toggle-switch input:checked + .toggle-track { background: var(–accent-dim); }
-.toggle-switch input:checked + .toggle-track + .toggle-thumb,
-.toggle-switch input:checked ~ .toggle-thumb { left: 19px; background: var(–accent); }
+  /* Timer toggle in log header */
+  .timer-toggle { display: flex; align-items: center; gap: 6px; padding: 8px 20px; border-bottom: 1px solid var(--border); background: var(--deep); }
+  .timer-toggle-label { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; flex: 1; }
+  .toggle-switch { position: relative; width: 36px; height: 20px; cursor: pointer; }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .toggle-track { position: absolute; inset: 0; background: var(--border); transition: background 0.2s; }
+  .toggle-thumb { position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; background: var(--text-muted); transition: all 0.2s; }
+  .toggle-switch input:checked + .toggle-track { background: var(--accent-dim); }
+  .toggle-switch input:checked + .toggle-track + .toggle-thumb,
+  .toggle-switch input:checked ~ .toggle-thumb { left: 19px; background: var(--accent); }
 
-/* Sparkline */
-.spark-row { padding: 0 14px 10px; }
-.spark-label { font-size: 8px; letter-spacing: 2px; color: var(–text-muted); text-transform: uppercase; margin-bottom: 6px; }
-.spark-svg { display: block; width: 100%; height: 36px; }
+  /* Sparkline */
+  .spark-row { padding: 0 14px 10px; }
+  .spark-label { font-size: 8px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
+  .spark-svg { display: block; width: 100%; height: 36px; }
 
-.sets-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
-.set-col { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; }
-.set-num { font-size: 8px; letter-spacing: 1px; color: var(–text-muted); text-transform: uppercase; }
-.set-field { width: 58px; background: var(–surface); border: 1px solid var(–border-light); color: var(–accent); font-family: ‘DM Mono’, monospace; font-size: 15px; font-weight: 500; padding: 8px 6px; text-align: center; outline: none; -webkit-appearance: none; border-radius: 0; }
-.set-field:focus { border-color: var(–accent); background: var(–card); }
-.set-field::placeholder { color: #6b6560; font-size: 10px; }
-.set-field.reps { color: #d4cec7; font-size: 14px; font-weight: 400; }
-.set-divider { font-size: 10px; color: var(–text-dim); align-self: center; margin-top: 16px; }
+  .sets-scroll { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; -webkit-overflow-scrolling: touch; }
+  .set-col { display: flex; flex-direction: column; align-items: center; gap: 4px; flex-shrink: 0; }
+  .set-num { font-size: 8px; letter-spacing: 1px; color: var(--text-muted); text-transform: uppercase; }
+  .set-field { width: 58px; background: var(--surface); border: 1px solid var(--border-light); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 500; padding: 8px 6px; text-align: center; outline: none; -webkit-appearance: none; border-radius: 0; }
+  .set-field:focus { border-color: var(--accent); background: var(--card); }
+  .set-field::placeholder { color: #6b6560; font-size: 10px; }
+  .set-field.reps { color: #d4cec7; font-size: 14px; font-weight: 400; }
+  .set-divider { font-size: 10px; color: var(--text-dim); align-self: center; margin-top: 16px; }
 
-.notes-section { padding: 16px 20px; border-bottom: 1px solid var(–border); }
-.notes-label { font-size: 9px; letter-spacing: 3px; color: var(–text-muted); text-transform: uppercase; margin-bottom: 8px; }
-.notes-input { width: 100%; background: var(–surface); border: 1px solid var(–border); color: var(–text); font-family: ‘DM Mono’, monospace; font-size: 13px; padding: 12px; outline: none; resize: none; min-height: 72px; -webkit-appearance: none; border-radius: 0; }
-.notes-input:focus { border-color: var(–accent); }
-.notes-input::placeholder { color: var(–text-dim); }
+  .notes-section { padding: 16px 20px; border-bottom: 1px solid var(--border); }
+  .notes-label { font-size: 9px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
+  .notes-input { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; padding: 12px; outline: none; resize: none; min-height: 72px; -webkit-appearance: none; border-radius: 0; }
+  .notes-input:focus { border-color: var(--accent); }
+  .notes-input::placeholder { color: var(--text-dim); }
 
-.save-section { padding: 20px; }
-.save-btn { width: 100%; padding: 16px; background: var(–accent-glow); border: 1px solid var(–accent); color: var(–accent); font-family: ‘DM Mono’, monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; }
-.save-btn:active { background: rgba(201,169,110,0.2); }
+  .save-section { padding: 20px; }
+  .save-btn { width: 100%; padding: 16px; background: var(--accent-glow); border: 1px solid var(--accent); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; }
+  .save-btn:active { background: rgba(201,169,110,0.2); }
 
-.add-ex-section { padding: 16px 20px; border-bottom: 1px solid var(–border); position: relative; }
-.add-ex-search { width: 100%; background: var(–surface); border: 1px solid var(–border); color: var(–text); font-family: ‘DM Mono’, monospace; font-size: 11px; padding: 10px 14px; outline: none; border-radius: 0; letter-spacing: 1px; }
-.add-ex-search:focus { border-color: var(–accent-dim); }
-.add-ex-search::placeholder { color: var(–text-muted); }
-.add-ex-results { position: absolute; left: 20px; right: 20px; background: var(–card); border: 1px solid var(–border-light); z-index: 50; max-height: 220px; overflow-y: auto; display: none; }
-.add-ex-results.open { display: block; }
-.add-ex-result-item { padding: 10px 14px; font-size: 10px; letter-spacing: 1px; color: var(–text-muted); cursor: pointer; border-bottom: 1px solid var(–border); }
-.add-ex-result-item:last-child { border-bottom: none; }
-.add-ex-result-item:hover, .add-ex-result-item.highlighted { background: var(–surface); color: var(–text); }
-.add-ex-result-item strong { color: var(–accent); font-weight: 400; }
+  .add-ex-section { padding: 16px 20px; border-bottom: 1px solid var(--border); position: relative; }
+  .add-ex-search { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 11px; padding: 10px 14px; outline: none; border-radius: 0; letter-spacing: 1px; }
+  .add-ex-search:focus { border-color: var(--accent-dim); }
+  .add-ex-search::placeholder { color: var(--text-muted); }
+  .add-ex-results { position: absolute; left: 20px; right: 20px; background: var(--card); border: 1px solid var(--border-light); z-index: 50; max-height: 220px; overflow-y: auto; display: none; }
+  .add-ex-results.open { display: block; }
+  .add-ex-result-item { padding: 10px 14px; font-size: 10px; letter-spacing: 1px; color: var(--text-muted); cursor: pointer; border-bottom: 1px solid var(--border); }
+  .add-ex-result-item:last-child { border-bottom: none; }
+  .add-ex-result-item:hover, .add-ex-result-item.highlighted { background: var(--surface); color: var(--text); }
+  .add-ex-result-item strong { color: var(--accent); font-weight: 400; }
 
-/* ── LIBRARY ── */
-.db-search-bar { padding: 12px 16px; background: var(–deep); border-bottom: 1px solid var(–border); position: sticky; top: 0; z-index: 5; }
-.search-input { width: 100%; background: var(–surface); border: 1px solid var(–border); color: var(–text); font-family: ‘DM Mono’, monospace; font-size: 13px; padding: 10px 14px; outline: none; -webkit-appearance: none; border-radius: 0; }
-.search-input:focus { border-color: var(–accent); }
-.search-input::placeholder { color: var(–text-dim); }
+  /* ── LIBRARY ── */
+  .db-search-bar { padding: 12px 16px; background: var(--deep); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 5; }
+  .search-input { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; padding: 10px 14px; outline: none; -webkit-appearance: none; border-radius: 0; }
+  .search-input:focus { border-color: var(--accent); }
+  .search-input::placeholder { color: var(--text-dim); }
 
-.filter-row { display: flex; gap: 6px; overflow-x: auto; padding: 10px 16px; border-bottom: 1px solid var(–border); -webkit-overflow-scrolling: touch; background: var(–deep); }
-.filter-row.sub { background: var(–surface); border-bottom: 1px solid var(–border); min-height: 0; max-height: 0; overflow: hidden; padding: 0 16px; transition: max-height 0.25s ease, padding 0.25s ease; }
-.filter-row.sub.open { max-height: 60px; padding: 8px 16px; }
-.filter-chip { background: transparent; border: 1px solid var(–border); color: var(–text-muted); font-family: ‘DM Mono’, monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; padding: 6px 12px; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
-.filter-chip.active { background: var(–accent-glow); border-color: var(–accent); color: var(–accent); }
-.filter-chip.cat { font-size: 10px; letter-spacing: 1.5px; }
+  .filter-row { display: flex; gap: 6px; overflow-x: auto; padding: 10px 16px; border-bottom: 1px solid var(--border); -webkit-overflow-scrolling: touch; background: var(--deep); }
+  .filter-row.sub { background: var(--surface); border-bottom: 1px solid var(--border); min-height: 0; max-height: 0; overflow: hidden; padding: 0 16px; transition: max-height 0.25s ease, padding 0.25s ease; }
+  .filter-row.sub.open { max-height: 60px; padding: 8px 16px; }
+  .filter-chip { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; padding: 6px 12px; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+  .filter-chip.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+  .filter-chip.cat { font-size: 10px; letter-spacing: 1.5px; }
 
-.ex-group-header { padding: 10px 20px 6px; font-size: 8px; letter-spacing: 3px; color: var(–text-dim); text-transform: uppercase; background: var(–deep); border-bottom: 1px solid var(–border); margin-top: 4px; }
-.ex-group-header:first-child { margin-top: 0; }
+  .ex-group-header { padding: 10px 20px 6px; font-size: 8px; letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase; background: var(--deep); border-bottom: 1px solid var(--border); margin-top: 4px; }
+  .ex-group-header:first-child { margin-top: 0; }
 
-.ex-list-item { border-bottom: 1px solid var(–border); }
-.ex-list-header { padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
-.ex-list-name { font-family: ‘Bebas Neue’, sans-serif; font-size: 20px; letter-spacing: 2px; }
-.ex-list-tags { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
+  .ex-list-item { border-bottom: 1px solid var(--border); }
+  .ex-list-header { padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+  .ex-list-name { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px; }
+  .ex-list-tags { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
 
-.tag { font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase; padding: 2px 6px; border: 1px solid var(–border); color: var(–text-muted); }
-.tag.push { border-color: #4a3a28; color: #c9a96e; }
-.tag.pull { border-color: #283a4a; color: #6eaac9; }
-.tag.legs { border-color: #2a3a28; color: #6ec980; }
-.tag.core { border-color: #3a2840; color: #c96ec9; }
-.tag.skill { border-color: #3a3828; color: #c9c46e; }
-.tag.calisthenics { border-color: #1a3a3a; color: #6ec9c4; }
-.tag.barbell { border-color: #3a1a1a; color: #c96e6e; }
-.tag.dumbbell { border-color: #2a2a3a; color: #8e8ec9; }
-.tag.machine { border-color: #2a3a2a; color: #8ec98e; }
+  .tag { font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase; padding: 2px 6px; border: 1px solid var(--border); color: var(--text-muted); }
+  .tag.push { border-color: #4a3a28; color: #c9a96e; }
+  .tag.pull { border-color: #283a4a; color: #6eaac9; }
+  .tag.legs { border-color: #2a3a28; color: #6ec980; }
+  .tag.core { border-color: #3a2840; color: #c96ec9; }
+  .tag.skill { border-color: #3a3828; color: #c9c46e; }
+  .tag.calisthenics { border-color: #1a3a3a; color: #6ec9c4; }
+  .tag.barbell { border-color: #3a1a1a; color: #c96e6e; }
+  .tag.dumbbell { border-color: #2a2a3a; color: #8e8ec9; }
+  .tag.machine { border-color: #2a3a2a; color: #8ec98e; }
 
-.ex-detail { display: none; padding: 0 20px 16px; border-top: 1px solid var(–border); }
-.ex-list-item.open .ex-detail { display: block; }
-.ex-list-item.open .ex-list-header { background: var(–surface); }
-.ex-desc { font-size: 12px; color: var(–text-muted); line-height: 1.6; padding: 12px 0; border-bottom: 1px solid var(–border); font-style: italic; }
-.info-line { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(–border); font-size: 11px; }
-.info-line-label { color: var(–text-muted); }
-.info-line-val { color: var(–text); text-align: right; max-width: 60%; }
-.video-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background: transparent; border: 1px solid var(–accent-dim); color: var(–accent); font-family: ‘DM Mono’, monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; text-decoration: none; margin-top: 12px; }
+  .ex-detail { display: none; padding: 0 20px 16px; border-top: 1px solid var(--border); }
+  .ex-list-item.open .ex-detail { display: block; }
+  .ex-list-item.open .ex-list-header { background: var(--surface); }
+  .ex-desc { font-size: 12px; color: var(--text-muted); line-height: 1.6; padding: 12px 0; border-bottom: 1px solid var(--border); font-style: italic; }
+  .info-line { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 11px; }
+  .info-line-label { color: var(--text-muted); }
+  .info-line-val { color: var(--text); text-align: right; max-width: 60%; }
+  .video-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background: transparent; border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; text-decoration: none; margin-top: 12px; }
 
-/* ── PROGRESS ── */
-.progress-header { padding: 20px 20px 0; }
-.progress-title { font-family: ‘Bebas Neue’, sans-serif; font-size: 34px; letter-spacing: 4px; }
-.progress-sub { font-size: 9px; letter-spacing: 2px; color: var(–text-muted); margin-top: 2px; }
-.block-stats { display: grid; grid-template-columns: repeat(2, 1fr); margin: 16px 0 0; border: 1px solid var(–border); border-bottom: none; }
-.block-stat { padding: 14px 16px; border-bottom: 1px solid var(–border); border-right: 1px solid var(–border); }
-.block-stat:nth-child(2n) { border-right: none; }
-.block-stat-label { font-size: 8px; letter-spacing: 2px; color: var(–text-muted); text-transform: uppercase; margin-bottom: 4px; }
-.block-stat-val { font-family: ‘Bebas Neue’, sans-serif; font-size: 18px; letter-spacing: 2px; color: var(–accent); line-height: 1.2; }
+  /* ── PROGRESS ── */
+  .progress-header { padding: 20px 20px 0; }
+  .progress-title { font-family: 'Bebas Neue', sans-serif; font-size: 34px; letter-spacing: 4px; }
+  .progress-sub { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); margin-top: 2px; }
+  .block-stats { display: grid; grid-template-columns: repeat(2, 1fr); margin: 16px 0 0; border: 1px solid var(--border); border-bottom: none; }
+  .block-stat { padding: 14px 16px; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); }
+  .block-stat:nth-child(2n) { border-right: none; }
+  .block-stat-label { font-size: 8px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
+  .block-stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px; color: var(--accent); line-height: 1.2; }
 
-.progress-ex-card { margin: 16px 20px 0; border: 1px solid var(–border); overflow: hidden; }
-.progress-ex-header { background: var(–surface); padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(–border); }
-.progress-ex-name { font-family: ‘Bebas Neue’, sans-serif; font-size: 16px; letter-spacing: 2px; }
-.progress-ex-scheme { font-size: 9px; color: var(–text-muted); }
-.wh-cell { font-size: 8px; letter-spacing: 2px; color: var(–text-dim); text-align: center; padding: 6px 4px; border-right: 1px solid var(–border); text-transform: uppercase; }
-.wh-cell:first-child { text-align: left; padding-left: 12px; }
-.wh-cell:last-child { border-right: none; }
-.wd-cell { font-size: 11px; color: var(–text-muted); text-align: center; padding: 9px 4px; border-bottom: 1px solid var(–border); border-right: 1px solid var(–border); }
-.wd-cell:first-child { font-size: 9px; text-align: left; padding-left: 12px; color: var(–text-dim); }
-.wd-cell:last-child { border-right: none; }
-.wd-cell.current { color: var(–accent); background: var(–accent-glow); }
-.wd-cell.up { color: var(–green); }
-.wd-cell.down { color: var(–red); }
-.wd-cell.empty { color: var(–text-dim); }
+  .progress-ex-card { margin: 16px 20px 0; border: 1px solid var(--border); overflow: hidden; }
+  .progress-ex-header { background: var(--surface); padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
+  .progress-ex-name { font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 2px; }
+  .progress-ex-scheme { font-size: 9px; color: var(--text-muted); }
+  .wh-cell { font-size: 8px; letter-spacing: 2px; color: var(--text-dim); text-align: center; padding: 6px 4px; border-right: 1px solid var(--border); text-transform: uppercase; }
+  .wh-cell:first-child { text-align: left; padding-left: 12px; }
+  .wh-cell:last-child { border-right: none; }
+  .wd-cell { font-size: 11px; color: var(--text-muted); text-align: center; padding: 9px 4px; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); }
+  .wd-cell:first-child { font-size: 9px; text-align: left; padding-left: 12px; color: var(--text-dim); }
+  .wd-cell:last-child { border-right: none; }
+  .wd-cell.current { color: var(--accent); background: var(--accent-glow); }
+  .wd-cell.up { color: var(--green); }
+  .wd-cell.down { color: var(--red); }
+  .wd-cell.empty { color: var(--text-dim); }
 
-/* ── BUILD TAB ── */
-.build-tab-toggle { display: flex; border-bottom: 1px solid var(–border); background: var(–deep); }
-.build-tab-btn { flex: 1; padding: 14px; background: transparent; border: none; color: var(–text-muted); font-family: ‘DM Mono’, monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
-.build-tab-btn.active { color: var(–accent); border-bottom-color: var(–accent); }
-.build-panel { display: none; }
-.build-panel.active { display: block; }
+  /* ── BUILD TAB ── */
+  .build-tab-toggle { display: flex; border-bottom: 1px solid var(--border); background: var(--deep); }
+  .build-tab-btn { flex: 1; padding: 14px; background: transparent; border: none; color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
+  .build-tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .build-panel { display: none; }
+  .build-panel.active { display: block; }
 
-/* ── BUILDER ── */
-.builder-header { padding: 20px 20px 16px; border-bottom: 1px solid var(–border); }
-.builder-title { font-family: ‘Bebas Neue’, sans-serif; font-size: 34px; letter-spacing: 4px; }
-.builder-sub { font-size: 9px; letter-spacing: 2px; color: var(–text-muted); margin-top: 2px; }
+  /* ── BUILDER ── */
+  .builder-header { padding: 20px 20px 16px; border-bottom: 1px solid var(--border); }
+  .builder-title { font-family: 'Bebas Neue', sans-serif; font-size: 34px; letter-spacing: 4px; }
+  .builder-sub { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); margin-top: 2px; }
 
-.field-section { padding: 16px 20px; border-bottom: 1px solid var(–border); }
-.field-label { font-size: 9px; letter-spacing: 3px; color: var(–text-muted); text-transform: uppercase; margin-bottom: 8px; }
-.field-sublabel { font-size: 8px; letter-spacing: 1px; color: var(–text-muted); text-transform: none; }
+  .field-section { padding: 16px 20px; border-bottom: 1px solid var(--border); }
+  .field-label { font-size: 9px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
+  .field-sublabel { font-size: 8px; letter-spacing: 1px; color: var(--text-muted); text-transform: none; }
 
-.name-field { width: 100%; background: var(–deep); border: 1px solid var(–border); color: var(–text); font-family: ‘Bebas Neue’, sans-serif; font-size: 22px; letter-spacing: 4px; padding: 10px 14px; outline: none; -webkit-appearance: none; border-radius: 0; }
-.name-field:focus { border-color: var(–accent); }
-.name-field::placeholder { color: var(–text-dim); }
+  .name-field { width: 100%; background: var(--deep); border: 1px solid var(--border); color: var(--text); font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 4px; padding: 10px 14px; outline: none; -webkit-appearance: none; border-radius: 0; }
+  .name-field:focus { border-color: var(--accent); }
+  .name-field::placeholder { color: var(--text-dim); }
 
-.picker-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-.picker-chip { background: transparent; border: 1px solid var(–border); color: var(–text-muted); font-family: ‘DM Mono’, monospace; font-size: 10px; letter-spacing: 1px; padding: 6px 12px; cursor: pointer; transition: all 0.15s; }
-.picker-chip.selected { background: var(–accent-glow); border-color: var(–accent); color: var(–accent); }
+  .picker-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+  .picker-chip { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; padding: 6px 12px; cursor: pointer; transition: all 0.15s; }
+  .picker-chip.selected { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
 
-/* Days builder */
-.days-section { padding: 16px 20px; border-bottom: 1px solid var(–border); }
-.days-list { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
+  /* Days builder */
+  .days-section { padding: 16px 20px; border-bottom: 1px solid var(--border); }
+  .days-list { display: flex; flex-direction: column; gap: 10px; margin-top: 10px; }
 
-.day-builder-card { border: 1px solid var(–border); overflow: hidden; }
-.day-builder-card.active-day { border-color: var(–accent); }
+  .day-builder-card { border: 1px solid var(--border); overflow: hidden; }
+  .day-builder-card.active-day { border-color: var(--accent); }
 
-.day-builder-header { background: var(–surface); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
-.day-builder-title { font-family: ‘Bebas Neue’, sans-serif; font-size: 16px; letter-spacing: 2px; flex: 1; }
-.day-builder-count { font-size: 9px; color: var(–text-muted); margin-right: 12px; }
-.day-builder-del { background: none; border: none; color: var(–text-dim); font-size: 15px; cursor: pointer; padding: 0 4px; }
-.day-builder-del:active { color: var(–red); }
-.day-builder-chevron { color: var(–accent); font-size: 13px; transition: transform 0.2s; }
-.day-builder-card.open .day-builder-chevron { transform: rotate(90deg); }
+  .day-builder-header { background: var(--surface); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+  .day-builder-title { font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 2px; flex: 1; }
+  .day-builder-count { font-size: 9px; color: var(--text-muted); margin-right: 12px; }
+  .day-builder-del { background: none; border: none; color: var(--text-dim); font-size: 15px; cursor: pointer; padding: 0 4px; }
+  .day-builder-del:active { color: var(--red); }
+  .day-builder-chevron { color: var(--accent); font-size: 13px; transition: transform 0.2s; }
+  .day-builder-card.open .day-builder-chevron { transform: rotate(90deg); }
 
-.day-builder-body { display: none; border-top: 1px solid var(–border); }
-.day-builder-card.open .day-builder-body { display: block; }
+  .day-builder-body { display: none; border-top: 1px solid var(--border); }
+  .day-builder-card.open .day-builder-body { display: block; }
 
-.day-name-row { padding: 12px 16px; border-bottom: 1px solid var(–border); display: flex; gap: 8px; align-items: center; }
-.day-name-input { flex: 1; background: var(–deep); border: 1px solid var(–border); color: var(–text); font-family: ‘DM Mono’, monospace; font-size: 11px; letter-spacing: 1px; padding: 8px 12px; outline: none; -webkit-appearance: none; border-radius: 0; text-transform: uppercase; }
-.day-name-input:focus { border-color: var(–accent); }
-.day-name-input::placeholder { color: var(–text-dim); }
+  .day-name-row { padding: 12px 16px; border-bottom: 1px solid var(--border); display: flex; gap: 8px; align-items: center; }
+  .day-name-input { flex: 1; background: var(--deep); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; padding: 8px 12px; outline: none; -webkit-appearance: none; border-radius: 0; text-transform: uppercase; }
+  .day-name-input:focus { border-color: var(--accent); }
+  .day-name-input::placeholder { color: var(--text-dim); }
 
-.day-ex-filter { border-bottom: 1px solid var(–border); }
-.day-ex-filter-row { display: flex; gap: 5px; overflow-x: auto; padding: 8px 16px; -webkit-overflow-scrolling: touch; }
-.day-ex-filter-row.top { border-bottom: 1px solid var(–border); background: var(–deep); }
-.day-ex-chip { background: transparent; border: 1px solid var(–border); color: var(–text-muted); font-family: ‘DM Mono’, monospace; font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase; padding: 5px 10px; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
-.day-ex-chip.active { background: var(–accent-glow); border-color: var(–accent); color: var(–accent); }
-.day-ex-group-label { width: 100%; font-size: 8px; letter-spacing: 3px; color: var(–text-dim); text-transform: uppercase; padding: 8px 2px 2px; border-top: 1px solid var(–border); margin-top: 4px; }
-.day-ex-group-label:first-child { border-top: none; padding-top: 2px; margin-top: 0; }
+  .day-ex-filter { border-bottom: 1px solid var(--border); }
+  .day-ex-filter-row { display: flex; gap: 5px; overflow-x: auto; padding: 8px 16px; -webkit-overflow-scrolling: touch; }
+  .day-ex-filter-row.top { border-bottom: 1px solid var(--border); background: var(--deep); }
+  .day-ex-chip { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase; padding: 5px 10px; cursor: pointer; white-space: nowrap; flex-shrink: 0; }
+  .day-ex-chip.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
+  .day-ex-group-label { width: 100%; font-size: 8px; letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase; padding: 8px 2px 2px; border-top: 1px solid var(--border); margin-top: 4px; }
+  .day-ex-group-label:first-child { border-top: none; padding-top: 2px; margin-top: 0; }
 
-.day-ex-picker { display: flex; flex-wrap: wrap; gap: 5px; padding: 10px 16px; border-bottom: 1px solid var(–border); max-height: 260px; overflow-y: auto; align-content: flex-start; }
-.day-ex-pill { background: transparent; border: 1px solid var(–border); color: var(–text-muted); font-family: ‘DM Mono’, monospace; font-size: 9px; letter-spacing: 1px; padding: 5px 10px; cursor: pointer; transition: all 0.12s; }
-.day-ex-pill.selected { background: var(–accent-glow); border-color: var(–accent); color: var(–accent); }
+  .day-ex-picker { display: flex; flex-wrap: wrap; gap: 5px; padding: 10px 16px; border-bottom: 1px solid var(--border); max-height: 260px; overflow-y: auto; align-content: flex-start; }
+  .day-ex-pill { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; padding: 5px 10px; cursor: pointer; transition: all 0.12s; }
+  .day-ex-pill.selected { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
 
-.day-selected-exs { padding: 10px 16px; display: flex; flex-direction: column; gap: 5px; }
-.day-sel-row { display: flex; align-items: center; background: var(–deep); border: 1px solid var(–border); padding: 8px 12px; gap: 6px; }
-.day-sel-name { font-size: 11px; color: var(–text); flex: 1; }
-.day-mini-input { width: 34px; background: var(–surface); border: 1px solid var(–border); color: var(–text); font-family: ‘DM Mono’, monospace; font-size: 11px; padding: 3px 5px; text-align: center; outline: none; -webkit-appearance: none; border-radius: 0; }
-.day-mini-input:focus { border-color: var(–accent); }
-.day-mini-sep { font-size: 9px; color: var(–text-dim); }
-.day-sel-del { background: none; border: none; color: var(–text-dim); font-size: 14px; cursor: pointer; padding: 0 2px; margin-left: 2px; }
-.day-sel-del:active { color: var(–red); }
+  .day-selected-exs { padding: 10px 16px; display: flex; flex-direction: column; gap: 5px; }
+  .day-sel-row { display: flex; align-items: center; background: var(--deep); border: 1px solid var(--border); padding: 8px 12px; gap: 6px; }
+  .day-sel-name { font-size: 11px; color: var(--text); flex: 1; }
+  .day-mini-input { width: 34px; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 11px; padding: 3px 5px; text-align: center; outline: none; -webkit-appearance: none; border-radius: 0; }
+  .day-mini-input:focus { border-color: var(--accent); }
+  .day-mini-sep { font-size: 9px; color: var(--text-dim); }
+  .day-sel-del { background: none; border: none; color: var(--text-dim); font-size: 14px; cursor: pointer; padding: 0 2px; margin-left: 2px; }
+  .day-sel-del:active { color: var(--red); }
 
-.add-day-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background: transparent; border: 1px solid var(–border); color: var(–text-muted); font-family: ‘DM Mono’, monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; margin-top: 10px; }
-.add-day-btn:active { border-color: var(–accent-dim); color: var(–accent); }
+  .add-day-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; margin-top: 10px; }
+  .add-day-btn:active { border-color: var(--accent-dim); color: var(--accent); }
 
-.builder-save-section { padding: 16px 20px; display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid var(–border); }
+  .builder-save-section { padding: 16px 20px; display: flex; flex-direction: column; gap: 8px; border-bottom: 1px solid var(--border); }
 
-/* Saved blocks */
-.saved-blocks-section { padding: 16px 20px 0; }
-.saved-wk-card { border: 1px solid var(–border); margin-bottom: 10px; }
-.saved-wk-header { padding: 12px 16px; background: var(–surface); border-bottom: 1px solid var(–border); display: flex; justify-content: space-between; align-items: flex-start; }
-.saved-wk-name { font-family: ‘Bebas Neue’, sans-serif; font-size: 18px; letter-spacing: 2px; }
-.saved-wk-meta { font-size: 9px; color: var(–text-muted); margin-top: 3px; }
-.saved-wk-methods { font-size: 9px; color: var(–accent); letter-spacing: 1px; margin-top: 2px; }
-.saved-wk-actions { display: flex; gap: 6px; align-items: center; }
-.saved-wk-del { background: none; border: 1px solid var(–border); color: var(–text-dim); font-family: ‘DM Mono’, monospace; font-size: 8px; letter-spacing: 1px; text-transform: uppercase; padding: 4px 8px; cursor: pointer; }
-.saved-wk-del:active { border-color: var(–red); color: var(–red); }
-.saved-wk-body { padding: 10px 16px 0; }
-.saved-wk-day { font-size: 10px; color: var(–text-muted); padding: 5px 0; border-bottom: 1px solid var(–border); display: flex; justify-content: space-between; }
-.saved-wk-day:last-of-type { border-bottom: none; }
-.saved-wk-day-count { color: var(–accent); }
+  /* Saved blocks */
+  .saved-blocks-section { padding: 16px 20px 0; }
+  .saved-wk-card { border: 1px solid var(--border); margin-bottom: 10px; }
+  .saved-wk-header { padding: 12px 16px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; }
+  .saved-wk-name { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px; }
+  .saved-wk-meta { font-size: 9px; color: var(--text-muted); margin-top: 3px; }
+  .saved-wk-methods { font-size: 9px; color: var(--accent); letter-spacing: 1px; margin-top: 2px; }
+  .saved-wk-actions { display: flex; gap: 6px; align-items: center; }
+  .saved-wk-del { background: none; border: 1px solid var(--border); color: var(--text-dim); font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 1px; text-transform: uppercase; padding: 4px 8px; cursor: pointer; }
+  .saved-wk-del:active { border-color: var(--red); color: var(--red); }
+  .saved-wk-body { padding: 10px 16px 0; }
+  .saved-wk-day { font-size: 10px; color: var(--text-muted); padding: 5px 0; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; }
+  .saved-wk-day:last-of-type { border-bottom: none; }
+  .saved-wk-day-count { color: var(--accent); }
 
-/* Archive panel */
-.archive-panel-header { padding: 20px 20px 16px; border-bottom: 1px solid var(–border); }
-.archive-panel-title { font-family: ‘Bebas Neue’, sans-serif; font-size: 34px; letter-spacing: 4px; }
-.archive-panel-sub { font-size: 9px; letter-spacing: 2px; color: var(–text-muted); margin-top: 2px; }
+  /* Archive panel */
+  .archive-panel-header { padding: 20px 20px 16px; border-bottom: 1px solid var(--border); }
+  .archive-panel-title { font-family: 'Bebas Neue', sans-serif; font-size: 34px; letter-spacing: 4px; }
+  .archive-panel-sub { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); margin-top: 2px; }
 
-.archived-block { border: 1px solid var(–border); margin: 16px 20px 0; overflow: hidden; }
-.archived-block-header { background: var(–surface); padding: 14px 16px; border-bottom: 1px solid var(–border); cursor: pointer; display: flex; align-items: flex-start; justify-content: space-between; }
-.archived-block-name { font-family: ‘Bebas Neue’, sans-serif; font-size: 20px; letter-spacing: 3px; }
-.archived-block-methods { font-size: 9px; color: var(–accent); letter-spacing: 1px; margin-top: 3px; }
-.archived-block-meta { font-size: 9px; color: var(–text-muted); letter-spacing: 1px; margin-top: 4px; }
-.archived-block-chevron { color: var(–accent); font-size: 14px; transition: transform 0.2s; flex-shrink: 0; margin-top: 4px; }
-.archived-block.open .archived-block-chevron { transform: rotate(90deg); }
-.archived-block-body { display: none; }
-.archived-block.open .archived-block-body { display: block; }
-.archived-day { padding: 10px 16px; border-bottom: 1px solid var(–border); display: flex; justify-content: space-between; align-items: center; }
-.archived-day-name { font-size: 12px; color: var(–text); }
-.archived-day-count { font-size: 10px; color: var(–text-muted); }
-.archived-progress { padding: 12px 16px; border-top: 1px solid var(–border); background: var(–deep); }
-.archived-progress-label { font-size: 8px; letter-spacing: 2px; color: var(–text-muted); text-transform: uppercase; margin-bottom: 10px; }
-.archived-progress-ex { margin-bottom: 10px; border: 1px solid var(–border); overflow: hidden; }
-.archived-progress-ex-name { font-family: ‘Bebas Neue’, sans-serif; font-size: 13px; letter-spacing: 2px; background: var(–surface); padding: 6px 10px; border-bottom: 1px solid var(–border); }
+  .archived-block { border: 1px solid var(--border); margin: 16px 20px 0; overflow: hidden; }
+  .archived-block-header { background: var(--surface); padding: 14px 16px; border-bottom: 1px solid var(--border); cursor: pointer; display: flex; align-items: flex-start; justify-content: space-between; }
+  .archived-block-name { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 3px; }
+  .archived-block-methods { font-size: 9px; color: var(--accent); letter-spacing: 1px; margin-top: 3px; }
+  .archived-block-meta { font-size: 9px; color: var(--text-muted); letter-spacing: 1px; margin-top: 4px; }
+  .archived-block-chevron { color: var(--accent); font-size: 14px; transition: transform 0.2s; flex-shrink: 0; margin-top: 4px; }
+  .archived-block.open .archived-block-chevron { transform: rotate(90deg); }
+  .archived-block-body { display: none; }
+  .archived-block.open .archived-block-body { display: block; }
+  .archived-day { padding: 10px 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; }
+  .archived-day-name { font-size: 12px; color: var(--text); }
+  .archived-day-count { font-size: 10px; color: var(--text-muted); }
+  .archived-progress { padding: 12px 16px; border-top: 1px solid var(--border); background: var(--deep); }
+  .archived-progress-label { font-size: 8px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px; }
+  .archived-progress-ex { margin-bottom: 10px; border: 1px solid var(--border); overflow: hidden; }
+  .archived-progress-ex-name { font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 2px; background: var(--surface); padding: 6px 10px; border-bottom: 1px solid var(--border); }
 
-/* ── CONFIRM ── */
-.confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.82); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.2s; display: flex; align-items: flex-end; }
-.confirm-overlay.open { opacity: 1; pointer-events: all; }
-.confirm-sheet { background: var(–surface); border-top: 1px solid var(–border); width: 100%; padding: 24px 20px; padding-bottom: calc(24px + var(–safe-bottom)); transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.32,0.72,0,1); }
-.confirm-overlay.open .confirm-sheet { transform: translateY(0); }
-.confirm-title { font-family: ‘Bebas Neue’, sans-serif; font-size: 24px; letter-spacing: 3px; margin-bottom: 8px; }
-.confirm-desc { font-size: 12px; color: var(–text-muted); line-height: 1.6; margin-bottom: 20px; }
-.confirm-yes { width: 100%; padding: 14px; background: var(–accent-glow); border: 1px solid var(–accent); color: var(–accent); font-family: ‘DM Mono’, monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; margin-bottom: 8px; }
-.confirm-no { width: 100%; padding: 14px; background: transparent; border: 1px solid var(–border); color: var(–text-muted); font-family: ‘DM Mono’, monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
+  /* ── CONFIRM ── */
+  .confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.82); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.2s; display: flex; align-items: flex-end; }
+  .confirm-overlay.open { opacity: 1; pointer-events: all; }
+  .confirm-sheet { background: var(--surface); border-top: 1px solid var(--border); width: 100%; padding: 24px 20px; padding-bottom: calc(24px + var(--safe-bottom)); transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.32,0.72,0,1); }
+  .confirm-overlay.open .confirm-sheet { transform: translateY(0); }
+  .confirm-title { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 3px; margin-bottom: 8px; }
+  .confirm-desc { font-size: 12px; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px; }
+  .confirm-yes { width: 100%; padding: 14px; background: var(--accent-glow); border: 1px solid var(--accent); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; margin-bottom: 8px; }
+  .confirm-no { width: 100%; padding: 14px; background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
 
-/* ── EX SHEET ── */
-.sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
-.sheet-overlay.open { opacity: 1; pointer-events: all; }
-.bottom-sheet { position: fixed; bottom: 0; left: 0; right: 0; background: var(–surface); border-top: 1px solid var(–border); z-index: 101; max-height: 80vh; overflow-y: auto; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.32,0.72,0,1); padding-bottom: var(–safe-bottom); }
-.sheet-overlay.open .bottom-sheet { transform: translateY(0); }
-.sheet-handle { width: 40px; height: 4px; background: var(–border-light); border-radius: 2px; margin: 12px auto 0; }
-.sheet-header { padding: 16px 20px; border-bottom: 1px solid var(–border); display: flex; align-items: center; justify-content: space-between; }
-.sheet-title { font-family: ‘Bebas Neue’, sans-serif; font-size: 22px; letter-spacing: 3px; }
-.sheet-close { background: none; border: none; color: var(–text-muted); font-size: 18px; cursor: pointer; padding: 4px 8px; }
-.sheet-body { padding: 20px; }
-.sheet-desc { font-size: 13px; color: var(–text-muted); line-height: 1.6; font-style: italic; padding-bottom: 14px; border-bottom: 1px solid var(–border); margin-bottom: 4px; }
+  /* ── EX SHEET ── */
+  .sheet-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 100; opacity: 0; pointer-events: none; transition: opacity 0.25s; }
+  .sheet-overlay.open { opacity: 1; pointer-events: all; }
+  .bottom-sheet { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--border); z-index: 101; max-height: 80vh; overflow-y: auto; transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.32,0.72,0,1); padding-bottom: var(--safe-bottom); }
+  .sheet-overlay.open .bottom-sheet { transform: translateY(0); }
+  .sheet-handle { width: 40px; height: 4px; background: var(--border-light); border-radius: 2px; margin: 12px auto 0; }
+  .sheet-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .sheet-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px; }
+  .sheet-close { background: none; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer; padding: 4px 8px; }
+  .sheet-body { padding: 20px; }
+  .sheet-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; font-style: italic; padding-bottom: 14px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
 
-.week-nav-btn { background: none; border: none; color: var(–accent-dim); font-size: 18px; cursor: pointer; padding: 0 2px; line-height: 1; transition: color 0.15s; }
-.week-nav-btn:active { color: var(–accent); }
+  .week-nav-btn { background: none; border: none; color: var(--accent-dim); font-size: 18px; cursor: pointer; padding: 0 2px; line-height: 1; transition: color 0.15s; }
+  .week-nav-btn:active { color: var(--accent); }
 
-.home-empty-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 40px; text-align: center; }
-.home-empty-icon { font-size: 28px; color: var(–accent-dim); margin-bottom: 20px; }
-.home-empty-title { font-family: ‘Bebas Neue’, sans-serif; font-size: 28px; letter-spacing: 4px; color: var(–text); margin-bottom: 8px; }
-.home-empty-sub { font-size: 11px; letter-spacing: 1px; color: var(–text-muted); line-height: 1.6; margin-bottom: 28px; }
-.home-empty-cta { background: var(–accent-glow); border: 1px solid var(–accent-dim); color: var(–accent); font-family: ‘DM Mono’, monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; padding: 14px 28px; cursor: pointer; }
-.home-empty-cta:active { background: rgba(201,169,110,0.2); }
+  .home-empty-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 40px; text-align: center; }
+  .home-empty-icon { font-size: 28px; color: var(--accent-dim); margin-bottom: 20px; }
+  .home-empty-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 4px; color: var(--text); margin-bottom: 8px; }
+  .home-empty-sub { font-size: 11px; letter-spacing: 1px; color: var(--text-muted); line-height: 1.6; margin-bottom: 28px; }
+  .home-empty-cta { background: var(--accent-glow); border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; padding: 14px 28px; cursor: pointer; }
+  .home-empty-cta:active { background: rgba(201,169,110,0.2); }
 
-/* Seed data btn */
-.seed-btn { display: block; margin: 0 20px 16px; padding: 10px; background: transparent; border: 1px dashed var(–border); color: var(–text-dim); font-family: ‘DM Mono’, monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; width: calc(100% - 40px); }
-.seed-btn:active { border-color: var(–accent-dim); color: var(–accent); }
+  /* Seed data btn */
+  .seed-btn { display: block; margin: 0 20px 16px; padding: 10px; background: transparent; border: 1px dashed var(--border); color: var(--text-dim); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; width: calc(100% - 40px); }
+  .seed-btn:active { border-color: var(--accent-dim); color: var(--accent); }
 
-.toast { position: fixed; bottom: calc(var(–nav-h) + 16px + var(–safe-bottom)); left: 50%; transform: translateX(-50%) translateY(20px); background: var(–card); border: 1px solid var(–accent-dim); color: var(–accent); font-family: ‘DM Mono’, monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 10px 18px; z-index: 9999; opacity: 0; transition: all 0.25s; pointer-events: none; white-space: nowrap; }
-.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .toast { position: fixed; bottom: calc(var(--nav-h) + 16px + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(20px); background: var(--card); border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 10px 18px; z-index: 9999; opacity: 0; transition: all 0.25s; pointer-events: none; white-space: nowrap; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-- { scrollbar-width: none; }
+  * { scrollbar-width: none; }
   *::-webkit-scrollbar { display: none; }
 
-/* ── AUTH ── */
-.auth-screen { position: fixed; inset: 0; background: #080808; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: env(safe-area-inset-bottom, 24px); }
-.auth-screen.hidden { display: none; }
-.auth-logo-wrap { position: absolute; top: 0; left: 0; right: 0; bottom: 40%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-.auth-logo { font-family: ‘Bebas Neue’, sans-serif; font-size: 72px; letter-spacing: 16px; color: var(–accent); line-height: 1; }
-.auth-tagline { font-size: 10px; letter-spacing: 4px; color: var(–text-muted); text-transform: uppercase; margin-top: 8px; }
-.auth-form { width: 100%; padding: 0 24px 32px; display: flex; flex-direction: column; gap: 12px; position: relative; z-index: 1; }
-.auth-title { font-family: ‘Bebas Neue’, sans-serif; font-size: 28px; letter-spacing: 4px; color: var(–text); margin-bottom: 4px; }
-.auth-input { width: 100%; background: var(–surface); border: 1px solid var(–border); color: var(–text); font-family: ‘DM Mono’, monospace; font-size: 14px; padding: 14px 16px; outline: none; -webkit-appearance: none; border-radius: 0; box-sizing: border-box; display: block; }
-.auth-input:focus { border-color: var(–accent); }
-.auth-input::placeholder { color: var(–text-dim); font-size: 12px; }
-.auth-btn-primary { width: 100%; padding: 16px; background: var(–accent); border: none; color: #080808; font-family: ‘DM Mono’, monospace; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; font-weight: 500; }
-.auth-btn-primary:active { background: #b8943d; }
-.auth-btn-ghost { width: 100%; padding: 14px; background: transparent; border: 1px solid var(–border); color: var(–text-muted); font-family: ‘DM Mono’, monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
-.auth-btn-ghost:active { border-color: var(–accent-dim); color: var(–accent); }
-.auth-divider { display: flex; align-items: center; gap: 12px; }
-.auth-divider-line { flex: 1; height: 1px; background: var(–border); }
-.auth-divider-text { font-size: 9px; letter-spacing: 2px; color: var(–text-dim); }
-.auth-switch { text-align: center; font-size: 11px; color: var(–text-muted); }
-.auth-switch span { color: var(–accent); cursor: pointer; }
-.auth-error { font-size: 10px; letter-spacing: 1px; color: var(–red); text-align: center; min-height: 16px; }
-.auth-grain { position: absolute; inset: 0; pointer-events: none; background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 200 200’ xmlns=‘http://www.w3.org/2000/svg’%3E%3Cfilter id=‘n’%3E%3CfeTurbulence type=‘fractalNoise’ baseFrequency=‘0.85’ numOctaves=‘4’ stitchTiles=‘stitch’/%3E%3C/filter%3E%3Crect width=‘100%25’ height=‘100%25’ filter=‘url(%23n)’ opacity=‘0.04’/%3E%3C/svg%3E”); }
-.auth-skip { position: absolute; top: calc(env(safe-area-inset-top,0px) + 16px); right: 20px; font-size: 10px; letter-spacing: 2px; color: var(–text-dim); cursor: pointer; text-transform: uppercase; }
-.auth-skip:active { color: var(–accent); }
+  /* ── AUTH ── */
+  .auth-screen { position: fixed; inset: 0; background: #080808; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: env(safe-area-inset-bottom, 24px); }
+  .auth-screen.hidden { display: none; }
+  .auth-logo-wrap { position: absolute; top: 0; left: 0; right: 0; bottom: 40%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .auth-logo { font-family: 'Bebas Neue', sans-serif; font-size: 72px; letter-spacing: 16px; color: var(--accent); line-height: 1; }
+  .auth-tagline { font-size: 10px; letter-spacing: 4px; color: var(--text-muted); text-transform: uppercase; margin-top: 8px; }
+  .auth-form { width: 100%; padding: 0 24px 32px; display: flex; flex-direction: column; gap: 12px; position: relative; z-index: 1; }
+  .auth-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 4px; color: var(--text); margin-bottom: 4px; }
+  .auth-input { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 14px; padding: 14px 16px; outline: none; -webkit-appearance: none; border-radius: 0; box-sizing: border-box; display: block; }
+  .auth-input:focus { border-color: var(--accent); }
+  .auth-input::placeholder { color: var(--text-dim); font-size: 12px; }
+  .auth-btn-primary { width: 100%; padding: 16px; background: var(--accent); border: none; color: #080808; font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; font-weight: 500; }
+  .auth-btn-primary:active { background: #b8943d; }
+  .auth-btn-ghost { width: 100%; padding: 14px; background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
+  .auth-btn-ghost:active { border-color: var(--accent-dim); color: var(--accent); }
+  .auth-divider { display: flex; align-items: center; gap: 12px; }
+  .auth-divider-line { flex: 1; height: 1px; background: var(--border); }
+  .auth-divider-text { font-size: 9px; letter-spacing: 2px; color: var(--text-dim); }
+  .auth-switch { text-align: center; font-size: 11px; color: var(--text-muted); }
+  .auth-switch span { color: var(--accent); cursor: pointer; }
+  .auth-error { font-size: 10px; letter-spacing: 1px; color: var(--red); text-align: center; min-height: 16px; }
+  .auth-grain { position: absolute; inset: 0; pointer-events: none; background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"); }
+  .auth-skip { position: absolute; top: calc(env(safe-area-inset-top,0px) + 16px); right: 20px; font-size: 10px; letter-spacing: 2px; color: var(--text-dim); cursor: pointer; text-transform: uppercase; }
+  .auth-skip:active { color: var(--accent); }
 
-/* ── PREMIUM ── */
-.premium-badge { display: inline-flex; align-items: center; gap: 4px; background: linear-gradient(135deg,#c9a96e,#8a5f2a); color: #080808; font-family: ‘DM Mono’, monospace; font-size: 8px; letter-spacing: 2px; text-transform: uppercase; padding: 3px 8px; font-weight: 500; }
-.free-badge { display: inline-flex; align-items: center; background: var(–surface); border: 1px solid var(–border); color: var(–text-muted); font-family: ‘DM Mono’, monospace; font-size: 8px; letter-spacing: 2px; text-transform: uppercase; padding: 3px 8px; }
-.user-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 20px; border-bottom: 1px solid var(–border); background: var(–deep); cursor: pointer; }
-.user-bar:active { background: var(–surface); }
-.user-name { font-size: 10px; letter-spacing: 1px; color: var(–text-muted); }
-.upgrade-link { font-size: 9px; letter-spacing: 2px; color: var(–accent); text-transform: uppercase; cursor: pointer; border: none; background: none; font-family: ‘DM Mono’, monospace; padding: 0; }
-.signout-sheet { position: fixed; inset: 0; z-index: 300; display: none; }
-.signout-sheet.open { display: block; }
-.signout-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.6); }
-.signout-card { position: absolute; bottom: 0; left: 0; right: 0; background: var(–card); border-top: 1px solid var(–border); padding: 24px 20px 40px; }
-.signout-name { font-family: ‘Bebas Neue’, sans-serif; font-size: 22px; letter-spacing: 3px; color: var(–text); margin-bottom: 4px; }
-.signout-email { font-size: 9px; letter-spacing: 1px; color: var(–text-muted); margin-bottom: 24px; }
-.signout-btn { width: 100%; padding: 14px; background: none; border: 1px solid var(–border-light); color: var(–text-muted); font-family: ‘DM Mono’, monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; }
-.signout-btn:active { border-color: var(–red); color: var(–red); }
+  /* ── PREMIUM ── */
+  .premium-badge { display: inline-flex; align-items: center; gap: 4px; background: linear-gradient(135deg,#c9a96e,#8a5f2a); color: #080808; font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 2px; text-transform: uppercase; padding: 3px 8px; font-weight: 500; }
+  .free-badge { display: inline-flex; align-items: center; background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 2px; text-transform: uppercase; padding: 3px 8px; }
+  .user-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 20px; border-bottom: 1px solid var(--border); background: var(--deep); cursor: pointer; }
+  .user-bar:active { background: var(--surface); }
+  .user-name { font-size: 10px; letter-spacing: 1px; color: var(--text-muted); }
+  .upgrade-link { font-size: 9px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; cursor: pointer; border: none; background: none; font-family: 'DM Mono', monospace; padding: 0; }
+  .signout-sheet { position: fixed; inset: 0; z-index: 300; display: none; }
+  .signout-sheet.open { display: block; }
+  .signout-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.6); }
+  .signout-card { position: absolute; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 24px 20px 40px; }
+  .signout-name { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px; color: var(--text); margin-bottom: 4px; }
+  .signout-email { font-size: 9px; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 24px; }
+  .signout-btn { width: 100%; padding: 14px; background: none; border: 1px solid var(--border-light); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; }
+  .signout-btn:active { border-color: var(--red); color: var(--red); }
 
-/* ── UPGRADE MODAL ── */
-.upgrade-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 500; display: flex; align-items: flex-end; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
-.upgrade-overlay.open { opacity: 1; pointer-events: all; }
-.upgrade-sheet { width: 100%; background: var(–surface); border-top: 1px solid var(–border); padding: 32px 24px; padding-bottom: calc(32px + env(safe-area-inset-bottom,0px)); transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.32,0.72,0,1); }
-.upgrade-overlay.open .upgrade-sheet { transform: translateY(0); }
-.upgrade-title { font-family: ‘Bebas Neue’, sans-serif; font-size: 36px; letter-spacing: 4px; line-height: 1; margin-bottom: 4px; }
-.upgrade-sub { font-size: 10px; letter-spacing: 2px; color: var(–text-muted); margin-bottom: 24px; }
-.upgrade-features { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
-.upgrade-feat { display: flex; align-items: flex-start; gap: 12px; font-size: 12px; color: var(–text-muted); line-height: 1.5; }
-.upgrade-feat-icon { color: var(–accent); font-size: 14px; margin-top: 1px; flex-shrink: 0; }
-.upgrade-price { display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px; }
-.upgrade-price-amount { font-family: ‘Bebas Neue’, sans-serif; font-size: 48px; letter-spacing: 2px; color: var(–accent); line-height: 1; }
-.upgrade-price-period { font-size: 11px; letter-spacing: 1px; color: var(–text-muted); }
-.upgrade-trial { font-size: 10px; letter-spacing: 1px; color: var(–green); margin-bottom: 20px; }
-.upgrade-cta { width: 100%; padding: 18px; background: var(–accent); border: none; color: #080808; font-family: ‘DM Mono’, monospace; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; font-weight: 500; margin-bottom: 10px; }
-.upgrade-dismiss { width: 100%; padding: 14px; background: transparent; border: 1px solid var(–border); color: var(–text-muted); font-family: ‘DM Mono’, monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
+  /* ── UPGRADE MODAL ── */
+  .upgrade-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 500; display: flex; align-items: flex-end; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .upgrade-overlay.open { opacity: 1; pointer-events: all; }
+  .upgrade-sheet { width: 100%; background: var(--surface); border-top: 1px solid var(--border); padding: 32px 24px; padding-bottom: calc(32px + env(safe-area-inset-bottom,0px)); transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.32,0.72,0,1); }
+  .upgrade-overlay.open .upgrade-sheet { transform: translateY(0); }
+  .upgrade-title { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 4px; line-height: 1; margin-bottom: 4px; }
+  .upgrade-sub { font-size: 10px; letter-spacing: 2px; color: var(--text-muted); margin-bottom: 24px; }
+  .upgrade-features { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
+  .upgrade-feat { display: flex; align-items: flex-start; gap: 12px; font-size: 12px; color: var(--text-muted); line-height: 1.5; }
+  .upgrade-feat-icon { color: var(--accent); font-size: 14px; margin-top: 1px; flex-shrink: 0; }
+  .upgrade-price { display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px; }
+  .upgrade-price-amount { font-family: 'Bebas Neue', sans-serif; font-size: 48px; letter-spacing: 2px; color: var(--accent); line-height: 1; }
+  .upgrade-price-period { font-size: 11px; letter-spacing: 1px; color: var(--text-muted); }
+  .upgrade-trial { font-size: 10px; letter-spacing: 1px; color: var(--green); margin-bottom: 20px; }
+  .upgrade-cta { width: 100%; padding: 18px; background: var(--accent); border: none; color: #080808; font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; font-weight: 500; margin-bottom: 10px; }
+  .upgrade-dismiss { width: 100%; padding: 14px; background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
 
-.fixed-section { margin: 0 16px 10px; border: 1px solid var(–border); }
-.fixed-section-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; cursor: pointer; }
-.fixed-section-label { font-size: 8px; letter-spacing: 3px; color: var(–text-muted); text-transform: uppercase; }
-.fixed-section-badge { font-size: 8px; letter-spacing: 2px; color: var(–accent); text-transform: uppercase; background: var(–accent-glow); padding: 2px 8px; border: 1px solid var(–accent-dim); }
-.fixed-section-title { font-family: ‘Bebas Neue’, sans-serif; font-size: 18px; letter-spacing: 3px; color: var(–text); margin-top: 2px; }
-.fixed-section-body { padding: 0 14px 12px; border-top: 1px solid var(–border); display: none; }
-.fixed-section.open .fixed-section-body { display: block; }
-.fixed-section.open .day-chevron { transform: rotate(90deg); }
-.fixed-section-start { display: flex; align-items: center; justify-content: center; width: 100%; padding: 10px; background: transparent; border: 1px solid var(–border); color: var(–text-muted); font-family: ‘DM Mono’, monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; margin-top: 8px; }
-.fixed-section-start:active { border-color: var(–accent); color: var(–accent); }
+  .fixed-section { margin: 0 16px 10px; border: 1px solid var(--border); }
+  .fixed-section-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; cursor: pointer; }
+  .fixed-section-label { font-size: 8px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; }
+  .fixed-section-badge { font-size: 8px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; background: var(--accent-glow); padding: 2px 8px; border: 1px solid var(--accent-dim); }
+  .fixed-section-title { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 3px; color: var(--text); margin-top: 2px; }
+  .fixed-section-body { padding: 0 14px 12px; border-top: 1px solid var(--border); display: none; }
+  .fixed-section.open .fixed-section-body { display: block; }
+  .fixed-section.open .day-chevron { transform: rotate(90deg); }
+  .fixed-section-start { display: flex; align-items: center; justify-content: center; width: 100%; padding: 10px; background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; margin-top: 8px; }
+  .fixed-section-start:active { border-color: var(--accent); color: var(--accent); }
 
-/* builder fixed sections */
-.builder-fixed { margin: 0 16px 16px; border: 1px solid var(–border); }
-.builder-fixed-header { padding: 14px; border-bottom: 1px solid var(–border); display: flex; align-items: center; justify-content: space-between; }
-.builder-fixed-title { font-family: ‘Bebas Neue’, sans-serif; font-size: 20px; letter-spacing: 3px; }
-.builder-fixed-sub { font-size: 9px; letter-spacing: 2px; color: var(–text-muted); margin-top: 2px; }
-.builder-fixed-body { padding: 12px 14px; }
-.coaching-hero { padding: 32px 20px 20px; border-bottom: 1px solid var(–border); }
-.coaching-eyebrow { font-size: 9px; letter-spacing: 4px; color: var(–accent); text-transform: uppercase; margin-bottom: 10px; }
-.coaching-title { font-family: ‘Bebas Neue’, sans-serif; font-size: 42px; letter-spacing: 4px; line-height: 1; margin-bottom: 12px; }
-.coaching-desc { font-size: 12px; color: var(–text-muted); line-height: 1.7; }
-.coaching-pillars { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(–border); border: 1px solid var(–border); margin: 20px; }
-.coaching-pillar { background: var(–surface); padding: 16px 14px; }
-.coaching-pillar-icon { font-size: 18px; margin-bottom: 8px; }
-.coaching-pillar-title { font-family: ‘Bebas Neue’, sans-serif; font-size: 15px; letter-spacing: 2px; color: var(–text); margin-bottom: 4px; }
-.coaching-pillar-desc { font-size: 10px; color: var(–text-muted); line-height: 1.5; letter-spacing: 0.5px; }
-.coaching-form { padding: 0 20px 20px; }
-.coaching-form-label { font-size: 9px; letter-spacing: 3px; color: var(–text-muted); text-transform: uppercase; margin-bottom: 16px; border-top: 1px solid var(–border); padding-top: 20px; }
-.coaching-input { width: 100%; background: var(–surface); border: 1px solid var(–border); color: var(–text); font-family: ‘DM Mono’, monospace; font-size: 13px; padding: 13px 16px; outline: none; -webkit-appearance: none; border-radius: 0; margin-bottom: 10px; }
-.coaching-input:focus { border-color: var(–accent); }
-.coaching-input::placeholder { color: var(–text-dim); font-size: 11px; }
-.coaching-textarea { width: 100%; background: var(–surface); border: 1px solid var(–border); color: var(–text); font-family: ‘DM Mono’, monospace; font-size: 13px; padding: 13px 16px; outline: none; resize: none; min-height: 100px; -webkit-appearance: none; border-radius: 0; margin-bottom: 10px; }
-.coaching-textarea:focus { border-color: var(–accent); }
-.coaching-textarea::placeholder { color: var(–text-dim); font-size: 11px; }
-.coaching-submit { width: 100%; padding: 16px; background: var(–accent-glow); border: 1px solid var(–accent); color: var(–accent); font-family: ‘DM Mono’, monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; }
-.coaching-submit:active { background: rgba(201,169,110,0.25); }
+  /* builder fixed sections */
+  .builder-fixed { margin: 0 16px 16px; border: 1px solid var(--border); }
+  .builder-fixed-header { padding: 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .builder-fixed-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 3px; }
+  .builder-fixed-sub { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); margin-top: 2px; }
+  .builder-fixed-body { padding: 12px 14px; }
+  .coaching-hero { padding: 32px 20px 20px; border-bottom: 1px solid var(--border); }
+  .coaching-eyebrow { font-size: 9px; letter-spacing: 4px; color: var(--accent); text-transform: uppercase; margin-bottom: 10px; }
+  .coaching-title { font-family: 'Bebas Neue', sans-serif; font-size: 42px; letter-spacing: 4px; line-height: 1; margin-bottom: 12px; }
+  .coaching-desc { font-size: 12px; color: var(--text-muted); line-height: 1.7; }
+  .coaching-pillars { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); margin: 20px; }
+  .coaching-pillar { background: var(--surface); padding: 16px 14px; }
+  .coaching-pillar-icon { font-size: 18px; margin-bottom: 8px; }
+  .coaching-pillar-title { font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 2px; color: var(--text); margin-bottom: 4px; }
+  .coaching-pillar-desc { font-size: 10px; color: var(--text-muted); line-height: 1.5; letter-spacing: 0.5px; }
+  .coaching-form { padding: 0 20px 20px; }
+  .coaching-form-label { font-size: 9px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 16px; border-top: 1px solid var(--border); padding-top: 20px; }
+  .coaching-input { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; padding: 13px 16px; outline: none; -webkit-appearance: none; border-radius: 0; margin-bottom: 10px; }
+  .coaching-input:focus { border-color: var(--accent); }
+  .coaching-input::placeholder { color: var(--text-dim); font-size: 11px; }
+  .coaching-textarea { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; padding: 13px 16px; outline: none; resize: none; min-height: 100px; -webkit-appearance: none; border-radius: 0; margin-bottom: 10px; }
+  .coaching-textarea:focus { border-color: var(--accent); }
+  .coaching-textarea::placeholder { color: var(--text-dim); font-size: 11px; }
+  .coaching-submit { width: 100%; padding: 16px; background: var(--accent-glow); border: 1px solid var(--accent); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; }
+  .coaching-submit:active { background: rgba(201,169,110,0.25); }
 
-/* AI Chat Interface */
-.ai-chat { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; min-height: 60px; }
-.ai-msg { max-width: 88%; padding: 12px 16px; font-size: 13px; line-height: 1.6; animation: ai-fade 0.3s ease; }
-@keyframes ai-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-.ai-msg.coach { align-self: flex-start; background: var(–surface); border: 1px solid var(–border); color: var(–text); border-radius: 0 12px 12px 12px; }
-.ai-msg.coach .ai-msg-label { font-size: 9px; letter-spacing: 2px; color: var(–accent); text-transform: uppercase; margin-bottom: 4px; }
-.ai-msg.user { align-self: flex-end; background: var(–accent-glow); border: 1px solid var(–accent-dim); color: var(–accent); border-radius: 12px 0 12px 12px; font-size: 12px; letter-spacing: 1px; }
-.ai-replies { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; animation: ai-fade 0.3s ease; }
-.ai-reply-chip { background: var(–surface); border: 1px solid var(–border); color: var(–text-muted); font-family: ‘DM Mono’, monospace; font-size: 11px; letter-spacing: 1px; padding: 10px 16px; cursor: pointer; transition: all 0.15s; }
-.ai-reply-chip:active { border-color: var(–accent); background: var(–accent-glow); color: var(–accent); }
-.ai-input-wrap { display: flex; gap: 8px; margin-bottom: 12px; }
-.ai-text-input { flex: 1; background: var(–surface); border: 1px solid var(–border); color: var(–text); font-family: ‘DM Mono’, monospace; font-size: 13px; padding: 12px 16px; outline: none; -webkit-appearance: none; border-radius: 0; }
-.ai-text-input:focus { border-color: var(–accent); }
-.ai-text-input::placeholder { color: var(–text-dim); font-size: 11px; }
-.ai-send-btn { background: var(–accent-glow); border: 1px solid var(–accent); color: var(–accent); font-size: 16px; width: 48px; cursor: pointer; font-family: ‘DM Mono’, monospace; }
-.ai-send-btn:active { background: rgba(201,169,110,0.25); }
-.ai-spinner-wrap { align-self: flex-start; padding: 12px 16px; animation: ai-fade 0.3s ease; }
-.ai-spinner { width: 20px; height: 20px; border: 2px solid var(–border); border-top-color: var(–accent); border-radius: 50%; animation: ai-spin 0.8s linear infinite; }
-@keyframes ai-spin { to { transform: rotate(360deg); } }
-.ai-result-day { background: var(–surface); border: 1px solid var(–border); padding: 16px; margin-bottom: 10px; }
-.ai-result-day-name { font-family: ‘Bebas Neue’, sans-serif; font-size: 16px; letter-spacing: 2px; margin-bottom: 10px; }
-.ai-result-ex { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(–border); font-size: 13px; }
-.ai-result-ex:last-child { border-bottom: none; }
-.ai-result-ex-name { color: var(–text); }
-.ai-result-ex-scheme { color: var(–text-muted); font-size: 12px; }
-.coaching-sent { text-align: center; padding: 24px; font-size: 10px; letter-spacing: 3px; color: var(–accent); text-transform: uppercase; display: none; }
+  /* AI Chat Interface */
+  .ai-chat { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; min-height: 60px; }
+  .ai-msg { max-width: 88%; padding: 12px 16px; font-size: 13px; line-height: 1.6; animation: ai-fade 0.3s ease; }
+  @keyframes ai-fade { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .ai-msg.coach { align-self: flex-start; background: var(--surface); border: 1px solid var(--border); color: var(--text); border-radius: 0 12px 12px 12px; }
+  .ai-msg.coach .ai-msg-label { font-size: 9px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; margin-bottom: 4px; }
+  .ai-msg.user { align-self: flex-end; background: var(--accent-glow); border: 1px solid var(--accent-dim); color: var(--accent); border-radius: 12px 0 12px 12px; font-size: 12px; letter-spacing: 1px; }
+  .ai-replies { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; animation: ai-fade 0.3s ease; }
+  .ai-reply-chip { background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; padding: 10px 16px; cursor: pointer; transition: all 0.15s; }
+  .ai-reply-chip:active { border-color: var(--accent); background: var(--accent-glow); color: var(--accent); }
+  .ai-input-wrap { display: flex; gap: 8px; margin-bottom: 12px; }
+  .ai-text-input { flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; padding: 12px 16px; outline: none; -webkit-appearance: none; border-radius: 0; }
+  .ai-text-input:focus { border-color: var(--accent); }
+  .ai-text-input::placeholder { color: var(--text-dim); font-size: 11px; }
+  .ai-send-btn { background: var(--accent-glow); border: 1px solid var(--accent); color: var(--accent); font-size: 16px; width: 48px; cursor: pointer; font-family: 'DM Mono', monospace; }
+  .ai-send-btn:active { background: rgba(201,169,110,0.25); }
+  .ai-spinner-wrap { align-self: flex-start; padding: 12px 16px; animation: ai-fade 0.3s ease; }
+  .ai-spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: ai-spin 0.8s linear infinite; }
+  @keyframes ai-spin { to { transform: rotate(360deg); } }
+  .ai-result-day { background: var(--surface); border: 1px solid var(--border); padding: 16px; margin-bottom: 10px; }
+  .ai-result-day-name { font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 2px; margin-bottom: 10px; }
+  .ai-result-ex { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .ai-result-ex:last-child { border-bottom: none; }
+  .ai-result-ex-name { color: var(--text); }
+  .ai-result-ex-scheme { color: var(--text-muted); font-size: 12px; }
+  .coaching-sent { text-align: center; padding: 24px; font-size: 10px; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; display: none; }
 
-/* ── ONBOARDING ── */
-.onboard-overlay { position: fixed; inset: 0; background: #080808; z-index: 9999; display: flex; flex-direction: column; overflow: hidden; }
-.onboard-progress { display: flex; gap: 6px; padding: 20px 24px 0; justify-content: center; }
-.onboard-dot { width: 32px; height: 3px; background: var(–border); transition: background 0.3s; }
-.onboard-dot.active { background: var(–accent); }
-.onboard-dot.done { background: var(–accent-dim); }
-.onboard-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 28px; text-align: center; }
-.onboard-step { display: none; flex-direction: column; align-items: center; width: 100%; max-width: 360px; animation: obFadeIn 0.35s ease; }
-.onboard-step.active { display: flex; }
-@keyframes obFadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-.onboard-icon { font-size: 32px; color: var(–accent); margin-bottom: 24px; opacity: 0.7; }
-.onboard-title { font-family: ‘Bebas Neue’, sans-serif; font-size: 32px; letter-spacing: 5px; color: var(–text); margin-bottom: 8px; line-height: 1.1; }
-.onboard-sub { font-size: 11px; letter-spacing: 1px; color: var(–text-muted); line-height: 1.7; margin-bottom: 36px; max-width: 280px; }
-.onboard-options { display: flex; flex-direction: column; gap: 10px; width: 100%; }
-.onboard-opt { background: var(–surface); border: 1px solid var(–border); color: var(–text); font-family: ‘DM Mono’, monospace; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; padding: 16px 20px; cursor: pointer; text-align: center; transition: all 0.2s; }
-.onboard-opt:active, .onboard-opt.selected { border-color: var(–accent-dim); color: var(–accent); background: var(–accent-glow); }
-.onboard-freq { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
-.onboard-freq-opt { background: var(–surface); border: 1px solid var(–border); color: var(–text); font-family: ‘Bebas Neue’, sans-serif; font-size: 28px; letter-spacing: 2px; padding: 20px 0; cursor: pointer; text-align: center; transition: all 0.2s; }
-.onboard-freq-opt span { display: block; font-family: ‘DM Mono’, monospace; font-size: 9px; letter-spacing: 1px; color: var(–text-muted); margin-top: 4px; text-transform: uppercase; }
-.onboard-freq-opt:active, .onboard-freq-opt.selected { border-color: var(–accent-dim); color: var(–accent); background: var(–accent-glow); }
-.onboard-cta { background: var(–accent-glow); border: 1px solid var(–accent-dim); color: var(–accent); font-family: ‘DM Mono’, monospace; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; padding: 16px 32px; cursor: pointer; margin-top: 8px; }
-.onboard-cta:active { background: rgba(201,169,110,0.2); }
-.onboard-footer { padding: 0 24px 32px; display: flex; justify-content: center; }
-.onboard-back { background: none; border: none; color: var(–text-muted); font-family: ‘DM Mono’, monospace; font-size: 10px; letter-spacing: 2px; cursor: pointer; padding: 12px; text-transform: uppercase; }
-.onboard-back:active { color: var(–accent); }
-.onboard-loading-bar { width: 120px; height: 2px; background: var(–border); margin-top: 32px; overflow: hidden; border-radius: 1px; }
-.onboard-loading-fill { width: 0%; height: 100%; background: var(–accent); animation: obLoad 1.8s ease forwards; }
-@keyframes obLoad { 0% { width: 0%; } 60% { width: 85%; } 100% { width: 100%; } }</style>
-
+  /* ── ONBOARDING ── */
+  .onboard-overlay { position: fixed; inset: 0; background: #080808; z-index: 9999; display: flex; flex-direction: column; overflow: hidden; }
+  .onboard-progress { display: flex; gap: 6px; padding: 20px 24px 0; justify-content: center; }
+  .onboard-dot { width: 32px; height: 3px; background: var(--border); transition: background 0.3s; }
+  .onboard-dot.active { background: var(--accent); }
+  .onboard-dot.done { background: var(--accent-dim); }
+  .onboard-body { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px 28px; text-align: center; }
+  .onboard-step { display: none; flex-direction: column; align-items: center; width: 100%; max-width: 360px; animation: obFadeIn 0.35s ease; }
+  .onboard-step.active { display: flex; }
+  @keyframes obFadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .onboard-icon { font-size: 32px; color: var(--accent); margin-bottom: 24px; opacity: 0.7; }
+  .onboard-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 5px; color: var(--text); margin-bottom: 8px; line-height: 1.1; }
+  .onboard-sub { font-size: 11px; letter-spacing: 1px; color: var(--text-muted); line-height: 1.7; margin-bottom: 36px; max-width: 280px; }
+  .onboard-options { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+  .onboard-opt { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; padding: 16px 20px; cursor: pointer; text-align: center; transition: all 0.2s; }
+  .onboard-opt:active, .onboard-opt.selected { border-color: var(--accent-dim); color: var(--accent); background: var(--accent-glow); }
+  .onboard-freq { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
+  .onboard-freq-opt { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; padding: 20px 0; cursor: pointer; text-align: center; transition: all 0.2s; }
+  .onboard-freq-opt span { display: block; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; }
+  .onboard-freq-opt:active, .onboard-freq-opt.selected { border-color: var(--accent-dim); color: var(--accent); background: var(--accent-glow); }
+  .onboard-cta { background: var(--accent-glow); border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; padding: 16px 32px; cursor: pointer; margin-top: 8px; }
+  .onboard-cta:active { background: rgba(201,169,110,0.2); }
+  .onboard-footer { padding: 0 24px 32px; display: flex; justify-content: center; }
+  .onboard-back { background: none; border: none; color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; cursor: pointer; padding: 12px; text-transform: uppercase; }
+  .onboard-back:active { color: var(--accent); }
+  .onboard-loading-bar { width: 120px; height: 2px; background: var(--border); margin-top: 32px; overflow: hidden; border-radius: 1px; }
+  .onboard-loading-fill { width: 0%; height: 100%; background: var(--accent); animation: obLoad 1.8s ease forwards; }
+  @keyframes obLoad { 0% { width: 0%; } 60% { width: 85%; } 100% { width: 100%; } }</style>
 </head>
 <body>
 
 <!-- ── CHANGELOG OVERLAY ── -->
-
 <div class="changelog-overlay" id="changelog-overlay" style="display:none" onclick="if(event.target===this)closeChangelog()">
   <div class="changelog-card">
     <div class="changelog-badge">What's new</div>
@@ -597,7 +594,6 @@ background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 200 200’ xml
 </div>
 
 <!-- ── WEEKLY SUMMARY OVERLAY ── -->
-
 <div class="weekly-overlay" id="weekly-overlay" style="display:none" onclick="if(event.target===this)closeWeeklySummary()">
   <div class="weekly-card">
     <div class="weekly-label">Last week</div>
@@ -618,7 +614,6 @@ background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 200 200’ xml
 </div>
 
 <!-- ── ONBOARDING OVERLAY ── -->
-
 <div class="onboard-overlay" id="onboard-overlay" style="display:none">
   <div class="onboard-progress" id="onboard-progress">
     <div class="onboard-dot active"></div>
@@ -629,69 +624,67 @@ background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 200 200’ xml
   </div>
   <div class="onboard-body">
 
-```
-<!-- Step 0: Welcome -->
-<div class="onboard-step active" data-step="0">
-  <div class="onboard-icon">✦</div>
-  <div class="onboard-title">WELCOME TO FORGE</div>
-  <div class="onboard-sub">Let's set up your first training block — takes 30 seconds</div>
-  <button class="onboard-cta" onclick="onboardNext()">GET STARTED</button>
-</div>
+    <!-- Step 0: Welcome -->
+    <div class="onboard-step active" data-step="0">
+      <div class="onboard-icon">✦</div>
+      <div class="onboard-title">WELCOME TO FORGE</div>
+      <div class="onboard-sub">Let's set up your first training block — takes 30 seconds</div>
+      <button class="onboard-cta" onclick="onboardNext()">GET STARTED</button>
+    </div>
 
-<!-- Step 1: Goal -->
-<div class="onboard-step" data-step="1">
-  <div class="onboard-title">WHAT'S YOUR GOAL?</div>
-  <div class="onboard-sub">Pick the one that matters most right now</div>
-  <div class="onboard-options">
-    <button class="onboard-opt" onclick="onboardSelect('goal',this)">Build Strength</button>
-    <button class="onboard-opt" onclick="onboardSelect('goal',this)">Body Composition</button>
-    <button class="onboard-opt" onclick="onboardSelect('goal',this)">General Fitness</button>
-    <button class="onboard-opt" onclick="onboardSelect('goal',this)">Mobility & Movement</button>
-    <button class="onboard-opt" onclick="onboardSelect('goal',this)">Learning Skill</button>
-  </div>
-</div>
+    <!-- Step 1: Goal -->
+    <div class="onboard-step" data-step="1">
+      <div class="onboard-title">WHAT'S YOUR GOAL?</div>
+      <div class="onboard-sub">Pick the one that matters most right now</div>
+      <div class="onboard-options">
+        <button class="onboard-opt" onclick="onboardSelect('goal',this)">Build Strength</button>
+        <button class="onboard-opt" onclick="onboardSelect('goal',this)">Body Composition</button>
+        <button class="onboard-opt" onclick="onboardSelect('goal',this)">General Fitness</button>
+        <button class="onboard-opt" onclick="onboardSelect('goal',this)">Mobility & Movement</button>
+        <button class="onboard-opt" onclick="onboardSelect('goal',this)">Learning Skill</button>
+      </div>
+    </div>
 
-<!-- Step 2: Experience -->
-<div class="onboard-step" data-step="2">
-  <div class="onboard-title">YOUR EXPERIENCE</div>
-  <div class="onboard-sub">How long have you been training?</div>
-  <div class="onboard-options">
-    <button class="onboard-opt" onclick="onboardSelect('level',this)">Beginner · 0–1 year</button>
-    <button class="onboard-opt" onclick="onboardSelect('level',this)">Intermediate · 1–3 years</button>
-    <button class="onboard-opt" onclick="onboardSelect('level',this)">Advanced · 3+ years</button>
-  </div>
-</div>
+    <!-- Step 2: Experience -->
+    <div class="onboard-step" data-step="2">
+      <div class="onboard-title">YOUR EXPERIENCE</div>
+      <div class="onboard-sub">How long have you been training?</div>
+      <div class="onboard-options">
+        <button class="onboard-opt" onclick="onboardSelect('level',this)">Beginner · 0–1 year</button>
+        <button class="onboard-opt" onclick="onboardSelect('level',this)">Intermediate · 1–3 years</button>
+        <button class="onboard-opt" onclick="onboardSelect('level',this)">Advanced · 3+ years</button>
+      </div>
+    </div>
 
-<!-- Step 3: Equipment -->
-<div class="onboard-step" data-step="3">
-  <div class="onboard-title">TRAINING STYLE</div>
-  <div class="onboard-sub">What equipment will you be using?</div>
-  <div class="onboard-options">
-    <button class="onboard-opt" onclick="onboardSelect('equipment',this)">Gym Floor</button>
-    <button class="onboard-opt" onclick="onboardSelect('equipment',this)">Calisthenics</button>
-    <button class="onboard-opt" onclick="onboardSelect('equipment',this)">Both</button>
-  </div>
-</div>
+    <!-- Step 3: Equipment -->
+    <div class="onboard-step" data-step="3">
+      <div class="onboard-title">TRAINING STYLE</div>
+      <div class="onboard-sub">What equipment will you be using?</div>
+      <div class="onboard-options">
+        <button class="onboard-opt" onclick="onboardSelect('equipment',this)">Gym Floor</button>
+        <button class="onboard-opt" onclick="onboardSelect('equipment',this)">Calisthenics</button>
+        <button class="onboard-opt" onclick="onboardSelect('equipment',this)">Both</button>
+      </div>
+    </div>
 
-<!-- Step 4: Frequency -->
-<div class="onboard-step" data-step="4">
-  <div class="onboard-title">DAYS PER WEEK</div>
-  <div class="onboard-sub">How many days can you commit to?</div>
-  <div class="onboard-freq">
-    <button class="onboard-freq-opt" onclick="onboardSelect('days',this)">2<span>days</span></button>
-    <button class="onboard-freq-opt" onclick="onboardSelect('days',this)">3<span>days</span></button>
-    <button class="onboard-freq-opt" onclick="onboardSelect('days',this)">4<span>days</span></button>
-  </div>
-</div>
+    <!-- Step 4: Frequency -->
+    <div class="onboard-step" data-step="4">
+      <div class="onboard-title">DAYS PER WEEK</div>
+      <div class="onboard-sub">How many days can you commit to?</div>
+      <div class="onboard-freq">
+        <button class="onboard-freq-opt" onclick="onboardSelect('days',this)">2<span>days</span></button>
+        <button class="onboard-freq-opt" onclick="onboardSelect('days',this)">3<span>days</span></button>
+        <button class="onboard-freq-opt" onclick="onboardSelect('days',this)">4<span>days</span></button>
+      </div>
+    </div>
 
-<!-- Step 5: Loading -->
-<div class="onboard-step" data-step="5">
-  <div class="onboard-icon">⚒</div>
-  <div class="onboard-title">BUILDING YOUR<br>PROGRAMME</div>
-  <div class="onboard-sub" id="onboard-summary"></div>
-  <div class="onboard-loading-bar"><div class="onboard-loading-fill"></div></div>
-</div>
-```
+    <!-- Step 5: Loading -->
+    <div class="onboard-step" data-step="5">
+      <div class="onboard-icon">⚒</div>
+      <div class="onboard-title">BUILDING YOUR<br>PROGRAMME</div>
+      <div class="onboard-sub" id="onboard-summary"></div>
+      <div class="onboard-loading-bar"><div class="onboard-loading-fill"></div></div>
+    </div>
 
   </div>
   <div class="onboard-footer">
@@ -700,7 +693,6 @@ background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 200 200’ xml
 </div>
 
 <!-- ── AUTH: LOADER (visible by default — hides login flash on cold boot) ── -->
-
 <div class="auth-screen" id="auth-loader">
   <div class="auth-grain"></div>
   <div class="auth-logo-wrap" style="margin-bottom:0">
@@ -710,7 +702,6 @@ background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 200 200’ xml
 </div>
 
 <!-- ── AUTH: SPLASH ── -->
-
 <div class="auth-screen hidden" id="auth-splash">
   <div class="auth-grain"></div>
   <div class="auth-logo-wrap">
@@ -725,7 +716,6 @@ background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 200 200’ xml
 </div>
 
 <!-- ── AUTH: LOGIN ── -->
-
 <div class="auth-screen hidden" id="auth-login">
   <div class="auth-grain"></div>
   <div class="auth-logo-wrap">
@@ -747,7 +737,6 @@ background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 200 200’ xml
 </div>
 
 <!-- ── AUTH: RESET PASSWORD (request link) ── -->
-
 <div class="auth-screen hidden" id="auth-reset">
   <div class="auth-grain"></div>
   <div class="auth-logo-wrap">
@@ -766,7 +755,6 @@ background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 200 200’ xml
 </div>
 
 <!-- ── AUTH: SET NEW PASSWORD (after clicking reset link) ── -->
-
 <div class="auth-screen hidden" id="auth-newpass">
   <div class="auth-grain"></div>
   <div class="auth-logo-wrap">
@@ -785,7 +773,6 @@ background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 200 200’ xml
 </div>
 
 <!-- ── AUTH: SIGNUP ── -->
-
 <div class="auth-screen hidden" id="auth-signup">
   <div class="auth-grain"></div>
   <div class="auth-logo-wrap">
@@ -807,48 +794,44 @@ background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 200 200’ xml
 </div>
 
 <!-- ── UPGRADE MODAL ── -->
-
 <div class="upgrade-overlay" id="upgrade-overlay">
   <div class="upgrade-sheet">
     <div class="upgrade-title">UPGRADE<br>YOUR TRAINING</div>
     <div class="upgrade-sub">CHOOSE YOUR PATH</div>
 
-```
-<!-- FORGE tier -->
-<div id="upgrade-forge-tier" style="border:1px solid var(--border);padding:20px;margin-bottom:12px">
-  <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;margin-bottom:4px">FORGE</div>
-  <div style="font-size:10px;letter-spacing:1px;color:var(--text-muted);margin-bottom:14px">The full training system</div>
-  <div class="upgrade-features" style="margin-bottom:14px">
-    <div class="upgrade-feat"><span class="upgrade-feat-icon">✦</span><span>Unlimited training blocks</span></div>
-    <div class="upgrade-feat"><span class="upgrade-feat-icon">◉</span><span>Full progress tracking & sparklines</span></div>
-    <div class="upgrade-feat"><span class="upgrade-feat-icon">⬡</span><span>198-exercise library</span></div>
-    <div class="upgrade-feat"><span class="upgrade-feat-icon">↺</span><span>Rest timer, notes, archive & all features</span></div>
-  </div>
-  <button class="upgrade-cta" id="upgrade-cta-btn" onclick="activatePremium('premium')">FORGE · £9.99/mo →</button>
-</div>
+    <!-- FORGE tier -->
+    <div id="upgrade-forge-tier" style="border:1px solid var(--border);padding:20px;margin-bottom:12px">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;margin-bottom:4px">FORGE</div>
+      <div style="font-size:10px;letter-spacing:1px;color:var(--text-muted);margin-bottom:14px">The full training system</div>
+      <div class="upgrade-features" style="margin-bottom:14px">
+        <div class="upgrade-feat"><span class="upgrade-feat-icon">✦</span><span>Unlimited training blocks</span></div>
+        <div class="upgrade-feat"><span class="upgrade-feat-icon">◉</span><span>Full progress tracking & sparklines</span></div>
+        <div class="upgrade-feat"><span class="upgrade-feat-icon">⬡</span><span>198-exercise library</span></div>
+        <div class="upgrade-feat"><span class="upgrade-feat-icon">↺</span><span>Rest timer, notes, archive & all features</span></div>
+      </div>
+      <button class="upgrade-cta" id="upgrade-cta-btn" onclick="activatePremium('premium')">FORGE · £9.99/mo →</button>
+    </div>
 
-<!-- FORGE+ tier -->
-<div id="upgrade-plus-tier" style="border:1px solid var(--accent-dim);padding:20px;margin-bottom:12px;background:var(--accent-glow)">
-  <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--accent);margin-bottom:4px">FORGE+</div>
-  <div style="font-size:10px;letter-spacing:1px;color:var(--text-muted);margin-bottom:14px">Coach programming + AI</div>
-  <div class="upgrade-features" style="margin-bottom:14px">
-    <div class="upgrade-feat"><span class="upgrade-feat-icon">✦</span><span>Everything in FORGE</span></div>
-    <div class="upgrade-feat"><span class="upgrade-feat-icon">◉</span><span>Monthly coached programme — auto-delivered</span></div>
-    <div class="upgrade-feat"><span class="upgrade-feat-icon">⬡</span><span>AI programme generator — personalised blocks on demand</span></div>
-    <div class="upgrade-feat"><span class="upgrade-feat-icon">◌</span><span>Priority support & future features first</span></div>
-  </div>
-  <div style="display:flex;gap:8px;margin-bottom:8px">
-    <button class="upgrade-cta" id="upgrade-plus-monthly" onclick="selectPlusBilling('monthly')" style="flex:1;background:var(--accent);color:#080808;font-size:10px;padding:14px 8px">£39.99/mo</button>
-    <button class="upgrade-cta" id="upgrade-plus-yearly" onclick="selectPlusBilling('yearly')" style="flex:1;background:transparent;border:1px solid var(--accent);color:var(--accent);font-size:10px;padding:14px 8px">£31.99/mo · yearly</button>
-  </div>
-  <div style="font-size:9px;letter-spacing:1px;color:var(--text-dim);text-align:center;margin-bottom:10px" id="upgrade-plus-save"></div>
-  <button class="upgrade-cta" id="upgrade-plus-btn" onclick="activatePremium('coached')" style="background:var(--accent);color:#080808">GET FORGE+ →</button>
-</div>
+    <!-- FORGE+ tier -->
+    <div id="upgrade-plus-tier" style="border:1px solid var(--accent-dim);padding:20px;margin-bottom:12px;background:var(--accent-glow)">
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--accent);margin-bottom:4px">FORGE+</div>
+      <div style="font-size:10px;letter-spacing:1px;color:var(--text-muted);margin-bottom:14px">Coach programming + AI</div>
+      <div class="upgrade-features" style="margin-bottom:14px">
+        <div class="upgrade-feat"><span class="upgrade-feat-icon">✦</span><span>Everything in FORGE</span></div>
+        <div class="upgrade-feat"><span class="upgrade-feat-icon">◉</span><span>Monthly coached programme — auto-delivered</span></div>
+        <div class="upgrade-feat"><span class="upgrade-feat-icon">⬡</span><span>AI programme generator — personalised blocks on demand</span></div>
+        <div class="upgrade-feat"><span class="upgrade-feat-icon">◌</span><span>Priority support & future features first</span></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <button class="upgrade-cta" id="upgrade-plus-monthly" onclick="selectPlusBilling('monthly')" style="flex:1;background:var(--accent);color:#080808;font-size:10px;padding:14px 8px">£39.99/mo</button>
+        <button class="upgrade-cta" id="upgrade-plus-yearly" onclick="selectPlusBilling('yearly')" style="flex:1;background:transparent;border:1px solid var(--accent);color:var(--accent);font-size:10px;padding:14px 8px">£31.99/mo · yearly</button>
+      </div>
+      <div style="font-size:9px;letter-spacing:1px;color:var(--text-dim);text-align:center;margin-bottom:10px" id="upgrade-plus-save"></div>
+      <button class="upgrade-cta" id="upgrade-plus-btn" onclick="activatePremium('coached')" style="background:var(--accent);color:#080808">GET FORGE+ →</button>
+    </div>
 
-<div class="upgrade-trial">✓ 7-day free trial · cancel anytime</div>
-<button class="upgrade-dismiss" onclick="closeUpgrade()">Maybe later</button>
-```
-
+    <div class="upgrade-trial">✓ 7-day free trial · cancel anytime</div>
+    <button class="upgrade-dismiss" onclick="closeUpgrade()">Maybe later</button>
   </div>
 </div>
 
@@ -860,7 +843,6 @@ background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 200 200’ xml
   </div>
 
   <!-- Sign out sheet -->
-
   <div class="signout-sheet" id="signout-sheet">
     <div class="signout-backdrop" onclick="closeSignOutSheet()"></div>
     <div class="signout-card">
@@ -886,325 +868,323 @@ background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 200 200’ xml
 
   <div class="scroll-area" id="scroll-area">
 
-```
-<!-- HOME -->
-<div class="page active" id="page-home">
-  <div class="home-hero">
-    <div class="home-greeting" id="home-greeting">TODAY</div>
-    <div class="home-title" id="home-title">READY<br>TO TRAIN</div>
-    <div class="home-sub" id="home-sub">DUP · Emphasised Concurrent</div>
-    <div class="home-streak" id="home-streak"></div>
-    <div class="home-lastweek" id="home-lastweek"></div>
-  </div>
-  <div class="stats-row" id="home-stats-row">
-    <div class="stat-cell">
-      <div class="stat-label">Week</div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <button class="week-nav-btn" onclick="weekBack()">‹</button>
-        <div class="stat-value" id="dash-week">W1</div>
-        <button class="week-nav-btn" onclick="cycleWeek()">›</button>
+    <!-- HOME -->
+    <div class="page active" id="page-home">
+      <div class="home-hero">
+        <div class="home-greeting" id="home-greeting">TODAY</div>
+        <div class="home-title" id="home-title">READY<br>TO TRAIN</div>
+        <div class="home-sub" id="home-sub">DUP · Emphasised Concurrent</div>
+        <div class="home-streak" id="home-streak"></div>
+        <div class="home-lastweek" id="home-lastweek"></div>
       </div>
-    </div>
-    <div class="stat-cell"><div class="stat-label">Logged</div><div class="stat-value" id="dash-sessions">0</div></div>
-    <div class="stat-cell"><div class="stat-label">Last</div><div class="stat-value" style="font-size:14px;margin-top:4px" id="dash-last">—</div></div>
-  </div>
-  <div id="home-block-section">
-    <div class="archive-bar">
-      <span class="archive-bar-label" id="current-block-label">Current Block</span>
-      <button class="archive-btn" onclick="openArchiveConfirm()">Archive Block →</button>
-    </div>
-    <div id="home-fixed-sections"></div>
-    <div id="home-day-cards"></div>
-  </div>
-  <div id="home-empty-state" style="display:none">
-    <div class="home-empty-wrap">
-      <div class="home-empty-icon">✦</div>
-      <div class="home-empty-title">No block yet</div>
-      <div class="home-empty-sub">Build your first training block to get started</div>
-      <button class="home-empty-cta" onclick="showOnboarding()">GET STARTED →</button>
-    </div>
-  </div>
-  <div style="height:20px"></div>
-</div>
-
-<!-- LOG -->
-<div class="page" id="page-log">
-  <div class="log-header">
-    <div style="flex:1;min-width:0">
-      <div class="log-title" id="log-title">DAY 1</div>
-      <div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-top:3px">SELECT WEEK</div>
-    </div>
-    <div class="week-tabs" id="log-week-tabs">
-      <button class="w-tab active" onclick="selectWeek(1,this)">W1</button>
-      <button class="w-tab" onclick="selectWeek(2,this)">W2</button>
-      <button class="w-tab" onclick="selectWeek(3,this)">W3</button>
-      <button class="w-tab" onclick="selectWeek(4,this)">W4</button>
-    </div>
-  </div>
-  <div class="timer-toggle">
-    <span class="timer-toggle-label">Auto rest timer · 90s</span>
-    <label class="toggle-switch">
-      <input type="checkbox" id="timer-enabled" checked onchange="timerEnabled=this.checked">
-      <div class="toggle-track"></div>
-      <div class="toggle-thumb"></div>
-    </label>
-  </div>
-  <div id="log-exercises-container"></div>
-  <div class="add-ex-section">
-    <input class="add-ex-search" type="text" id="add-ex-search" placeholder="+ Search and add exercise..." autocomplete="off"
-      oninput="onAddExSearch(this.value)"
-      onkeydown="onAddExKey(event)"
-      onfocus="onAddExSearch(this.value)">
-    <div class="add-ex-results" id="add-ex-results"></div>
-  </div>
-  <div class="notes-section">
-    <div class="notes-label">Session Notes</div>
-    <textarea class="notes-input" id="session-notes" placeholder="Energy, recovery, technique notes..." autocomplete="off"></textarea>
-  </div>
-  <div class="save-section"><button class="save-btn" onclick="saveSession()">SAVE SESSION ✓</button></div>
-</div>
-
-<!-- LIBRARY -->
-<div class="page" id="page-db">
-  <div class="db-search-bar">
-    <input class="search-input" type="search" placeholder="Search exercises..." oninput="filterDB(this.value)" id="db-search">
-  </div>
-  <div class="filter-row" id="db-cats">
-    <button class="filter-chip cat active" onclick="setDBCat('all',this)">All</button>
-    <button class="filter-chip cat" onclick="setDBCat('skill',this)">Skills</button>
-    <button class="filter-chip cat" onclick="setDBCat('calisthenics',this)">Calisthenics</button>
-    <button class="filter-chip cat" onclick="setDBCat('barbell',this)">Barbell</button>
-    <button class="filter-chip cat" onclick="setDBCat('dumbbell',this)">Dumbbell</button>
-    <button class="filter-chip cat" onclick="setDBCat('machine',this)">Machine</button>
-  </div>
-  <div class="filter-row sub" id="db-subs"></div>
-  <div id="db-list"></div>
-</div>
-
-<!-- PROGRESS -->
-<div class="page" id="page-progress">
-  <div class="progress-header">
-    <div class="progress-title">PROGRESS</div>
-    <div class="progress-sub" id="progress-sub">CURRENT BLOCK</div>
-    <div class="block-stats">
-      <div class="block-stat"><div class="block-stat-label">Block</div><div class="block-stat-val" id="prog-block">—</div></div>
-      <div class="block-stat"><div class="block-stat-label">Method</div><div class="block-stat-val" id="prog-method">—</div></div>
-      <div class="block-stat"><div class="block-stat-label">Split</div><div class="block-stat-val" id="prog-split">—</div></div>
-      <div class="block-stat"><div class="block-stat-label">Week</div><div class="block-stat-val" id="prog-week">W1</div></div>
-    </div>
-  </div>
-  <div id="progress-container" style="padding-bottom:20px"></div>
-</div>
-
-<!-- BUILD + ARCHIVE -->
-<div class="page" id="page-builder">
-  <div class="build-tab-toggle">
-    <button class="build-tab-btn active" id="btab-build" onclick="switchBuildTab('build')">Builder</button>
-    <button class="build-tab-btn" id="btab-archive" onclick="switchBuildTab('archive')">Archive</button>
-  </div>
-
-  <!-- BUILDER PANEL -->
-  <div class="build-panel active" id="bpanel-build">
-    <div class="builder-header">
-      <div class="builder-title">BUILDER</div>
-      <div class="builder-sub">CREATE NEW BLOCK</div>
-    </div>
-
-    <!-- Block name -->
-    <div class="field-section">
-      <div class="field-label">Block Name</div>
-      <input class="name-field" type="text" id="custom-name" placeholder="NAME IT" maxlength="50">
-    </div>
-
-    <!-- Method -->
-    <div class="field-section">
-      <div class="field-label">Method <span class="field-sublabel">(select one or more)</span></div>
-      <div class="picker-chips" id="method-chips">
-        <button class="picker-chip" onclick="toggleMethod('Short Linear',this)">Short Linear</button>
-        <button class="picker-chip" onclick="toggleMethod('Long Linear',this)">Long Linear</button>
-        <button class="picker-chip" onclick="toggleMethod('Concurrent',this)">Concurrent</button>
-        <button class="picker-chip" onclick="toggleMethod('Emphasized Concurrent',this)">Emphasized Concurrent</button>
-        <button class="picker-chip" onclick="toggleMethod('DUP',this)">DUP</button>
-      </div>
-      <div id="method-preview" style="margin-top:10px;font-size:10px;letter-spacing:1px;color:var(--accent);min-height:16px"></div>
-    </div>
-
-    <!-- Duration -->
-    <div class="field-section">
-      <div class="field-label">Block Length</div>
-      <div class="picker-chips" id="builder-duration-chips">
-        <button class="picker-chip" onclick="setBuilderWeeks(4,this)">4 Weeks</button>
-        <button class="picker-chip" onclick="setBuilderWeeks(6,this)">6 Weeks</button>
-        <button class="picker-chip" onclick="setBuilderWeeks(8,this)">8 Weeks</button>
-        <button class="picker-chip" onclick="setBuilderWeeks(12,this)">12 Weeks</button>
-      </div>
-    </div>
-
-    <!-- Warm-up (fixed, same every week) -->
-    <div class="builder-fixed">
-      <div class="builder-fixed-header">
-        <div>
-          <div class="builder-fixed-title">WARM-UP</div>
-          <div class="builder-fixed-sub">Same every session — not logged weekly</div>
+      <div class="stats-row" id="home-stats-row">
+        <div class="stat-cell">
+          <div class="stat-label">Week</div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <button class="week-nav-btn" onclick="weekBack()">‹</button>
+            <div class="stat-value" id="dash-week">W1</div>
+            <button class="week-nav-btn" onclick="cycleWeek()">›</button>
+          </div>
         </div>
-        <span style="font-size:9px;letter-spacing:2px;color:var(--accent);text-transform:uppercase">Fixed</span>
+        <div class="stat-cell"><div class="stat-label">Logged</div><div class="stat-value" id="dash-sessions">0</div></div>
+        <div class="stat-cell"><div class="stat-label">Last</div><div class="stat-value" style="font-size:14px;margin-top:4px" id="dash-last">—</div></div>
       </div>
-      <div class="builder-fixed-body">
-        <div id="warmup-ex-list"></div>
-        <div id="warmup-picker-wrap">
-          <div class="day-ex-picker" id="warmup-ex-picker" style="max-height:200px;overflow-y:auto"></div>
+      <div id="home-block-section">
+        <div class="archive-bar">
+          <span class="archive-bar-label" id="current-block-label">Current Block</span>
+          <button class="archive-btn" onclick="openArchiveConfirm()">Archive Block →</button>
+        </div>
+        <div id="home-fixed-sections"></div>
+        <div id="home-day-cards"></div>
+      </div>
+      <div id="home-empty-state" style="display:none">
+        <div class="home-empty-wrap">
+          <div class="home-empty-icon">✦</div>
+          <div class="home-empty-title">No block yet</div>
+          <div class="home-empty-sub">Build your first training block to get started</div>
+          <button class="home-empty-cta" onclick="showOnboarding()">GET STARTED →</button>
         </div>
       </div>
+      <div style="height:20px"></div>
     </div>
 
-    <!-- Skill (fixed, same every week) -->
-    <div class="builder-fixed">
-      <div class="builder-fixed-header">
-        <div>
-          <div class="builder-fixed-title">SKILL WORK</div>
-          <div class="builder-fixed-sub">Same every session — not logged weekly</div>
+    <!-- LOG -->
+    <div class="page" id="page-log">
+      <div class="log-header">
+        <div style="flex:1;min-width:0">
+          <div class="log-title" id="log-title">DAY 1</div>
+          <div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-top:3px">SELECT WEEK</div>
         </div>
-        <span style="font-size:9px;letter-spacing:2px;color:var(--accent);text-transform:uppercase">Fixed</span>
-      </div>
-      <div class="builder-fixed-body">
-        <div id="skill-ex-list"></div>
-        <div id="skill-picker-wrap">
-          <div class="day-ex-picker" id="skill-ex-picker" style="max-height:200px;overflow-y:auto"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Days -->
-    <div class="days-section">
-      <div class="field-label">Days <span class="field-sublabel">(tap a day to edit its exercises)</span></div>
-      <div class="days-list" id="days-list"></div>
-      <button class="add-day-btn" onclick="addDay()">+ ADD DAY</button>
-    </div>
-
-    <!-- Save -->
-    <div class="builder-save-section">
-      <button class="save-btn" onclick="saveAndStart()">SAVE & SET AS CURRENT →</button>
-      <button class="save-btn" style="background:transparent;border-color:var(--border);color:var(--text-muted)" onclick="saveBlockOnly()">Save Only</button>
-    </div>
-
-    <!-- Saved blocks -->
-    <div class="saved-blocks-section">
-      <div class="section-label" style="padding:0 0 10px;border-bottom:1px solid var(--border);margin-bottom:12px">SAVED BLOCKS</div>
-      <div id="builder-saved-list"></div>
-    </div>
-    <div style="height:20px"></div>
-  </div>
-
-  <!-- ARCHIVE PANEL -->
-  <div class="build-panel" id="bpanel-archive">
-    <div class="archive-panel-header">
-      <div class="archive-panel-title">ARCHIVE</div>
-      <div class="archive-panel-sub">PAST TRAINING BLOCKS</div>
-    </div>
-    <div id="archive-list" style="padding-bottom:20px"></div>
-  </div>
-</div>
-
-  <!-- COACHING -->
-  <div class="page" id="page-coaching">
-
-    <!-- AI PROGRAMME HERO (FORGE+ / admin) — top of page -->
-    <div id="ai-programme-link" style="display:none">
-      <div style="padding:28px 20px 24px;border-bottom:1px solid var(--border);background:linear-gradient(180deg, rgba(201,169,110,0.06) 0%, transparent 100%)">
-        <div style="font-size:9px;letter-spacing:4px;color:var(--accent);text-transform:uppercase;margin-bottom:10px">✦ FORGE+ AI</div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:4px;line-height:1;margin-bottom:10px;color:var(--text)">BUILD MY<br>PROGRAMME</div>
-        <div style="font-size:11px;letter-spacing:0.5px;color:var(--text-muted);line-height:1.7;margin-bottom:20px">Answer a few questions about your level and goals. The AI builds a complete training block — personalised exercises, sets, reps, and progression. Finish a block and it reads your data to build the next one smarter.</div>
-        <button class="coaching-submit" onclick="navigate('ai')" style="width:100%">START AI ASSESSMENT →</button>
-      </div>
-    </div>
-
-    <!-- PROGRAMMES FEED -->
-    <div class="coaching-hero">
-      <div class="coaching-eyebrow">Monthly Drops</div>
-      <div class="coaching-title">PROGRAMMES</div>
-      <div class="coaching-desc">Coached training blocks — built by a certified PT, dropped every month. Load directly into your app and train.</div>
-    </div>
-
-    <!-- ADMIN: Publish panel (only visible to admin) -->
-    <div id="admin-publish-panel" style="display:none;margin:20px;border:1px solid var(--accent-dim);padding:20px;background:var(--surface)">
-      <div style="font-size:8px;letter-spacing:4px;color:var(--accent);margin-bottom:16px">ADMIN — PUBLISH PROGRAMME</div>
-      <input class="coaching-input" type="text" id="prog-title" placeholder="Programme title e.g. FORGE BLOCK 01">
-      <input class="coaching-input" type="text" id="prog-month" placeholder="Month e.g. April 2026">
-      <textarea class="coaching-textarea" id="prog-desc" placeholder="Short description — who it's for, what it focuses on..."></textarea>
-      <div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:8px;margin-top:4px">AUDIENCE</div>
-      <div style="display:flex;gap:8px;margin-bottom:14px" id="prog-type-chips">
-        <button class="day-ex-chip active" id="prog-type-coached" onclick="selectProgType('coached',this)" style="flex:1;text-align:center">✦ COACHED — All coached users</button>
-        <button class="day-ex-chip" id="prog-type-personal" onclick="selectProgType('personal',this)" style="flex:1;text-align:center">◉ PERSONAL — 1-2-1 only</button>
-      </div>
-      <input type="hidden" id="prog-type" value="coached">
-      <div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:8px">SELECT BLOCK TO PUBLISH</div>
-      <select class="coaching-input" id="prog-block-select" style="-webkit-appearance:none;color:var(--text-muted);margin-bottom:10px">
-        <option value="" disabled selected>Select a saved block...</option>
-      </select>
-      <button class="coaching-submit" onclick="publishProgramme()" style="margin-bottom:0">PUBLISH SELECTED BLOCK AS PROGRAMME →</button>
-    </div>
-
-    <!-- PROGRAMMES LIST -->
-    <div id="programmes-list" style="padding:0 20px 20px">
-      <div style="padding:32px 0;text-align:center;font-size:9px;letter-spacing:3px;color:var(--text-dim)" id="programmes-empty">Loading programmes...</div>
-    </div>
-
-    <!-- DIVIDER -->
-    <div style="border-top:1px solid var(--border);margin:0 20px"></div>
-
-    <!-- COACHING ENQUIRY -->
-    <div class="coaching-form">
-      <div class="coaching-eyebrow" style="padding-top:20px">1-2-1 Personal Training</div>
-      <div class="coaching-title" style="font-size:32px;margin-bottom:8px">TRAIN WITH<br>A COACH</div>
-      <div class="coaching-desc" style="margin-bottom:20px">Fully personalised programming. Built around your body, schedule, and goals.</div>
-      <div class="coaching-pillars" style="margin:0 0 20px">
-        <div class="coaching-pillar"><div class="coaching-pillar-icon">⬡</div><div class="coaching-pillar-title">Custom Blocks</div><div class="coaching-pillar-desc">Every block written specifically for your level</div></div>
-        <div class="coaching-pillar"><div class="coaching-pillar-icon">◉</div><div class="coaching-pillar-title">Skill Progressions</div><div class="coaching-pillar-desc">Structured paths to your target skills</div></div>
-        <div class="coaching-pillar"><div class="coaching-pillar-icon">✦</div><div class="coaching-pillar-title">Weekly Check-ins</div><div class="coaching-pillar-desc">Direct access and programming adjustments</div></div>
-        <div class="coaching-pillar"><div class="coaching-pillar-icon">◌</div><div class="coaching-pillar-title">Full Accountability</div><div class="coaching-pillar-desc">Consistent progress through honest feedback</div></div>
-      </div>
-      <div class="coaching-form-label">Request a spot</div>
-      <input class="coaching-input" type="text" id="coach-name" placeholder="Your name">
-      <input class="coaching-input" type="email" id="coach-email" placeholder="Email address">
-      <select class="coaching-input" id="coach-goal" style="-webkit-appearance:none;color:var(--text-muted)">
-        <option value="" disabled selected style="color:var(--text-dim)">Your main goal...</option>
-        <option value="calisthenics-skills">Calisthenics skills — muscle-up, front lever, planche</option>
-        <option value="strength-hypertrophy">Strength & hypertrophy</option>
-        <option value="fat-loss-conditioning">Fat loss & conditioning</option>
-        <option value="general-fitness">General fitness & movement quality</option>
-        <option value="beginners">Complete beginner — start from scratch</option>
-      </select>
-      <textarea class="coaching-textarea" id="coach-message" placeholder="Tell me where you're at and what you want to achieve..."></textarea>
-      <button class="coaching-submit" onclick="submitCoachingRequest()">SEND REQUEST →</button>
-      <div class="coaching-sent" id="coaching-sent">✓ Request sent — I'll be in touch within 24h</div>
-    </div>
-    <div style="height:20px"></div>
-  </div>
-
-  <!-- AI COACH PAGE (hidden, admin only) -->
-  <div class="page" id="page-ai">
-    <div style="padding:20px">
-      <button class="back-btn" style="display:flex;margin-bottom:16px" onclick="navigate('coaching')">← BACK</button>
-      <div class="coaching-eyebrow">AI Coach</div>
-      <div class="coaching-title" style="font-size:32px;margin-bottom:16px">BUILD MY<br>PROGRAMME</div>
-
-      <div id="ai-chat" class="ai-chat"></div>
-      <div id="ai-replies" class="ai-replies"></div>
-      <div id="ai-input-wrap" class="ai-input-wrap" style="display:none">
-        <input class="ai-text-input" type="text" id="ai-text-input" placeholder="Type your answer..." autocomplete="off" onkeydown="if(event.key==='Enter')aiSendText()">
-        <button class="ai-send-btn" onclick="aiSendText()">→</button>
-      </div>
-
-      <div id="ai-result" style="display:none">
-        <div id="ai-result-days"></div>
-        <div style="display:flex;gap:10px;margin-top:20px">
-          <button class="coaching-submit" id="ai-restart-btn" style="flex:1;background:transparent;border-color:var(--border);color:var(--text-muted)" onclick="aiRestart()">START OVER</button>
-          <button class="coaching-submit" style="flex:2" onclick="aiLoadBlock()">LOAD AS CURRENT BLOCK →</button>
+        <div class="week-tabs" id="log-week-tabs">
+          <button class="w-tab active" onclick="selectWeek(1,this)">W1</button>
+          <button class="w-tab" onclick="selectWeek(2,this)">W2</button>
+          <button class="w-tab" onclick="selectWeek(3,this)">W3</button>
+          <button class="w-tab" onclick="selectWeek(4,this)">W4</button>
         </div>
       </div>
+      <div class="timer-toggle">
+        <span class="timer-toggle-label">Auto rest timer · 90s</span>
+        <label class="toggle-switch">
+          <input type="checkbox" id="timer-enabled" checked onchange="timerEnabled=this.checked">
+          <div class="toggle-track"></div>
+          <div class="toggle-thumb"></div>
+        </label>
+      </div>
+      <div id="log-exercises-container"></div>
+      <div class="add-ex-section">
+        <input class="add-ex-search" type="text" id="add-ex-search" placeholder="+ Search and add exercise..." autocomplete="off"
+          oninput="onAddExSearch(this.value)"
+          onkeydown="onAddExKey(event)"
+          onfocus="onAddExSearch(this.value)">
+        <div class="add-ex-results" id="add-ex-results"></div>
+      </div>
+      <div class="notes-section">
+        <div class="notes-label">Session Notes</div>
+        <textarea class="notes-input" id="session-notes" placeholder="Energy, recovery, technique notes..." autocomplete="off"></textarea>
+      </div>
+      <div class="save-section"><button class="save-btn" onclick="saveSession()">SAVE SESSION ✓</button></div>
     </div>
-  </div>
-```
+
+    <!-- LIBRARY -->
+    <div class="page" id="page-db">
+      <div class="db-search-bar">
+        <input class="search-input" type="search" placeholder="Search exercises..." oninput="filterDB(this.value)" id="db-search">
+      </div>
+      <div class="filter-row" id="db-cats">
+        <button class="filter-chip cat active" onclick="setDBCat('all',this)">All</button>
+        <button class="filter-chip cat" onclick="setDBCat('skill',this)">Skills</button>
+        <button class="filter-chip cat" onclick="setDBCat('calisthenics',this)">Calisthenics</button>
+        <button class="filter-chip cat" onclick="setDBCat('barbell',this)">Barbell</button>
+        <button class="filter-chip cat" onclick="setDBCat('dumbbell',this)">Dumbbell</button>
+        <button class="filter-chip cat" onclick="setDBCat('machine',this)">Machine</button>
+      </div>
+      <div class="filter-row sub" id="db-subs"></div>
+      <div id="db-list"></div>
+    </div>
+
+    <!-- PROGRESS -->
+    <div class="page" id="page-progress">
+      <div class="progress-header">
+        <div class="progress-title">PROGRESS</div>
+        <div class="progress-sub" id="progress-sub">CURRENT BLOCK</div>
+        <div class="block-stats">
+          <div class="block-stat"><div class="block-stat-label">Block</div><div class="block-stat-val" id="prog-block">—</div></div>
+          <div class="block-stat"><div class="block-stat-label">Method</div><div class="block-stat-val" id="prog-method">—</div></div>
+          <div class="block-stat"><div class="block-stat-label">Split</div><div class="block-stat-val" id="prog-split">—</div></div>
+          <div class="block-stat"><div class="block-stat-label">Week</div><div class="block-stat-val" id="prog-week">W1</div></div>
+        </div>
+      </div>
+      <div id="progress-container" style="padding-bottom:20px"></div>
+    </div>
+
+    <!-- BUILD + ARCHIVE -->
+    <div class="page" id="page-builder">
+      <div class="build-tab-toggle">
+        <button class="build-tab-btn active" id="btab-build" onclick="switchBuildTab('build')">Builder</button>
+        <button class="build-tab-btn" id="btab-archive" onclick="switchBuildTab('archive')">Archive</button>
+      </div>
+
+      <!-- BUILDER PANEL -->
+      <div class="build-panel active" id="bpanel-build">
+        <div class="builder-header">
+          <div class="builder-title">BUILDER</div>
+          <div class="builder-sub">CREATE NEW BLOCK</div>
+        </div>
+
+        <!-- Block name -->
+        <div class="field-section">
+          <div class="field-label">Block Name</div>
+          <input class="name-field" type="text" id="custom-name" placeholder="NAME IT" maxlength="50">
+        </div>
+
+        <!-- Method -->
+        <div class="field-section">
+          <div class="field-label">Method <span class="field-sublabel">(select one or more)</span></div>
+          <div class="picker-chips" id="method-chips">
+            <button class="picker-chip" onclick="toggleMethod('Short Linear',this)">Short Linear</button>
+            <button class="picker-chip" onclick="toggleMethod('Long Linear',this)">Long Linear</button>
+            <button class="picker-chip" onclick="toggleMethod('Concurrent',this)">Concurrent</button>
+            <button class="picker-chip" onclick="toggleMethod('Emphasized Concurrent',this)">Emphasized Concurrent</button>
+            <button class="picker-chip" onclick="toggleMethod('DUP',this)">DUP</button>
+          </div>
+          <div id="method-preview" style="margin-top:10px;font-size:10px;letter-spacing:1px;color:var(--accent);min-height:16px"></div>
+        </div>
+
+        <!-- Duration -->
+        <div class="field-section">
+          <div class="field-label">Block Length</div>
+          <div class="picker-chips" id="builder-duration-chips">
+            <button class="picker-chip" onclick="setBuilderWeeks(4,this)">4 Weeks</button>
+            <button class="picker-chip" onclick="setBuilderWeeks(6,this)">6 Weeks</button>
+            <button class="picker-chip" onclick="setBuilderWeeks(8,this)">8 Weeks</button>
+            <button class="picker-chip" onclick="setBuilderWeeks(12,this)">12 Weeks</button>
+          </div>
+        </div>
+
+        <!-- Warm-up (fixed, same every week) -->
+        <div class="builder-fixed">
+          <div class="builder-fixed-header">
+            <div>
+              <div class="builder-fixed-title">WARM-UP</div>
+              <div class="builder-fixed-sub">Same every session — not logged weekly</div>
+            </div>
+            <span style="font-size:9px;letter-spacing:2px;color:var(--accent);text-transform:uppercase">Fixed</span>
+          </div>
+          <div class="builder-fixed-body">
+            <div id="warmup-ex-list"></div>
+            <div id="warmup-picker-wrap">
+              <div class="day-ex-picker" id="warmup-ex-picker" style="max-height:200px;overflow-y:auto"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Skill (fixed, same every week) -->
+        <div class="builder-fixed">
+          <div class="builder-fixed-header">
+            <div>
+              <div class="builder-fixed-title">SKILL WORK</div>
+              <div class="builder-fixed-sub">Same every session — not logged weekly</div>
+            </div>
+            <span style="font-size:9px;letter-spacing:2px;color:var(--accent);text-transform:uppercase">Fixed</span>
+          </div>
+          <div class="builder-fixed-body">
+            <div id="skill-ex-list"></div>
+            <div id="skill-picker-wrap">
+              <div class="day-ex-picker" id="skill-ex-picker" style="max-height:200px;overflow-y:auto"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Days -->
+        <div class="days-section">
+          <div class="field-label">Days <span class="field-sublabel">(tap a day to edit its exercises)</span></div>
+          <div class="days-list" id="days-list"></div>
+          <button class="add-day-btn" onclick="addDay()">+ ADD DAY</button>
+        </div>
+
+        <!-- Save -->
+        <div class="builder-save-section">
+          <button class="save-btn" onclick="saveAndStart()">SAVE & SET AS CURRENT →</button>
+          <button class="save-btn" style="background:transparent;border-color:var(--border);color:var(--text-muted)" onclick="saveBlockOnly()">Save Only</button>
+        </div>
+
+        <!-- Saved blocks -->
+        <div class="saved-blocks-section">
+          <div class="section-label" style="padding:0 0 10px;border-bottom:1px solid var(--border);margin-bottom:12px">SAVED BLOCKS</div>
+          <div id="builder-saved-list"></div>
+        </div>
+        <div style="height:20px"></div>
+      </div>
+
+      <!-- ARCHIVE PANEL -->
+      <div class="build-panel" id="bpanel-archive">
+        <div class="archive-panel-header">
+          <div class="archive-panel-title">ARCHIVE</div>
+          <div class="archive-panel-sub">PAST TRAINING BLOCKS</div>
+        </div>
+        <div id="archive-list" style="padding-bottom:20px"></div>
+      </div>
+    </div>
+
+      <!-- COACHING -->
+      <div class="page" id="page-coaching">
+
+        <!-- AI PROGRAMME HERO (FORGE+ / admin) — top of page -->
+        <div id="ai-programme-link" style="display:none">
+          <div style="padding:28px 20px 24px;border-bottom:1px solid var(--border);background:linear-gradient(180deg, rgba(201,169,110,0.06) 0%, transparent 100%)">
+            <div style="font-size:9px;letter-spacing:4px;color:var(--accent);text-transform:uppercase;margin-bottom:10px">✦ FORGE+ AI</div>
+            <div style="font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:4px;line-height:1;margin-bottom:10px;color:var(--text)">BUILD MY<br>PROGRAMME</div>
+            <div style="font-size:11px;letter-spacing:0.5px;color:var(--text-muted);line-height:1.7;margin-bottom:20px">Answer a few questions about your level and goals. The AI builds a complete training block — personalised exercises, sets, reps, and progression. Finish a block and it reads your data to build the next one smarter.</div>
+            <button class="coaching-submit" onclick="navigate('ai')" style="width:100%">START AI ASSESSMENT →</button>
+          </div>
+        </div>
+
+        <!-- PROGRAMMES FEED -->
+        <div class="coaching-hero">
+          <div class="coaching-eyebrow">Monthly Drops</div>
+          <div class="coaching-title">PROGRAMMES</div>
+          <div class="coaching-desc">Coached training blocks — built by a certified PT, dropped every month. Load directly into your app and train.</div>
+        </div>
+
+        <!-- ADMIN: Publish panel (only visible to admin) -->
+        <div id="admin-publish-panel" style="display:none;margin:20px;border:1px solid var(--accent-dim);padding:20px;background:var(--surface)">
+          <div style="font-size:8px;letter-spacing:4px;color:var(--accent);margin-bottom:16px">ADMIN — PUBLISH PROGRAMME</div>
+          <input class="coaching-input" type="text" id="prog-title" placeholder="Programme title e.g. FORGE BLOCK 01">
+          <input class="coaching-input" type="text" id="prog-month" placeholder="Month e.g. April 2026">
+          <textarea class="coaching-textarea" id="prog-desc" placeholder="Short description — who it's for, what it focuses on..."></textarea>
+          <div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:8px;margin-top:4px">AUDIENCE</div>
+          <div style="display:flex;gap:8px;margin-bottom:14px" id="prog-type-chips">
+            <button class="day-ex-chip active" id="prog-type-coached" onclick="selectProgType('coached',this)" style="flex:1;text-align:center">✦ COACHED — All coached users</button>
+            <button class="day-ex-chip" id="prog-type-personal" onclick="selectProgType('personal',this)" style="flex:1;text-align:center">◉ PERSONAL — 1-2-1 only</button>
+          </div>
+          <input type="hidden" id="prog-type" value="coached">
+          <div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:8px">SELECT BLOCK TO PUBLISH</div>
+          <select class="coaching-input" id="prog-block-select" style="-webkit-appearance:none;color:var(--text-muted);margin-bottom:10px">
+            <option value="" disabled selected>Select a saved block...</option>
+          </select>
+          <button class="coaching-submit" onclick="publishProgramme()" style="margin-bottom:0">PUBLISH SELECTED BLOCK AS PROGRAMME →</button>
+        </div>
+
+        <!-- PROGRAMMES LIST -->
+        <div id="programmes-list" style="padding:0 20px 20px">
+          <div style="padding:32px 0;text-align:center;font-size:9px;letter-spacing:3px;color:var(--text-dim)" id="programmes-empty">Loading programmes...</div>
+        </div>
+
+        <!-- DIVIDER -->
+        <div style="border-top:1px solid var(--border);margin:0 20px"></div>
+
+        <!-- COACHING ENQUIRY -->
+        <div class="coaching-form">
+          <div class="coaching-eyebrow" style="padding-top:20px">1-2-1 Personal Training</div>
+          <div class="coaching-title" style="font-size:32px;margin-bottom:8px">TRAIN WITH<br>A COACH</div>
+          <div class="coaching-desc" style="margin-bottom:20px">Fully personalised programming. Built around your body, schedule, and goals.</div>
+          <div class="coaching-pillars" style="margin:0 0 20px">
+            <div class="coaching-pillar"><div class="coaching-pillar-icon">⬡</div><div class="coaching-pillar-title">Custom Blocks</div><div class="coaching-pillar-desc">Every block written specifically for your level</div></div>
+            <div class="coaching-pillar"><div class="coaching-pillar-icon">◉</div><div class="coaching-pillar-title">Skill Progressions</div><div class="coaching-pillar-desc">Structured paths to your target skills</div></div>
+            <div class="coaching-pillar"><div class="coaching-pillar-icon">✦</div><div class="coaching-pillar-title">Weekly Check-ins</div><div class="coaching-pillar-desc">Direct access and programming adjustments</div></div>
+            <div class="coaching-pillar"><div class="coaching-pillar-icon">◌</div><div class="coaching-pillar-title">Full Accountability</div><div class="coaching-pillar-desc">Consistent progress through honest feedback</div></div>
+          </div>
+          <div class="coaching-form-label">Request a spot</div>
+          <input class="coaching-input" type="text" id="coach-name" placeholder="Your name">
+          <input class="coaching-input" type="email" id="coach-email" placeholder="Email address">
+          <select class="coaching-input" id="coach-goal" style="-webkit-appearance:none;color:var(--text-muted)">
+            <option value="" disabled selected style="color:var(--text-dim)">Your main goal...</option>
+            <option value="calisthenics-skills">Calisthenics skills — muscle-up, front lever, planche</option>
+            <option value="strength-hypertrophy">Strength & hypertrophy</option>
+            <option value="fat-loss-conditioning">Fat loss & conditioning</option>
+            <option value="general-fitness">General fitness & movement quality</option>
+            <option value="beginners">Complete beginner — start from scratch</option>
+          </select>
+          <textarea class="coaching-textarea" id="coach-message" placeholder="Tell me where you're at and what you want to achieve..."></textarea>
+          <button class="coaching-submit" onclick="submitCoachingRequest()">SEND REQUEST →</button>
+          <div class="coaching-sent" id="coaching-sent">✓ Request sent — I'll be in touch within 24h</div>
+        </div>
+        <div style="height:20px"></div>
+      </div>
+
+      <!-- AI COACH PAGE (hidden, admin only) -->
+      <div class="page" id="page-ai">
+        <div style="padding:20px">
+          <button class="back-btn" style="display:flex;margin-bottom:16px" onclick="navigate('coaching')">← BACK</button>
+          <div class="coaching-eyebrow">AI Coach</div>
+          <div class="coaching-title" style="font-size:32px;margin-bottom:16px">BUILD MY<br>PROGRAMME</div>
+
+          <div id="ai-chat" class="ai-chat"></div>
+          <div id="ai-replies" class="ai-replies"></div>
+          <div id="ai-input-wrap" class="ai-input-wrap" style="display:none">
+            <input class="ai-text-input" type="text" id="ai-text-input" placeholder="Type your answer..." autocomplete="off" onkeydown="if(event.key==='Enter')aiSendText()">
+            <button class="ai-send-btn" onclick="aiSendText()">→</button>
+          </div>
+
+          <div id="ai-result" style="display:none">
+            <div id="ai-result-days"></div>
+            <div style="display:flex;gap:10px;margin-top:20px">
+              <button class="coaching-submit" id="ai-restart-btn" style="flex:1;background:transparent;border-color:var(--border);color:var(--text-muted)" onclick="aiRestart()">START OVER</button>
+              <button class="coaching-submit" style="flex:2" onclick="aiLoadBlock()">LOAD AS CURRENT BLOCK →</button>
+            </div>
+          </div>
+        </div>
+      </div>
 
   </div><!-- end scroll-area -->
 
@@ -1218,7 +1198,6 @@ background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 200 200’ xml
 </div>
 
 <!-- EX SHEET -->
-
 <div class="sheet-overlay" id="sheet-overlay" onclick="closeSheet(event)">
   <div class="bottom-sheet">
     <div class="sheet-handle"></div>
@@ -1239,7 +1218,6 @@ background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 200 200’ xml
 </div>
 
 <!-- ARCHIVE CONFIRM -->
-
 <div class="confirm-overlay" id="confirm-overlay">
   <div class="confirm-sheet">
     <div class="confirm-title">ARCHIVE THIS BLOCK?</div>
@@ -1250,7 +1228,6 @@ background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 200 200’ xml
 </div>
 
 <!-- REST TIMER -->
-
 <div class="timer-overlay" id="timer-overlay">
   <div class="timer-label">REST</div>
   <div class="timer-ring">
@@ -1277,7 +1254,6 @@ background-image: url(“data:image/svg+xml,%3Csvg viewBox=‘0 0 200 200’ xml
 </div>
 
 <!-- BLOCK END PROMPT -->
-
 <div class="confirm-overlay" id="blockend-overlay">
   <div class="confirm-sheet">
     <div class="confirm-title" id="blockend-title">BLOCK COMPLETE</div>
@@ -5658,6 +5634,5 @@ async function executePushUpdate() {
 }
 
 </script>
-
 </body>
 </html>
