@@ -2439,7 +2439,10 @@ function renderHomeDays() {
   const hasActiveBlock = currentBlock.days?.length > 0;
   const hasFixed = (currentBlock.warmup?.length > 0) || (currentBlock.skill?.length > 0);
   const hasSaved = customWorkouts.length > 0;
-  const hasAnything = hasActiveBlock || hasFixed || hasSaved;
+  // FORGE+ uses AI for programming — don't let dormant saved blocks suppress the empty CTA
+  const tierForEmpty = currentUser?.tier || '';
+  const isForgePlusForEmpty = (tierForEmpty === 'coached' || tierForEmpty === 'admin');
+  const hasAnything = hasActiveBlock || hasFixed || (hasSaved && !isForgePlusForEmpty);
 
   blockSection.style.display = hasAnything ? 'block' : 'none';
   emptyState.style.display = hasAnything ? 'none' : 'block';
@@ -2520,7 +2523,13 @@ async function executeArchive() {
     sessionLog: {...sessionLog},
   });
   localStorage.setItem('fw_archive', JSON.stringify(archivedBlocks));
-  if (customWorkouts.length > 0) {
+  // FORGE+ users always land on empty state after archiving — they use the AI,
+  // not saved manual blocks. Other tiers keep the existing fall-through behaviour.
+  const tier = currentUser?.tier || '';
+  const isForgePlus = (tier === 'coached' || tier === 'admin');
+  if (isForgePlus) {
+    currentBlock = { name:'', methods:[], weeks:4, warmup:[], skill:[], days:[] };
+  } else if (customWorkouts.length > 0) {
     const next = customWorkouts[0];
     currentBlock = { name:next.name, methods:next.methods||[], days:next.days||[] };
   } else {
