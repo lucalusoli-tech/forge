@@ -1,215 +1,310 @@
-import React from ‘react’;
+<!DOCTYPE html>
 
-const Roadmap = () => {
-const pillars = [
-{
-name: ‘FORGE Product’,
-icon: ‘⚙️’,
-items: [
-{ task: ‘Stripe + Supabase subscription architecture’, status: ‘in-progress’, priority: ‘high’ },
-{ task: ‘FORGE+ auto-progression logic’, status: ‘next’, priority: ‘high’ },
-{ task: ‘Programme generation edge function refinement’, status: ‘done’, priority: ‘high’ },
-{ task: ‘Web Push notifications (rest timer)’, status: ‘parked’, priority: ‘low’ },
-{ task: ‘Tier access gating (pt tier hides Programmes)’, status: ‘done’, priority: ‘medium’ },
-]
-},
-{
-name: ‘FORGE Content’,
-icon: ‘🎬’,
-items: [
-{ task: ‘Talking PT posts — first word within 1s’, status: ‘active’, priority: ‘high’ },
-{ task: ‘Silent cinematic movement posts’, status: ‘active’, priority: ‘medium’ },
-{ task: ‘Cover image strategy (lockout frames)’, status: ‘done’, priority: ‘medium’ },
-{ task: ‘Filming cadence + batch production’, status: ‘next’, priority: ‘high’ },
-{ task: ‘Hook iteration based on retention data’, status: ‘ongoing’, priority: ‘high’ },
-]
-},
-{
-name: ‘PT Business’,
-icon: ‘🏋️’,
-items: [
-{ task: ‘Handstand Workshop (26 April @ The Ministry)’, status: ‘done’, priority: ‘high’ },
-{ task: ‘Referral outreach (direct asks)’, status: ‘in-progress’, priority: ‘high’ },
-{ task: ‘Rate card refresh in FORGE design system’, status: ‘done’, priority: ‘medium’ },
-{ task: ‘Client retention / rebooking flow’, status: ‘next’, priority: ‘medium’ },
-{ task: ‘Online programme sales funnel’, status: ‘planned’, priority: ‘medium’ },
-]
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FORGE Roadmap</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+```
+body {
+  min-height: 100vh;
+  background: #080808;
+  padding: 48px 24px;
+  font-family: 'Inter', -apple-system, sans-serif;
+  color: #e8dcc8;
 }
-];
 
-const statusStyles = {
-‘done’: { bg: ‘rgba(201, 169, 110, 0.15)’, border: ‘#c9a96e’, text: ‘#c9a96e’ },
-‘in-progress’: { bg: ‘rgba(201, 169, 110, 0.08)’, border: ‘#c9a96e’, text: ‘#e8dcc8’ },
-‘active’: { bg: ‘rgba(201, 169, 110, 0.08)’, border: ‘#c9a96e’, text: ‘#e8dcc8’ },
-‘ongoing’: { bg: ‘rgba(201, 169, 110, 0.08)’, border: ‘#c9a96e’, text: ‘#e8dcc8’ },
-‘next’: { bg: ‘rgba(255,255,255,0.03)’, border: ‘#3a3a3a’, text: ‘#a0a0a0’ },
-‘planned’: { bg: ‘rgba(255,255,255,0.02)’, border: ‘#2a2a2a’, text: ‘#707070’ },
-‘parked’: { bg: ‘rgba(255,255,255,0.01)’, border: ‘#1a1a1a’, text: ‘#505050’ },
-};
+.header {
+  text-align: center;
+  margin-bottom: 56px;
+}
 
-const statusLabels = {
-‘done’: ‘✓ DONE’,
-‘in-progress’: ‘◐ IN PROGRESS’,
-‘active’: ‘● ACTIVE’,
-‘ongoing’: ‘↻ ONGOING’,
-‘next’: ‘→ NEXT’,
-‘planned’: ‘○ PLANNED’,
-‘parked’: ‘⏸ PARKED’,
-};
+.header-tag {
+  font-size: 11px;
+  letter-spacing: 4px;
+  color: #c9a96e;
+  margin-bottom: 12px;
+  font-weight: 500;
+}
 
-return (
-<div style={{
-minHeight: ‘100vh’,
-background: ‘#080808’,
-padding: ‘48px 24px’,
-fontFamily: “‘Inter’, -apple-system, sans-serif”,
-color: ‘#e8dcc8’
-}}>
-{/* Header */}
-<div style={{ textAlign: ‘center’, marginBottom: ‘56px’ }}>
-<div style={{
-fontSize: ‘11px’,
-letterSpacing: ‘4px’,
-color: ‘#c9a96e’,
-marginBottom: ‘12px’,
-fontWeight: 500
-}}>
-默鍛 FORGE
-</div>
-<h1 style={{
-fontSize: ‘28px’,
-fontWeight: 300,
-letterSpacing: ‘1px’,
-margin: 0,
-color: ‘#e8dcc8’
-}}>
-ROADMAP
-</h1>
-<div style={{
-width: ‘40px’,
-height: ‘1px’,
-background: ‘linear-gradient(90deg, transparent, #c9a96e, transparent)’,
-margin: ‘20px auto 0’
-}} />
-</div>
+.header h1 {
+  font-size: 28px;
+  font-weight: 300;
+  letter-spacing: 1px;
+  color: #e8dcc8;
+}
 
-```
-  {/* Legend */}
-  <div style={{
-    display: 'flex',
-    justifyContent: 'center',
-    gap: '16px',
-    flexWrap: 'wrap',
-    marginBottom: '48px',
-    fontSize: '10px',
-    letterSpacing: '1px'
-  }}>
-    {['done', 'in-progress', 'next', 'parked'].map(status => (
-      <div key={status} style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-        <div style={{
-          width: '8px',
-          height: '8px',
-          borderRadius: '2px',
-          background: statusStyles[status].bg,
-          border: `1px solid ${statusStyles[status].border}`
-        }} />
-        <span style={{ color: statusStyles[status].text }}>
-          {status.toUpperCase().replace('-', ' ')}
-        </span>
-      </div>
-    ))}
-  </div>
+.header-line {
+  width: 40px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #c9a96e, transparent);
+  margin: 20px auto 0;
+}
 
-  {/* Pillars */}
-  <div style={{
-    display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-    gap: '24px',
-    maxWidth: '1000px',
-    margin: '0 auto'
-  }}>
-    {pillars.map((pillar, idx) => (
-      <div key={idx} style={{
-        background: 'rgba(255,255,255,0.02)',
-        border: '1px solid #1a1a1a',
-        borderRadius: '4px',
-        padding: '28px 24px'
-      }}>
-        {/* Pillar Header */}
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '10px',
-          marginBottom: '24px',
-          paddingBottom: '16px',
-          borderBottom: '1px solid #1a1a1a'
-        }}>
-          <span style={{ fontSize: '18px' }}>{pillar.icon}</span>
-          <span style={{
-            fontSize: '12px',
-            letterSpacing: '2px',
-            fontWeight: 500,
-            color: '#c9a96e'
-          }}>
-            {pillar.name.toUpperCase()}
-          </span>
-        </div>
+.legend {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 48px;
+  font-size: 10px;
+  letter-spacing: 1px;
+}
 
-        {/* Tasks */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {pillar.items.map((item, i) => {
-            const style = statusStyles[item.status];
-            return (
-              <div key={i} style={{
-                background: style.bg,
-                border: `1px solid ${style.border}`,
-                borderRadius: '3px',
-                padding: '12px 14px',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'flex-start',
-                gap: '12px'
-              }}>
-                <span style={{
-                  fontSize: '13px',
-                  color: style.text,
-                  lineHeight: 1.4,
-                  flex: 1
-                }}>
-                  {item.task}
-                </span>
-                <span style={{
-                  fontSize: '8px',
-                  letterSpacing: '1px',
-                  color: style.text,
-                  opacity: 0.7,
-                  whiteSpace: 'nowrap',
-                  marginTop: '2px'
-                }}>
-                  {statusLabels[item.status]}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    ))}
-  </div>
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
 
-  {/* Footer */}
-  <div style={{
-    textAlign: 'center',
-    marginTop: '56px',
-    fontSize: '10px',
-    letterSpacing: '2px',
-    color: '#404040'
-  }}>
-    APRIL 2026
-  </div>
-</div>
+.legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.pillars {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 24px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+.pillar {
+  background: rgba(255,255,255,0.02);
+  border: 1px solid #1a1a1a;
+  border-radius: 4px;
+  padding: 28px 24px;
+}
+
+.pillar-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #1a1a1a;
+}
+
+.pillar-icon {
+  font-size: 18px;
+}
+
+.pillar-name {
+  font-size: 12px;
+  letter-spacing: 2px;
+  font-weight: 500;
+  color: #c9a96e;
+}
+
+.tasks {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.task {
+  border-radius: 3px;
+  padding: 12px 14px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.task-text {
+  font-size: 13px;
+  line-height: 1.4;
+  flex: 1;
+}
+
+.task-status {
+  font-size: 8px;
+  letter-spacing: 1px;
+  opacity: 0.7;
+  white-space: nowrap;
+  margin-top: 2px;
+}
+
+/* Status styles */
+.status-done {
+  background: rgba(201, 169, 110, 0.15);
+  border: 1px solid #c9a96e;
+}
+.status-done .task-text,
+.status-done .task-status { color: #c9a96e; }
+
+.status-active {
+  background: rgba(201, 169, 110, 0.08);
+  border: 1px solid #c9a96e;
+}
+.status-active .task-text,
+.status-active .task-status { color: #e8dcc8; }
+
+.status-next {
+  background: rgba(255,255,255,0.03);
+  border: 1px solid #3a3a3a;
+}
+.status-next .task-text,
+.status-next .task-status { color: #a0a0a0; }
+
+.status-parked {
+  background: rgba(255,255,255,0.01);
+  border: 1px solid #1a1a1a;
+}
+.status-parked .task-text,
+.status-parked .task-status { color: #505050; }
+
+.footer {
+  text-align: center;
+  margin-top: 56px;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: #404040;
+}
+
+/* Legend color variants */
+.legend-done { background: rgba(201,169,110,0.15); border: 1px solid #c9a96e; }
+.legend-active { background: rgba(201,169,110,0.08); border: 1px solid #c9a96e; }
+.legend-next { background: rgba(255,255,255,0.03); border: 1px solid #3a3a3a; }
+.legend-parked { background: rgba(255,255,255,0.01); border: 1px solid #1a1a1a; }
 ```
 
-);
-};
+  </style>
+</head>
+<body>
 
-export default Roadmap;
+  <div class="header">
+    <div class="header-tag">默鍛 FORGE</div>
+    <h1>ROADMAP</h1>
+    <div class="header-line"></div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-dot legend-done"></div>
+      <span style="color: #c9a96e;">DONE</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot legend-active"></div>
+      <span style="color: #e8dcc8;">ACTIVE</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot legend-next"></div>
+      <span style="color: #a0a0a0;">NEXT</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot legend-parked"></div>
+      <span style="color: #505050;">PARKED</span>
+    </div>
+  </div>
+
+  <div class="pillars">
+
+```
+<!-- FORGE PRODUCT -->
+<div class="pillar">
+  <div class="pillar-header">
+    <span class="pillar-icon">⚙️</span>
+    <span class="pillar-name">FORGE PRODUCT</span>
+  </div>
+  <div class="tasks">
+    <div class="task status-active">
+      <span class="task-text">Stripe + Supabase subscription architecture</span>
+      <span class="task-status">◐ IN PROGRESS</span>
+    </div>
+    <div class="task status-next">
+      <span class="task-text">FORGE+ auto-progression logic</span>
+      <span class="task-status">→ NEXT</span>
+    </div>
+    <div class="task status-done">
+      <span class="task-text">Programme generation edge function</span>
+      <span class="task-status">✓ DONE</span>
+    </div>
+    <div class="task status-done">
+      <span class="task-text">Tier access gating (pt tier)</span>
+      <span class="task-status">✓ DONE</span>
+    </div>
+    <div class="task status-parked">
+      <span class="task-text">Web Push notifications (rest timer)</span>
+      <span class="task-status">⏸ PARKED</span>
+    </div>
+  </div>
+</div>
+
+<!-- FORGE CONTENT -->
+<div class="pillar">
+  <div class="pillar-header">
+    <span class="pillar-icon">🎬</span>
+    <span class="pillar-name">FORGE CONTENT</span>
+  </div>
+  <div class="tasks">
+    <div class="task status-active">
+      <span class="task-text">Talking PT posts — first word within 1s</span>
+      <span class="task-status">● ACTIVE</span>
+    </div>
+    <div class="task status-active">
+      <span class="task-text">Silent cinematic movement posts</span>
+      <span class="task-status">● ACTIVE</span>
+    </div>
+    <div class="task status-next">
+      <span class="task-text">Filming cadence + batch production</span>
+      <span class="task-status">→ NEXT</span>
+    </div>
+    <div class="task status-active">
+      <span class="task-text">Hook iteration based on retention</span>
+      <span class="task-status">↻ ONGOING</span>
+    </div>
+    <div class="task status-done">
+      <span class="task-text">Cover image strategy (lockout frames)</span>
+      <span class="task-status">✓ DONE</span>
+    </div>
+  </div>
+</div>
+
+<!-- PT BUSINESS -->
+<div class="pillar">
+  <div class="pillar-header">
+    <span class="pillar-icon">🏋️</span>
+    <span class="pillar-name">PT BUSINESS</span>
+  </div>
+  <div class="tasks">
+    <div class="task status-done">
+      <span class="task-text">Handstand Workshop (26 April)</span>
+      <span class="task-status">✓ DONE</span>
+    </div>
+    <div class="task status-active">
+      <span class="task-text">Referral outreach (direct asks)</span>
+      <span class="task-status">◐ IN PROGRESS</span>
+    </div>
+    <div class="task status-done">
+      <span class="task-text">Rate card refresh</span>
+      <span class="task-status">✓ DONE</span>
+    </div>
+    <div class="task status-next">
+      <span class="task-text">Client retention / rebooking flow</span>
+      <span class="task-status">→ NEXT</span>
+    </div>
+    <div class="task status-next">
+      <span class="task-text">Online programme sales funnel</span>
+      <span class="task-status">○ PLANNED</span>
+    </div>
+  </div>
+</div>
+```
+
+  </div>
+
+  <div class="footer">APRIL 2026</div>
+
+</body>
+</html>
