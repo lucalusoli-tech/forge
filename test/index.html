@@ -2439,10 +2439,10 @@ function renderHomeDays() {
   const hasActiveBlock = currentBlock.days?.length > 0;
   const hasFixed = (currentBlock.warmup?.length > 0) || (currentBlock.skill?.length > 0);
   const hasSaved = customWorkouts.length > 0;
-  // FORGE+ uses AI for programming — don't let dormant saved blocks suppress the empty CTA
+  // FORGE+ and premium use AI/upgrade path — don't let dormant saved blocks suppress the empty CTA
   const tierForEmpty = currentUser?.tier || '';
-  const isForgePlusForEmpty = (tierForEmpty === 'coached' || tierForEmpty === 'admin');
-  const hasAnything = hasActiveBlock || hasFixed || (hasSaved && !isForgePlusForEmpty);
+  const skipSavedForEmpty = (tierForEmpty === 'coached' || tierForEmpty === 'admin' || tierForEmpty === 'premium');
+  const hasAnything = hasActiveBlock || hasFixed || (hasSaved && !skipSavedForEmpty);
 
   blockSection.style.display = hasAnything ? 'block' : 'none';
   emptyState.style.display = hasAnything ? 'none' : 'block';
@@ -2537,11 +2537,12 @@ async function executeArchive() {
     sessionLog: {...sessionLog},
   });
   localStorage.setItem('fw_archive', JSON.stringify(archivedBlocks));
-  // FORGE+ users always land on empty state after archiving — they use the AI,
-  // not saved manual blocks. Other tiers keep the existing fall-through behaviour.
+  // FORGE+ and premium users land on empty state after archiving.
+  // FORGE+ uses AI for next block, premium sees upgrade CTA.
+  // Other tiers (pt, trial, free) keep existing fall-through behaviour.
   const tier = currentUser?.tier || '';
-  const isForgePlus = (tier === 'coached' || tier === 'admin');
-  if (isForgePlus) {
+  const isForgePlusOrPremium = (tier === 'coached' || tier === 'admin' || tier === 'premium');
+  if (isForgePlusOrPremium) {
     currentBlock = { name:'', methods:[], weeks:4, warmup:[], skill:[], days:[] };
   } else if (customWorkouts.length > 0) {
     const next = customWorkouts[0];
