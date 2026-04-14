@@ -2439,10 +2439,10 @@ function renderHomeDays() {
   const hasActiveBlock = currentBlock.days?.length > 0;
   const hasFixed = (currentBlock.warmup?.length > 0) || (currentBlock.skill?.length > 0);
   const hasSaved = customWorkouts.length > 0;
-  // FORGE+ uses AI for programming — don't let dormant saved blocks suppress the empty CTA
+  // FORGE+ and premium use AI/upgrade path — don't let dormant saved blocks suppress the empty CTA
   const tierForEmpty = currentUser?.tier || '';
-  const isForgePlusForEmpty = (tierForEmpty === 'coached' || tierForEmpty === 'admin');
-  const hasAnything = hasActiveBlock || hasFixed || (hasSaved && !isForgePlusForEmpty);
+  const skipSavedForEmpty = (tierForEmpty === 'coached' || tierForEmpty === 'admin' || tierForEmpty === 'premium');
+  const hasAnything = hasActiveBlock || hasFixed || (hasSaved && !skipSavedForEmpty);
 
   blockSection.style.display = hasAnything ? 'block' : 'none';
   emptyState.style.display = hasAnything ? 'none' : 'block';
@@ -2462,6 +2462,20 @@ function renderHomeDays() {
       emptySub.textContent = 'Answer a few questions and FORGE AI will build your first programme — tailored to your level, goals, and schedule.';
       emptyCta.textContent = 'ENTER THE FORGE →';
       emptyCta.onclick = () => navigate('ai');
+    } else if (tier === 'premium') {
+      // Premium tier: one welcome template only
+      const hasUsedWelcome = archivedBlocks.length > 0;
+      if (hasUsedWelcome) {
+        emptyTitle.textContent = 'Ready for more?';
+        emptySub.textContent = 'Upgrade to FORGE+ for AI-built programmes, or request a custom programme from your coach.';
+        emptyCta.textContent = 'UPGRADE TO FORGE+ →';
+        emptyCta.onclick = () => openUpgrade();
+      } else {
+        emptyTitle.textContent = 'No block yet';
+        emptySub.textContent = 'Build your first training block to get started';
+        emptyCta.textContent = 'GET STARTED →';
+        emptyCta.onclick = () => showOnboarding();
+      }
     } else {
       emptyTitle.textContent = 'No block yet';
       emptySub.textContent = 'Build your first training block to get started';
@@ -2523,11 +2537,12 @@ async function executeArchive() {
     sessionLog: {...sessionLog},
   });
   localStorage.setItem('fw_archive', JSON.stringify(archivedBlocks));
-  // FORGE+ users always land on empty state after archiving — they use the AI,
-  // not saved manual blocks. Other tiers keep the existing fall-through behaviour.
+  // FORGE+ and premium users land on empty state after archiving.
+  // FORGE+ uses AI for next block, premium sees upgrade CTA.
+  // Other tiers (pt, trial, free) keep existing fall-through behaviour.
   const tier = currentUser?.tier || '';
-  const isForgePlus = (tier === 'coached' || tier === 'admin');
-  if (isForgePlus) {
+  const isForgePlusOrPremium = (tier === 'coached' || tier === 'admin' || tier === 'premium');
+  if (isForgePlusOrPremium) {
     currentBlock = { name:'', methods:[], weeks:4, warmup:[], skill:[], days:[] };
   } else if (customWorkouts.length > 0) {
     const next = customWorkouts[0];
