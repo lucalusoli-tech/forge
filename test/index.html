@@ -2462,6 +2462,20 @@ function renderHomeDays() {
       emptySub.textContent = 'Answer a few questions and FORGE AI will build your first programme — tailored to your level, goals, and schedule.';
       emptyCta.textContent = 'ENTER THE FORGE →';
       emptyCta.onclick = () => navigate('ai');
+    } else if (tier === 'premium') {
+      // Premium tier: one welcome template only
+      const hasUsedWelcome = archivedBlocks.length > 0;
+      if (hasUsedWelcome) {
+        emptyTitle.textContent = 'Ready for more?';
+        emptySub.textContent = 'Upgrade to FORGE+ for AI-built programmes, or request a custom programme from your coach.';
+        emptyCta.textContent = 'UPGRADE TO FORGE+ →';
+        emptyCta.onclick = () => openUpgrade();
+      } else {
+        emptyTitle.textContent = 'No block yet';
+        emptySub.textContent = 'Build your first training block to get started';
+        emptyCta.textContent = 'GET STARTED →';
+        emptyCta.onclick = () => showOnboarding();
+      }
     } else {
       emptyTitle.textContent = 'No block yet';
       emptySub.textContent = 'Build your first training block to get started';
