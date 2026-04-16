@@ -3706,6 +3706,14 @@ let timerFired = false; // guards fireTimerAlert against multi-firing on iOS res
     }).catch(err => {
       console.warn('[FORGE] SW registration failed, using fallback notifications', err);
     });
+    // Listen for SW telling us it fired the notification
+    navigator.serviceWorker.addEventListener('message', e => {
+      if (e.data?.type === 'TIMER_SW_FIRED') {
+        console.log('[FORGE Timer] SW fired notification — setting timerFired=true');
+        timerFired = true;
+        timerEndTime = 0; // Clear so resume handlers skip
+      }
+    });
   }
 })();
 
