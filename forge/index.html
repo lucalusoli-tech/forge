@@ -3843,9 +3843,10 @@ function _recalcTimerOnResume() {
   if (timerRemaining <= 0) {
     clearInterval(timerInterval);
     if (timerBackupTimeout) { clearTimeout(timerBackupTimeout); timerBackupTimeout = null; }
-    // Timer expired while page was suspended — SW already fired the notification.
-    // Just close the timer UI, don't fire another notification.
-    console.log('[FORGE Timer] Timer expired while suspended — closing UI (SW handled notification)');
+    // Timer expired while page was suspended — SW may have fired, or may not (iOS kills SW too).
+    // Either way, just close the UI. If SW fired, user already got notified. If not, they're
+    // back in the app now so they can see the timer is done.
+    console.log('[FORGE Timer] Timer expired while suspended — closing UI');
     closeTimer();
     return;
   } else {
@@ -3865,17 +3866,26 @@ function _recalcTimerOnResume() {
   }
 }
 
+// Debounced resume handler — prevents multiple rapid calls from stacking
+let _resumeDebounce = 0;
+function _debouncedResume() {
+  const now = Date.now();
+  if (now - _resumeDebounce < 500) return; // Ignore if called within 500ms
+  _resumeDebounce = now;
+  _recalcTimerOnResume();
+}
+
 // Multiple resume event listeners — iOS fires different ones in different situations
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden) _recalcTimerOnResume();
+  if (!document.hidden) _debouncedResume();
 });
 window.addEventListener('pageshow', (e) => {
   // pageshow fires on BFCache restore, which visibilitychange sometimes misses on iOS
-  _recalcTimerOnResume();
+  _debouncedResume();
 });
 window.addEventListener('focus', () => {
   // Belt-and-braces — focus fires when user taps back into the PWA
-  _recalcTimerOnResume();
+  _debouncedResume();
 });
 
 function updateTimerDisplay() {
