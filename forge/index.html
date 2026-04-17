@@ -1967,12 +1967,10 @@ function switchBuildTab(tab) {
 }
 
 // ─── CHANGELOG ─────────────────────────────────────────────────
-const FORGE_VERSION = '1.9.1';
+const FORGE_VERSION = '1.9.2';
 const FORGE_CHANGELOG = [
-  'FORGE+: home now guides you straight into your AI assessment',
-  'Forgot your password? Reset it from the sign-in screen',
-  'Rest timer no longer double-alerts when reopening the app',
-  'Smoother return to your session after locking your phone'
+  'Fixed double notification when reopening from lock screen',
+  'Premium tier now correctly shows upgrade prompt after first block'
 ];
 
 function checkChangelog() {
@@ -3845,16 +3843,11 @@ function _recalcTimerOnResume() {
   if (timerRemaining <= 0) {
     clearInterval(timerInterval);
     if (timerBackupTimeout) { clearTimeout(timerBackupTimeout); timerBackupTimeout = null; }
-    // If timer expired more than 3 seconds ago, the SW likely already fired the notification
-    // while the phone was locked — skip the page notification to avoid double.
-    const expiredAgo = -msRemaining;
-    if (expiredAgo > 3000) {
-      console.log('[FORGE Timer] Skipping page notification — timer expired ' + Math.round(expiredAgo/1000) + 's ago (SW likely fired)');
-      closeTimer();
-      return;
-    }
-    fireTimerAlert();
-    setTimeout(() => closeTimer(), 800);
+    // Timer expired while page was suspended — SW already fired the notification.
+    // Just close the timer UI, don't fire another notification.
+    console.log('[FORGE Timer] Timer expired while suspended — closing UI (SW handled notification)');
+    closeTimer();
+    return;
   } else {
     // Restart the interval in case it was killed by iOS background throttling
     clearInterval(timerInterval);
