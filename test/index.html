@@ -1967,12 +1967,10 @@ function switchBuildTab(tab) {
 }
 
 // ─── CHANGELOG ─────────────────────────────────────────────────
-const FORGE_VERSION = '1.9.1';
+const FORGE_VERSION = '1.9.2';
 const FORGE_CHANGELOG = [
-  'FORGE+: home now guides you straight into your AI assessment',
-  'Forgot your password? Reset it from the sign-in screen',
-  'Rest timer no longer double-alerts when reopening the app',
-  'Smoother return to your session after locking your phone'
+  'Fixed double notification when reopening from lock screen',
+  'Premium tier now correctly shows upgrade prompt after first block'
 ];
 
 function checkChangelog() {
@@ -2857,7 +2855,9 @@ function isDayLogged(dayId, week) {
 function isWeekComplete(week) {
   const days = currentBlock.days || [];
   if (!days.length) return false;
-  return days.every(d => isDayLogged(d.id, week));
+  const logged = days.filter(d => isDayLogged(d.id, week)).length;
+  const threshold = Math.ceil(days.length * 0.5); // At least 50% of days
+  return logged >= threshold;
 }
 
 function checkWeekComplete() {
@@ -2874,8 +2874,10 @@ function checkWeekComplete() {
     return;
   }
 
+  const daysLogged = (currentBlock.days || []).filter(d => isDayLogged(d.id, currentWeek)).length;
+  const totalDays = (currentBlock.days || []).length;
   title.textContent = 'WEEK ' + currentWeek + ' COMPLETE';
-  desc.textContent = 'All ' + (currentBlock.days.length) + ' sessions logged. Move to Week ' + (currentWeek + 1) + '?';
+  desc.textContent = daysLogged + ' of ' + totalDays + ' sessions logged. Move to Week ' + (currentWeek + 1) + '?';
   actions.innerHTML = `<button class="confirm-yes" onclick="closeWeekComplete();cycleWeek()">NEXT WEEK →</button>`;
   document.getElementById('weekcomplete-overlay').classList.add('open');
 }
@@ -3845,16 +3847,12 @@ function _recalcTimerOnResume() {
   if (timerRemaining <= 0) {
     clearInterval(timerInterval);
     if (timerBackupTimeout) { clearTimeout(timerBackupTimeout); timerBackupTimeout = null; }
-    // If timer expired more than 3 seconds ago, the SW likely already fired the notification
-    // while the phone was locked — skip the page notification to avoid double.
-    const expiredAgo = -msRemaining;
-    if (expiredAgo > 3000) {
-      console.log('[FORGE Timer] Skipping page notification — timer expired ' + Math.round(expiredAgo/1000) + 's ago (SW likely fired)');
-      closeTimer();
-      return;
-    }
-    fireTimerAlert();
-    setTimeout(() => closeTimer(), 800);
+    // Timer expired while page was suspended — SW may have fired, or may not (iOS kills SW too).
+    // Either way, just close the UI. If SW fired, user already got notified. If not, they're
+    // back in the app now so they can see the timer is done.
+    console.log('[FORGE Timer] Timer expired while suspended — closing UI');
+    closeTimer();
+    return;
   } else {
     // Restart the interval in case it was killed by iOS background throttling
     clearInterval(timerInterval);
@@ -3872,17 +3870,26 @@ function _recalcTimerOnResume() {
   }
 }
 
+// Debounced resume handler — prevents multiple rapid calls from stacking
+let _resumeDebounce = 0;
+function _debouncedResume() {
+  const now = Date.now();
+  if (now - _resumeDebounce < 500) return; // Ignore if called within 500ms
+  _resumeDebounce = now;
+  _recalcTimerOnResume();
+}
+
 // Multiple resume event listeners — iOS fires different ones in different situations
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden) _recalcTimerOnResume();
+  if (!document.hidden) _debouncedResume();
 });
 window.addEventListener('pageshow', (e) => {
   // pageshow fires on BFCache restore, which visibilitychange sometimes misses on iOS
-  _recalcTimerOnResume();
+  _debouncedResume();
 });
 window.addEventListener('focus', () => {
   // Belt-and-braces — focus fires when user taps back into the PWA
-  _recalcTimerOnResume();
+  _debouncedResume();
 });
 
 function updateTimerDisplay() {
