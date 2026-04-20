@@ -1967,10 +1967,10 @@ function switchBuildTab(tab) {
 }
 
 // ─── CHANGELOG ─────────────────────────────────────────────────
-const FORGE_VERSION = '1.9.2';
+const FORGE_VERSION = '1.9.3';
 const FORGE_CHANGELOG = [
-  'Fixed double notification when reopening from lock screen',
-  'Premium tier now correctly shows upgrade prompt after first block'
+  'Week progression now triggers at 50% completion — skip a day without getting stuck',
+  'Fixed notification issue when switching between apps'
 ];
 
 function checkChangelog() {
@@ -2855,7 +2855,9 @@ function isDayLogged(dayId, week) {
 function isWeekComplete(week) {
   const days = currentBlock.days || [];
   if (!days.length) return false;
-  return days.every(d => isDayLogged(d.id, week));
+  const logged = days.filter(d => isDayLogged(d.id, week)).length;
+  const threshold = Math.ceil(days.length * 0.5); // At least 50% of days
+  return logged >= threshold;
 }
 
 function checkWeekComplete() {
@@ -2872,8 +2874,10 @@ function checkWeekComplete() {
     return;
   }
 
+  const daysLogged = (currentBlock.days || []).filter(d => isDayLogged(d.id, currentWeek)).length;
+  const totalDays = (currentBlock.days || []).length;
   title.textContent = 'WEEK ' + currentWeek + ' COMPLETE';
-  desc.textContent = 'All ' + (currentBlock.days.length) + ' sessions logged. Move to Week ' + (currentWeek + 1) + '?';
+  desc.textContent = daysLogged + ' of ' + totalDays + ' sessions logged. Move to Week ' + (currentWeek + 1) + '?';
   actions.innerHTML = `<button class="confirm-yes" onclick="closeWeekComplete();cycleWeek()">NEXT WEEK →</button>`;
   document.getElementById('weekcomplete-overlay').classList.add('open');
 }
