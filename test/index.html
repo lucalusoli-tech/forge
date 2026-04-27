@@ -2858,17 +2858,30 @@ function isDayLogged(dayId, week) {
 }
 
 function isWeekComplete(week) {
+  // Returns true if EVERY scheduled day for this week has been logged.
   const days = currentBlock.days || [];
   if (!days.length) return false;
-  const logged = days.filter(d => isDayLogged(d.id, week)).length;
-  const threshold = Math.ceil(days.length * 0.5); // At least 50% of days
-  return logged >= threshold;
+  return days.every(d => isDayLogged(d.id, week));
+}
+
+function isLastScheduledDay(dayId) {
+  // True if dayId is the final entry in currentBlock.days (i.e. the
+  // last day of the scheduled week). User just logged the "end of week" session.
+  const days = currentBlock.days || [];
+  if (!days.length) return false;
+  return days[days.length - 1].id === dayId;
 }
 
 function checkWeekComplete() {
-  if (!isWeekComplete(currentWeek)) return;
-  const total = currentBlock.weeks || 4;
+  // Trigger rule: prompt fires when the user just logged the LAST scheduled
+  // day of the week. If earlier days are unlogged, a warning is shown.
+  const days = currentBlock.days || [];
+  if (!days.length) return;
 
+  // Only prompt if the day they just finished is the last day of the schedule.
+  if (!isLastScheduledDay(currentDayId)) return;
+
+  const total = currentBlock.weeks || 4;
   const title = document.getElementById('weekcomplete-title');
   const desc = document.getElementById('weekcomplete-desc');
   const actions = document.getElementById('weekcomplete-actions');
@@ -2879,10 +2892,16 @@ function checkWeekComplete() {
     return;
   }
 
-  const daysLogged = (currentBlock.days || []).filter(d => isDayLogged(d.id, currentWeek)).length;
-  const totalDays = (currentBlock.days || []).length;
+  const daysLogged = days.filter(d => isDayLogged(d.id, currentWeek)).length;
+  const totalDays = days.length;
+  const fullyComplete = daysLogged === totalDays;
+
   title.textContent = 'WEEK ' + currentWeek + ' COMPLETE';
-  desc.textContent = daysLogged + ' of ' + totalDays + ' sessions logged. Move to Week ' + (currentWeek + 1) + '?';
+  if (fullyComplete) {
+    desc.textContent = 'All ' + totalDays + ' sessions logged. Move to Week ' + (currentWeek + 1) + '?';
+  } else {
+    desc.textContent = 'You\'ve logged ' + daysLogged + ' of ' + totalDays + ' sessions. Advance anyway?';
+  }
   actions.innerHTML = `<button class="confirm-yes" onclick="closeWeekComplete();cycleWeek()">NEXT WEEK →</button>`;
   document.getElementById('weekcomplete-overlay').classList.add('open');
 }
