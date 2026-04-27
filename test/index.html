@@ -3775,8 +3775,7 @@ function autoSaveSet(wk, setNum) {
 }
 
 function fireTimerAlert() {
-  // Hard guard: only fire once per timer cycle, no matter how many resume
-  // events race in or how many fallback paths trigger on iOS resume.
+  // Hard guard: only fire once per timer cycle.
   if (timerFired) return;
   timerFired = true;
   // Clear timerEndTime immediately so any late resume events see "no active timer"
@@ -3784,27 +3783,14 @@ function fireTimerAlert() {
   // Kill any pending timers so they can't re-fire
   clearInterval(timerInterval);
   if (timerBackupTimeout) { clearTimeout(timerBackupTimeout); timerBackupTimeout = null; }
-  // Cancel SW scheduled notification (page caught it first — prevent double)
+  // Tell SW to stand down — page is firing foreground UX itself.
+  // SW would have suppressed firing anyway because the page is visible,
+  // but cancelling is cleaner and avoids any pending timeout sitting around.
   swTimerCancel();
-  // Vibrate
+  // Foreground-only UX: vibrate + audio beep. NO notification from the page.
+  // The SW is the single source of truth for notifications, and only fires
+  // when the page is hidden — so there's no path that produces a duplicate.
   if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
-  // Notification via Service Worker (better lock-screen delivery)
-  if (swRegistration && Notification.permission === 'granted') {
-    try {
-      swRegistration.showNotification('FORGE', {
-        body: 'Rest over — next set',
-        icon: 'https://forgetraining.app/icon-192.png',
-        tag: 'forge-timer',
-        requireInteraction: true,
-        vibrate: [200, 100, 200, 100, 200],
-        silent: false
-      });
-    } catch(e) {
-      try { new Notification('FORGE', { body: 'Rest over — next set', tag: 'forge-timer', requireInteraction: true }); } catch(e2) {}
-    }
-  } else if ('Notification' in window && Notification.permission === 'granted') {
-    try { new Notification('FORGE', { body: 'Rest over — next set', tag: 'forge-timer', requireInteraction: true }); } catch(e) {}
-  }
   // Audio beep
   try {
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
