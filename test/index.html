@@ -1762,6 +1762,9 @@ let customWorkouts = JSON.parse(localStorage.getItem('fw_customs')||'[]');
 let archivedBlocks = JSON.parse(localStorage.getItem('fw_archive')||'[]');
 let sessionLog = JSON.parse(localStorage.getItem('fw_log')||'{}');
 let currentWeek = parseInt(localStorage.getItem('fw_week')||'1');
+// Map of programme-week-number -> first-session-date (YYYY-MM-DD).
+// Used to detect "calendar week elapsed" for the week-advance prompt fallback.
+let weekStarts = JSON.parse(localStorage.getItem('fw_week_starts')||'{}');
 
 // ─── INIT ──────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
@@ -1905,6 +1908,8 @@ function openBlockEndPrompt() {
 function repeatBlock() {
   currentWeek = 1;
   localStorage.setItem('fw_week', currentWeek);
+  weekStarts = {};
+  localStorage.setItem('fw_week_starts', JSON.stringify({}));
   updateStats();
   renderHomeDays();
   scheduleSync();
@@ -2013,6 +2018,26 @@ function recordTrainingDate() {
     localStorage.setItem('fw_trained_dates', JSON.stringify(trainedDates));
   }
   updateStreakDisplay();
+}
+
+function recordWeekStart(weekNum) {
+  // Record the first-session date for this programme week, if not already set.
+  // Used by the week-advance prompt to detect "calendar week elapsed".
+  const key = String(weekNum);
+  if (!weekStarts[key]) {
+    weekStarts[key] = todayStr();
+    localStorage.setItem('fw_week_starts', JSON.stringify(weekStarts));
+  }
+}
+
+function daysSinceWeekStart(weekNum) {
+  // Returns whole days between today and the first-session date of this week.
+  // Returns null if no first-session date is recorded yet.
+  const key = String(weekNum);
+  if (!weekStarts[key]) return null;
+  const start = new Date(weekStarts[key]);
+  const today = new Date(todayStr());
+  return Math.floor((today - start) / (1000 * 60 * 60 * 24));
 }
 
 function calcStreak() {
@@ -2555,6 +2580,8 @@ async function executeArchive() {
   }
   currentWeek = 1;
   localStorage.setItem('fw_week', '1');
+  weekStarts = {};
+  localStorage.setItem('fw_week_starts', JSON.stringify({}));
   // Sync the archive (with session log saved inside) BEFORE clearing the log
   await syncBlocksToCloud();
   // Now clear the session log
@@ -2832,6 +2859,7 @@ function saveSession() {
   document.getElementById('dash-sessions').textContent=prev+1;
   document.getElementById('dash-last').textContent=day.name.split('—')[0].trim();
   recordTrainingDate();
+  recordWeekStart(currentWeek);
   showToast('Saved ✓'); renderProgress();
   // User explicitly finished — clear the active session marker so next boot goes to home
   try { sessionStorage.removeItem('forge:activeSession'); } catch(e) {}
@@ -2873,13 +2901,21 @@ function isLastScheduledDay(dayId) {
 }
 
 function checkWeekComplete() {
-  // Trigger rule: prompt fires when the user just logged the LAST scheduled
-  // day of the week. If earlier days are unlogged, a warning is shown.
+  // Two trigger paths:
+  //  1) Last-day trigger: user just logged the last scheduled day of the week.
+  //  2) Calendar-elapsed fallback: it's been ≥7 days since the first session
+  //     of this week AND any session is logged AND the last day still isn't.
   const days = currentBlock.days || [];
   if (!days.length) return;
 
-  // Only prompt if the day they just finished is the last day of the schedule.
-  if (!isLastScheduledDay(currentDayId)) return;
+  const lastDayLogged = isLastScheduledDay(currentDayId);
+  const anyLogged = days.some(d => isDayLogged(d.id, currentWeek));
+  const lastDayId = days[days.length - 1].id;
+  const lastDayDone = isDayLogged(lastDayId, currentWeek);
+  const elapsed = daysSinceWeekStart(currentWeek);
+  const calendarElapsed = elapsed !== null && elapsed >= 7 && anyLogged && !lastDayDone;
+
+  if (!lastDayLogged && !calendarElapsed) return;
 
   const total = currentBlock.weeks || 4;
   const title = document.getElementById('weekcomplete-title');
@@ -2899,6 +2935,8 @@ function checkWeekComplete() {
   title.textContent = 'WEEK ' + currentWeek + ' COMPLETE';
   if (fullyComplete) {
     desc.textContent = 'All ' + totalDays + ' sessions logged. Move to Week ' + (currentWeek + 1) + '?';
+  } else if (calendarElapsed) {
+    desc.textContent = '7 days since you started this week. ' + daysLogged + ' of ' + totalDays + ' sessions logged. Advance anyway?';
   } else {
     desc.textContent = 'You\'ve logged ' + daysLogged + ' of ' + totalDays + ' sessions. Advance anyway?';
   }
@@ -4444,9 +4482,11 @@ async function aiLoadBlock() {
   currentWeek = 1;
   // Clear session log for the new block
   sessionLog = {};
+  weekStarts = {};
   localStorage.setItem('fw_block', JSON.stringify(currentBlock));
   localStorage.setItem('fw_week', '1');
   localStorage.setItem('fw_log', JSON.stringify({}));
+  localStorage.setItem('fw_week_starts', JSON.stringify({}));
   await syncLogsToCloud(true); // force — legitimate clear after archive
   saveCurrentBlock();
   updateStats();
