@@ -1,6 +1,7 @@
-// FORGE Timer Service Worker — DIAGNOSTIC BUILD
-// Same logic as production, with console.log lines so we can see what's
-// happening on iOS. Once the bug is identified, strip the logs back out.
+// FORGE Timer Service Worker — DIAGNOSTIC: hardcoded 2s timeout
+// Ignores duration from page. Always fires after 2 seconds.
+// Purpose: isolate whether the bug is "iOS suspends SW after long wait"
+// vs "something about setTimeout context drops the notification."
 
 self.addEventListener('install', e => self.skipWaiting());
 self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
@@ -16,11 +17,10 @@ self.addEventListener('message', e => {
   if (!e.data) return;
 
   if (e.data.type === 'TIMER_START') {
-    console.log('[SW] TIMER_START received, duration:', e.data.duration);
+    console.log('[SW] TIMER_START received, IGNORING duration, using 2s');
     if (timerTimeout) clearTimeout(timerTimeout);
-    const ms = (e.data.duration || 90) * 1000;
     timerTimeout = setTimeout(async () => {
-      console.log('[SW] timeout fired');
+      console.log('[SW] timeout fired (2s)');
       timerTimeout = null;
       const visible = await isAnyClientVisible();
       console.log('[SW] visible check:', visible);
@@ -43,7 +43,7 @@ self.addEventListener('message', e => {
       } catch (err) {
         console.error('[SW] showNotification threw:', err);
       }
-    }, ms);
+    }, 2000); // <-- HARDCODED 2 SECONDS
   }
 
   if (e.data.type === 'TIMER_CANCEL') {
