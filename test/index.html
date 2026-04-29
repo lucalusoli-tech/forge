@@ -1444,7 +1444,7 @@ const EXERCISES = [
   {id:'bwf-back-lever-pullout',name:'Back Lever Pullout',tags:['skill','calisthenics','pull'],sets:'3×3-5',target:'Lats, Biceps, Shoulder Girdle',intensity:'Elite',level:'Elite',cue:'From back lever, pull out to front lever position',video:'https://www.youtube.com/results?search_query=back+lever+pullout',desc:'Transition from back lever to front lever. Elite combination of both static holds.'},
   {id:'bwf-fl-to-inverted',name:'FL to Inverted',tags:['skill','calisthenics','pull'],sets:'3×3-5',target:'Lats, Core, Shoulder Girdle',intensity:'Elite',level:'Advanced',cue:'From front lever, pull to inverted hang in one controlled motion',video:'https://www.youtube.com/results?search_query=front+lever+to+inverted+hang',desc:'Front lever pulled through to inverted hang. Extreme pulling strength and body control.'},
   {id:'bwf-hanging-pull-fl-to-inv',name:'Hanging Pull FL to Inv',tags:['skill','calisthenics','pull'],sets:'3×3',target:'Full Posterior Chain, Lats',intensity:'Elite',level:'Advanced',cue:'Dead hang, pull through front lever to inverted',video:'https://www.youtube.com/results?search_query=front+lever+to+inverted+pull',desc:'Full range pull from dead hang through front lever to inverted hang. Rare pulling capacity.'},
-  {id:'bwf-360-pull',name:'360° Pull',tags:['skill','calisthenics','pull'],sets:'3×1-3',target:'Full Upper Body, Core',intensity:'Elite',level:'Advanced',cue:'Complete full rotation around the bar',video:'https://www.youtube.com/results?search_query=360+pull+up+bar',desc:'Full 360° rotation around the bar. Combines skin the cat, front lever and back lever strength.'},
+  {id:'bwf-360-pull',name:'360° Pull',tags:['skill','calisthenics','pull'],sets:'3×1-3',target:'Full Upper Body, Core',intensity:'Elite',level:'Advanced',cue:'Complete full rotation around the bar',video:'https://www.youtube.com/watch?v=1k-FRtD2Wq8',desc:'Full 360° rotation around the bar. Combines skin the cat, front lever and back lever strength.'},
   {id:'bwf-front-lever-row',name:'Front Lever Row',tags:['skill','calisthenics','pull'],sets:'3×3-5',target:'Lats, Rhomboids, Core',intensity:'Elite',level:'Elite',cue:'Full front lever, row to chest, maintain horizontal',video:'https://www.youtube.com/results?search_query=front+lever+row',desc:'Full front lever row. One of the most demanding pulling exercises in existence.'},
 
   // ── BWF VERTICAL PULL — ADVANCED ─────────────────────────────
@@ -4297,6 +4297,10 @@ function aiAnswer(value) {
   if (step.key === 'progressGoal' && /new direction/i.test(value)) {
     delete aiData.targetSkill;
   }
+  // Same for explicit skill-swap signal.
+  if (step.key === 'skillProgress' && /swap/i.test(value)) {
+    delete aiData.targetSkill;
+  }
 
   // After goal is selected, build the branched flow
   if (step.key === 'goal') {
@@ -4725,14 +4729,26 @@ function aiAutoProgress() {
         msg: "Same goal, or shifting focus?",
         type: 'chips',
         options: ['Same goal — keep progressing', 'Shift focus slightly', 'New direction entirely']
-      },
-      {
-        key: 'progressNotes',
-        msg: "Anything else? Injuries, schedule changes, something you want more or less of?",
-        type: 'text',
-        placeholder: "e.g. shoulder feels off, want more leg work, only 3 days now, or type 'nothing'"
       }
     ];
+
+    // Skill tracking is not yet automated — ask the user directly when a target skill exists.
+    // This question informs the AI how to handle the skill section (advance / hold / regress / swap).
+    if (targetSkill) {
+      progressFlow.push({
+        key: 'skillProgress',
+        msg: "How did your skill work go on <strong>" + targetSkill + "</strong>?",
+        type: 'chips',
+        options: ['Progressed — ready for harder', 'Held — same level next block', 'Struggled — easier variation', 'Want to swap skill']
+      });
+    }
+
+    progressFlow.push({
+      key: 'progressNotes',
+      msg: "Anything else? Injuries, schedule changes, something you want more or less of?",
+      type: 'text',
+      placeholder: "e.g. shoulder feels off, want more leg work, only 3 days now, or type 'nothing'"
+    });
 
     aiFlow = progressFlow;
 
