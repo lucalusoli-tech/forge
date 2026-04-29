@@ -4292,6 +4292,12 @@ function aiAnswer(value) {
   aiData[step.key] = value;
   aiStep++;
 
+  // If user picks "New direction entirely", drop the inherited targetSkill
+  // so the AI is free to swap. Otherwise keep it preserved across blocks.
+  if (step.key === 'progressGoal' && /new direction/i.test(value)) {
+    delete aiData.targetSkill;
+  }
+
   // After goal is selected, build the branched flow
   if (step.key === 'goal') {
     aiBuildFlow(value);
@@ -4677,6 +4683,14 @@ function gatherProgressData() {
 function aiAutoProgress() {
   const progressData = gatherProgressData();
 
+  // Derive targetSkill from previous block's skill section.
+  // The skill[] section is the user's stated skill goal — preserve it across blocks.
+  const skillIds = (currentBlock.skill || []).map(s => {
+    const ex = EXERCISES.find(e => e.id === s.id);
+    return ex ? ex.name : s.id;
+  });
+  const targetSkill = skillIds.length > 0 ? skillIds.join(', ') : null;
+
   // Navigate to AI page
   navigate('ai');
 
@@ -4688,6 +4702,9 @@ function aiAutoProgress() {
     document.getElementById('ai-chat').innerHTML = '';
     document.getElementById('ai-result').style.display = 'none';
     aiHideInputs();
+
+    // Pre-populate targetSkill — preserved across blocks unless user explicitly changes
+    if (targetSkill) aiData.targetSkill = targetSkill;
 
     // Store progress data for generation
     window._aiProgressData = progressData;
