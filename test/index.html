@@ -4517,11 +4517,14 @@ function gatherProgressData() {
   const CATEGORIES = ['skill','push','pull','legs','core'];
   const LEVEL_RANK = { Beginner: 1, Intermediate: 2, Advanced: 3, Elite: 4 };
 
-  // Parse a rep prescription like "8-12", "8", "5-10s", "1 min"
+  // Parse a rep prescription like "8-12", "8", "5-10s", "1'", "1 min"
   function parseReps(repStr) {
-    if (!repStr) return { ceiling: null, isHold: false };
+    if (!repStr && repStr !== 0) return { ceiling: null, isHold: false };
     const s = String(repStr).toLowerCase().trim();
-    const isHold = /s\b|sec|min/.test(s);
+    // isHold: any time-based unit (s, sec, min, ', ")
+    const isHold = /s\b|sec|min|'|"/.test(s);
+    // Treat reps:"0" or empty as a hold-style entry (skill/iso work)
+    if (s === '0' || s === '') return { ceiling: null, isHold: true };
     const range = s.match(/(\d+)\s*[-–]\s*(\d+)/);
     if (range) return { ceiling: parseInt(range[2], 10), isHold };
     const single = s.match(/(\d+)/);
@@ -4530,8 +4533,9 @@ function gatherProgressData() {
   }
 
   // Per-exercise outcome from final-week data only.
+  // Returns null when there's no real data → exercise is excluded from category aggregation.
   function exerciseOutcome(prescribedSets, ceiling, finalEntry, priorEntries) {
-    if (!finalEntry) return 'hold'; // No final-week log → hold
+    if (!finalEntry) return null; // No final-week log → exclude (was 'hold')
     const setsTarget = prescribedSets || 3;
     let setsAtCeiling = 0;
     let setsLogged = 0;
@@ -4545,6 +4549,8 @@ function gatherProgressData() {
       if (!isNaN(r) && r > topRepsThisWeek) topRepsThisWeek = r;
       if (ceiling != null && !isNaN(r) && r >= ceiling) setsAtCeiling++;
     }
+    // No real data in finalEntry (all empty strings) → exclude from aggregation
+    if (setsLogged === 0) return null;
     if (setsLogged < setsTarget) {
       const priorMaxReps = Math.max(0, ...priorEntries.map(e => {
         let m = 0;
