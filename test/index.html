@@ -4510,17 +4510,72 @@ function gatherProgressData() {
     blockName: block.name || 'Unknown',
     weeks: total,
     methods: block.methods || [],
-    exercises: []
+    exercises: [],
+    categoryState: {}
   };
 
-  // Gather all unique exercise IDs across days
+  const CATEGORIES = ['skill','push','pull','legs','core'];
+  const LEVEL_RANK = { Beginner: 1, Intermediate: 2, Advanced: 3, Elite: 4 };
+
+  // Parse a rep prescription like "8-12", "8", "5-10s", "1 min"
+  function parseReps(repStr) {
+    if (!repStr) return { ceiling: null, isHold: false };
+    const s = String(repStr).toLowerCase().trim();
+    const isHold = /s\b|sec|min/.test(s);
+    const range = s.match(/(\d+)\s*[-–]\s*(\d+)/);
+    if (range) return { ceiling: parseInt(range[2], 10), isHold };
+    const single = s.match(/(\d+)/);
+    if (single) return { ceiling: parseInt(single[1], 10), isHold };
+    return { ceiling: null, isHold };
+  }
+
+  // Per-exercise outcome from final-week data only.
+  function exerciseOutcome(prescribedSets, ceiling, finalEntry, priorEntries) {
+    if (!finalEntry) return 'hold'; // No final-week log → hold
+    const setsTarget = prescribedSets || 3;
+    let setsAtCeiling = 0;
+    let setsLogged = 0;
+    let topRepsThisWeek = 0;
+    for (let s = 1; s <= 5; s++) {
+      const r = parseFloat(finalEntry[`s${s}_r`]);
+      const w = parseFloat(finalEntry[`s${s}_w`]);
+      const hasData = (!isNaN(r) && r > 0) || (!isNaN(w) && w > 0);
+      if (!hasData) continue;
+      setsLogged++;
+      if (!isNaN(r) && r > topRepsThisWeek) topRepsThisWeek = r;
+      if (ceiling != null && !isNaN(r) && r >= ceiling) setsAtCeiling++;
+    }
+    if (setsLogged < setsTarget) {
+      const priorMaxReps = Math.max(0, ...priorEntries.map(e => {
+        let m = 0;
+        for (let s = 1; s <= 5; s++) {
+          const r = parseFloat(e[`s${s}_r`]);
+          if (!isNaN(r) && r > m) m = r;
+        }
+        return m;
+      }));
+      if (priorMaxReps > 0 && topRepsThisWeek > 0 && topRepsThisWeek < priorMaxReps * 0.7) {
+        return 'regress';
+      }
+      return 'hold';
+    }
+    if (ceiling != null && setsAtCeiling >= setsTarget) return 'advance';
+    return 'hold';
+  }
+
   const seen = new Set();
+  const exerciseOutcomes = [];
+
   (block.days || []).forEach(day => {
     (day.exercises || []).forEach(ex => {
       if (seen.has(ex.id)) return;
       seen.add(ex.id);
 
       const exData = EXERCISES.find(e => e.id === ex.id);
+      const tags = exData?.tags || [];
+      const level = exData?.level || null;
+      const { ceiling, isHold } = parseReps(ex.reps);
+
       const exProgress = {
         id: ex.id,
         name: exData ? exData.name : ex.id,
@@ -4528,19 +4583,23 @@ function gatherProgressData() {
         weeklyData: []
       };
 
-      // Collect data for each week across all days this exercise appears
+      let finalEntry = null;
+      const priorEntries = [];
+
       for (let w = 1; w <= total; w++) {
         let bestWeight = null;
         let bestReps = null;
         let setsLogged = 0;
+        let mergedEntry = {};
 
         (block.days || []).forEach(d => {
           if (!d.exercises.find(e => e.id === ex.id)) return;
           const key = `${d.id}_${ex.id}_v${w}`;
           const entry = sessionLog[key];
           if (!entry) return;
-
           for (let s = 1; s <= 5; s++) {
+            if (entry[`s${s}_r`] != null) mergedEntry[`s${s}_r`] = entry[`s${s}_r`];
+            if (entry[`s${s}_w`] != null) mergedEntry[`s${s}_w`] = entry[`s${s}_w`];
             const wVal = parseFloat(entry[`s${s}_w`]);
             const rVal = parseFloat(entry[`s${s}_r`]);
             if (!isNaN(wVal) && wVal > 0) {
@@ -4561,12 +4620,49 @@ function gatherProgressData() {
           weekEntry.sets = setsLogged;
           exProgress.weeklyData.push(weekEntry);
         }
+
+        if (Object.keys(mergedEntry).length > 0) {
+          if (w === total) finalEntry = mergedEntry;
+          else priorEntries.push(mergedEntry);
+        }
       }
 
       if (exProgress.weeklyData.length > 0) {
         progress.exercises.push(exProgress);
       }
+
+      const prescribedSetsNum = parseInt(ex.sets, 10) || 3;
+      const outcome = isHold
+        ? 'hold'
+        : exerciseOutcome(prescribedSetsNum, ceiling, finalEntry, priorEntries);
+
+      exerciseOutcomes.push({ id: ex.id, tags, level, outcome });
     });
+  });
+
+  // Per-category aggregation: worst-of (any regress → category regresses)
+  const RANK = { advance: 0, hold: 1, regress: 2 };
+  CATEGORIES.forEach(cat => {
+    const inCat = exerciseOutcomes.filter(e => e.tags.includes(cat) && e.outcome);
+    if (inCat.length === 0) {
+      progress.categoryState[cat] = { currentLevel: null, outcome: null, exerciseCount: 0 };
+      return;
+    }
+    const worst = inCat.reduce((acc, e) => RANK[e.outcome] > RANK[acc] ? e.outcome : acc, 'advance');
+    const levelCounts = {};
+    inCat.forEach(e => { if (e.level) levelCounts[e.level] = (levelCounts[e.level] || 0) + 1; });
+    let currentLevel = null;
+    let bestCount = 0;
+    Object.entries(levelCounts).forEach(([lvl, cnt]) => {
+      if (cnt > bestCount || (cnt === bestCount && LEVEL_RANK[lvl] > LEVEL_RANK[currentLevel || 'Beginner'])) {
+        currentLevel = lvl; bestCount = cnt;
+      }
+    });
+    progress.categoryState[cat] = {
+      currentLevel,
+      outcome: worst,
+      exerciseCount: inCat.length
+    };
   });
 
   return progress;
