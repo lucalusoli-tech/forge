@@ -3818,13 +3818,7 @@ const TIMER_CIRCUMFERENCE = 590.6;
 
 function onSetBlur(wk, setNum, exName) {
   const r = document.getElementById(`${wk}_s${setNum}_r`);
-  if(r && r.value.trim() !== '' && timerEnabled) {
-    // Dismiss the on-screen keyboard so it doesn't cover the timer
-    if (document.activeElement && typeof document.activeElement.blur === 'function') {
-      document.activeElement.blur();
-    }
-    startTimer(exName);
-  }
+  if(r && r.value.trim() !== '' && timerEnabled) startTimer(exName);
 }
 
 function autoSaveSet(wk, setNum) {
@@ -3870,6 +3864,15 @@ function fireTimerAlert() {
 function startTimer(exName) {
   clearInterval(timerInterval);
   if (timerBackupTimeout) clearTimeout(timerBackupTimeout);
+
+  // Dismiss the iOS on-screen keyboard before showing the timer overlay.
+  // Blur whatever is focused, then blur every set input as a fallback —
+  // iOS sometimes ignores blur() on a single element.
+  if (document.activeElement && typeof document.activeElement.blur === 'function') {
+    document.activeElement.blur();
+  }
+  document.querySelectorAll('input.set-field').forEach(el => el.blur());
+
   timerFired = false; // reset guard for new timer cycle
   timerRemaining = timerDuration;
   timerPaused = false;
