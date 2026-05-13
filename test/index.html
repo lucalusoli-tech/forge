@@ -136,7 +136,10 @@
 
   .log-ex-card { border-bottom: 1px solid var(--border); }
   .log-ex-header { padding: 14px 20px 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+  .log-ex-name-row { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
   .log-ex-name { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px; }
+  .log-ex-play { display: inline-flex; align-items: center; background: var(--accent-glow); border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 2px; padding: 3px 7px; line-height: 1; text-transform: uppercase; flex-shrink: 0; transform: translateY(-1px); }
+  .log-ex-header:active .log-ex-play { background: rgba(201,169,110,0.2); }
   .log-ex-target { font-size: 10px; color: var(--text-muted); letter-spacing: 1px; margin-top: 2px; }
   .log-ex-note { font-size: 9px; color: var(--accent); letter-spacing: 1px; }
   .log-ex-body { padding: 0 20px 16px; }
@@ -2748,7 +2751,7 @@ function renderLogExercises(exercises) {
     }
     c.innerHTML+=`<div class="log-ex-card">
       <div class="log-ex-header" onclick="openSheet('${exData.id}')">
-        <div><div class="log-ex-name">${exData.name}</div><div class="log-ex-target">${ex.sets}×${ex.reps}</div></div>
+        <div><div class="log-ex-name-row"><div class="log-ex-name">${exData.name}</div><span class="log-ex-play" aria-hidden="true">▶ DEMO</span></div><div class="log-ex-target">${ex.sets}×${ex.reps}</div></div>
         <div class="log-ex-note">${ex.note||''}</div>
       </div>
       ${lastWeekHint}
@@ -3864,15 +3867,6 @@ function fireTimerAlert() {
 function startTimer(exName) {
   clearInterval(timerInterval);
   if (timerBackupTimeout) clearTimeout(timerBackupTimeout);
-
-  // Dismiss the iOS on-screen keyboard before showing the timer overlay.
-  // Blur whatever is focused, then blur every set input as a fallback —
-  // iOS sometimes ignores blur() on a single element.
-  if (document.activeElement && typeof document.activeElement.blur === 'function') {
-    document.activeElement.blur();
-  }
-  document.querySelectorAll('input.set-field').forEach(el => el.blur());
-
   timerFired = false; // reset guard for new timer cycle
   timerRemaining = timerDuration;
   timerPaused = false;
