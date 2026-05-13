@@ -80,6 +80,17 @@
   .weekly-cta { background: var(--accent-glow); border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; padding: 14px 28px; cursor: pointer; width: 100%; }
   .weekly-cta:active { background: rgba(201,169,110,0.2); }
 
+  /* ── READY OVERLAY (post-generation hand-off) ── */
+  .ready-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 9998; display: flex; align-items: center; justify-content: center; padding: 24px; }
+  .ready-card { background: var(--deep); border: 1px solid var(--accent-dim); max-width: 320px; width: 100%; padding: 36px 28px; text-align: center; animation: obFadeIn 0.4s ease; }
+  .ready-label { font-size: 9px; letter-spacing: 4px; color: var(--accent); text-transform: uppercase; margin-bottom: 18px; }
+  .ready-title { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 3px; color: var(--text); margin-bottom: 10px; line-height: 1.1; }
+  .ready-meta { font-size: 10px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 28px; }
+  .ready-cta { background: var(--accent-glow); border: 1px solid var(--accent); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; padding: 16px 20px; cursor: pointer; width: 100%; }
+  .ready-cta:active { background: rgba(201,169,110,0.25); }
+  .ready-secondary { background: none; border: none; color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 14px; cursor: pointer; margin-top: 6px; width: 100%; }
+  .ready-secondary:active { color: var(--text); }
+
   /* ── CHANGELOG ── */
   .changelog-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9997; display: flex; align-items: center; justify-content: center; padding: 24px; }
   .changelog-card { background: var(--deep); border: 1px solid var(--border); max-width: 320px; width: 100%; padding: 32px 24px; animation: obFadeIn 0.35s ease; }
@@ -135,13 +146,12 @@
   .w-tab.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
 
   .log-ex-card { border-bottom: 1px solid var(--border); }
-  .log-ex-header { padding: 14px 20px 10px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
-  .log-ex-name-row { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+  .log-ex-header { padding: 14px 20px 10px; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; }
+  .log-ex-name-row { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
   .log-ex-name { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px; }
-  .log-ex-play { display: inline-flex; align-items: center; background: var(--accent-glow); border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 2px; padding: 3px 7px; line-height: 1; text-transform: uppercase; flex-shrink: 0; transform: translateY(-1px); }
-  .log-ex-header:active .log-ex-play { background: rgba(201,169,110,0.2); }
+  .log-ex-play { color: var(--accent); font-size: 11px; line-height: 1; flex-shrink: 0; transform: translateY(-1px); }
   .log-ex-target { font-size: 10px; color: var(--text-muted); letter-spacing: 1px; margin-top: 2px; }
-  .log-ex-note { font-size: 9px; color: var(--accent); letter-spacing: 1px; }
+  .log-ex-note { font-size: 9px; color: var(--accent); letter-spacing: 1px; text-align: right; max-width: 110px; flex-shrink: 0; line-height: 1.4; }
   .log-ex-body { padding: 0 20px 16px; }
 
   /* Set note */
@@ -613,6 +623,17 @@
     </div>
     <div class="weekly-streak" id="weekly-streak"></div>
     <button class="weekly-cta" onclick="closeWeeklySummary()">LET'S GO</button>
+  </div>
+</div>
+
+<!-- ── READY OVERLAY (post-generation hand-off) ── -->
+<div class="ready-overlay" id="ready-overlay" style="display:none" onclick="if(event.target===this)closeReady()">
+  <div class="ready-card">
+    <div class="ready-label">Programme ready</div>
+    <div class="ready-title" id="ready-title">—</div>
+    <div class="ready-meta" id="ready-meta">—</div>
+    <button class="ready-cta" id="ready-cta" onclick="startDayOneFromReady()">START DAY 1 →</button>
+    <button class="ready-secondary" onclick="closeReady()">View programme</button>
   </div>
 </div>
 
@@ -1216,7 +1237,6 @@
     <div class="sheet-body">
       <div id="sheet-tags" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px"></div>
       <p class="sheet-desc" id="sheet-desc"></p>
-      <div class="info-line"><span class="info-line-label">Sets × Reps</span><span class="info-line-val" id="sheet-sets"></span></div>
       <div class="info-line"><span class="info-line-label">Target</span><span class="info-line-val" id="sheet-target"></span></div>
       <div class="info-line"><span class="info-line-label">Intensity</span><span class="info-line-val" id="sheet-intensity"></span></div>
       <div class="info-line"><span class="info-line-label">Cue</span><span class="info-line-val" id="sheet-cue"></span></div>
@@ -2751,7 +2771,7 @@ function renderLogExercises(exercises) {
     }
     c.innerHTML+=`<div class="log-ex-card">
       <div class="log-ex-header" onclick="openSheet('${exData.id}')">
-        <div><div class="log-ex-name-row"><div class="log-ex-name">${exData.name}</div><span class="log-ex-play" aria-hidden="true">▶ DEMO</span></div><div class="log-ex-target">${ex.sets}×${ex.reps}</div></div>
+        <div><div class="log-ex-name-row"><div class="log-ex-name">${exData.name}</div><span class="log-ex-play" aria-hidden="true">▶</span></div><div class="log-ex-target">${ex.sets}×${ex.reps}</div></div>
         <div class="log-ex-note">${ex.note||''}</div>
       </div>
       ${lastWeekHint}
@@ -3079,7 +3099,6 @@ function openSheet(id){
   const ex=EXERCISES.find(e=>e.id===id); if(!ex) return;
   document.getElementById('sheet-title').textContent=ex.name.toUpperCase();
   document.getElementById('sheet-desc').textContent=ex.desc;
-  document.getElementById('sheet-sets').textContent=ex.sets;
   document.getElementById('sheet-target').textContent=ex.target;
   document.getElementById('sheet-intensity').textContent=ex.intensity;
   document.getElementById('sheet-cue').textContent=ex.cue;
@@ -4508,7 +4527,31 @@ async function aiLoadBlock() {
   renderBuilderSaved();
   renderArchive();
   navigate('home');
-  showToast('Programme loaded ✓');
+  showReadyOverlay();
+}
+
+function showReadyOverlay() {
+  const block = currentBlock || {};
+  const title = (block.name || 'Your Programme').toUpperCase();
+  const weeks = block.weeks || 4;
+  const days = (block.days || []).length;
+  document.getElementById('ready-title').textContent = title;
+  document.getElementById('ready-meta').textContent =
+    `${weeks} ${weeks===1?'WEEK':'WEEKS'} · ${days} ${days===1?'DAY':'DAYS'}`;
+  // Edge case: no days → hide the START DAY 1 CTA
+  const cta = document.getElementById('ready-cta');
+  if (cta) cta.style.display = days > 0 ? '' : 'none';
+  document.getElementById('ready-overlay').style.display = 'flex';
+}
+
+function closeReady() {
+  document.getElementById('ready-overlay').style.display = 'none';
+}
+
+function startDayOneFromReady() {
+  closeReady();
+  const firstDay = (currentBlock.days || [])[0];
+  if (firstDay) startDay(firstDay.id);
 }
 
 function aiRestart() {
