@@ -1444,7 +1444,7 @@ const EXERCISES = [
   {id:'bwf-back-lever-pullout',name:'Back Lever Pullout',tags:['skill','calisthenics','pull'],sets:'3×3-5',target:'Lats, Biceps, Shoulder Girdle',intensity:'Elite',level:'Elite',cue:'From back lever, pull out to front lever position',video:'https://www.youtube.com/results?search_query=back+lever+pullout',desc:'Transition from back lever to front lever. Elite combination of both static holds.'},
   {id:'bwf-fl-to-inverted',name:'FL to Inverted',tags:['skill','calisthenics','pull'],sets:'3×3-5',target:'Lats, Core, Shoulder Girdle',intensity:'Elite',level:'Advanced',cue:'From front lever, pull to inverted hang in one controlled motion',video:'https://www.youtube.com/results?search_query=front+lever+to+inverted+hang',desc:'Front lever pulled through to inverted hang. Extreme pulling strength and body control.'},
   {id:'bwf-hanging-pull-fl-to-inv',name:'Hanging Pull FL to Inv',tags:['skill','calisthenics','pull'],sets:'3×3',target:'Full Posterior Chain, Lats',intensity:'Elite',level:'Advanced',cue:'Dead hang, pull through front lever to inverted',video:'https://www.youtube.com/results?search_query=front+lever+to+inverted+pull',desc:'Full range pull from dead hang through front lever to inverted hang. Rare pulling capacity.'},
-  {id:'bwf-360-pull',name:'360° Pull',tags:['skill','calisthenics','pull'],sets:'3×1-3',target:'Full Upper Body, Core',intensity:'Elite',level:'Advanced',cue:'Complete full rotation around the bar',video:'https://www.youtube.com/results?search_query=360+pull+up+bar',desc:'Full 360° rotation around the bar. Combines skin the cat, front lever and back lever strength.'},
+  {id:'bwf-360-pull',name:'360° Pull',tags:['skill','calisthenics','pull'],sets:'3×1-3',target:'Full Upper Body, Core',intensity:'Elite',level:'Advanced',cue:'Complete full rotation around the bar',video:'https://www.youtube.com/watch?v=1k-FRtD2Wq8',desc:'Full 360° rotation around the bar. Combines skin the cat, front lever and back lever strength.'},
   {id:'bwf-front-lever-row',name:'Front Lever Row',tags:['skill','calisthenics','pull'],sets:'3×3-5',target:'Lats, Rhomboids, Core',intensity:'Elite',level:'Elite',cue:'Full front lever, row to chest, maintain horizontal',video:'https://www.youtube.com/results?search_query=front+lever+row',desc:'Full front lever row. One of the most demanding pulling exercises in existence.'},
 
   // ── BWF VERTICAL PULL — ADVANCED ─────────────────────────────
@@ -3864,6 +3864,15 @@ function fireTimerAlert() {
 function startTimer(exName) {
   clearInterval(timerInterval);
   if (timerBackupTimeout) clearTimeout(timerBackupTimeout);
+
+  // Dismiss the iOS on-screen keyboard before showing the timer overlay.
+  // Blur whatever is focused, then blur every set input as a fallback —
+  // iOS sometimes ignores blur() on a single element.
+  if (document.activeElement && typeof document.activeElement.blur === 'function') {
+    document.activeElement.blur();
+  }
+  document.querySelectorAll('input.set-field').forEach(el => el.blur());
+
   timerFired = false; // reset guard for new timer cycle
   timerRemaining = timerDuration;
   timerPaused = false;
@@ -4292,6 +4301,16 @@ function aiAnswer(value) {
   aiData[step.key] = value;
   aiStep++;
 
+  // If user picks "New direction entirely", drop the inherited targetSkill
+  // so the AI is free to swap. Otherwise keep it preserved across blocks.
+  if (step.key === 'progressGoal' && /new direction/i.test(value)) {
+    delete aiData.targetSkill;
+  }
+  // Same for explicit skill-swap signal.
+  if (step.key === 'skillProgress' && /swap/i.test(value)) {
+    delete aiData.targetSkill;
+  }
+
   // After goal is selected, build the branched flow
   if (step.key === 'goal') {
     aiBuildFlow(value);
@@ -4510,17 +4529,78 @@ function gatherProgressData() {
     blockName: block.name || 'Unknown',
     weeks: total,
     methods: block.methods || [],
-    exercises: []
+    exercises: [],
+    categoryState: {}
   };
 
-  // Gather all unique exercise IDs across days
+  const CATEGORIES = ['skill','push','pull','legs','core'];
+  const LEVEL_RANK = { Beginner: 1, Intermediate: 2, Advanced: 3, Elite: 4 };
+
+  // Parse a rep prescription like "8-12", "8", "5-10s", "1'", "1 min"
+  function parseReps(repStr) {
+    if (!repStr && repStr !== 0) return { ceiling: null, isHold: false };
+    const s = String(repStr).toLowerCase().trim();
+    // isHold: any time-based unit (s, sec, min, ', ")
+    const isHold = /s\b|sec|min|'|"/.test(s);
+    // Treat reps:"0" or empty as a hold-style entry (skill/iso work)
+    if (s === '0' || s === '') return { ceiling: null, isHold: true };
+    const range = s.match(/(\d+)\s*[-–]\s*(\d+)/);
+    if (range) return { ceiling: parseInt(range[2], 10), isHold };
+    const single = s.match(/(\d+)/);
+    if (single) return { ceiling: parseInt(single[1], 10), isHold };
+    return { ceiling: null, isHold };
+  }
+
+  // Per-exercise outcome from final-week data only.
+  // Returns null when there's no real data → exercise is excluded from category aggregation.
+  function exerciseOutcome(prescribedSets, ceiling, finalEntry, priorEntries) {
+    if (!finalEntry) return null; // No final-week log → exclude (was 'hold')
+    const setsTarget = prescribedSets || 3;
+    let setsAtCeiling = 0;
+    let setsLogged = 0;
+    let topRepsThisWeek = 0;
+    for (let s = 1; s <= 5; s++) {
+      const r = parseFloat(finalEntry[`s${s}_r`]);
+      const w = parseFloat(finalEntry[`s${s}_w`]);
+      const hasData = (!isNaN(r) && r > 0) || (!isNaN(w) && w > 0);
+      if (!hasData) continue;
+      setsLogged++;
+      if (!isNaN(r) && r > topRepsThisWeek) topRepsThisWeek = r;
+      if (ceiling != null && !isNaN(r) && r >= ceiling) setsAtCeiling++;
+    }
+    // No real data in finalEntry (all empty strings) → exclude from aggregation
+    if (setsLogged === 0) return null;
+    if (setsLogged < setsTarget) {
+      const priorMaxReps = Math.max(0, ...priorEntries.map(e => {
+        let m = 0;
+        for (let s = 1; s <= 5; s++) {
+          const r = parseFloat(e[`s${s}_r`]);
+          if (!isNaN(r) && r > m) m = r;
+        }
+        return m;
+      }));
+      if (priorMaxReps > 0 && topRepsThisWeek > 0 && topRepsThisWeek < priorMaxReps * 0.7) {
+        return 'regress';
+      }
+      return 'hold';
+    }
+    if (ceiling != null && setsAtCeiling >= setsTarget) return 'advance';
+    return 'hold';
+  }
+
   const seen = new Set();
+  const exerciseOutcomes = [];
+
   (block.days || []).forEach(day => {
     (day.exercises || []).forEach(ex => {
       if (seen.has(ex.id)) return;
       seen.add(ex.id);
 
       const exData = EXERCISES.find(e => e.id === ex.id);
+      const tags = exData?.tags || [];
+      const level = exData?.level || null;
+      const { ceiling, isHold } = parseReps(ex.reps);
+
       const exProgress = {
         id: ex.id,
         name: exData ? exData.name : ex.id,
@@ -4528,19 +4608,23 @@ function gatherProgressData() {
         weeklyData: []
       };
 
-      // Collect data for each week across all days this exercise appears
+      let finalEntry = null;
+      const priorEntries = [];
+
       for (let w = 1; w <= total; w++) {
         let bestWeight = null;
         let bestReps = null;
         let setsLogged = 0;
+        let mergedEntry = {};
 
         (block.days || []).forEach(d => {
           if (!d.exercises.find(e => e.id === ex.id)) return;
           const key = `${d.id}_${ex.id}_v${w}`;
           const entry = sessionLog[key];
           if (!entry) return;
-
           for (let s = 1; s <= 5; s++) {
+            if (entry[`s${s}_r`] != null) mergedEntry[`s${s}_r`] = entry[`s${s}_r`];
+            if (entry[`s${s}_w`] != null) mergedEntry[`s${s}_w`] = entry[`s${s}_w`];
             const wVal = parseFloat(entry[`s${s}_w`]);
             const rVal = parseFloat(entry[`s${s}_r`]);
             if (!isNaN(wVal) && wVal > 0) {
@@ -4561,12 +4645,49 @@ function gatherProgressData() {
           weekEntry.sets = setsLogged;
           exProgress.weeklyData.push(weekEntry);
         }
+
+        if (Object.keys(mergedEntry).length > 0) {
+          if (w === total) finalEntry = mergedEntry;
+          else priorEntries.push(mergedEntry);
+        }
       }
 
       if (exProgress.weeklyData.length > 0) {
         progress.exercises.push(exProgress);
       }
+
+      const prescribedSetsNum = parseInt(ex.sets, 10) || 3;
+      const outcome = isHold
+        ? 'hold'
+        : exerciseOutcome(prescribedSetsNum, ceiling, finalEntry, priorEntries);
+
+      exerciseOutcomes.push({ id: ex.id, tags, level, outcome });
     });
+  });
+
+  // Per-category aggregation: worst-of (any regress → category regresses)
+  const RANK = { advance: 0, hold: 1, regress: 2 };
+  CATEGORIES.forEach(cat => {
+    const inCat = exerciseOutcomes.filter(e => e.tags.includes(cat) && e.outcome);
+    if (inCat.length === 0) {
+      progress.categoryState[cat] = { currentLevel: null, outcome: null, exerciseCount: 0 };
+      return;
+    }
+    const worst = inCat.reduce((acc, e) => RANK[e.outcome] > RANK[acc] ? e.outcome : acc, 'advance');
+    const levelCounts = {};
+    inCat.forEach(e => { if (e.level) levelCounts[e.level] = (levelCounts[e.level] || 0) + 1; });
+    let currentLevel = null;
+    let bestCount = 0;
+    Object.entries(levelCounts).forEach(([lvl, cnt]) => {
+      if (cnt > bestCount || (cnt === bestCount && LEVEL_RANK[lvl] > LEVEL_RANK[currentLevel || 'Beginner'])) {
+        currentLevel = lvl; bestCount = cnt;
+      }
+    });
+    progress.categoryState[cat] = {
+      currentLevel,
+      outcome: worst,
+      exerciseCount: inCat.length
+    };
   });
 
   return progress;
@@ -4574,6 +4695,14 @@ function gatherProgressData() {
 
 function aiAutoProgress() {
   const progressData = gatherProgressData();
+
+  // Derive targetSkill from previous block's skill section.
+  // The skill[] section is the user's stated skill goal — preserve it across blocks.
+  const skillIds = (currentBlock.skill || []).map(s => {
+    const ex = EXERCISES.find(e => e.id === s.id);
+    return ex ? ex.name : s.id;
+  });
+  const targetSkill = skillIds.length > 0 ? skillIds.join(', ') : null;
 
   // Navigate to AI page
   navigate('ai');
@@ -4586,6 +4715,9 @@ function aiAutoProgress() {
     document.getElementById('ai-chat').innerHTML = '';
     document.getElementById('ai-result').style.display = 'none';
     aiHideInputs();
+
+    // Pre-populate targetSkill — preserved across blocks unless user explicitly changes
+    if (targetSkill) aiData.targetSkill = targetSkill;
 
     // Store progress data for generation
     window._aiProgressData = progressData;
@@ -4606,14 +4738,26 @@ function aiAutoProgress() {
         msg: "Same goal, or shifting focus?",
         type: 'chips',
         options: ['Same goal — keep progressing', 'Shift focus slightly', 'New direction entirely']
-      },
-      {
-        key: 'progressNotes',
-        msg: "Anything else? Injuries, schedule changes, something you want more or less of?",
-        type: 'text',
-        placeholder: "e.g. shoulder feels off, want more leg work, only 3 days now, or type 'nothing'"
       }
     ];
+
+    // Skill tracking is not yet automated — ask the user directly when a target skill exists.
+    // This question informs the AI how to handle the skill section (advance / hold / regress / swap).
+    if (targetSkill) {
+      progressFlow.push({
+        key: 'skillProgress',
+        msg: "How did your skill work go on <strong>" + targetSkill + "</strong>?",
+        type: 'chips',
+        options: ['Progressed — ready for harder', 'Held — same level next block', 'Struggled — easier variation', 'Want to swap skill']
+      });
+    }
+
+    progressFlow.push({
+      key: 'progressNotes',
+      msg: "Anything else? Injuries, schedule changes, something you want more or less of?",
+      type: 'text',
+      placeholder: "e.g. shoulder feels off, want more leg work, only 3 days now, or type 'nothing'"
+    });
 
     aiFlow = progressFlow;
 
