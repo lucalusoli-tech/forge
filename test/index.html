@@ -93,7 +93,7 @@
 
   /* ── LOG TOUR (first-time spotlight) ── */
   .tour-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.82); z-index: 9999; cursor: pointer; animation: obFadeIn 0.3s ease; }
-  .tour-spotlight-on { position: relative; z-index: 10000; pointer-events: none; animation: tour-pulse 1.6s ease-in-out infinite; }
+  .tour-spotlight-on { position: relative; z-index: 10000; pointer-events: none; background-color: var(--deep); border-radius: 4px; padding: 6px 8px; margin: -6px -8px; animation: tour-pulse 1.6s ease-in-out infinite; }
   @keyframes tour-pulse {
     0%, 100% { box-shadow: 0 0 0 1px transparent, 0 0 12px transparent; }
     50% { box-shadow: 0 0 0 2px var(--accent), 0 0 22px rgba(201,169,110,0.6); }
@@ -359,6 +359,9 @@
   .day-ex-chip.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
   .day-ex-group-label { width: 100%; font-size: 8px; letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase; padding: 8px 2px 2px; border-top: 1px solid var(--border); margin-top: 4px; }
   .day-ex-group-label:first-child { border-top: none; padding-top: 2px; margin-top: 0; }
+  .day-ex-search { width: 100%; background: var(--black); border: none; border-top: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 11px; padding: 10px 16px; outline: none; -webkit-appearance: none; border-radius: 0; box-sizing: border-box; }
+  .day-ex-search:focus { background: var(--surface); }
+  .day-ex-search::placeholder { color: var(--text-dim); }
 
   .day-ex-picker { display: flex; flex-wrap: wrap; gap: 5px; padding: 10px 16px; border-bottom: 1px solid var(--border); max-height: 260px; overflow-y: auto; align-content: flex-start; }
   .day-ex-pill { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; padding: 5px 10px; cursor: pointer; transition: all 0.12s; }
@@ -3407,6 +3410,13 @@ function setDaySub(dayIdx, sub, btn) {
   renderBuilderDays();
 }
 
+function setDayQuery(dayIdx, val) {
+  // Update state and re-render ONLY the picker container so the search
+  // input keeps focus (full renderBuilderDays would blur it on every keystroke)
+  builderDays[dayIdx].filterQuery = val;
+  renderDayExPicker(dayIdx);
+}
+
 const INTENSITY_ORDER = { 'Easy':1, 'Moderate':2, 'Hard':3, 'Very hard':4, 'Elite':5, 'Skill':6 };
 function byIntensity(a, b) {
   return (INTENSITY_ORDER[a.intensity] || 99) - (INTENSITY_ORDER[b.intensity] || 99);
@@ -3420,9 +3430,11 @@ function renderDayExPicker(dayIdx) {
 
   const cat = day.filterCat || 'all';
   const sub = day.filterSub || null;
+  const q = (day.filterQuery || '').trim().toLowerCase();
 
   // Filter exercises
   let filtered = EXERCISES.filter(ex => {
+    if(q && !ex.name.toLowerCase().includes(q)) return false;
     const meta = EX_META[ex.id];
     if(!meta) return cat === 'all';
     if(cat === 'all') return true;
@@ -3430,6 +3442,11 @@ function renderDayExPicker(dayIdx) {
     if(sub && meta.subcat !== sub) return false;
     return true;
   });
+
+  if(!filtered.length) {
+    container.innerHTML = `<div style="padding:14px 4px;font-size:10px;letter-spacing:2px;color:var(--text-dim)">No exercises match</div>`;
+    return;
+  }
 
   // For skill subcategories — render in progression order with group label
   if(cat === 'skill' && sub && SKILL_GROUPS[sub]) {
@@ -3587,6 +3604,7 @@ function renderBuilderDays() {
     const filterHTML = `<div class="day-ex-filter">
       <div class="day-ex-filter-row top">${catChips}</div>
       ${subRow}
+      <input class="day-ex-search" type="search" placeholder="Search exercises…" value="${(day.filterQuery||'').replace(/"/g,'&quot;')}" oninput="setDayQuery(${i}, this.value)">
     </div>`;
 
     return `<div class="day-builder-card${isOpen?' open':''}" id="bday-card-${i}">
