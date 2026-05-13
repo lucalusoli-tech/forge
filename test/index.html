@@ -98,8 +98,9 @@
     0%, 100% { box-shadow: 0 0 0 1px transparent, 0 0 12px transparent; }
     50% { box-shadow: 0 0 0 2px var(--accent), 0 0 22px rgba(201,169,110,0.6); }
   }
-  .tour-callout { position: fixed; z-index: 10001; background: var(--deep); border: 1px solid var(--accent); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; padding: 10px 16px; white-space: nowrap; pointer-events: none; animation: obFadeIn 0.3s ease; }
+  .tour-callout { position: fixed; z-index: 10001; background: var(--deep); border: 1px solid var(--accent); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; padding: 10px 16px; max-width: 220px; text-align: center; line-height: 1.5; pointer-events: none; animation: obFadeIn 0.3s ease; }
   .tour-callout::before { content: ''; position: absolute; top: -6px; left: var(--arrow-x, 24px); transform: translateX(-6px); width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 6px solid var(--accent); }
+  .tour-callout.tour-callout-above::before { top: auto; bottom: -6px; border-bottom: none; border-top: 6px solid var(--accent); }
   .tour-dots { position: fixed; bottom: 56px; left: 0; right: 0; display: flex; justify-content: center; gap: 8px; z-index: 10001; pointer-events: none; }
   .tour-dot { width: 6px; height: 6px; border-radius: 50%; background: rgba(201,169,110,0.25); }
   .tour-dot.active { background: var(--accent); }
@@ -651,12 +652,9 @@
 </div>
 
 <!-- ── LOG TOUR (first-time spotlight) ── -->
-<div class="tour-overlay" id="tour-overlay" style="display:none" onclick="advanceLogTour()">
+<div class="tour-overlay" id="tour-overlay" style="display:none" onclick="advanceTour()">
   <div class="tour-callout" id="tour-callout" style="display:none"></div>
-  <div class="tour-dots" id="tour-dots">
-    <div class="tour-dot" id="tour-dot-1"></div>
-    <div class="tour-dot" id="tour-dot-2"></div>
-  </div>
+  <div class="tour-dots" id="tour-dots"></div>
 </div>
 
 <!-- ── ONBOARDING OVERLAY ── -->
@@ -1090,7 +1088,7 @@
         </div>
 
         <!-- Skill (fixed, same every week) -->
-        <div class="builder-fixed">
+        <div class="builder-fixed" id="builder-skill-section">
           <div class="builder-fixed-header">
             <div>
               <div class="builder-fixed-title">SKILL WORK</div>
@@ -2000,6 +1998,7 @@ function navigate(page, push=true) {
     const aiChat = document.getElementById('ai-chat');
     if(aiChat && !aiChat.hasChildNodes()) aiStartChat();
   }
+  if (page==='builder') maybeStartTour('builder');
 }
 
 function goBack() {
@@ -2744,7 +2743,7 @@ function startDay(dayId, overrideDay) {
   
   renderLogExercises(day.exercises);
   navigate('log');
-  maybeStartLogTour();
+  maybeStartTour('log');
 }
 
 function renderLogExercises(exercises) {
@@ -4577,25 +4576,54 @@ function startDayOneFromReady() {
   if (firstDay) startDay(firstDay.id);
 }
 
-// ─── LOG TOUR (first-time spotlight) ──────────────────────────────
+// ─── TOUR ENGINE (first-time spotlight, reusable across screens) ──
+const TOURS = {
+  log: {
+    storageKey: 'fw_log_tour_seen',
+    beats: [
+      { selector: '.log-ex-card .log-ex-play', label: 'Tap for demo' },
+      { selector: '.log-ex-card .sets-scroll', label: 'Log your set' }
+    ]
+  },
+  builder: {
+    storageKey: 'fw_builder_tour_seen',
+    beats: [
+      { selector: '#page-builder .builder-header', label: 'Create your programme' },
+      { selector: '#builder-skill-section', label: 'Choose your skill\nfor every session' },
+      { selector: '#page-builder .add-day-btn', label: 'Add a day' }
+    ]
+  }
+};
+
+let _tourActive = null; // current tour key
 let _tourBeat = 0;
 let _tourTargetEl = null;
 
-function maybeStartLogTour() {
-  if (localStorage.getItem('fw_log_tour_seen') === 'true') return;
+function maybeStartTour(tourKey) {
+  const tour = TOURS[tourKey];
+  if (!tour) return;
+  if (localStorage.getItem(tour.storageKey) === 'true') return;
   // Wait two frames for DOM + layout to settle
-  requestAnimationFrame(() => requestAnimationFrame(_startLogTour));
+  requestAnimationFrame(() => requestAnimationFrame(() => _startTour(tourKey)));
 }
 
-function _startLogTour() {
-  // Abort silently if no exercises rendered (e.g. empty day)
-  if (!document.querySelector('.log-ex-card .log-ex-play')) return;
+function _startTour(tourKey) {
+  const tour = TOURS[tourKey];
+  if (!tour) return;
+  // Abort silently if the first beat's target doesn't exist
+  if (!document.querySelector(tour.beats[0].selector)) return;
+  _tourActive = tourKey;
   _tourBeat = 0;
+  // Render dots dynamically based on number of beats
+  const dotsEl = document.getElementById('tour-dots');
+  dotsEl.innerHTML = tour.beats.map(() => '<div class="tour-dot"></div>').join('');
   document.getElementById('tour-overlay').style.display = 'block';
-  advanceLogTour();
+  advanceTour();
 }
 
-function advanceLogTour() {
+function advanceTour() {
+  if (!_tourActive) return;
+  const tour = TOURS[_tourActive];
   // Clear previous spotlight
   if (_tourTargetEl) {
     _tourTargetEl.classList.remove('tour-spotlight-on');
@@ -4603,40 +4631,49 @@ function advanceLogTour() {
   }
   _tourBeat++;
   // Update progress dots
-  const d1 = document.getElementById('tour-dot-1');
-  const d2 = document.getElementById('tour-dot-2');
-  if (d1) d1.classList.toggle('active', _tourBeat === 1);
-  if (d2) d2.classList.toggle('active', _tourBeat === 2);
+  const dots = document.querySelectorAll('#tour-dots .tour-dot');
+  dots.forEach((d, i) => d.classList.toggle('active', i === _tourBeat - 1));
 
-  if (_tourBeat === 1) {
-    _tourTargetEl = document.querySelector('.log-ex-card .log-ex-play');
-    if (!_tourTargetEl) { endLogTour(); return; }
-    _showTourCallout(_tourTargetEl, 'Tap for demo');
-  } else if (_tourBeat === 2) {
-    _tourTargetEl = document.querySelector('.log-ex-card .sets-scroll');
-    if (!_tourTargetEl) { endLogTour(); return; }
-    _showTourCallout(_tourTargetEl, 'Log your set');
-  } else {
-    endLogTour();
+  if (_tourBeat > tour.beats.length) {
+    endTour();
+    return;
   }
+  const beat = tour.beats[_tourBeat - 1];
+  const target = document.querySelector(beat.selector);
+  if (!target) { endTour(); return; }
+  _tourTargetEl = target;
+  // Scroll into view if not already visible, then render spotlight
+  target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  setTimeout(() => _renderSpotlight(target, beat.label), 350);
 }
 
-function _showTourCallout(target, text) {
+function _renderSpotlight(target, text) {
+  if (target !== _tourTargetEl) return; // user advanced before scroll settled
   target.classList.add('tour-spotlight-on');
   const callout = document.getElementById('tour-callout');
-  callout.textContent = text;
+  // Support \n in labels for multi-line callouts
+  callout.innerHTML = text.split('\n').map(l => l.replace(/[<>]/g,'')).join('<br>');
   callout.style.display = 'block';
   callout.style.visibility = 'hidden'; // measure invisibly
   requestAnimationFrame(() => {
     const rect = target.getBoundingClientRect();
     const cw = callout.offsetWidth;
+    const ch = callout.offsetHeight;
     const targetCenter = rect.left + rect.width / 2;
     let left = targetCenter - cw / 2;
     const pad = 16;
     if (left < pad) left = pad;
     if (left + cw > window.innerWidth - pad) left = window.innerWidth - cw - pad;
+    // Default: below target. If no room, place above instead.
+    let top = rect.bottom + 14;
+    let placeAbove = false;
+    if (top + ch > window.innerHeight - 80) {
+      top = rect.top - ch - 14;
+      placeAbove = true;
+    }
     callout.style.left = left + 'px';
-    callout.style.top = (rect.bottom + 14) + 'px';
+    callout.style.top = top + 'px';
+    callout.classList.toggle('tour-callout-above', placeAbove);
     // Arrow points at target center, clamped inside callout
     const arrowX = Math.max(16, Math.min(cw - 16, targetCenter - left));
     callout.style.setProperty('--arrow-x', arrowX + 'px');
@@ -4644,21 +4681,33 @@ function _showTourCallout(target, text) {
   });
 }
 
-function endLogTour() {
+function endTour() {
   if (_tourTargetEl) {
     _tourTargetEl.classList.remove('tour-spotlight-on');
     _tourTargetEl = null;
   }
   document.getElementById('tour-overlay').style.display = 'none';
   document.getElementById('tour-callout').style.display = 'none';
-  localStorage.setItem('fw_log_tour_seen', 'true');
+  if (_tourActive) {
+    const tour = TOURS[_tourActive];
+    if (tour) localStorage.setItem(tour.storageKey, 'true');
+  }
+  _tourActive = null;
   _tourBeat = 0;
 }
 
-// Dev helper — paste in console to re-trigger the tour next session
+// Dev helpers — paste in console to re-trigger a tour
 window._resetLogTour = function() {
   localStorage.removeItem('fw_log_tour_seen');
   console.log('Log tour will fire on next session start.');
+};
+window._resetBuilderTour = function() {
+  localStorage.removeItem('fw_builder_tour_seen');
+  console.log('Builder tour will fire on next builder visit.');
+};
+window._resetAllTours = function() {
+  Object.values(TOURS).forEach(t => localStorage.removeItem(t.storageKey));
+  console.log('All tours will fire on next visit.');
 };
 
 function aiRestart() {
