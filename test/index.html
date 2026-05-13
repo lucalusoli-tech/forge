@@ -92,11 +92,11 @@
   .ready-secondary:active { color: var(--text); }
 
   /* ── LOG TOUR (first-time spotlight) ── */
-  .tour-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.82); z-index: 9999; cursor: pointer; animation: obFadeIn 0.3s ease; }
-  .tour-spotlight-on { position: relative; z-index: 10000; pointer-events: none; background-color: var(--deep); border-radius: 4px; padding: 6px 8px; margin: -6px -8px; animation: tour-pulse 1.6s ease-in-out infinite; }
-  @keyframes tour-pulse {
-    0%, 100% { box-shadow: 0 0 0 1px transparent, 0 0 12px transparent; }
-    50% { box-shadow: 0 0 0 2px var(--accent), 0 0 22px rgba(201,169,110,0.6); }
+  .tour-overlay { position: fixed; inset: 0; background: transparent; z-index: 9998; cursor: pointer; animation: obFadeIn 0.3s ease; }
+  .tour-halo { position: fixed; z-index: 9999; pointer-events: none; border: 2px solid var(--accent); border-radius: 4px; box-shadow: 0 0 0 9999px rgba(0,0,0,0.82), 0 0 22px rgba(201,169,110,0.5); animation: obFadeIn 0.25s ease, tour-halo-pulse 1.6s ease-in-out infinite; }
+  @keyframes tour-halo-pulse {
+    0%, 100% { box-shadow: 0 0 0 9999px rgba(0,0,0,0.82), 0 0 0 transparent; }
+    50% { box-shadow: 0 0 0 9999px rgba(0,0,0,0.82), 0 0 26px rgba(201,169,110,0.65); }
   }
   .tour-callout { position: fixed; z-index: 10001; background: var(--deep); border: 1px solid var(--accent); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; padding: 10px 16px; max-width: 220px; text-align: center; line-height: 1.5; pointer-events: none; animation: obFadeIn 0.3s ease; }
   .tour-callout::before { content: ''; position: absolute; top: -6px; left: var(--arrow-x, 24px); transform: translateX(-6px); width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 6px solid var(--accent); }
@@ -656,6 +656,7 @@
 
 <!-- ── LOG TOUR (first-time spotlight) ── -->
 <div class="tour-overlay" id="tour-overlay" style="display:none" onclick="advanceTour()">
+  <div class="tour-halo" id="tour-halo" style="display:none"></div>
   <div class="tour-callout" id="tour-callout" style="display:none"></div>
   <div class="tour-dots" id="tour-dots"></div>
 </div>
@@ -4641,12 +4642,11 @@ function _startTour(tourKey) {
 function advanceTour() {
   if (!_tourActive) return;
   const tour = TOURS[_tourActive];
-  // Clear previous spotlight
-  if (_tourTargetEl) {
-    _tourTargetEl.classList.remove('tour-spotlight-on');
-    _tourTargetEl = null;
-  }
   _tourBeat++;
+  // Hide halo + callout during transition
+  document.getElementById('tour-halo').style.display = 'none';
+  document.getElementById('tour-callout').style.display = 'none';
+  _tourTargetEl = null;
   // Update progress dots
   const dots = document.querySelectorAll('#tour-dots .tour-dot');
   dots.forEach((d, i) => d.classList.toggle('active', i === _tourBeat - 1));
@@ -4659,21 +4659,31 @@ function advanceTour() {
   const target = document.querySelector(beat.selector);
   if (!target) { endTour(); return; }
   _tourTargetEl = target;
-  // Scroll into view if not already visible, then render spotlight
-  target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  setTimeout(() => _renderSpotlight(target, beat.label), 350);
+  // Instant scroll so halo and target stay in sync (smooth scroll caused desync on iOS)
+  target.scrollIntoView({ behavior: 'auto', block: 'center' });
+  // Two frames: let layout settle after scroll, then measure + render
+  requestAnimationFrame(() => requestAnimationFrame(() => _renderSpotlight(target, beat.label)));
 }
 
 function _renderSpotlight(target, text) {
   if (target !== _tourTargetEl) return; // user advanced before scroll settled
-  target.classList.add('tour-spotlight-on');
+  const halo = document.getElementById('tour-halo');
   const callout = document.getElementById('tour-callout');
-  // Support \n in labels for multi-line callouts
+
+  // Position halo over target using getBoundingClientRect (viewport-relative, matches position:fixed)
+  const rect = target.getBoundingClientRect();
+  const padX = 8, padY = 6;
+  halo.style.top    = (rect.top - padY) + 'px';
+  halo.style.left   = (rect.left - padX) + 'px';
+  halo.style.width  = (rect.width + padX * 2) + 'px';
+  halo.style.height = (rect.height + padY * 2) + 'px';
+  halo.style.display = 'block';
+
+  // Position callout
   callout.innerHTML = text.split('\n').map(l => l.replace(/[<>]/g,'')).join('<br>');
   callout.style.display = 'block';
   callout.style.visibility = 'hidden'; // measure invisibly
   requestAnimationFrame(() => {
-    const rect = target.getBoundingClientRect();
     const cw = callout.offsetWidth;
     const ch = callout.offsetHeight;
     const targetCenter = rect.left + rect.width / 2;
@@ -4699,11 +4709,9 @@ function _renderSpotlight(target, text) {
 }
 
 function endTour() {
-  if (_tourTargetEl) {
-    _tourTargetEl.classList.remove('tour-spotlight-on');
-    _tourTargetEl = null;
-  }
+  _tourTargetEl = null;
   document.getElementById('tour-overlay').style.display = 'none';
+  document.getElementById('tour-halo').style.display = 'none';
   document.getElementById('tour-callout').style.display = 'none';
   if (_tourActive) {
     const tour = TOURS[_tourActive];
