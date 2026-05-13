@@ -107,20 +107,20 @@
   .tour-dot.active { background: var(--accent); }
 
   /* ── NUMPAD (custom in-app number pad replacing iOS native keypad) ── */
-  .numpad { position: fixed; left: 0; right: 0; bottom: 0; background: var(--deep); border-top: 1px solid var(--accent-dim); z-index: 9990; padding: 12px 12px calc(12px + var(--safe-bottom)); transform: translateY(100%); transition: transform 0.22s ease; }
+  .numpad { position: fixed; left: 0; right: 0; bottom: 0; background: var(--deep); border-top: 1px solid var(--accent-dim); z-index: 9990; padding: 8px 10px calc(8px + var(--safe-bottom)); transform: translateY(100%); transition: transform 0.22s ease; }
   .numpad.open { transform: translateY(0); }
-  .numpad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-  .numpad-key { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; padding: 14px 0; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
+  .numpad-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
+  .numpad-key { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; padding: 9px 0; cursor: pointer; -webkit-tap-highlight-color: transparent; user-select: none; -webkit-user-select: none; }
   .numpad-key:active { background: var(--card); border-color: var(--accent-dim); }
-  .numpad-key.numpad-back { color: var(--accent); font-size: 20px; }
+  .numpad-key.numpad-back { color: var(--accent); font-size: 17px; }
   .numpad-key.numpad-dot { color: var(--text-muted); }
   .numpad-key.numpad-dot[disabled] { opacity: 0.3; pointer-events: none; }
-  .numpad-done { width: 100%; margin-top: 8px; background: var(--accent-glow); border: 1px solid var(--accent); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 4px; text-transform: uppercase; padding: 14px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .numpad-done { width: 100%; margin-top: 6px; background: var(--accent-glow); border: 1px solid var(--accent); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 4px; text-transform: uppercase; padding: 10px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
   .numpad-done:active { background: rgba(201,169,110,0.25); }
   /* When numpad is open, ensure the active set-field stands out */
   .set-field.numpad-active { border-color: var(--accent); background: var(--card); }
   /* Push log content above the keypad so the last set isn't hidden */
-  body.numpad-open #page-log { padding-bottom: 280px; }
+  body.numpad-open #page-log { padding-bottom: 220px; }
 
   /* ── CHANGELOG ── */
   .changelog-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9997; display: flex; align-items: center; justify-content: center; padding: 24px; }
@@ -6265,3 +6265,4 @@ async function executePushUpdate() {
 </script>
 </body>
 </html>
+      
