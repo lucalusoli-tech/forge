@@ -92,11 +92,12 @@
   .ready-secondary:active { color: var(--text); }
 
   /* ── LOG TOUR (first-time spotlight) ── */
-  .tour-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.82); z-index: 9999; cursor: pointer; animation: obFadeIn 0.3s ease; }
-  .tour-spotlight-on { position: relative; z-index: 10000; pointer-events: none; animation: tour-pulse 1.6s ease-in-out infinite; }
-  @keyframes tour-pulse {
-    0%, 100% { box-shadow: 0 0 0 1px transparent, 0 0 12px transparent; }
-    50% { box-shadow: 0 0 0 2px var(--accent), 0 0 22px rgba(201,169,110,0.6); }
+  .tour-overlay { position: fixed; inset: 0; background: transparent; z-index: 9998; cursor: pointer; animation: obFadeIn 0.3s ease; }
+  .tour-halo { position: fixed; z-index: 9999; pointer-events: none; box-shadow: 0 0 0 9999px rgba(0,0,0,0.82); }
+  .tour-halo::after { content: ''; position: absolute; inset: -2px; border: 2px solid rgba(201,169,110,1); border-radius: 4px; box-shadow: 0 0 22px rgba(201,169,110,0.6); opacity: 0; animation: tour-glow-fade 1.6s ease-in-out infinite; pointer-events: none; }
+  @keyframes tour-glow-fade {
+    0%, 100% { opacity: 0; }
+    50%      { opacity: 1; }
   }
   .tour-callout { position: fixed; z-index: 10001; background: var(--deep); border: 1px solid var(--accent); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; padding: 10px 16px; max-width: 220px; text-align: center; line-height: 1.5; pointer-events: none; animation: obFadeIn 0.3s ease; }
   .tour-callout::before { content: ''; position: absolute; top: -6px; left: var(--arrow-x, 24px); transform: translateX(-6px); width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-bottom: 6px solid var(--accent); }
@@ -359,6 +360,9 @@
   .day-ex-chip.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
   .day-ex-group-label { width: 100%; font-size: 8px; letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase; padding: 8px 2px 2px; border-top: 1px solid var(--border); margin-top: 4px; }
   .day-ex-group-label:first-child { border-top: none; padding-top: 2px; margin-top: 0; }
+  .day-ex-search { width: 100%; background: var(--black); border: none; border-top: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 11px; padding: 10px 16px; outline: none; -webkit-appearance: none; border-radius: 0; box-sizing: border-box; }
+  .day-ex-search:focus { background: var(--surface); }
+  .day-ex-search::placeholder { color: var(--text-dim); }
 
   .day-ex-picker { display: flex; flex-wrap: wrap; gap: 5px; padding: 10px 16px; border-bottom: 1px solid var(--border); max-height: 260px; overflow-y: auto; align-content: flex-start; }
   .day-ex-pill { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; padding: 5px 10px; cursor: pointer; transition: all 0.12s; }
@@ -653,6 +657,7 @@
 
 <!-- ── LOG TOUR (first-time spotlight) ── -->
 <div class="tour-overlay" id="tour-overlay" style="display:none" onclick="advanceTour()">
+  <div class="tour-halo" id="tour-halo" style="display:none"></div>
   <div class="tour-callout" id="tour-callout" style="display:none"></div>
   <div class="tour-dots" id="tour-dots"></div>
 </div>
@@ -3407,6 +3412,13 @@ function setDaySub(dayIdx, sub, btn) {
   renderBuilderDays();
 }
 
+function setDayQuery(dayIdx, val) {
+  // Update state and re-render ONLY the picker container so the search
+  // input keeps focus (full renderBuilderDays would blur it on every keystroke)
+  builderDays[dayIdx].filterQuery = val;
+  renderDayExPicker(dayIdx);
+}
+
 const INTENSITY_ORDER = { 'Easy':1, 'Moderate':2, 'Hard':3, 'Very hard':4, 'Elite':5, 'Skill':6 };
 function byIntensity(a, b) {
   return (INTENSITY_ORDER[a.intensity] || 99) - (INTENSITY_ORDER[b.intensity] || 99);
@@ -3420,9 +3432,11 @@ function renderDayExPicker(dayIdx) {
 
   const cat = day.filterCat || 'all';
   const sub = day.filterSub || null;
+  const q = (day.filterQuery || '').trim().toLowerCase();
 
   // Filter exercises
   let filtered = EXERCISES.filter(ex => {
+    if(q && !ex.name.toLowerCase().includes(q)) return false;
     const meta = EX_META[ex.id];
     if(!meta) return cat === 'all';
     if(cat === 'all') return true;
@@ -3430,6 +3444,11 @@ function renderDayExPicker(dayIdx) {
     if(sub && meta.subcat !== sub) return false;
     return true;
   });
+
+  if(!filtered.length) {
+    container.innerHTML = `<div style="padding:14px 4px;font-size:10px;letter-spacing:2px;color:var(--text-dim)">No exercises match</div>`;
+    return;
+  }
 
   // For skill subcategories — render in progression order with group label
   if(cat === 'skill' && sub && SKILL_GROUPS[sub]) {
@@ -3587,6 +3606,7 @@ function renderBuilderDays() {
     const filterHTML = `<div class="day-ex-filter">
       <div class="day-ex-filter-row top">${catChips}</div>
       ${subRow}
+      <input class="day-ex-search" type="search" placeholder="Search exercises…" value="${(day.filterQuery||'').replace(/"/g,'&quot;')}" oninput="setDayQuery(${i}, this.value)">
     </div>`;
 
     return `<div class="day-builder-card${isOpen?' open':''}" id="bday-card-${i}">
@@ -4598,10 +4618,18 @@ let _tourActive = null; // current tour key
 let _tourBeat = 0;
 let _tourTargetEl = null;
 
+// Scope tour flags to the current user ID so every new account gets a fresh tour.
+// Falls back to 'anon' for users who haven't signed in yet (shouldn't happen
+// in practice since tours fire from inside the app).
+function _tourKey(storageKey) {
+  const uid = (typeof currentUser !== 'undefined' && currentUser && currentUser.id) ? currentUser.id : 'anon';
+  return storageKey + '_' + uid;
+}
+
 function maybeStartTour(tourKey) {
   const tour = TOURS[tourKey];
   if (!tour) return;
-  if (localStorage.getItem(tour.storageKey) === 'true') return;
+  if (localStorage.getItem(_tourKey(tour.storageKey)) === 'true') return;
   // Wait two frames for DOM + layout to settle
   requestAnimationFrame(() => requestAnimationFrame(() => _startTour(tourKey)));
 }
@@ -4623,12 +4651,11 @@ function _startTour(tourKey) {
 function advanceTour() {
   if (!_tourActive) return;
   const tour = TOURS[_tourActive];
-  // Clear previous spotlight
-  if (_tourTargetEl) {
-    _tourTargetEl.classList.remove('tour-spotlight-on');
-    _tourTargetEl = null;
-  }
   _tourBeat++;
+  // Hide halo + callout during transition
+  document.getElementById('tour-halo').style.display = 'none';
+  document.getElementById('tour-callout').style.display = 'none';
+  _tourTargetEl = null;
   // Update progress dots
   const dots = document.querySelectorAll('#tour-dots .tour-dot');
   dots.forEach((d, i) => d.classList.toggle('active', i === _tourBeat - 1));
@@ -4641,21 +4668,31 @@ function advanceTour() {
   const target = document.querySelector(beat.selector);
   if (!target) { endTour(); return; }
   _tourTargetEl = target;
-  // Scroll into view if not already visible, then render spotlight
-  target.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  setTimeout(() => _renderSpotlight(target, beat.label), 350);
+  // Instant scroll so halo and target stay in sync (smooth scroll caused desync on iOS)
+  target.scrollIntoView({ behavior: 'auto', block: 'center' });
+  // Two frames: let layout settle after scroll, then measure + render
+  requestAnimationFrame(() => requestAnimationFrame(() => _renderSpotlight(target, beat.label)));
 }
 
 function _renderSpotlight(target, text) {
   if (target !== _tourTargetEl) return; // user advanced before scroll settled
-  target.classList.add('tour-spotlight-on');
+  const halo = document.getElementById('tour-halo');
   const callout = document.getElementById('tour-callout');
-  // Support \n in labels for multi-line callouts
+
+  // Position halo over target using getBoundingClientRect (viewport-relative, matches position:fixed)
+  const rect = target.getBoundingClientRect();
+  const padX = 8, padY = 6;
+  halo.style.top    = (rect.top - padY) + 'px';
+  halo.style.left   = (rect.left - padX) + 'px';
+  halo.style.width  = (rect.width + padX * 2) + 'px';
+  halo.style.height = (rect.height + padY * 2) + 'px';
+  halo.style.display = 'block';
+
+  // Position callout
   callout.innerHTML = text.split('\n').map(l => l.replace(/[<>]/g,'')).join('<br>');
   callout.style.display = 'block';
   callout.style.visibility = 'hidden'; // measure invisibly
   requestAnimationFrame(() => {
-    const rect = target.getBoundingClientRect();
     const cw = callout.offsetWidth;
     const ch = callout.offsetHeight;
     const targetCenter = rect.left + rect.width / 2;
@@ -4681,15 +4718,13 @@ function _renderSpotlight(target, text) {
 }
 
 function endTour() {
-  if (_tourTargetEl) {
-    _tourTargetEl.classList.remove('tour-spotlight-on');
-    _tourTargetEl = null;
-  }
+  _tourTargetEl = null;
   document.getElementById('tour-overlay').style.display = 'none';
+  document.getElementById('tour-halo').style.display = 'none';
   document.getElementById('tour-callout').style.display = 'none';
   if (_tourActive) {
     const tour = TOURS[_tourActive];
-    if (tour) localStorage.setItem(tour.storageKey, 'true');
+    if (tour) localStorage.setItem(_tourKey(tour.storageKey), 'true');
   }
   _tourActive = null;
   _tourBeat = 0;
@@ -4697,16 +4732,18 @@ function endTour() {
 
 // Dev helpers — paste in console to re-trigger a tour
 window._resetLogTour = function() {
-  localStorage.removeItem('fw_log_tour_seen');
-  console.log('Log tour will fire on next session start.');
+  Object.keys(localStorage).filter(k => k.startsWith('fw_log_tour_seen')).forEach(k => localStorage.removeItem(k));
+  console.log('Log tour will fire on next session start (all accounts).');
 };
 window._resetBuilderTour = function() {
-  localStorage.removeItem('fw_builder_tour_seen');
-  console.log('Builder tour will fire on next builder visit.');
+  Object.keys(localStorage).filter(k => k.startsWith('fw_builder_tour_seen')).forEach(k => localStorage.removeItem(k));
+  console.log('Builder tour will fire on next builder visit (all accounts).');
 };
 window._resetAllTours = function() {
-  Object.values(TOURS).forEach(t => localStorage.removeItem(t.storageKey));
-  console.log('All tours will fire on next visit.');
+  Object.values(TOURS).forEach(t => {
+    Object.keys(localStorage).filter(k => k.startsWith(t.storageKey)).forEach(k => localStorage.removeItem(k));
+  });
+  console.log('All tours will fire on next visit (all accounts).');
 };
 
 function aiRestart() {
