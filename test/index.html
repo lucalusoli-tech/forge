@@ -237,29 +237,31 @@
 
   /* ── LEVEL 3: FOCUS-MODE SET RENDERING ── */
   .set-stack { display: flex; flex-direction: column; gap: 0; }
-  /* Completed sets — collapsed summary row */
-  .set-row-done { display: flex; align-items: center; justify-content: space-between; padding: 9px 4px; border-bottom: 1px solid var(--border); font-family: 'DM Mono', monospace; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-  .set-row-done:active { background: rgba(255,255,255,0.02); }
-  .set-row-done .set-row-label { font-size: 9px; letter-spacing: 3px; color: var(--text); opacity: 0.5; }
-  .set-row-done .set-row-value { font-size: 13px; letter-spacing: 1px; color: var(--text); opacity: 0.75; }
-  .set-row-done .set-row-edit { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); opacity: 0.5; text-transform: uppercase; }
-  /* Active set — the prominent one */
-  .set-row-active { padding: 18px 4px 16px; border-bottom: 1px solid var(--border); }
-  .set-row-active-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
-  .set-row-active-label { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px; color: var(--accent); line-height: 1; }
-  .set-row-active-progress { font-size: 9px; letter-spacing: 2px; color: var(--text); opacity: 0.5; }
-  .set-row-active-inputs { display: flex; align-items: center; gap: 12px; }
-  .set-row-active-field { flex: 1; }
-  .set-row-active-field-label { font-size: 8px; letter-spacing: 3px; color: var(--text); opacity: 0.5; margin-bottom: 5px; text-transform: uppercase; }
-  .set-row-active-field .set-field { width: 100%; font-size: 22px; padding: 12px 8px; box-sizing: border-box; }
-  .set-row-active-field .set-field.reps { font-size: 22px; }
-  .set-row-active-x { font-size: 14px; color: var(--text-muted); align-self: flex-end; padding-bottom: 14px; opacity: 0.5; }
-  /* Pending sets — tiny stub list */
-  .set-row-pending { display: flex; align-items: center; padding: 8px 4px; border-bottom: 1px solid var(--border); font-family: 'DM Mono', monospace; cursor: pointer; -webkit-tap-highlight-color: transparent; }
-  .set-row-pending:last-child { border-bottom: none; }
-  .set-row-pending .set-row-label { font-size: 9px; letter-spacing: 3px; color: var(--text); opacity: 0.3; }
-  .set-row-pending .set-row-hint { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); opacity: 0.3; margin-left: 14px; text-transform: uppercase; }
-  .set-row-pending:active .set-row-label { opacity: 0.6; }
+  /* Shared row geometry — all set states use the same horizontal layout */
+  .set-row { display: flex; align-items: center; gap: 14px; padding: 12px 4px; border-bottom: 1px solid var(--border); font-family: 'DM Mono', monospace; -webkit-tap-highlight-color: transparent; }
+  .set-row:last-child { border-bottom: none; }
+  .set-row-label { font-size: 9px; letter-spacing: 3px; flex-shrink: 0; width: 48px; }
+  .set-row-value { flex: 1; text-align: center; font-size: 14px; letter-spacing: 1px; }
+  .set-row-meta { font-size: 9px; letter-spacing: 2px; flex-shrink: 0; min-width: 50px; text-align: right; text-transform: uppercase; }
+  /* Completed state */
+  .set-row.done { cursor: pointer; }
+  .set-row.done:active { background: rgba(255,255,255,0.02); }
+  .set-row.done .set-row-label { color: var(--text); opacity: 0.5; }
+  .set-row.done .set-row-value { color: var(--text); opacity: 0.75; }
+  .set-row.done .set-row-meta { color: var(--text-muted); opacity: 0.5; }
+  /* Active state — same shape, gold accents, editable inputs */
+  .set-row.active { padding: 14px 4px; border-color: var(--accent-dim); background: linear-gradient(90deg, rgba(201,169,110,0.03), transparent); }
+  .set-row.active .set-row-label { color: var(--accent); font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 3px; }
+  .set-row.active .set-row-inputs { flex: 1; display: flex; align-items: center; gap: 8px; }
+  .set-row.active .set-field { flex: 1; width: auto; padding: 9px 4px; font-size: 16px; }
+  .set-row.active .set-row-x { font-size: 12px; color: var(--text-muted); opacity: 0.4; flex-shrink: 0; }
+  .set-row.active .set-row-meta { color: var(--accent); opacity: 0.6; }
+  /* Pending state — quieter */
+  .set-row.pending { cursor: pointer; padding: 10px 4px; }
+  .set-row.pending .set-row-label { color: var(--text); opacity: 0.3; }
+  .set-row.pending .set-row-value { color: var(--text-muted); opacity: 0.3; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; }
+  .set-row.pending .set-row-meta { display: none; }
+  .set-row.pending:active .set-row-label { opacity: 0.5; }
 
   .notes-section { padding: 16px 20px; border-bottom: 1px solid var(--border); }
   .notes-label { font-size: 9px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
@@ -2890,41 +2892,35 @@ function renderSetStack(wk, totalSets, exName, forceActiveSet) {
     const isActive = (s === activeSet);
     const isDone = (r !== '' && !isActive);
     if (isActive) {
-      // Prominent active set
-      html += `<div class="set-row-active" data-set="${s}">
-        <div class="set-row-active-header">
-          <div class="set-row-active-label">SET ${s}</div>
-          <div class="set-row-active-progress">${s} OF ${totalSets}</div>
+      // Active row — same horizontal shape as the others, but inputs are editable
+      html += `<div class="set-row active" data-set="${s}">
+        <div class="set-row-label">SET ${s}</div>
+        <div class="set-row-inputs">
+          <input class="set-field" type="text" inputmode="none" placeholder="kg" value="${w}" id="${wk}_s${s}_w"
+            autocomplete="one-time-code" data-lpignore="true" data-form-type="other" oninput="autoSaveSet('${wk}',${s})"
+            data-numpad="decimal" readonly>
+          <div class="set-row-x">×</div>
+          <input class="set-field reps" type="text" inputmode="none" placeholder="reps" value="${r}" id="${wk}_s${s}_r"
+            autocomplete="one-time-code" data-lpignore="true" data-form-type="other" oninput="autoSaveSet('${wk}',${s})"
+            onblur="onSetBlur('${wk}',${s},${exNameAttr})" data-numpad="integer" readonly>
         </div>
-        <div class="set-row-active-inputs">
-          <div class="set-row-active-field">
-            <div class="set-row-active-field-label">Weight (kg)</div>
-            <input class="set-field" type="text" inputmode="none" placeholder="kg" value="${w}" id="${wk}_s${s}_w"
-              autocomplete="one-time-code" data-lpignore="true" data-form-type="other" oninput="autoSaveSet('${wk}',${s})"
-              data-numpad="decimal" readonly>
-          </div>
-          <div class="set-row-active-x">×</div>
-          <div class="set-row-active-field">
-            <div class="set-row-active-field-label">Reps</div>
-            <input class="set-field reps" type="text" inputmode="none" placeholder="reps" value="${r}" id="${wk}_s${s}_r"
-              autocomplete="one-time-code" data-lpignore="true" data-form-type="other" oninput="autoSaveSet('${wk}',${s})"
-              onblur="onSetBlur('${wk}',${s},${exNameAttr})" data-numpad="integer" readonly>
-          </div>
-        </div>
+        <div class="set-row-meta">${s} of ${totalSets}</div>
       </div>`;
     } else if (isDone) {
-      // Collapsed completed row
-      const wDisplay = w ? `${w}kg` : 'BW';
-      html += `<div class="set-row-done" onclick="reactivateSet('${wk}',${s},${totalSets},${exNameAttr})">
+      // Completed row — BW when weight is 0 or empty, else "Xkg"
+      const wNum = parseFloat(w);
+      const wDisplay = (!w || wNum === 0) ? 'BW' : `${w}kg`;
+      html += `<div class="set-row done" onclick="reactivateSet('${wk}',${s},${totalSets},${exNameAttr})">
         <div class="set-row-label">SET ${s}</div>
         <div class="set-row-value">${wDisplay} × ${r}r</div>
-        <div class="set-row-edit">Edit</div>
+        <div class="set-row-meta">Edit</div>
       </div>`;
     } else {
-      // Pending stub
-      html += `<div class="set-row-pending" onclick="reactivateSet('${wk}',${s},${totalSets},${exNameAttr})">
+      // Pending row — quiet stub, same shape
+      html += `<div class="set-row pending" onclick="reactivateSet('${wk}',${s},${totalSets},${exNameAttr})">
         <div class="set-row-label">SET ${s}</div>
-        <div class="set-row-hint">Pending</div>
+        <div class="set-row-value">Pending</div>
+        <div class="set-row-meta"></div>
       </div>`;
     }
   }
@@ -4739,7 +4735,7 @@ const TOURS = {
     storageKey: 'fw_log_tour_seen',
     beats: [
       { selector: '.log-ex-card .log-ex-play', label: 'Tap for demo' },
-      { selector: '.log-ex-card .set-row-active', label: 'Log your set' }
+      { selector: '.log-ex-card .set-row.active', label: 'Log your set' }
     ]
   },
   builder: {
