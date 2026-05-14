@@ -235,6 +235,32 @@
   .set-field.reps { color: #d4cec7; font-size: 14px; font-weight: 400; }
   .set-divider { font-size: 10px; color: var(--text-dim); align-self: center; margin-top: 16px; }
 
+  /* ── LEVEL 3: FOCUS-MODE SET RENDERING ── */
+  .set-stack { display: flex; flex-direction: column; gap: 0; }
+  /* Completed sets — collapsed summary row */
+  .set-row-done { display: flex; align-items: center; justify-content: space-between; padding: 9px 4px; border-bottom: 1px solid var(--border); font-family: 'DM Mono', monospace; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .set-row-done:active { background: rgba(255,255,255,0.02); }
+  .set-row-done .set-row-label { font-size: 9px; letter-spacing: 3px; color: var(--text); opacity: 0.5; }
+  .set-row-done .set-row-value { font-size: 13px; letter-spacing: 1px; color: var(--text); opacity: 0.75; }
+  .set-row-done .set-row-edit { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); opacity: 0.5; text-transform: uppercase; }
+  /* Active set — the prominent one */
+  .set-row-active { padding: 18px 4px 16px; border-bottom: 1px solid var(--border); }
+  .set-row-active-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 12px; }
+  .set-row-active-label { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px; color: var(--accent); line-height: 1; }
+  .set-row-active-progress { font-size: 9px; letter-spacing: 2px; color: var(--text); opacity: 0.5; }
+  .set-row-active-inputs { display: flex; align-items: center; gap: 12px; }
+  .set-row-active-field { flex: 1; }
+  .set-row-active-field-label { font-size: 8px; letter-spacing: 3px; color: var(--text); opacity: 0.5; margin-bottom: 5px; text-transform: uppercase; }
+  .set-row-active-field .set-field { width: 100%; font-size: 22px; padding: 12px 8px; box-sizing: border-box; }
+  .set-row-active-field .set-field.reps { font-size: 22px; }
+  .set-row-active-x { font-size: 14px; color: var(--text-muted); align-self: flex-end; padding-bottom: 14px; opacity: 0.5; }
+  /* Pending sets — tiny stub list */
+  .set-row-pending { display: flex; align-items: center; padding: 8px 4px; border-bottom: 1px solid var(--border); font-family: 'DM Mono', monospace; cursor: pointer; -webkit-tap-highlight-color: transparent; }
+  .set-row-pending:last-child { border-bottom: none; }
+  .set-row-pending .set-row-label { font-size: 9px; letter-spacing: 3px; color: var(--text); opacity: 0.3; }
+  .set-row-pending .set-row-hint { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); opacity: 0.3; margin-left: 14px; text-transform: uppercase; }
+  .set-row-pending:active .set-row-label { opacity: 0.6; }
+
   .notes-section { padding: 16px 20px; border-bottom: 1px solid var(--border); }
   .notes-label { font-size: 9px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
   .notes-input { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; padding: 12px; outline: none; resize: none; min-height: 72px; -webkit-appearance: none; border-radius: 0; }
@@ -2792,24 +2818,9 @@ function renderLogExercises(exercises) {
   exercises.forEach(ex => {
     const exData = EXERCISES.find(e=>e.id===ex.id); if(!exData) return;
     const wk = `${currentDayId}_${ex.id}_v${currentWeek}`;
-    const saved = sessionLog[wk]||{};
-    let cols='';
-    for(let s=1;s<=ex.sets;s++){
-      cols+=`<div class="set-col">
-        <div class="set-num">S${s}</div>
-        <input class="set-field" type="text" inputmode="none" placeholder="kg" value="${saved[`s${s}_w`]||''}" id="${wk}_s${s}_w"
-          autocomplete="one-time-code" data-lpignore="true" data-form-type="other" oninput="autoSaveSet('${wk}',${s})"
-          data-numpad="decimal" readonly>
-        <input class="set-field reps" type="text" inputmode="none" placeholder="reps" value="${saved[`s${s}_r`]||''}" id="${wk}_s${s}_r"
-          autocomplete="one-time-code" data-lpignore="true" data-form-type="other" oninput="autoSaveSet('${wk}',${s})"
-          onblur="onSetBlur('${wk}',${s},'${exData.name}')" data-numpad="integer" readonly>
-      </div>`;
-      if(s<ex.sets) cols+=`<div class="set-divider">·</div>`;
-    }
-    // Build sparkline from past weeks
     const sparkSvg = buildSparkline(ex.id);
+    const saved = sessionLog[wk]||{};
     const savedNote = saved['note']||'';
-    // Build "last week" summary from previous week's data
     let lastWeekHint = '';
     if (currentWeek > 1) {
       const prevKey = `${currentDayId}_${ex.id}_v${currentWeek - 1}`;
@@ -2832,7 +2843,7 @@ function renderLogExercises(exercises) {
         lastWeekHint = `<div style="font-size:9px;letter-spacing:1px;color:var(--accent-dim);padding:0 16px 4px">↳ ${hint}</div>`;
       }
     }
-    c.innerHTML+=`<div class="log-ex-card">
+    c.innerHTML+=`<div class="log-ex-card" data-wk="${wk}" data-sets="${ex.sets}">
       <div class="log-ex-header" onclick="openSheet('${exData.id}')">
         <div><div class="log-ex-name-row"><div class="log-ex-name">${exData.name}</div><span class="log-ex-play" aria-hidden="true">▶</span></div><div class="log-ex-target">${ex.sets}×${ex.reps}</div></div>
         <div class="log-ex-note">${ex.note||''}</div>
@@ -2840,15 +2851,96 @@ function renderLogExercises(exercises) {
       ${lastWeekHint}
       ${sparkSvg ? `<div class="spark-row"><div class="spark-label">Load trend</div>${sparkSvg}</div>` : ''}
       <div class="log-ex-body">
-        <div style="font-size:8px;letter-spacing:2px;color:var(--text-muted);margin-bottom:8px">WEIGHT / REPS PER SET</div>
-        <div class="sets-scroll">${cols}</div>
+        <div class="set-stack" id="set-stack-${wk}"></div>
       </div>
       <div class="set-note-row">
         <input class="set-note-input" type="text" placeholder="Exercise note — technique, feel, load..." value="${savedNote}"
           id="${wk}_note" autocomplete="off" onblur="autoSaveNote('${wk}')">
       </div>
     </div>`;
+    renderSetStack(wk, ex.sets, exData.name);
   });
+}
+
+// Determine which set is "active": first one without reps logged.
+// If all sets have reps, no active set (everything is done).
+function _activeSetIndex(wk, totalSets) {
+  const saved = sessionLog[wk] || {};
+  for (let s = 1; s <= totalSets; s++) {
+    if (!saved[`s${s}_r`] || saved[`s${s}_r`] === '') return s;
+  }
+  return null; // all complete
+}
+
+// Render the set-stack inside an exercise card. Called on initial render and
+// whenever a set completes (to re-evaluate active/completed/pending states).
+function renderSetStack(wk, totalSets, exName, forceActiveSet) {
+  const container = document.getElementById('set-stack-' + wk);
+  if (!container) return;
+  const saved = sessionLog[wk] || {};
+  // forceActiveSet lets caller pin an active set (e.g. when user taps a completed row to edit)
+  const autoActive = _activeSetIndex(wk, totalSets);
+  const activeSet = forceActiveSet != null ? forceActiveSet : autoActive;
+  // Safely embed exName in inline attributes (escapes quotes etc.)
+  const exNameAttr = JSON.stringify(exName).replace(/"/g, '&quot;');
+  let html = '';
+  for (let s = 1; s <= totalSets; s++) {
+    const w = saved[`s${s}_w`] || '';
+    const r = saved[`s${s}_r`] || '';
+    const isActive = (s === activeSet);
+    const isDone = (r !== '' && !isActive);
+    if (isActive) {
+      // Prominent active set
+      html += `<div class="set-row-active" data-set="${s}">
+        <div class="set-row-active-header">
+          <div class="set-row-active-label">SET ${s}</div>
+          <div class="set-row-active-progress">${s} OF ${totalSets}</div>
+        </div>
+        <div class="set-row-active-inputs">
+          <div class="set-row-active-field">
+            <div class="set-row-active-field-label">Weight (kg)</div>
+            <input class="set-field" type="text" inputmode="none" placeholder="kg" value="${w}" id="${wk}_s${s}_w"
+              autocomplete="one-time-code" data-lpignore="true" data-form-type="other" oninput="autoSaveSet('${wk}',${s})"
+              data-numpad="decimal" readonly>
+          </div>
+          <div class="set-row-active-x">×</div>
+          <div class="set-row-active-field">
+            <div class="set-row-active-field-label">Reps</div>
+            <input class="set-field reps" type="text" inputmode="none" placeholder="reps" value="${r}" id="${wk}_s${s}_r"
+              autocomplete="one-time-code" data-lpignore="true" data-form-type="other" oninput="autoSaveSet('${wk}',${s})"
+              onblur="onSetBlur('${wk}',${s},${exNameAttr})" data-numpad="integer" readonly>
+          </div>
+        </div>
+      </div>`;
+    } else if (isDone) {
+      // Collapsed completed row
+      const wDisplay = w ? `${w}kg` : 'BW';
+      html += `<div class="set-row-done" onclick="reactivateSet('${wk}',${s},${totalSets},${exNameAttr})">
+        <div class="set-row-label">SET ${s}</div>
+        <div class="set-row-value">${wDisplay} × ${r}r</div>
+        <div class="set-row-edit">Edit</div>
+      </div>`;
+    } else {
+      // Pending stub
+      html += `<div class="set-row-pending" onclick="reactivateSet('${wk}',${s},${totalSets},${exNameAttr})">
+        <div class="set-row-label">SET ${s}</div>
+        <div class="set-row-hint">Pending</div>
+      </div>`;
+    }
+  }
+  container.innerHTML = html;
+}
+
+// Tapping a completed or pending row promotes it to active
+function reactivateSet(wk, setNum, totalSets, exName) {
+  renderSetStack(wk, totalSets, exName, setNum);
+  // Focus the kg input of the newly-active set
+  setTimeout(() => {
+    const kgInput = document.getElementById(`${wk}_s${setNum}_w`);
+    if (kgInput) {
+      kgInput.dispatchEvent(new Event('click', { bubbles: true }));
+    }
+  }, 50);
 }
 
 function addExToLog(id) {
@@ -3918,6 +4010,16 @@ const TIMER_CIRCUMFERENCE = 590.6;
 function onSetBlur(wk, setNum, exName) {
   const r = document.getElementById(`${wk}_s${setNum}_r`);
   if(r && r.value.trim() !== '' && timerEnabled) startTimer(exName);
+  // Re-render the set stack so this set collapses to its done-row and the
+  // next pending set promotes to active. Only fires when reps is non-empty
+  // (so partial edits don't snap the user away from the active set).
+  if (r && r.value.trim() !== '') {
+    const card = document.querySelector(`.log-ex-card[data-wk="${wk}"]`);
+    if (card) {
+      const totalSets = parseInt(card.dataset.sets, 10);
+      renderSetStack(wk, totalSets, exName);
+    }
+  }
 }
 
 function autoSaveSet(wk, setNum) {
@@ -4637,7 +4739,7 @@ const TOURS = {
     storageKey: 'fw_log_tour_seen',
     beats: [
       { selector: '.log-ex-card .log-ex-play', label: 'Tap for demo' },
-      { selector: '.log-ex-card .sets-scroll', label: 'Log your set' }
+      { selector: '.log-ex-card .set-row-active', label: 'Log your set' }
     ]
   },
   builder: {
@@ -4787,9 +4889,19 @@ let _numpadActiveInput = null;
 
 function openNumpad(input) {
   if (!input) return;
-  // Close any previous active state
+  // Close any previous active state — fire blur so any onblur handlers run
+  // (e.g. set re-render in focus mode). The re-render will replace this
+  // input's DOM node, so capture the *new* user-tapped input AFTER the blur.
+  const newInputId = input.id;
   if (_numpadActiveInput && _numpadActiveInput !== input) {
-    _numpadActiveInput.classList.remove('numpad-active');
+    const prev = _numpadActiveInput;
+    prev.classList.remove('numpad-active');
+    prev.dispatchEvent(new Event('blur', { bubbles: true }));
+    // After blur may have triggered a re-render, re-resolve the input by ID.
+    // Critical: if the re-render created a new DOM node, the original `input`
+    // reference is stale.
+    input = document.getElementById(newInputId);
+    if (!input) return; // user tapped a set that re-render removed (e.g. now completed)
   }
   _numpadActiveInput = input;
   input.classList.add('numpad-active');
