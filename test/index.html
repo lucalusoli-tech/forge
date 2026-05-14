@@ -62,7 +62,7 @@
   .home-greeting { font-size: 9px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
   .home-title { font-family: 'Bebas Neue', sans-serif; font-size: 38px; letter-spacing: 4px; line-height: 1; }
   .home-sub { font-size: 10px; letter-spacing: 2px; color: var(--text-muted); margin-top: 4px; }
-  .home-streak { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--accent); margin-top: 10px; text-transform: uppercase; display: none; }
+  .home-streak { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--text); margin-top: 10px; text-transform: uppercase; display: none; opacity: 0.7; }
   .home-streak.visible { display: block; }
   .home-lastweek { display: none; margin-top: 12px; padding: 10px 14px; background: var(--accent-glow); border: 1px solid var(--accent-dim); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; color: var(--accent); cursor: pointer; }
   .home-lastweek.visible { display: block; }
@@ -74,9 +74,9 @@
   .weekly-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 4px; color: var(--text); margin-bottom: 20px; line-height: 1.1; }
   .weekly-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
   .weekly-stat { background: var(--surface); border: 1px solid var(--border); padding: 16px 12px; }
-  .weekly-stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; color: var(--accent); line-height: 1; }
+  .weekly-stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; color: var(--text); line-height: 1; }
   .weekly-stat-lbl { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-top: 4px; }
-  .weekly-streak { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; color: var(--accent); margin-bottom: 24px; text-transform: uppercase; }
+  .weekly-streak { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; color: var(--text); margin-bottom: 24px; text-transform: uppercase; opacity: 0.7; }
   .weekly-cta { background: var(--accent-glow); border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; padding: 14px 28px; cursor: pointer; width: 100%; }
   .weekly-cta:active { background: rgba(201,169,110,0.2); }
 
@@ -136,7 +136,7 @@
   .stat-cell { padding: 16px 20px; border-right: 1px solid var(--border); }
   .stat-cell:last-child { border-right: none; }
   .stat-label { font-size: 8px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
-  .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 2px; color: var(--accent); line-height: 1; }
+  .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 2px; color: var(--text); line-height: 1; }
 
   .section-label { padding: 16px 20px 10px; font-size: 9px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; border-bottom: 1px solid var(--border); }
 
@@ -164,7 +164,7 @@
   .ex-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
   .ex-row:last-of-type { border-bottom: none; margin-bottom: 8px; }
   .ex-name { font-size: 12px; color: var(--text); }
-  .ex-scheme { font-size: 11px; color: var(--accent); }
+  .ex-scheme { font-size: 11px; color: var(--text); opacity: 0.6; }
 
   .start-btn { display: flex; align-items: center; justify-content: center; width: 100%; padding: 12px; background: var(--accent-glow); border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; margin-top: 4px; }
   .start-btn:active { background: rgba(201,169,110,0.2); }
@@ -182,7 +182,7 @@
   .log-ex-name { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px; }
   .log-ex-play { color: var(--accent); font-size: 11px; line-height: 1; flex-shrink: 0; transform: translateY(-1px); }
   .log-ex-target { font-size: 10px; color: var(--text-muted); letter-spacing: 1px; margin-top: 2px; }
-  .log-ex-note { font-size: 9px; color: var(--accent); letter-spacing: 1px; text-align: right; max-width: 110px; flex-shrink: 0; line-height: 1.4; }
+  .log-ex-note { font-size: 9px; color: var(--text); letter-spacing: 1px; text-align: right; max-width: 110px; flex-shrink: 0; line-height: 1.4; opacity: 0.7; }
   .log-ex-body { padding: 0 20px 16px; }
 
   /* Set note */
@@ -305,7 +305,7 @@
   .block-stat { padding: 14px 16px; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); }
   .block-stat:nth-child(2n) { border-right: none; }
   .block-stat-label { font-size: 8px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
-  .block-stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px; color: var(--accent); line-height: 1.2; }
+  .block-stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px; color: var(--text); line-height: 1.2; }
 
   .progress-ex-card { margin: 16px 20px 0; border: 1px solid var(--border); overflow: hidden; }
   .progress-ex-header { background: var(--surface); padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
@@ -404,7 +404,7 @@
   .saved-wk-header { padding: 12px 16px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; }
   .saved-wk-name { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px; }
   .saved-wk-meta { font-size: 9px; color: var(--text-muted); margin-top: 3px; }
-  .saved-wk-methods { font-size: 9px; color: var(--accent); letter-spacing: 1px; margin-top: 2px; }
+  .saved-wk-methods { font-size: 9px; color: var(--text); letter-spacing: 1px; margin-top: 2px; opacity: 0.6; }
   .saved-wk-actions { display: flex; gap: 6px; align-items: center; }
   .saved-wk-del { background: none; border: 1px solid var(--border); color: var(--text-dim); font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 1px; text-transform: uppercase; padding: 4px 8px; cursor: pointer; }
   .saved-wk-del:active { border-color: var(--red); color: var(--red); }
@@ -421,7 +421,7 @@
   .archived-block { border: 1px solid var(--border); margin: 16px 20px 0; overflow: hidden; }
   .archived-block-header { background: var(--surface); padding: 14px 16px; border-bottom: 1px solid var(--border); cursor: pointer; display: flex; align-items: flex-start; justify-content: space-between; }
   .archived-block-name { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 3px; }
-  .archived-block-methods { font-size: 9px; color: var(--accent); letter-spacing: 1px; margin-top: 3px; }
+  .archived-block-methods { font-size: 9px; color: var(--text); letter-spacing: 1px; margin-top: 3px; opacity: 0.6; }
   .archived-block-meta { font-size: 9px; color: var(--text-muted); letter-spacing: 1px; margin-top: 4px; }
   .archived-block-chevron { color: var(--accent); font-size: 14px; transition: transform 0.2s; flex-shrink: 0; margin-top: 4px; }
   .archived-block.open .archived-block-chevron { transform: rotate(90deg); }
@@ -1096,7 +1096,7 @@
             <button class="picker-chip" onclick="toggleMethod('Emphasized Concurrent',this)">Emphasized Concurrent</button>
             <button class="picker-chip" onclick="toggleMethod('DUP',this)">DUP</button>
           </div>
-          <div id="method-preview" style="margin-top:10px;font-size:10px;letter-spacing:1px;color:var(--accent);min-height:16px"></div>
+          <div id="method-preview" style="margin-top:10px;font-size:10px;letter-spacing:1px;color:var(--text);opacity:0.6;min-height:16px"></div>
         </div>
 
         <!-- Duration -->
@@ -3344,7 +3344,7 @@ function renderHomeFixedSections() {
       const ex = EXERCISES.find(x=>x.id===e.id);
       return `<div style="display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--border)">
         <span style="font-size:11px;letter-spacing:1px;color:var(--text)">${ex?.name||e.id}</span>
-        <span style="font-size:10px;letter-spacing:1px;color:var(--accent);flex-shrink:0;margin-left:12px">${e.sets||''}</span>
+        <span style="font-size:10px;letter-spacing:1px;color:var(--text);opacity:0.6;flex-shrink:0;margin-left:12px">${e.sets||''}</span>
       </div>${e.note ? `<div style="font-size:9px;letter-spacing:1px;color:var(--text-muted);padding:4px 0 6px">${e.note}</div>` : ''}`;
     }).join('');
   }
@@ -5930,7 +5930,7 @@ async function loadProgrammes() {
   list.innerHTML = programmes.map(p => `
     <div style="border:1px solid var(--border);background:var(--card);margin-bottom:12px;padding:20px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-        <div style="font-size:8px;letter-spacing:3px;color:var(--accent)">${p.month||''}</div>
+        <div style="font-size:8px;letter-spacing:3px;color:var(--text);opacity:0.6">${p.month||''}</div>
         ${isAdmin ? `<div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;padding:2px 8px;border:1px solid ${p.type==='personal'?'var(--accent-dim)':'var(--border)'};color:${p.type==='personal'?'var(--accent)':'var(--text-dim)'}">${p.type||'coached'}</div>` : ''}
       </div>
       <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--text);margin-bottom:8px">${p.title}</div>
@@ -6265,4 +6265,3 @@ async function executePushUpdate() {
 </script>
 </body>
 </html>
-      
