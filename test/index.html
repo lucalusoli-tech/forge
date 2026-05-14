@@ -191,24 +191,29 @@
   .set-note-input:focus { border-bottom-color: var(--accent); color: var(--text); }
   .set-note-input::placeholder { color: var(--text-dim); font-size: 10px; }
 
-  /* Rest timer overlay */
-  .timer-overlay { position: fixed; inset: 0; background: rgba(8,8,8,0.96); z-index: 300; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  /* Rest timer overlay — cinematic countdown */
+  .timer-overlay { position: fixed; inset: 0; background: rgba(8,8,8,0.98); z-index: 300; display: flex; flex-direction: column; align-items: stretch; justify-content: space-between; opacity: 0; pointer-events: none; transition: opacity 0.3s; padding: 80px 24px calc(40px + var(--safe-bottom)); }
   .timer-overlay.open { opacity: 1; pointer-events: all; }
-  .timer-label { font-size: 9px; letter-spacing: 4px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 20px; }
-  .timer-ring { position: relative; width: 200px; height: 200px; margin-bottom: 28px; }
-  .timer-ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
-  .timer-ring-bg { fill: none; stroke: var(--border); stroke-width: 2; }
-  .timer-ring-fill { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: butt; transition: stroke-dashoffset 1s linear; }
-  .timer-digits { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 4px; }
-  .timer-time { font-family: 'DM Mono', monospace; font-size: 56px; font-weight: 500; letter-spacing: 2px; color: var(--text); line-height: 1; }
-  .timer-ex-name { font-size: 9px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; }
-  .timer-actions { display: flex; gap: 10px; }
-  .timer-btn { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 10px 20px; cursor: pointer; }
+  /* Top section — REST label */
+  .timer-top { text-align: center; }
+  .timer-label { font-size: 10px; letter-spacing: 6px; color: var(--text-muted); text-transform: uppercase; }
+  /* Center — hero time + next-up preview */
+  .timer-center { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; }
+  .timer-time { font-family: 'DM Mono', monospace; font-size: 96px; font-weight: 500; letter-spacing: 4px; color: var(--text); line-height: 1; margin-bottom: 48px; }
+  .timer-next-label { font-size: 9px; letter-spacing: 4px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px; }
+  .timer-next-name { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; text-align: center; line-height: 1.2; margin-bottom: 8px; }
+  .timer-next-target { font-size: 10px; letter-spacing: 3px; color: var(--text); opacity: 0.6; text-transform: uppercase; }
+  /* Bottom — actions + duration row */
+  .timer-bottom { display: flex; flex-direction: column; align-items: center; gap: 28px; }
+  .timer-actions { display: flex; gap: 12px; }
+  .timer-btn { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; padding: 12px 26px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
   .timer-btn.primary { border-color: var(--accent-dim); color: var(--accent); }
   .timer-btn:active { background: var(--surface); }
-  .timer-duration-row { display: flex; gap: 8px; margin-top: 20px; }
+  .timer-duration-row { display: flex; gap: 8px; }
   .timer-dur-btn { background: transparent; border: 1px solid var(--border); color: var(--text-dim); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; padding: 5px 12px; cursor: pointer; }
   .timer-dur-btn.active { border-color: var(--accent-dim); color: var(--accent); }
+  /* Progress line — thin gold bar across the very top, depletes left-to-right */
+  .timer-progress { position: absolute; top: 0; left: 0; height: 2px; background: var(--accent); width: 100%; transform-origin: left center; transform: scaleX(1); transition: transform 1s linear; }
 
   /* Timer toggle in log header */
   .timer-toggle { display: flex; align-items: center; gap: 6px; padding: 8px 20px; border-bottom: 1px solid var(--border); background: var(--deep); }
@@ -240,7 +245,7 @@
   /* Shared row geometry — all set states use the same horizontal layout */
   .set-row { display: flex; align-items: center; gap: 14px; padding: 12px 4px; border-bottom: 1px solid var(--border); font-family: 'DM Mono', monospace; -webkit-tap-highlight-color: transparent; }
   .set-row:last-child { border-bottom: none; }
-  .set-row-label { font-size: 9px; letter-spacing: 3px; flex-shrink: 0; width: 48px; }
+  .set-row-label { font-size: 9px; letter-spacing: 3px; flex-shrink: 0; width: 64px; }
   .set-row-value { flex: 1; text-align: center; font-size: 14px; letter-spacing: 1px; }
   .set-row-meta { font-size: 9px; letter-spacing: 2px; flex-shrink: 0; min-width: 50px; text-align: right; text-transform: uppercase; }
   /* Completed state */
@@ -251,7 +256,7 @@
   .set-row.done .set-row-meta { color: var(--text-muted); opacity: 0.5; }
   /* Active state — same shape, gold accents, editable inputs */
   .set-row.active { padding: 14px 4px; border-color: var(--accent-dim); background: linear-gradient(90deg, rgba(201,169,110,0.03), transparent); }
-  .set-row.active .set-row-label { color: var(--accent); font-family: 'DM Mono', monospace; font-size: 16px; letter-spacing: 3px; }
+  .set-row.active .set-row-label { color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; letter-spacing: 2px; }
   .set-row.active .set-row-inputs { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; }
   .set-row.active .set-field { flex: 1; min-width: 0; width: auto; padding: 9px 4px; font-size: 15px; }
   .set-row.active .set-row-x { font-size: 12px; color: var(--text-muted); opacity: 0.4; flex-shrink: 0; }
@@ -1346,27 +1351,27 @@
 
 <!-- REST TIMER -->
 <div class="timer-overlay" id="timer-overlay">
-  <div class="timer-label">REST</div>
-  <div class="timer-ring">
-    <svg viewBox="0 0 200 200" width="200" height="200">
-      <circle class="timer-ring-bg" cx="100" cy="100" r="94"/>
-      <circle class="timer-ring-fill" id="timer-ring-fill" cx="100" cy="100" r="94"
-        stroke-dasharray="590.6" stroke-dashoffset="0"/>
-    </svg>
-    <div class="timer-digits">
-      <div class="timer-time" id="timer-display">1:30</div>
-      <div class="timer-ex-name" id="timer-ex-label"></div>
+  <div class="timer-progress" id="timer-progress"></div>
+  <div class="timer-top">
+    <div class="timer-label">Rest</div>
+  </div>
+  <div class="timer-center">
+    <div class="timer-time" id="timer-display">1:30</div>
+    <div class="timer-next-label">Up next</div>
+    <div class="timer-next-name" id="timer-ex-label">—</div>
+    <div class="timer-next-target" id="timer-next-target"></div>
+  </div>
+  <div class="timer-bottom">
+    <div class="timer-actions">
+      <button class="timer-btn" onclick="skipTimer()">Skip</button>
+      <button class="timer-btn primary" onclick="toggleTimerPause()" id="timer-pause-btn">Pause</button>
     </div>
-  </div>
-  <div class="timer-actions">
-    <button class="timer-btn" onclick="skipTimer()">SKIP</button>
-    <button class="timer-btn primary" onclick="toggleTimerPause()" id="timer-pause-btn">PAUSE</button>
-  </div>
-  <div class="timer-duration-row">
-    <button class="timer-dur-btn" onclick="setTimerDuration(60,this)">60s</button>
-    <button class="timer-dur-btn active" onclick="setTimerDuration(90,this)">90s</button>
-    <button class="timer-dur-btn" onclick="setTimerDuration(120,this)">2m</button>
-    <button class="timer-dur-btn" onclick="setTimerDuration(180,this)">3m</button>
+    <div class="timer-duration-row">
+      <button class="timer-dur-btn" onclick="setTimerDuration(60,this)">60s</button>
+      <button class="timer-dur-btn active" onclick="setTimerDuration(90,this)">90s</button>
+      <button class="timer-dur-btn" onclick="setTimerDuration(120,this)">2m</button>
+      <button class="timer-dur-btn" onclick="setTimerDuration(180,this)">3m</button>
+    </div>
   </div>
 </div>
 
@@ -4013,7 +4018,7 @@ function onSetBlur(wk, setNum, exName) {
   if (document.body.classList.contains('numpad-open')) return;
 
   const r = document.getElementById(`${wk}_s${setNum}_r`);
-  if(r && r.value.trim() !== '' && timerEnabled) startTimer(exName);
+  if(r && r.value.trim() !== '' && timerEnabled) startTimer(exName, wk, setNum);
   // Re-render the set stack so this set collapses to its done-row and the
   // next pending set promotes to active. Only fires when reps is non-empty
   // (so partial edits don't snap the user away from the active set).
@@ -4066,15 +4071,51 @@ function fireTimerAlert() {
   } catch(e) {}
 }
 
-function startTimer(exName) {
+function startTimer(exName, wk, justCompletedSet) {
   clearInterval(timerInterval);
   if (timerBackupTimeout) clearTimeout(timerBackupTimeout);
   timerFired = false; // reset guard for new timer cycle
   timerRemaining = timerDuration;
   timerPaused = false;
   timerEndTime = Date.now() + (timerDuration * 1000);
-  document.getElementById('timer-pause-btn').textContent = 'PAUSE';
-  document.getElementById('timer-ex-label').textContent = exName || '';
+  document.getElementById('timer-pause-btn').textContent = 'Pause';
+
+  // Populate the up-next preview. Figure out the next set / next exercise.
+  // wk format: `${currentDayId}_${exId}_v${currentWeek}` — parse for context.
+  let nextLabel = (exName || '').toUpperCase();
+  let nextTarget = '';
+  const day = currentBlock && currentBlock.days
+    ? currentBlock.days.find(d => d.id === currentDayId)
+    : null;
+  if (wk && justCompletedSet != null && day && day.exercises) {
+    const card = document.querySelector(`.log-ex-card[data-wk="${wk}"]`);
+    const totalSets = card ? parseInt(card.dataset.sets, 10) : 0;
+    // Resolve current exercise from wk
+    const exIdMatch = wk.match(/_(.+)_v\d+$/);
+    const exId = exIdMatch ? exIdMatch[1] : null;
+    const exIndex = day.exercises.findIndex(e => e.id === exId);
+    const currentEx = exIndex >= 0 ? day.exercises[exIndex] : null;
+    if (justCompletedSet < totalSets && currentEx) {
+      // Still more sets on the same exercise
+      const nextSetNum = justCompletedSet + 1;
+      nextTarget = `Set ${nextSetNum} of ${totalSets} · ${currentEx.reps} reps`;
+    } else if (exIndex >= 0 && exIndex < day.exercises.length - 1) {
+      // Moving to next exercise
+      const nextEx = day.exercises[exIndex + 1];
+      const nextExData = EXERCISES.find(e => e.id === nextEx.id);
+      if (nextExData) {
+        nextLabel = nextExData.name.toUpperCase();
+        nextTarget = `Set 1 of ${nextEx.sets} · ${nextEx.reps} reps`;
+      }
+    } else {
+      // Last set of last exercise — workout done
+      nextLabel = 'Workout complete';
+      nextTarget = '';
+    }
+  }
+  document.getElementById('timer-ex-label').textContent = nextLabel || '—';
+  document.getElementById('timer-next-target').textContent = nextTarget;
+
   document.getElementById('timer-overlay').classList.add('open');
   updateTimerDisplay();
 
@@ -4172,8 +4213,9 @@ function updateTimerDisplay() {
   const s = timerRemaining % 60;
   document.getElementById('timer-display').textContent = m+':'+(s<10?'0':'')+s;
   const pct = timerRemaining / timerDuration;
-  const offset = TIMER_CIRCUMFERENCE * (1 - pct);
-  document.getElementById('timer-ring-fill').style.strokeDashoffset = offset;
+  // Progress bar depletes left-to-right (full at start, empty at end)
+  const bar = document.getElementById('timer-progress');
+  if (bar) bar.style.transform = 'scaleX(' + pct + ')';
 }
 
 function toggleTimerPause() {
@@ -4194,7 +4236,7 @@ function toggleTimerPause() {
     }, timerRemaining * 1000 + 500);
     swTimerStart(timerRemaining);
   }
-  document.getElementById('timer-pause-btn').textContent = timerPaused ? 'RESUME' : 'PAUSE';
+  document.getElementById('timer-pause-btn').textContent = timerPaused ? 'Resume' : 'Pause';
 }
 
 function skipTimer() {
