@@ -4081,27 +4081,30 @@ function startTimer(exName, wk, justCompletedSet) {
   document.getElementById('timer-pause-btn').textContent = 'Pause';
 
   // Populate the up-next preview. Figure out the next set / next exercise.
-  // wk format: `${currentDayId}_${exId}_v${currentWeek}` — parse for context.
   let nextLabel = (exName || '').toUpperCase();
   let nextTarget = '';
   const day = currentBlock && currentBlock.days
     ? currentBlock.days.find(d => d.id === currentDayId)
     : null;
-  if (wk && justCompletedSet != null && day && day.exercises) {
-    const card = document.querySelector(`.log-ex-card[data-wk="${wk}"]`);
-    const totalSets = card ? parseInt(card.dataset.sets, 10) : 0;
-    // Resolve current exercise from wk
-    const exIdMatch = wk.match(/_(.+)_v\d+$/);
-    const exId = exIdMatch ? exIdMatch[1] : null;
-    const exIndex = day.exercises.findIndex(e => e.id === exId);
-    const currentEx = exIndex >= 0 ? day.exercises[exIndex] : null;
-    if (justCompletedSet < totalSets && currentEx) {
-      // Still more sets on the same exercise
-      const nextSetNum = justCompletedSet + 1;
-      nextTarget = `Set ${nextSetNum} of ${totalSets} · ${currentEx.reps} reps`;
-    } else if (exIndex >= 0 && exIndex < day.exercises.length - 1) {
-      // Moving to next exercise
-      const nextEx = day.exercises[exIndex + 1];
+  const card = wk ? document.querySelector(`.log-ex-card[data-wk="${wk}"]`) : null;
+  const totalSets = card ? parseInt(card.dataset.sets, 10) : 0;
+
+  if (justCompletedSet != null && totalSets > 0 && justCompletedSet < totalSets) {
+    // Still more sets on the same exercise — pull rep target by matching name
+    const currentEx = day && day.exercises ? day.exercises.find(e => {
+      const exData = EXERCISES.find(x => x.id === e.id);
+      return exData && exData.name === exName;
+    }) : null;
+    const repTarget = currentEx ? currentEx.reps : '';
+    nextTarget = `Set ${justCompletedSet + 1} of ${totalSets}${repTarget ? ' · ' + repTarget + ' reps' : ''}`;
+  } else if (day && day.exercises && totalSets > 0 && justCompletedSet === totalSets) {
+    // Last set of this exercise — find the next exercise in the day
+    const currentIndex = day.exercises.findIndex(e => {
+      const exData = EXERCISES.find(x => x.id === e.id);
+      return exData && exData.name === exName;
+    });
+    if (currentIndex >= 0 && currentIndex < day.exercises.length - 1) {
+      const nextEx = day.exercises[currentIndex + 1];
       const nextExData = EXERCISES.find(e => e.id === nextEx.id);
       if (nextExData) {
         nextLabel = nextExData.name.toUpperCase();
@@ -4113,6 +4116,7 @@ function startTimer(exName, wk, justCompletedSet) {
       nextTarget = '';
     }
   }
+  // else: defensive fallback — just show the current exercise name with no extra context
   document.getElementById('timer-ex-label').textContent = nextLabel || '—';
   document.getElementById('timer-next-target').textContent = nextTarget;
 
