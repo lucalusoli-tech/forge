@@ -16,7 +16,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
@@ -40,7 +40,7 @@
   .status-bar { height: env(safe-area-inset-top, 0px); background: #080808; flex-shrink: 0; }
 
   .topbar { height: 52px; background: #080808; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; flex-shrink: 0; z-index: 10; }
-  .topbar-logo { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 5px; color: var(--accent); line-height: 1; }
+  .topbar-logo { font-family: 'DM Mono', monospace; font-size: 26px; letter-spacing: 5px; color: var(--accent); line-height: 1; }
   .week-pill { background: var(--accent-glow); border: 1px solid var(--accent-dim); color: var(--accent); font-size: 10px; letter-spacing: 2px; padding: 4px 10px; cursor: pointer; user-select: none; -webkit-user-select: none; }
   .week-pill:active { background: rgba(201,169,110,0.2); }
   .back-btn { background: none; border: none; color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; cursor: pointer; padding: 4px 0; display: none; align-items: center; gap: 6px; }
@@ -60,9 +60,9 @@
   /* ── HOME ── */
   .home-hero { padding: 24px 20px 16px; border-bottom: 1px solid var(--border); }
   .home-greeting { font-size: 9px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
-  .home-title { font-family: 'Bebas Neue', sans-serif; font-size: 38px; letter-spacing: 4px; line-height: 1; }
+  .home-title { font-family: 'DM Mono', monospace; font-size: 26px; font-weight: 500; letter-spacing: 3px; line-height: 1.1; }
   .home-sub { font-size: 10px; letter-spacing: 2px; color: var(--text-muted); margin-top: 4px; }
-  .home-streak { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--accent); margin-top: 10px; text-transform: uppercase; display: none; }
+  .home-streak { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--text); margin-top: 10px; text-transform: uppercase; display: none; opacity: 0.7; }
   .home-streak.visible { display: block; }
   .home-lastweek { display: none; margin-top: 12px; padding: 10px 14px; background: var(--accent-glow); border: 1px solid var(--accent-dim); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; color: var(--accent); cursor: pointer; }
   .home-lastweek.visible { display: block; }
@@ -71,12 +71,12 @@
   .weekly-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9998; display: flex; align-items: center; justify-content: center; padding: 24px; }
   .weekly-card { background: var(--deep); border: 1px solid var(--border); max-width: 320px; width: 100%; padding: 32px 24px; text-align: center; animation: obFadeIn 0.35s ease; }
   .weekly-label { font-size: 9px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 16px; }
-  .weekly-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 4px; color: var(--text); margin-bottom: 20px; line-height: 1.1; }
+  .weekly-title { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; letter-spacing: 3px; color: var(--text); margin-bottom: 20px; line-height: 1.2; }
   .weekly-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
   .weekly-stat { background: var(--surface); border: 1px solid var(--border); padding: 16px 12px; }
-  .weekly-stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; color: var(--accent); line-height: 1; }
+  .weekly-stat-val { font-family: 'DM Mono', monospace; font-size: 28px; letter-spacing: 2px; color: var(--text); line-height: 1; }
   .weekly-stat-lbl { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-top: 4px; }
-  .weekly-streak { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; color: var(--accent); margin-bottom: 24px; text-transform: uppercase; }
+  .weekly-streak { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; color: var(--text); margin-bottom: 24px; text-transform: uppercase; opacity: 0.7; }
   .weekly-cta { background: var(--accent-glow); border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; padding: 14px 28px; cursor: pointer; width: 100%; }
   .weekly-cta:active { background: rgba(201,169,110,0.2); }
 
@@ -84,7 +84,7 @@
   .ready-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 9998; display: flex; align-items: center; justify-content: center; padding: 24px; }
   .ready-card { background: var(--deep); border: 1px solid var(--accent-dim); max-width: 320px; width: 100%; padding: 36px 28px; text-align: center; animation: obFadeIn 0.4s ease; }
   .ready-label { font-size: 9px; letter-spacing: 4px; color: var(--accent); text-transform: uppercase; margin-bottom: 18px; }
-  .ready-title { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 3px; color: var(--text); margin-bottom: 10px; line-height: 1.1; }
+  .ready-title { font-family: 'DM Mono', monospace; font-size: 26px; letter-spacing: 3px; color: var(--text); margin-bottom: 10px; line-height: 1.1; }
   .ready-meta { font-size: 10px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 28px; }
   .ready-cta { background: var(--accent-glow); border: 1px solid var(--accent); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; padding: 16px 20px; cursor: pointer; width: 100%; }
   .ready-cta:active { background: rgba(201,169,110,0.25); }
@@ -126,7 +126,7 @@
   .changelog-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9997; display: flex; align-items: center; justify-content: center; padding: 24px; }
   .changelog-card { background: var(--deep); border: 1px solid var(--border); max-width: 320px; width: 100%; padding: 32px 24px; animation: obFadeIn 0.35s ease; }
   .changelog-badge { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; margin-bottom: 16px; text-align: center; }
-  .changelog-title { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 4px; color: var(--text); margin-bottom: 20px; text-align: center; line-height: 1.1; }
+  .changelog-title { font-family: 'DM Mono', monospace; font-size: 26px; letter-spacing: 4px; color: var(--text); margin-bottom: 20px; text-align: center; line-height: 1.1; }
   .changelog-list { list-style: none; padding: 0; margin: 0 0 24px; }
   .changelog-list li { font-size: 11px; letter-spacing: 0.5px; color: var(--text-muted); line-height: 1.6; padding: 6px 0; border-bottom: 1px solid var(--border); }
   .changelog-list li:last-child { border-bottom: none; }
@@ -136,7 +136,7 @@
   .stat-cell { padding: 16px 20px; border-right: 1px solid var(--border); }
   .stat-cell:last-child { border-right: none; }
   .stat-label { font-size: 8px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
-  .stat-value { font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 2px; color: var(--accent); line-height: 1; }
+  .stat-value { font-family: 'DM Mono', monospace; font-size: 26px; letter-spacing: 2px; color: var(--text); line-height: 1; }
 
   .section-label { padding: 16px 20px 10px; font-size: 9px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; border-bottom: 1px solid var(--border); }
 
@@ -154,7 +154,7 @@
   .day-card { border-bottom: 1px solid var(--border); }
   .day-card-header { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
   .day-card-left { flex: 1; }
-  .day-tag { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 3px; line-height: 1; }
+  .day-tag { font-family: 'DM Mono', monospace; font-size: 20px; letter-spacing: 3px; line-height: 1; }
   .day-type { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-top: 3px; }
   .day-chevron { color: var(--accent); font-size: 14px; transition: transform 0.2s; }
   .day-card-exercises { display: none; padding: 0 20px 16px; }
@@ -164,14 +164,14 @@
   .ex-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
   .ex-row:last-of-type { border-bottom: none; margin-bottom: 8px; }
   .ex-name { font-size: 12px; color: var(--text); }
-  .ex-scheme { font-size: 11px; color: var(--accent); }
+  .ex-scheme { font-size: 11px; color: var(--text); opacity: 0.6; }
 
   .start-btn { display: flex; align-items: center; justify-content: center; width: 100%; padding: 12px; background: var(--accent-glow); border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; margin-top: 4px; }
   .start-btn:active { background: rgba(201,169,110,0.2); }
 
   /* ── LOG ── */
   .log-header { padding: 20px 20px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; }
-  .log-title { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 3px; line-height: 1.1; max-width: 200px; }
+  .log-title { font-family: 'DM Mono', monospace; font-size: 24px; letter-spacing: 3px; line-height: 1.1; max-width: 200px; }
   .week-tabs { display: flex; gap: 4px; }
   .w-tab { width: 34px; height: 28px; background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 9px; cursor: pointer; }
   .w-tab.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
@@ -179,10 +179,10 @@
   .log-ex-card { border-bottom: 1px solid var(--border); }
   .log-ex-header { padding: 14px 20px 10px; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; }
   .log-ex-name-row { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
-  .log-ex-name { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px; }
+  .log-ex-name { font-family: 'DM Mono', monospace; font-size: 18px; letter-spacing: 2px; }
   .log-ex-play { color: var(--accent); font-size: 11px; line-height: 1; flex-shrink: 0; transform: translateY(-1px); }
   .log-ex-target { font-size: 10px; color: var(--text-muted); letter-spacing: 1px; margin-top: 2px; }
-  .log-ex-note { font-size: 9px; color: var(--accent); letter-spacing: 1px; text-align: right; max-width: 110px; flex-shrink: 0; line-height: 1.4; }
+  .log-ex-note { font-size: 9px; color: var(--text); letter-spacing: 1px; text-align: right; max-width: 110px; flex-shrink: 0; line-height: 1.4; opacity: 0.7; }
   .log-ex-body { padding: 0 20px 16px; }
 
   /* Set note */
@@ -191,24 +191,29 @@
   .set-note-input:focus { border-bottom-color: var(--accent); color: var(--text); }
   .set-note-input::placeholder { color: var(--text-dim); font-size: 10px; }
 
-  /* Rest timer overlay */
-  .timer-overlay { position: fixed; inset: 0; background: rgba(8,8,8,0.96); z-index: 300; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  /* Rest timer overlay — cinematic countdown */
+  .timer-overlay { position: fixed; inset: 0; background: rgba(8,8,8,0.98); z-index: 300; display: flex; flex-direction: column; align-items: stretch; justify-content: space-between; opacity: 0; pointer-events: none; transition: opacity 0.3s; padding: 80px 24px calc(40px + var(--safe-bottom)); }
   .timer-overlay.open { opacity: 1; pointer-events: all; }
-  .timer-label { font-size: 9px; letter-spacing: 4px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 20px; }
-  .timer-ring { position: relative; width: 200px; height: 200px; margin-bottom: 28px; }
-  .timer-ring svg { position: absolute; inset: 0; transform: rotate(-90deg); }
-  .timer-ring-bg { fill: none; stroke: var(--border); stroke-width: 2; }
-  .timer-ring-fill { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: butt; transition: stroke-dashoffset 1s linear; }
-  .timer-digits { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 4px; }
-  .timer-time { font-family: 'Bebas Neue', sans-serif; font-size: 72px; letter-spacing: 4px; color: var(--text); line-height: 1; }
-  .timer-ex-name { font-size: 9px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; }
-  .timer-actions { display: flex; gap: 10px; }
-  .timer-btn { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 10px 20px; cursor: pointer; }
+  /* Top section — REST label */
+  .timer-top { text-align: center; }
+  .timer-label { font-size: 10px; letter-spacing: 6px; color: var(--text-muted); text-transform: uppercase; }
+  /* Center — hero time + next-up preview */
+  .timer-center { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; }
+  .timer-time { font-family: 'DM Mono', monospace; font-size: 96px; font-weight: 500; letter-spacing: 4px; color: var(--text); line-height: 1; margin-bottom: 48px; }
+  .timer-next-label { font-size: 9px; letter-spacing: 4px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px; }
+  .timer-next-name { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; text-align: center; line-height: 1.2; margin-bottom: 8px; }
+  .timer-next-target { font-size: 10px; letter-spacing: 3px; color: var(--text); opacity: 0.6; text-transform: uppercase; }
+  /* Bottom — actions + duration row */
+  .timer-bottom { display: flex; flex-direction: column; align-items: center; gap: 28px; }
+  .timer-actions { display: flex; gap: 12px; }
+  .timer-btn { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; padding: 12px 26px; cursor: pointer; -webkit-tap-highlight-color: transparent; }
   .timer-btn.primary { border-color: var(--accent-dim); color: var(--accent); }
   .timer-btn:active { background: var(--surface); }
-  .timer-duration-row { display: flex; gap: 8px; margin-top: 20px; }
+  .timer-duration-row { display: flex; gap: 8px; }
   .timer-dur-btn { background: transparent; border: 1px solid var(--border); color: var(--text-dim); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; padding: 5px 12px; cursor: pointer; }
   .timer-dur-btn.active { border-color: var(--accent-dim); color: var(--accent); }
+  /* Progress line — thin gold bar across the very top, depletes left-to-right */
+  .timer-progress { position: absolute; top: 0; left: 0; height: 2px; background: var(--accent); width: 100%; transform-origin: left center; transform: scaleX(1); transition: transform 1s linear; }
 
   /* Timer toggle in log header */
   .timer-toggle { display: flex; align-items: center; gap: 6px; padding: 8px 20px; border-bottom: 1px solid var(--border); background: var(--deep); }
@@ -234,6 +239,35 @@
   .set-field::placeholder { color: #6b6560; font-size: 10px; }
   .set-field.reps { color: #d4cec7; font-size: 14px; font-weight: 400; }
   .set-divider { font-size: 10px; color: var(--text-dim); align-self: center; margin-top: 16px; }
+
+  /* ── LEVEL 3: FOCUS-MODE SET RENDERING ── */
+  .set-stack { display: flex; flex-direction: column; gap: 0; }
+  /* Shared row geometry — all set states use the same horizontal layout */
+  .set-row { display: flex; align-items: center; gap: 14px; padding: 12px 4px; border-bottom: 1px solid var(--border); font-family: 'DM Mono', monospace; -webkit-tap-highlight-color: transparent; }
+  .set-row:last-child { border-bottom: none; }
+  .set-row-label { font-size: 9px; letter-spacing: 3px; flex-shrink: 0; width: 64px; }
+  .set-row-value { flex: 1; text-align: center; font-size: 14px; letter-spacing: 1px; }
+  .set-row-meta { font-size: 9px; letter-spacing: 2px; flex-shrink: 0; min-width: 50px; text-align: right; text-transform: uppercase; }
+  /* Completed state */
+  .set-row.done { cursor: pointer; }
+  .set-row.done:active { background: rgba(255,255,255,0.02); }
+  .set-row.done .set-row-label { color: var(--text); opacity: 0.5; }
+  .set-row.done .set-row-value { color: var(--text); opacity: 0.75; }
+  .set-row.done .set-row-meta { color: var(--text-muted); opacity: 0.5; }
+  /* Active state — same shape, gold accents, editable inputs */
+  .set-row.active { padding: 14px 4px; border-color: var(--accent-dim); background: linear-gradient(90deg, rgba(201,169,110,0.03), transparent); }
+  .set-row.active .set-row-label { color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; letter-spacing: 2px; }
+  .set-row.active .set-row-inputs { flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; }
+  .set-row.active .set-field { flex: 1; min-width: 0; width: auto; padding: 9px 4px; font-size: 15px; }
+  .set-row.active .set-row-x { font-size: 12px; color: var(--text-muted); opacity: 0.4; flex-shrink: 0; }
+  /* Hide the right-side meta on active rows — frees up ~64px for the inputs */
+  .set-row.active .set-row-meta { display: none; }
+  /* Pending state — quieter */
+  .set-row.pending { cursor: pointer; padding: 10px 4px; }
+  .set-row.pending .set-row-label { color: var(--text); opacity: 0.3; }
+  .set-row.pending .set-row-value { color: var(--text-muted); opacity: 0.3; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; }
+  .set-row.pending .set-row-meta { display: none; }
+  .set-row.pending:active .set-row-label { opacity: 0.5; }
 
   .notes-section { padding: 16px 20px; border-bottom: 1px solid var(--border); }
   .notes-label { font-size: 9px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
@@ -274,7 +308,7 @@
 
   .ex-list-item { border-bottom: 1px solid var(--border); }
   .ex-list-header { padding: 14px 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
-  .ex-list-name { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 2px; }
+  .ex-list-name { font-family: 'DM Mono', monospace; font-size: 20px; letter-spacing: 2px; }
   .ex-list-tags { display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap; }
 
   .tag { font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase; padding: 2px 6px; border: 1px solid var(--border); color: var(--text-muted); }
@@ -299,17 +333,17 @@
 
   /* ── PROGRESS ── */
   .progress-header { padding: 20px 20px 0; }
-  .progress-title { font-family: 'Bebas Neue', sans-serif; font-size: 34px; letter-spacing: 4px; }
+  .progress-title { font-family: 'DM Mono', monospace; font-size: 24px; font-weight: 500; letter-spacing: 3px; }
   .progress-sub { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); margin-top: 2px; }
   .block-stats { display: grid; grid-template-columns: repeat(2, 1fr); margin: 16px 0 0; border: 1px solid var(--border); border-bottom: none; }
   .block-stat { padding: 14px 16px; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); }
   .block-stat:nth-child(2n) { border-right: none; }
   .block-stat-label { font-size: 8px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 4px; }
-  .block-stat-val { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px; color: var(--accent); line-height: 1.2; }
+  .block-stat-val { font-family: 'DM Mono', monospace; font-size: 18px; letter-spacing: 2px; color: var(--text); line-height: 1.2; }
 
   .progress-ex-card { margin: 16px 20px 0; border: 1px solid var(--border); overflow: hidden; }
   .progress-ex-header { background: var(--surface); padding: 10px 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); }
-  .progress-ex-name { font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 2px; }
+  .progress-ex-name { font-family: 'DM Mono', monospace; font-size: 16px; letter-spacing: 2px; }
   .progress-ex-scheme { font-size: 9px; color: var(--text-muted); }
   .wh-cell { font-size: 8px; letter-spacing: 2px; color: var(--text-dim); text-align: center; padding: 6px 4px; border-right: 1px solid var(--border); text-transform: uppercase; }
   .wh-cell:first-child { text-align: left; padding-left: 12px; }
@@ -331,14 +365,14 @@
 
   /* ── BUILDER ── */
   .builder-header { padding: 20px 20px 16px; border-bottom: 1px solid var(--border); }
-  .builder-title { font-family: 'Bebas Neue', sans-serif; font-size: 34px; letter-spacing: 4px; }
+  .builder-title { font-family: 'DM Mono', monospace; font-size: 24px; font-weight: 500; letter-spacing: 3px; }
   .builder-sub { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); margin-top: 2px; }
 
   .field-section { padding: 16px 20px; border-bottom: 1px solid var(--border); }
   .field-label { font-size: 9px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
   .field-sublabel { font-size: 8px; letter-spacing: 1px; color: var(--text-muted); text-transform: none; }
 
-  .name-field { width: 100%; background: var(--deep); border: 1px solid var(--border); color: var(--text); font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 4px; padding: 10px 14px; outline: none; -webkit-appearance: none; border-radius: 0; }
+  .name-field { width: 100%; background: var(--deep); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 22px; letter-spacing: 4px; padding: 10px 14px; outline: none; -webkit-appearance: none; border-radius: 0; }
   .name-field:focus { border-color: var(--accent); }
   .name-field::placeholder { color: var(--text-dim); }
 
@@ -354,7 +388,7 @@
   .day-builder-card.active-day { border-color: var(--accent); }
 
   .day-builder-header { background: var(--surface); padding: 12px 16px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
-  .day-builder-title { font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 2px; flex: 1; }
+  .day-builder-title { font-family: 'DM Mono', monospace; font-size: 16px; letter-spacing: 2px; flex: 1; }
   .day-builder-count { font-size: 9px; color: var(--text-muted); margin-right: 12px; }
   .day-builder-del { background: none; border: none; color: var(--text-dim); font-size: 15px; cursor: pointer; padding: 0 4px; }
   .day-builder-del:active { color: var(--red); }
@@ -402,9 +436,9 @@
   .saved-blocks-section { padding: 16px 20px 0; }
   .saved-wk-card { border: 1px solid var(--border); margin-bottom: 10px; }
   .saved-wk-header { padding: 12px 16px; background: var(--surface); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: flex-start; }
-  .saved-wk-name { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 2px; }
+  .saved-wk-name { font-family: 'DM Mono', monospace; font-size: 18px; letter-spacing: 2px; }
   .saved-wk-meta { font-size: 9px; color: var(--text-muted); margin-top: 3px; }
-  .saved-wk-methods { font-size: 9px; color: var(--accent); letter-spacing: 1px; margin-top: 2px; }
+  .saved-wk-methods { font-size: 9px; color: var(--text); letter-spacing: 1px; margin-top: 2px; opacity: 0.6; }
   .saved-wk-actions { display: flex; gap: 6px; align-items: center; }
   .saved-wk-del { background: none; border: 1px solid var(--border); color: var(--text-dim); font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 1px; text-transform: uppercase; padding: 4px 8px; cursor: pointer; }
   .saved-wk-del:active { border-color: var(--red); color: var(--red); }
@@ -415,13 +449,13 @@
 
   /* Archive panel */
   .archive-panel-header { padding: 20px 20px 16px; border-bottom: 1px solid var(--border); }
-  .archive-panel-title { font-family: 'Bebas Neue', sans-serif; font-size: 34px; letter-spacing: 4px; }
+  .archive-panel-title { font-family: 'DM Mono', monospace; font-size: 24px; font-weight: 500; letter-spacing: 3px; }
   .archive-panel-sub { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); margin-top: 2px; }
 
   .archived-block { border: 1px solid var(--border); margin: 16px 20px 0; overflow: hidden; }
   .archived-block-header { background: var(--surface); padding: 14px 16px; border-bottom: 1px solid var(--border); cursor: pointer; display: flex; align-items: flex-start; justify-content: space-between; }
-  .archived-block-name { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 3px; }
-  .archived-block-methods { font-size: 9px; color: var(--accent); letter-spacing: 1px; margin-top: 3px; }
+  .archived-block-name { font-family: 'DM Mono', monospace; font-size: 20px; letter-spacing: 3px; }
+  .archived-block-methods { font-size: 9px; color: var(--text); letter-spacing: 1px; margin-top: 3px; opacity: 0.6; }
   .archived-block-meta { font-size: 9px; color: var(--text-muted); letter-spacing: 1px; margin-top: 4px; }
   .archived-block-chevron { color: var(--accent); font-size: 14px; transition: transform 0.2s; flex-shrink: 0; margin-top: 4px; }
   .archived-block.open .archived-block-chevron { transform: rotate(90deg); }
@@ -433,14 +467,14 @@
   .archived-progress { padding: 12px 16px; border-top: 1px solid var(--border); background: var(--deep); }
   .archived-progress-label { font-size: 8px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 10px; }
   .archived-progress-ex { margin-bottom: 10px; border: 1px solid var(--border); overflow: hidden; }
-  .archived-progress-ex-name { font-family: 'Bebas Neue', sans-serif; font-size: 13px; letter-spacing: 2px; background: var(--surface); padding: 6px 10px; border-bottom: 1px solid var(--border); }
+  .archived-progress-ex-name { font-family: 'DM Mono', monospace; font-size: 13px; letter-spacing: 2px; background: var(--surface); padding: 6px 10px; border-bottom: 1px solid var(--border); }
 
   /* ── CONFIRM ── */
   .confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.82); z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.2s; display: flex; align-items: flex-end; }
   .confirm-overlay.open { opacity: 1; pointer-events: all; }
   .confirm-sheet { background: var(--surface); border-top: 1px solid var(--border); width: 100%; padding: 24px 20px; padding-bottom: calc(24px + var(--safe-bottom)); transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.32,0.72,0,1); }
   .confirm-overlay.open .confirm-sheet { transform: translateY(0); }
-  .confirm-title { font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 3px; margin-bottom: 8px; }
+  .confirm-title { font-family: 'DM Mono', monospace; font-size: 24px; letter-spacing: 3px; margin-bottom: 8px; }
   .confirm-desc { font-size: 12px; color: var(--text-muted); line-height: 1.6; margin-bottom: 20px; }
   .confirm-yes { width: 100%; padding: 14px; background: var(--accent-glow); border: 1px solid var(--accent); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; margin-bottom: 8px; }
   .confirm-no { width: 100%; padding: 14px; background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
@@ -452,7 +486,7 @@
   .sheet-overlay.open .bottom-sheet { transform: translateY(0); }
   .sheet-handle { width: 40px; height: 4px; background: var(--border-light); border-radius: 2px; margin: 12px auto 0; }
   .sheet-header { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-  .sheet-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px; }
+  .sheet-title { font-family: 'DM Mono', monospace; font-size: 22px; letter-spacing: 3px; }
   .sheet-close { background: none; border: none; color: var(--text-muted); font-size: 18px; cursor: pointer; padding: 4px 8px; }
   .sheet-body { padding: 20px; }
   .sheet-desc { font-size: 13px; color: var(--text-muted); line-height: 1.6; font-style: italic; padding-bottom: 14px; border-bottom: 1px solid var(--border); margin-bottom: 4px; }
@@ -462,7 +496,7 @@
 
   .home-empty-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 40px; text-align: center; }
   .home-empty-icon { font-size: 28px; color: var(--accent-dim); margin-bottom: 20px; }
-  .home-empty-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 4px; color: var(--text); margin-bottom: 8px; }
+  .home-empty-title { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; letter-spacing: 3px; color: var(--text); margin-bottom: 8px; }
   .home-empty-sub { font-size: 11px; letter-spacing: 1px; color: var(--text-muted); line-height: 1.6; margin-bottom: 28px; }
   .home-empty-cta { background: var(--accent-glow); border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; padding: 14px 28px; cursor: pointer; }
   .home-empty-cta:active { background: rgba(201,169,110,0.2); }
@@ -481,10 +515,10 @@
   .auth-screen { position: fixed; inset: 0; background: #080808; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: env(safe-area-inset-bottom, 24px); }
   .auth-screen.hidden { display: none; }
   .auth-logo-wrap { position: absolute; top: 0; left: 0; right: 0; bottom: 40%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-  .auth-logo { font-family: 'Bebas Neue', sans-serif; font-size: 72px; letter-spacing: 16px; color: var(--accent); line-height: 1; }
+  .auth-logo { font-family: 'DM Mono', monospace; font-size: 44px; font-weight: 500; letter-spacing: 10px; color: var(--accent); line-height: 1; }
   .auth-tagline { font-size: 10px; letter-spacing: 4px; color: var(--text-muted); text-transform: uppercase; margin-top: 8px; }
   .auth-form { width: 100%; padding: 0 24px 32px; display: flex; flex-direction: column; gap: 12px; position: relative; z-index: 1; }
-  .auth-title { font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 4px; color: var(--text); margin-bottom: 4px; }
+  .auth-title { font-family: 'DM Mono', monospace; font-size: 28px; letter-spacing: 4px; color: var(--text); margin-bottom: 4px; }
   .auth-input { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 14px; padding: 14px 16px; outline: none; -webkit-appearance: none; border-radius: 0; box-sizing: border-box; display: block; }
   .auth-input:focus { border-color: var(--accent); }
   .auth-input::placeholder { color: var(--text-dim); font-size: 12px; }
@@ -513,7 +547,7 @@
   .signout-sheet.open { display: block; }
   .signout-backdrop { position: absolute; inset: 0; background: rgba(0,0,0,0.6); }
   .signout-card { position: absolute; bottom: 0; left: 0; right: 0; background: var(--card); border-top: 1px solid var(--border); padding: 24px 20px 40px; }
-  .signout-name { font-family: 'Bebas Neue', sans-serif; font-size: 22px; letter-spacing: 3px; color: var(--text); margin-bottom: 4px; }
+  .signout-name { font-family: 'DM Mono', monospace; font-size: 22px; letter-spacing: 3px; color: var(--text); margin-bottom: 4px; }
   .signout-email { font-size: 9px; letter-spacing: 1px; color: var(--text-muted); margin-bottom: 24px; }
   .signout-btn { width: 100%; padding: 14px; background: none; border: 1px solid var(--border-light); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; }
   .signout-btn:active { border-color: var(--red); color: var(--red); }
@@ -523,13 +557,13 @@
   .upgrade-overlay.open { opacity: 1; pointer-events: all; }
   .upgrade-sheet { width: 100%; background: var(--surface); border-top: 1px solid var(--border); padding: 32px 24px; padding-bottom: calc(32px + env(safe-area-inset-bottom,0px)); transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.32,0.72,0,1); }
   .upgrade-overlay.open .upgrade-sheet { transform: translateY(0); }
-  .upgrade-title { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 4px; line-height: 1; margin-bottom: 4px; }
+  .upgrade-title { font-family: 'DM Mono', monospace; font-size: 24px; font-weight: 500; letter-spacing: 3px; line-height: 1.1; margin-bottom: 4px; }
   .upgrade-sub { font-size: 10px; letter-spacing: 2px; color: var(--text-muted); margin-bottom: 24px; }
   .upgrade-features { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
   .upgrade-feat { display: flex; align-items: flex-start; gap: 12px; font-size: 12px; color: var(--text-muted); line-height: 1.5; }
   .upgrade-feat-icon { color: var(--accent); font-size: 14px; margin-top: 1px; flex-shrink: 0; }
   .upgrade-price { display: flex; align-items: baseline; gap: 6px; margin-bottom: 6px; }
-  .upgrade-price-amount { font-family: 'Bebas Neue', sans-serif; font-size: 48px; letter-spacing: 2px; color: var(--accent); line-height: 1; }
+  .upgrade-price-amount { font-family: 'DM Mono', monospace; font-size: 32px; font-weight: 500; letter-spacing: 1px; color: var(--accent); line-height: 1; }
   .upgrade-price-period { font-size: 11px; letter-spacing: 1px; color: var(--text-muted); }
   .upgrade-trial { font-size: 10px; letter-spacing: 1px; color: var(--green); margin-bottom: 20px; }
   .upgrade-cta { width: 100%; padding: 18px; background: var(--accent); border: none; color: #080808; font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; font-weight: 500; margin-bottom: 10px; }
@@ -539,7 +573,7 @@
   .fixed-section-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px; cursor: pointer; }
   .fixed-section-label { font-size: 8px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; }
   .fixed-section-badge { font-size: 8px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; background: var(--accent-glow); padding: 2px 8px; border: 1px solid var(--accent-dim); }
-  .fixed-section-title { font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 3px; color: var(--text); margin-top: 2px; }
+  .fixed-section-title { font-family: 'DM Mono', monospace; font-size: 18px; letter-spacing: 3px; color: var(--text); margin-top: 2px; }
   .fixed-section-body { padding: 0 14px 12px; border-top: 1px solid var(--border); display: none; }
   .fixed-section.open .fixed-section-body { display: block; }
   .fixed-section.open .day-chevron { transform: rotate(90deg); }
@@ -549,17 +583,17 @@
   /* builder fixed sections */
   .builder-fixed { margin: 0 16px 16px; border: 1px solid var(--border); }
   .builder-fixed-header { padding: 14px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
-  .builder-fixed-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; letter-spacing: 3px; }
+  .builder-fixed-title { font-family: 'DM Mono', monospace; font-size: 20px; letter-spacing: 3px; }
   .builder-fixed-sub { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); margin-top: 2px; }
   .builder-fixed-body { padding: 12px 14px; }
   .coaching-hero { padding: 32px 20px 20px; border-bottom: 1px solid var(--border); }
   .coaching-eyebrow { font-size: 9px; letter-spacing: 4px; color: var(--accent); text-transform: uppercase; margin-bottom: 10px; }
-  .coaching-title { font-family: 'Bebas Neue', sans-serif; font-size: 42px; letter-spacing: 4px; line-height: 1; margin-bottom: 12px; }
+  .coaching-title { font-family: 'DM Mono', monospace; font-size: 28px; font-weight: 500; letter-spacing: 3px; line-height: 1.1; margin-bottom: 12px; }
   .coaching-desc { font-size: 12px; color: var(--text-muted); line-height: 1.7; }
   .coaching-pillars { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); margin: 20px; }
   .coaching-pillar { background: var(--surface); padding: 16px 14px; }
   .coaching-pillar-icon { font-size: 18px; margin-bottom: 8px; }
-  .coaching-pillar-title { font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 2px; color: var(--text); margin-bottom: 4px; }
+  .coaching-pillar-title { font-family: 'DM Mono', monospace; font-size: 15px; letter-spacing: 2px; color: var(--text); margin-bottom: 4px; }
   .coaching-pillar-desc { font-size: 10px; color: var(--text-muted); line-height: 1.5; letter-spacing: 0.5px; }
   .coaching-form { padding: 0 20px 20px; }
   .coaching-form-label { font-size: 9px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 16px; border-top: 1px solid var(--border); padding-top: 20px; }
@@ -592,7 +626,7 @@
   .ai-spinner { width: 20px; height: 20px; border: 2px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: ai-spin 0.8s linear infinite; }
   @keyframes ai-spin { to { transform: rotate(360deg); } }
   .ai-result-day { background: var(--surface); border: 1px solid var(--border); padding: 16px; margin-bottom: 10px; }
-  .ai-result-day-name { font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 2px; margin-bottom: 10px; }
+  .ai-result-day-name { font-family: 'DM Mono', monospace; font-size: 16px; letter-spacing: 2px; margin-bottom: 10px; }
   .ai-result-ex { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
   .ai-result-ex:last-child { border-bottom: none; }
   .ai-result-ex-name { color: var(--text); }
@@ -610,13 +644,13 @@
   .onboard-step.active { display: flex; }
   @keyframes obFadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
   .onboard-icon { font-size: 32px; color: var(--accent); margin-bottom: 24px; opacity: 0.7; }
-  .onboard-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 5px; color: var(--text); margin-bottom: 8px; line-height: 1.1; }
+  .onboard-title { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; letter-spacing: 4px; color: var(--text); margin-bottom: 8px; line-height: 1.2; }
   .onboard-sub { font-size: 11px; letter-spacing: 1px; color: var(--text-muted); line-height: 1.7; margin-bottom: 36px; max-width: 280px; }
   .onboard-options { display: flex; flex-direction: column; gap: 10px; width: 100%; }
   .onboard-opt { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; padding: 16px 20px; cursor: pointer; text-align: center; transition: all 0.2s; }
   .onboard-opt:active, .onboard-opt.selected { border-color: var(--accent-dim); color: var(--accent); background: var(--accent-glow); }
   .onboard-freq { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; width: 100%; }
-  .onboard-freq-opt { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 2px; padding: 20px 0; cursor: pointer; text-align: center; transition: all 0.2s; }
+  .onboard-freq-opt { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; letter-spacing: 2px; padding: 20px 0; cursor: pointer; text-align: center; transition: all 0.2s; }
   .onboard-freq-opt span { display: block; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; color: var(--text-muted); margin-top: 4px; text-transform: uppercase; }
   .onboard-freq-opt:active, .onboard-freq-opt.selected { border-color: var(--accent-dim); color: var(--accent); background: var(--accent-glow); }
   .onboard-cta { background: var(--accent-glow); border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; padding: 16px 32px; cursor: pointer; margin-top: 8px; }
@@ -886,7 +920,7 @@
 
     <!-- FORGE tier -->
     <div id="upgrade-forge-tier" style="border:1px solid var(--border);padding:20px;margin-bottom:12px">
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;margin-bottom:4px">FORGE</div>
+      <div style="font-family:'DM Mono',monospace;font-size:22px;letter-spacing:3px;margin-bottom:4px">FORGE</div>
       <div style="font-size:10px;letter-spacing:1px;color:var(--text-muted);margin-bottom:14px">The full training system</div>
       <div class="upgrade-features" style="margin-bottom:14px">
         <div class="upgrade-feat"><span class="upgrade-feat-icon">✦</span><span>Unlimited training blocks</span></div>
@@ -899,7 +933,7 @@
 
     <!-- FORGE+ tier -->
     <div id="upgrade-plus-tier" style="border:1px solid var(--accent-dim);padding:20px;margin-bottom:12px;background:var(--accent-glow)">
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;color:var(--accent);margin-bottom:4px">FORGE+</div>
+      <div style="font-family:'DM Mono',monospace;font-size:22px;letter-spacing:3px;color:var(--accent);margin-bottom:4px">FORGE+</div>
       <div style="font-size:10px;letter-spacing:1px;color:var(--text-muted);margin-bottom:14px">Coach programming + AI</div>
       <div class="upgrade-features" style="margin-bottom:14px">
         <div class="upgrade-feat"><span class="upgrade-feat-icon">✦</span><span>Everything in FORGE</span></div>
@@ -1096,7 +1130,7 @@
             <button class="picker-chip" onclick="toggleMethod('Emphasized Concurrent',this)">Emphasized Concurrent</button>
             <button class="picker-chip" onclick="toggleMethod('DUP',this)">DUP</button>
           </div>
-          <div id="method-preview" style="margin-top:10px;font-size:10px;letter-spacing:1px;color:var(--accent);min-height:16px"></div>
+          <div id="method-preview" style="margin-top:10px;font-size:10px;letter-spacing:1px;color:var(--text);opacity:0.6;min-height:16px"></div>
         </div>
 
         <!-- Duration -->
@@ -1182,7 +1216,7 @@
         <div id="ai-programme-link" style="display:none">
           <div style="padding:28px 20px 24px;border-bottom:1px solid var(--border);background:linear-gradient(180deg, rgba(201,169,110,0.06) 0%, transparent 100%)">
             <div style="font-size:9px;letter-spacing:4px;color:var(--accent);text-transform:uppercase;margin-bottom:10px">✦ FORGE+ AI</div>
-            <div style="font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:4px;line-height:1;margin-bottom:10px;color:var(--text)">BUILD MY<br>PROGRAMME</div>
+            <div style="font-family:'DM Mono',monospace;font-size:24px;font-weight:500;letter-spacing:3px;line-height:1.1;margin-bottom:10px;color:var(--text)">BUILD MY<br>PROGRAMME</div>
             <div style="font-size:11px;letter-spacing:0.5px;color:var(--text-muted);line-height:1.7;margin-bottom:20px">Answer a few questions about your level and goals. The AI builds a complete training block — personalised exercises, sets, reps, and progression. Finish a block and it reads your data to build the next one smarter.</div>
             <button class="coaching-submit" onclick="navigate('ai')" style="width:100%">START AI ASSESSMENT →</button>
           </div>
@@ -1317,27 +1351,27 @@
 
 <!-- REST TIMER -->
 <div class="timer-overlay" id="timer-overlay">
-  <div class="timer-label">REST</div>
-  <div class="timer-ring">
-    <svg viewBox="0 0 200 200" width="200" height="200">
-      <circle class="timer-ring-bg" cx="100" cy="100" r="94"/>
-      <circle class="timer-ring-fill" id="timer-ring-fill" cx="100" cy="100" r="94"
-        stroke-dasharray="590.6" stroke-dashoffset="0"/>
-    </svg>
-    <div class="timer-digits">
-      <div class="timer-time" id="timer-display">1:30</div>
-      <div class="timer-ex-name" id="timer-ex-label"></div>
+  <div class="timer-progress" id="timer-progress"></div>
+  <div class="timer-top">
+    <div class="timer-label">Rest</div>
+  </div>
+  <div class="timer-center">
+    <div class="timer-time" id="timer-display">1:30</div>
+    <div class="timer-next-label">Up next</div>
+    <div class="timer-next-name" id="timer-ex-label">—</div>
+    <div class="timer-next-target" id="timer-next-target"></div>
+  </div>
+  <div class="timer-bottom">
+    <div class="timer-actions">
+      <button class="timer-btn" onclick="skipTimer()">Skip</button>
+      <button class="timer-btn primary" onclick="toggleTimerPause()" id="timer-pause-btn">Pause</button>
     </div>
-  </div>
-  <div class="timer-actions">
-    <button class="timer-btn" onclick="skipTimer()">SKIP</button>
-    <button class="timer-btn primary" onclick="toggleTimerPause()" id="timer-pause-btn">PAUSE</button>
-  </div>
-  <div class="timer-duration-row">
-    <button class="timer-dur-btn" onclick="setTimerDuration(60,this)">60s</button>
-    <button class="timer-dur-btn active" onclick="setTimerDuration(90,this)">90s</button>
-    <button class="timer-dur-btn" onclick="setTimerDuration(120,this)">2m</button>
-    <button class="timer-dur-btn" onclick="setTimerDuration(180,this)">3m</button>
+    <div class="timer-duration-row">
+      <button class="timer-dur-btn" onclick="setTimerDuration(60,this)">60s</button>
+      <button class="timer-dur-btn active" onclick="setTimerDuration(90,this)">90s</button>
+      <button class="timer-dur-btn" onclick="setTimerDuration(120,this)">2m</button>
+      <button class="timer-dur-btn" onclick="setTimerDuration(180,this)">3m</button>
+    </div>
   </div>
 </div>
 
@@ -2061,10 +2095,11 @@ function switchBuildTab(tab) {
 }
 
 // ─── CHANGELOG ─────────────────────────────────────────────────
-const FORGE_VERSION = '1.9.3';
+const FORGE_VERSION = '2.0.0';
 const FORGE_CHANGELOG = [
-  'Week progression now triggers at 50% completion — skip a day without getting stuck',
-  'Fixed notification issue when switching between apps'
+  'Refreshed look — cleaner typography and a tighter visual rhythm across every screen',
+  'New in-app number pad for logging sets — no more fighting the iOS keyboard',
+  'Redesigned rest timer with a cinematic countdown and a preview of what is coming next'
 ];
 
 function checkChangelog() {
@@ -2792,24 +2827,9 @@ function renderLogExercises(exercises) {
   exercises.forEach(ex => {
     const exData = EXERCISES.find(e=>e.id===ex.id); if(!exData) return;
     const wk = `${currentDayId}_${ex.id}_v${currentWeek}`;
-    const saved = sessionLog[wk]||{};
-    let cols='';
-    for(let s=1;s<=ex.sets;s++){
-      cols+=`<div class="set-col">
-        <div class="set-num">S${s}</div>
-        <input class="set-field" type="text" inputmode="none" placeholder="kg" value="${saved[`s${s}_w`]||''}" id="${wk}_s${s}_w"
-          autocomplete="one-time-code" data-lpignore="true" data-form-type="other" oninput="autoSaveSet('${wk}',${s})"
-          data-numpad="decimal" readonly>
-        <input class="set-field reps" type="text" inputmode="none" placeholder="reps" value="${saved[`s${s}_r`]||''}" id="${wk}_s${s}_r"
-          autocomplete="one-time-code" data-lpignore="true" data-form-type="other" oninput="autoSaveSet('${wk}',${s})"
-          onblur="onSetBlur('${wk}',${s},'${exData.name}')" data-numpad="integer" readonly>
-      </div>`;
-      if(s<ex.sets) cols+=`<div class="set-divider">·</div>`;
-    }
-    // Build sparkline from past weeks
     const sparkSvg = buildSparkline(ex.id);
+    const saved = sessionLog[wk]||{};
     const savedNote = saved['note']||'';
-    // Build "last week" summary from previous week's data
     let lastWeekHint = '';
     if (currentWeek > 1) {
       const prevKey = `${currentDayId}_${ex.id}_v${currentWeek - 1}`;
@@ -2832,7 +2852,7 @@ function renderLogExercises(exercises) {
         lastWeekHint = `<div style="font-size:9px;letter-spacing:1px;color:var(--accent-dim);padding:0 16px 4px">↳ ${hint}</div>`;
       }
     }
-    c.innerHTML+=`<div class="log-ex-card">
+    c.innerHTML+=`<div class="log-ex-card" data-wk="${wk}" data-sets="${ex.sets}">
       <div class="log-ex-header" onclick="openSheet('${exData.id}')">
         <div><div class="log-ex-name-row"><div class="log-ex-name">${exData.name}</div><span class="log-ex-play" aria-hidden="true">▶</span></div><div class="log-ex-target">${ex.sets}×${ex.reps}</div></div>
         <div class="log-ex-note">${ex.note||''}</div>
@@ -2840,15 +2860,90 @@ function renderLogExercises(exercises) {
       ${lastWeekHint}
       ${sparkSvg ? `<div class="spark-row"><div class="spark-label">Load trend</div>${sparkSvg}</div>` : ''}
       <div class="log-ex-body">
-        <div style="font-size:8px;letter-spacing:2px;color:var(--text-muted);margin-bottom:8px">WEIGHT / REPS PER SET</div>
-        <div class="sets-scroll">${cols}</div>
+        <div class="set-stack" id="set-stack-${wk}"></div>
       </div>
       <div class="set-note-row">
         <input class="set-note-input" type="text" placeholder="Exercise note — technique, feel, load..." value="${savedNote}"
           id="${wk}_note" autocomplete="off" onblur="autoSaveNote('${wk}')">
       </div>
     </div>`;
+    renderSetStack(wk, ex.sets, exData.name);
   });
+}
+
+// Determine which set is "active": first one without reps logged.
+// If all sets have reps, no active set (everything is done).
+function _activeSetIndex(wk, totalSets) {
+  const saved = sessionLog[wk] || {};
+  for (let s = 1; s <= totalSets; s++) {
+    if (!saved[`s${s}_r`] || saved[`s${s}_r`] === '') return s;
+  }
+  return null; // all complete
+}
+
+// Render the set-stack inside an exercise card. Called on initial render and
+// whenever a set completes (to re-evaluate active/completed/pending states).
+function renderSetStack(wk, totalSets, exName, forceActiveSet) {
+  const container = document.getElementById('set-stack-' + wk);
+  if (!container) return;
+  const saved = sessionLog[wk] || {};
+  // forceActiveSet lets caller pin an active set (e.g. when user taps a completed row to edit)
+  const autoActive = _activeSetIndex(wk, totalSets);
+  const activeSet = forceActiveSet != null ? forceActiveSet : autoActive;
+  // Safely embed exName in inline attributes (escapes quotes etc.)
+  const exNameAttr = JSON.stringify(exName).replace(/"/g, '&quot;');
+  let html = '';
+  for (let s = 1; s <= totalSets; s++) {
+    const w = saved[`s${s}_w`] || '';
+    const r = saved[`s${s}_r`] || '';
+    const isActive = (s === activeSet);
+    const isDone = (r !== '' && !isActive);
+    if (isActive) {
+      // Active row — same horizontal shape as the others, but inputs are editable
+      html += `<div class="set-row active" data-set="${s}">
+        <div class="set-row-label">SET ${s}</div>
+        <div class="set-row-inputs">
+          <input class="set-field" type="text" inputmode="none" placeholder="kg" value="${w}" id="${wk}_s${s}_w"
+            autocomplete="one-time-code" data-lpignore="true" data-form-type="other" oninput="autoSaveSet('${wk}',${s})"
+            data-numpad="decimal" readonly>
+          <div class="set-row-x">×</div>
+          <input class="set-field reps" type="text" inputmode="none" placeholder="reps" value="${r}" id="${wk}_s${s}_r"
+            autocomplete="one-time-code" data-lpignore="true" data-form-type="other" oninput="autoSaveSet('${wk}',${s})"
+            onblur="onSetBlur('${wk}',${s},${exNameAttr})" data-numpad="integer" readonly>
+        </div>
+        <div class="set-row-meta">${s} of ${totalSets}</div>
+      </div>`;
+    } else if (isDone) {
+      // Completed row — BW when weight is 0 or empty, else "Xkg"
+      const wNum = parseFloat(w);
+      const wDisplay = (!w || wNum === 0) ? 'BW' : `${w}kg`;
+      html += `<div class="set-row done" onclick="reactivateSet('${wk}',${s},${totalSets},${exNameAttr})">
+        <div class="set-row-label">SET ${s}</div>
+        <div class="set-row-value">${wDisplay} × ${r}r</div>
+        <div class="set-row-meta">Edit</div>
+      </div>`;
+    } else {
+      // Pending row — quiet stub, same shape
+      html += `<div class="set-row pending" onclick="reactivateSet('${wk}',${s},${totalSets},${exNameAttr})">
+        <div class="set-row-label">SET ${s}</div>
+        <div class="set-row-value">Pending</div>
+        <div class="set-row-meta"></div>
+      </div>`;
+    }
+  }
+  container.innerHTML = html;
+}
+
+// Tapping a completed or pending row promotes it to active
+function reactivateSet(wk, setNum, totalSets, exName) {
+  renderSetStack(wk, totalSets, exName, setNum);
+  // Focus the kg input of the newly-active set
+  setTimeout(() => {
+    const kgInput = document.getElementById(`${wk}_s${setNum}_w`);
+    if (kgInput) {
+      kgInput.dispatchEvent(new Event('click', { bubbles: true }));
+    }
+  }, 50);
 }
 
 function addExToLog(id) {
@@ -3344,7 +3439,7 @@ function renderHomeFixedSections() {
       const ex = EXERCISES.find(x=>x.id===e.id);
       return `<div style="display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px solid var(--border)">
         <span style="font-size:11px;letter-spacing:1px;color:var(--text)">${ex?.name||e.id}</span>
-        <span style="font-size:10px;letter-spacing:1px;color:var(--accent);flex-shrink:0;margin-left:12px">${e.sets||''}</span>
+        <span style="font-size:10px;letter-spacing:1px;color:var(--text);opacity:0.6;flex-shrink:0;margin-left:12px">${e.sets||''}</span>
       </div>${e.note ? `<div style="font-size:9px;letter-spacing:1px;color:var(--text-muted);padding:4px 0 6px">${e.note}</div>` : ''}`;
     }).join('');
   }
@@ -3916,8 +4011,25 @@ function swTimerCancel() {
 const TIMER_CIRCUMFERENCE = 590.6;
 
 function onSetBlur(wk, setNum, exName) {
+  // While the numpad is open, blur events fire whenever the user taps any
+  // numpad button (including ⌫) because focus shifts from the readonly input
+  // to the button. These should NOT trigger set completion. Only the explicit
+  // DONE button (which closes the numpad first, then fires blur) or a tap
+  // outside the numpad should complete the set.
+  if (document.body.classList.contains('numpad-open')) return;
+
   const r = document.getElementById(`${wk}_s${setNum}_r`);
-  if(r && r.value.trim() !== '' && timerEnabled) startTimer(exName);
+  if(r && r.value.trim() !== '' && timerEnabled) startTimer(exName, wk, setNum);
+  // Re-render the set stack so this set collapses to its done-row and the
+  // next pending set promotes to active. Only fires when reps is non-empty
+  // (so partial edits don't snap the user away from the active set).
+  if (r && r.value.trim() !== '') {
+    const card = document.querySelector(`.log-ex-card[data-wk="${wk}"]`);
+    if (card) {
+      const totalSets = parseInt(card.dataset.sets, 10);
+      renderSetStack(wk, totalSets, exName);
+    }
+  }
 }
 
 function autoSaveSet(wk, setNum) {
@@ -3960,15 +4072,55 @@ function fireTimerAlert() {
   } catch(e) {}
 }
 
-function startTimer(exName) {
+function startTimer(exName, wk, justCompletedSet) {
   clearInterval(timerInterval);
   if (timerBackupTimeout) clearTimeout(timerBackupTimeout);
   timerFired = false; // reset guard for new timer cycle
   timerRemaining = timerDuration;
   timerPaused = false;
   timerEndTime = Date.now() + (timerDuration * 1000);
-  document.getElementById('timer-pause-btn').textContent = 'PAUSE';
-  document.getElementById('timer-ex-label').textContent = exName || '';
+  document.getElementById('timer-pause-btn').textContent = 'Pause';
+
+  // Populate the up-next preview. Figure out the next set / next exercise.
+  let nextLabel = (exName || '').toUpperCase();
+  let nextTarget = '';
+  const day = currentBlock && currentBlock.days
+    ? currentBlock.days.find(d => d.id === currentDayId)
+    : null;
+  const card = wk ? document.querySelector(`.log-ex-card[data-wk="${wk}"]`) : null;
+  const totalSets = card ? parseInt(card.dataset.sets, 10) : 0;
+
+  if (justCompletedSet != null && totalSets > 0 && justCompletedSet < totalSets) {
+    // Still more sets on the same exercise — pull rep target by matching name
+    const currentEx = day && day.exercises ? day.exercises.find(e => {
+      const exData = EXERCISES.find(x => x.id === e.id);
+      return exData && exData.name === exName;
+    }) : null;
+    const repTarget = currentEx ? currentEx.reps : '';
+    nextTarget = `Set ${justCompletedSet + 1} of ${totalSets}${repTarget ? ' · ' + repTarget + ' reps' : ''}`;
+  } else if (day && day.exercises && totalSets > 0 && justCompletedSet === totalSets) {
+    // Last set of this exercise — find the next exercise in the day
+    const currentIndex = day.exercises.findIndex(e => {
+      const exData = EXERCISES.find(x => x.id === e.id);
+      return exData && exData.name === exName;
+    });
+    if (currentIndex >= 0 && currentIndex < day.exercises.length - 1) {
+      const nextEx = day.exercises[currentIndex + 1];
+      const nextExData = EXERCISES.find(e => e.id === nextEx.id);
+      if (nextExData) {
+        nextLabel = nextExData.name.toUpperCase();
+        nextTarget = `Set 1 of ${nextEx.sets} · ${nextEx.reps} reps`;
+      }
+    } else {
+      // Last set of last exercise — workout done
+      nextLabel = 'Workout complete';
+      nextTarget = '';
+    }
+  }
+  // else: defensive fallback — just show the current exercise name with no extra context
+  document.getElementById('timer-ex-label').textContent = nextLabel || '—';
+  document.getElementById('timer-next-target').textContent = nextTarget;
+
   document.getElementById('timer-overlay').classList.add('open');
   updateTimerDisplay();
 
@@ -4066,8 +4218,9 @@ function updateTimerDisplay() {
   const s = timerRemaining % 60;
   document.getElementById('timer-display').textContent = m+':'+(s<10?'0':'')+s;
   const pct = timerRemaining / timerDuration;
-  const offset = TIMER_CIRCUMFERENCE * (1 - pct);
-  document.getElementById('timer-ring-fill').style.strokeDashoffset = offset;
+  // Progress bar depletes left-to-right (full at start, empty at end)
+  const bar = document.getElementById('timer-progress');
+  if (bar) bar.style.transform = 'scaleX(' + pct + ')';
 }
 
 function toggleTimerPause() {
@@ -4088,7 +4241,7 @@ function toggleTimerPause() {
     }, timerRemaining * 1000 + 500);
     swTimerStart(timerRemaining);
   }
-  document.getElementById('timer-pause-btn').textContent = timerPaused ? 'RESUME' : 'PAUSE';
+  document.getElementById('timer-pause-btn').textContent = timerPaused ? 'Resume' : 'Pause';
 }
 
 function skipTimer() {
@@ -4637,7 +4790,7 @@ const TOURS = {
     storageKey: 'fw_log_tour_seen',
     beats: [
       { selector: '.log-ex-card .log-ex-play', label: 'Tap for demo' },
-      { selector: '.log-ex-card .sets-scroll', label: 'Log your set' }
+      { selector: '.log-ex-card .set-row.active', label: 'Log your set' }
     ]
   },
   builder: {
@@ -4787,9 +4940,19 @@ let _numpadActiveInput = null;
 
 function openNumpad(input) {
   if (!input) return;
-  // Close any previous active state
+  // Close any previous active state — fire blur so any onblur handlers run
+  // (e.g. set re-render in focus mode). The re-render will replace this
+  // input's DOM node, so capture the *new* user-tapped input AFTER the blur.
+  const newInputId = input.id;
   if (_numpadActiveInput && _numpadActiveInput !== input) {
-    _numpadActiveInput.classList.remove('numpad-active');
+    const prev = _numpadActiveInput;
+    prev.classList.remove('numpad-active');
+    prev.dispatchEvent(new Event('blur', { bubbles: true }));
+    // After blur may have triggered a re-render, re-resolve the input by ID.
+    // Critical: if the re-render created a new DOM node, the original `input`
+    // reference is stale.
+    input = document.getElementById(newInputId);
+    if (!input) return; // user tapped a set that re-render removed (e.g. now completed)
   }
   _numpadActiveInput = input;
   input.classList.add('numpad-active');
@@ -5908,7 +6071,7 @@ async function loadProgrammes() {
     list.innerHTML = `
       <div style="border:1px solid var(--border);background:var(--card);margin-bottom:12px;padding:32px 20px;text-align:center">
         <div style="font-size:28px;margin-bottom:16px">✦</div>
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:3px;margin-bottom:8px">FORGE+</div>
+        <div style="font-family:'DM Mono',monospace;font-size:22px;letter-spacing:3px;margin-bottom:8px">FORGE+</div>
         <div style="font-size:10px;letter-spacing:1px;color:var(--text-muted);line-height:1.8;margin-bottom:20px">New training programme every month — built by a certified L3 PT and loaded straight into your app. Plus AI-generated blocks on demand.</div>
         <button onclick="openUpgrade()" style="width:100%;padding:12px;background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer">UPGRADE TO FORGE+ →</button>
       </div>`;
@@ -5930,10 +6093,10 @@ async function loadProgrammes() {
   list.innerHTML = programmes.map(p => `
     <div style="border:1px solid var(--border);background:var(--card);margin-bottom:12px;padding:20px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-        <div style="font-size:8px;letter-spacing:3px;color:var(--accent)">${p.month||''}</div>
+        <div style="font-size:8px;letter-spacing:3px;color:var(--text);opacity:0.6">${p.month||''}</div>
         ${isAdmin ? `<div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;padding:2px 8px;border:1px solid ${p.type==='personal'?'var(--accent-dim)':'var(--border)'};color:${p.type==='personal'?'var(--accent)':'var(--text-dim)'}">${p.type||'coached'}</div>` : ''}
       </div>
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:3px;color:var(--text);margin-bottom:8px">${p.title}</div>
+      <div style="font-family:'DM Mono',monospace;font-size:24px;letter-spacing:3px;color:var(--text);margin-bottom:8px">${p.title}</div>
       <div style="font-size:10px;letter-spacing:1px;color:var(--text-muted);line-height:1.8;margin-bottom:16px">${p.description||''}</div>
       <button onclick="loadProgrammeAsBlock('${p.id}')" style="width:100%;padding:12px;background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer">LOAD INTO APP →</button>
       ${isAdmin ? `
@@ -6093,7 +6256,7 @@ function showAssignedBlocksNotice(blocks) {
       <div style="font-size:8px;letter-spacing:4px;color:var(--accent);text-transform:uppercase;margin-bottom:12px">
         ${count > 1 ? count + ' New Blocks Assigned' : 'New Block Assigned'}
       </div>
-      <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:3px;line-height:1;margin-bottom:4px">${first.block_name}</div>
+      <div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:500;letter-spacing:3px;line-height:1.1;margin-bottom:4px">${first.block_name}</div>
       <div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:16px">From ${first.coach_email}</div>
       ${note}
       <div style="display:flex;gap:8px">
@@ -6206,7 +6369,7 @@ async function openPushUpdate(blockId) {
   modal.innerHTML = `
     <div style="position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px" onclick="closePushModal()">
       <div style="background:var(--surface);border:1px solid var(--border);max-width:360px;width:100%;padding:24px" onclick="event.stopPropagation()">
-        <div style="font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;margin-bottom:4px">PUSH UPDATE</div>
+        <div style="font-family:'DM Mono',monospace;font-size:20px;letter-spacing:2px;margin-bottom:4px">PUSH UPDATE</div>
         <div style="font-size:10px;color:var(--text-muted);letter-spacing:1px;margin-bottom:20px">${block.name}</div>
         
         <div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:8px">SELECT CLIENT</div>
