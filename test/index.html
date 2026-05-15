@@ -178,11 +178,46 @@
 
   .log-ex-card { border-bottom: 1px solid var(--border); }
 
-  /* ── SUPERSET GROUP (gold rail wrapping consecutive paired exercises) ── */
-  .superset-group { position: relative; border-bottom: 1px solid var(--border); padding: 0 0 0 12px; margin: 0; }
-  .superset-group::before { content: ''; position: absolute; top: 14px; bottom: 14px; left: 0; width: 2px; background: var(--accent-dim); }
-  .superset-group-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 4px; color: var(--accent); text-transform: uppercase; padding: 14px 16px 4px; }
-  .superset-group .log-ex-card:last-child { border-bottom: none; }
+  /* ── SUPERSET CONTAINER (merged rounds layout) ── */
+  .ss-container { border-bottom: 1px solid var(--border); padding: 16px 16px 18px; }
+  .ss-header { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; margin-bottom: 4px; }
+  .ss-subheader { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; letter-spacing: 1px; color: var(--text); margin-bottom: 14px; line-height: 1.3; }
+  .ss-round { margin-bottom: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+  .ss-round:first-of-type { border-top: none; padding-top: 0; }
+  .ss-round-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 6px; }
+  .ss-round-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; color: var(--text); opacity: 0.5; text-transform: uppercase; }
+  .ss-round-state { font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 2px; opacity: 0.6; }
+  .ss-round.done .ss-round-label { color: var(--text); opacity: 0.4; }
+  .ss-round.done .ss-round-state { color: var(--text-muted); }
+  .ss-round.active .ss-round-label { color: var(--accent); opacity: 1; }
+  .ss-round.active .ss-round-state { color: var(--accent); }
+  .ss-round.pending .ss-round-label { opacity: 0.3; }
+  /* Each exercise row within a round */
+  .ss-row { display: flex; align-items: center; gap: 12px; padding: 8px 4px; font-family: 'DM Mono', monospace; -webkit-tap-highlight-color: transparent; }
+  .ss-row-name { flex-shrink: 0; width: 100px; font-size: 11px; letter-spacing: 1px; cursor: pointer; }
+  .ss-row-name .ss-play { font-size: 9px; color: var(--accent); margin-left: 4px; opacity: 0.7; }
+  .ss-row-content { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; }
+  .ss-row-value { flex: 1; font-size: 13px; letter-spacing: 1px; }
+  .ss-row-edit { font-size: 8px; letter-spacing: 2px; color: var(--text-muted); opacity: 0.5; text-transform: uppercase; flex-shrink: 0; }
+  /* Row states */
+  .ss-row.done { cursor: pointer; }
+  .ss-row.done:active { background: rgba(255,255,255,0.02); }
+  .ss-row.done .ss-row-name { color: var(--text); opacity: 0.6; }
+  .ss-row.done .ss-row-value { color: var(--text); opacity: 0.75; }
+  .ss-row.active { background: linear-gradient(90deg, rgba(201,169,110,0.04), transparent); padding: 12px 4px; }
+  .ss-row.active .ss-row-name { color: var(--accent); }
+  .ss-row.active .set-field { flex: 1; min-width: 0; width: auto; padding: 8px 4px; font-size: 14px; }
+  .ss-row.active .ss-row-x { font-size: 11px; color: var(--text-muted); opacity: 0.4; flex-shrink: 0; }
+  .ss-row.pending { cursor: pointer; }
+  .ss-row.pending .ss-row-name { color: var(--text); opacity: 0.3; }
+  .ss-row.pending .ss-row-value { color: var(--text-muted); opacity: 0.3; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; }
+  .ss-row.pending:active .ss-row-name { opacity: 0.5; }
+  /* Notes stacked at bottom */
+  .ss-notes { margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--border); display: flex; flex-direction: column; gap: 8px; }
+  .ss-note-row { display: flex; align-items: center; gap: 10px; }
+  .ss-note-label { font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 2px; color: var(--text-muted); opacity: 0.5; text-transform: uppercase; flex-shrink: 0; width: 80px; }
+  .ss-note-input { flex: 1; background: transparent; border: none; border-bottom: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 11px; padding: 4px 0; outline: none; }
+  .ss-note-input:focus { border-bottom-color: var(--accent); }
   .log-ex-header { padding: 14px 20px 10px; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; }
   .log-ex-name-row { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
   .log-ex-name { font-family: 'DM Mono', monospace; font-size: 18px; letter-spacing: 2px; }
@@ -2831,9 +2866,10 @@ function renderLogExercises(exercises) {
   const c = document.getElementById('log-exercises-container');
   c.innerHTML = '';
 
-  // Walk exercises; emit consecutive same-group exercises inside one wrapper.
+  // Walk exercises; emit grouped exercises as one merged round-based container.
   let i = 0;
   let html = '';
+  const groupsToRender = []; // collect group labels for second-pass rendering
   while (i < exercises.length) {
     const startEx = exercises[i];
     if (startEx.supersetGroup) {
@@ -2843,11 +2879,8 @@ function renderLogExercises(exercises) {
         groupExs.push(exercises[i]);
         i++;
       }
-      const label = groupExs.length === 3 ? `Tri-set ${g}` : `Superset ${g}`;
-      html += `<div class="superset-group" data-group="${g}">`;
-      html += `<div class="superset-group-label">${label}</div>`;
-      groupExs.forEach(ex => { html += _logExerciseCardHTML(ex); });
-      html += `</div>`;
+      html += `<div class="ss-container" id="ss-container-${g}" data-group="${g}"></div>`;
+      groupsToRender.push(g);
     } else {
       html += _logExerciseCardHTML(startEx);
       i++;
@@ -2855,13 +2888,17 @@ function renderLogExercises(exercises) {
   }
   c.innerHTML = html;
 
-  // Now populate each card's set-stack (DOM exists, so renderSetStack can find data-exid)
+  // Now populate each standalone card's set-stack
   exercises.forEach(ex => {
+    if (ex.supersetGroup) return; // grouped handled below
     const exData = EXERCISES.find(e => e.id === ex.id);
     if (!exData) return;
     const wk = `${currentDayId}_${ex.id}_v${currentWeek}`;
     renderSetStack(wk, ex.sets, exData.name);
   });
+
+  // Populate each superset container
+  groupsToRender.forEach(g => renderSupersetGroup(g));
 }
 
 // Extracted: build the HTML for one exercise card (without populating the set-stack)
@@ -2910,6 +2947,130 @@ function _logExerciseCardHTML(ex) {
       </div>
     </div>`;
 }
+
+// Render a superset group as a merged round-based container.
+// Reads `currentBlock` for the group's exercises and `sessionLog` for state.
+function renderSupersetGroup(groupLabel) {
+  const container = document.getElementById('ss-container-' + groupLabel);
+  if (!container) return;
+  const group = _groupExercises(groupLabel);
+  if (!group.length) { container.innerHTML = ''; return; }
+
+  const groupTypeLabel = group.length === 3 ? `Tri-set ${groupLabel}` : `Superset ${groupLabel}`;
+  const exNames = group.map(g => {
+    const exData = EXERCISES.find(e => e.id === g.id);
+    return exData ? exData.name : g.id;
+  }).join(' + ');
+
+  // Determine active position once: which (exercise, round) is up next?
+  // If a force-pin is set (user tapped a completed/pending row), honor it
+  let activeRound = null;
+  let activeExId = null;
+  if (_ssForceActive && _ssForceActive.group === groupLabel) {
+    activeRound = _ssForceActive.round;
+    activeExId = _ssForceActive.exId;
+  } else {
+    for (const g of group) {
+      const r = _resolveActiveSet(g.id, g.sets);
+      if (r != null) { activeRound = r; activeExId = g.id; break; }
+    }
+  }
+
+  const maxRound = Math.max.apply(null, group.map(g => g.sets));
+
+  let html = `<div class="ss-header">${groupTypeLabel}</div>`;
+  html += `<div class="ss-subheader">${exNames}</div>`;
+
+  for (let round = 1; round <= maxRound; round++) {
+    const roundComplete = _isGroupRoundComplete(groupLabel, round);
+    const isActiveRound = (round === activeRound);
+    let roundClass = 'pending';
+    let roundState = '';
+    if (roundComplete) { roundClass = 'done'; roundState = '✓'; }
+    else if (isActiveRound) { roundClass = 'active'; roundState = '•'; }
+
+    html += `<div class="ss-round ${roundClass}">`;
+    html += `<div class="ss-round-header"><div class="ss-round-label">Round ${round} of ${maxRound}</div><div class="ss-round-state">${roundState}</div></div>`;
+
+    group.forEach(g => {
+      if (round > g.sets) return; // this exercise has fewer rounds — skip
+      const exData = EXERCISES.find(e => e.id === g.id);
+      if (!exData) return;
+      const wk = `${currentDayId}_${g.id}_v${currentWeek}`;
+      const saved = sessionLog[wk] || {};
+      const w = saved[`s${round}_w`] || '';
+      const r = saved[`s${round}_r`] || '';
+      const isActive = (g.id === activeExId && round === activeRound);
+      const isDone = (r !== '' && !isActive);
+      const exNameAttr = JSON.stringify(exData.name).replace(/"/g, '&quot;');
+
+      if (isActive) {
+        html += `<div class="ss-row active">
+          <div class="ss-row-name" onclick="openSheet('${exData.id}')">${exData.name}<span class="ss-play" aria-hidden="true">▶</span></div>
+          <div class="ss-row-content">
+            <input class="set-field" type="text" inputmode="none" placeholder="kg" value="${w}" id="${wk}_s${round}_w"
+              autocomplete="one-time-code" data-lpignore="true" data-form-type="other" oninput="autoSaveSet('${wk}',${round})"
+              data-numpad="decimal" readonly>
+            <div class="ss-row-x">×</div>
+            <input class="set-field reps" type="text" inputmode="none" placeholder="reps" value="${r}" id="${wk}_s${round}_r"
+              autocomplete="one-time-code" data-lpignore="true" data-form-type="other" oninput="autoSaveSet('${wk}',${round})"
+              onblur="onSetBlur('${wk}',${round},${exNameAttr})" data-numpad="integer" readonly>
+          </div>
+        </div>`;
+      } else if (isDone) {
+        const wNum = parseFloat(w);
+        const wDisplay = (!w || wNum === 0) ? 'BW' : `${w}kg`;
+        html += `<div class="ss-row done" onclick="ssReactivate('${groupLabel}','${g.id}',${round})">
+          <div class="ss-row-name">${exData.name}</div>
+          <div class="ss-row-content">
+            <div class="ss-row-value">${wDisplay} × ${r}r</div>
+            <div class="ss-row-edit">Edit</div>
+          </div>
+        </div>`;
+      } else {
+        html += `<div class="ss-row pending" onclick="ssReactivate('${groupLabel}','${g.id}',${round})">
+          <div class="ss-row-name">${exData.name}</div>
+          <div class="ss-row-content">
+            <div class="ss-row-value">Pending</div>
+          </div>
+        </div>`;
+      }
+    });
+
+    html += `</div>`; // /ss-round
+  }
+
+  // Notes section — one input per exercise stacked at the bottom
+  html += `<div class="ss-notes">`;
+  group.forEach(g => {
+    const exData = EXERCISES.find(e => e.id === g.id);
+    if (!exData) return;
+    const wk = `${currentDayId}_${g.id}_v${currentWeek}`;
+    const saved = sessionLog[wk] || {};
+    const savedNote = (saved['note'] || '').replace(/"/g, '&quot;');
+    html += `<div class="ss-note-row">
+      <div class="ss-note-label">${exData.name}</div>
+      <input class="ss-note-input" type="text" placeholder="Note — technique, feel, load…" value="${savedNote}"
+        id="${wk}_note" autocomplete="off" onblur="autoSaveNote('${wk}')">
+    </div>`;
+  });
+  html += `</div>`;
+
+  container.innerHTML = html;
+}
+
+// Tap a completed or pending row inside a superset to make it the active one
+function ssReactivate(groupLabel, exId, roundNum) {
+  _ssForceActive = { group: groupLabel, exId, round: roundNum };
+  renderSupersetGroup(groupLabel);
+  // Auto-open numpad on the kg input for the newly active row
+  setTimeout(() => {
+    const wk = `${currentDayId}_${exId}_v${currentWeek}`;
+    const kgInput = document.getElementById(`${wk}_s${roundNum}_w`);
+    if (kgInput) kgInput.click();
+  }, 60);
+}
+let _ssForceActive = null;
 
 // Determine which set is "active": first one without reps logged.
 // If all sets have reps, no active set (everything is done).
@@ -4144,9 +4305,10 @@ function onSetBlur(wk, setNum, exName) {
     return;
   }
 
-  // Grouped exercise — re-render every member of the group so active state
+  // Grouped exercise — re-render the merged superset container so active state
   // can shift to the next exercise's round, not the next set on this card.
-  _renderGroupSetStacks(group);
+  _ssForceActive = null; // a legitimate completion resets any forced pin
+  renderSupersetGroup(group);
 
   // Only fire the rest timer when the WHOLE round is complete across the group.
   // Otherwise, the next group member's set is up next — no rest yet.
