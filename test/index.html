@@ -60,7 +60,7 @@
   /* ── HOME ── */
   .home-hero { padding: 24px 20px 16px; border-bottom: 1px solid var(--border); }
   .home-greeting { font-size: 9px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 6px; }
-  .home-title { font-family: 'DM Mono', monospace; font-size: 26px; font-weight: 500; letter-spacing: 3px; line-height: 1.1; }
+  .home-title { font-family: 'DM Mono', monospace; font-size: 24px; font-weight: 500; letter-spacing: 1.5px; line-height: 1.15; }
   .home-sub { font-size: 10px; letter-spacing: 2px; color: var(--text-muted); margin-top: 4px; }
   .home-streak { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--text); margin-top: 10px; text-transform: uppercase; display: none; opacity: 0.7; }
   .home-streak.visible { display: block; }
@@ -71,7 +71,7 @@
   .weekly-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9998; display: flex; align-items: center; justify-content: center; padding: 24px; }
   .weekly-card { background: var(--deep); border: 1px solid var(--border); max-width: 320px; width: 100%; padding: 32px 24px; text-align: center; animation: obFadeIn 0.35s ease; }
   .weekly-label { font-size: 9px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 16px; }
-  .weekly-title { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; letter-spacing: 3px; color: var(--text); margin-bottom: 20px; line-height: 1.2; }
+  .weekly-title { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; letter-spacing: 1.5px; color: var(--text); margin-bottom: 20px; line-height: 1.2; }
   .weekly-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
   .weekly-stat { background: var(--surface); border: 1px solid var(--border); padding: 16px 12px; }
   .weekly-stat-val { font-family: 'DM Mono', monospace; font-size: 28px; letter-spacing: 2px; color: var(--text); line-height: 1; }
@@ -84,7 +84,7 @@
   .ready-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 9998; display: flex; align-items: center; justify-content: center; padding: 24px; }
   .ready-card { background: var(--deep); border: 1px solid var(--accent-dim); max-width: 320px; width: 100%; padding: 36px 28px; text-align: center; animation: obFadeIn 0.4s ease; }
   .ready-label { font-size: 9px; letter-spacing: 4px; color: var(--accent); text-transform: uppercase; margin-bottom: 18px; }
-  .ready-title { font-family: 'DM Mono', monospace; font-size: 26px; letter-spacing: 3px; color: var(--text); margin-bottom: 10px; line-height: 1.1; }
+  .ready-title { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; letter-spacing: 1.5px; color: var(--text); margin-bottom: 10px; line-height: 1.15; }
   .ready-meta { font-size: 10px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 28px; }
   .ready-cta { background: var(--accent-glow); border: 1px solid var(--accent); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; padding: 16px 20px; cursor: pointer; width: 100%; }
   .ready-cta:active { background: rgba(201,169,110,0.25); }
@@ -126,7 +126,7 @@
   .changelog-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9997; display: flex; align-items: center; justify-content: center; padding: 24px; }
   .changelog-card { background: var(--deep); border: 1px solid var(--border); max-width: 320px; width: 100%; padding: 32px 24px; animation: obFadeIn 0.35s ease; }
   .changelog-badge { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; margin-bottom: 16px; text-align: center; }
-  .changelog-title { font-family: 'DM Mono', monospace; font-size: 26px; letter-spacing: 4px; color: var(--text); margin-bottom: 20px; text-align: center; line-height: 1.1; }
+  .changelog-title { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; letter-spacing: 1.5px; color: var(--text); margin-bottom: 20px; text-align: center; line-height: 1.15; }
   .changelog-list { list-style: none; padding: 0; margin: 0 0 24px; }
   .changelog-list li { font-size: 11px; letter-spacing: 0.5px; color: var(--text-muted); line-height: 1.6; padding: 6px 0; border-bottom: 1px solid var(--border); }
   .changelog-list li:last-child { border-bottom: none; }
@@ -154,7 +154,7 @@
   .day-card { border-bottom: 1px solid var(--border); }
   .day-card-header { padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
   .day-card-left { flex: 1; }
-  .day-tag { font-family: 'DM Mono', monospace; font-size: 20px; letter-spacing: 3px; line-height: 1; }
+  .day-tag { font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 500; letter-spacing: 1.5px; line-height: 1.2; }
   .day-type { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; margin-top: 3px; }
   .day-chevron { color: var(--accent); font-size: 14px; transition: transform 0.2s; }
   .day-card-exercises { display: none; padding: 0 20px 16px; }
@@ -171,12 +171,18 @@
 
   /* ── LOG ── */
   .log-header { padding: 20px 20px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; justify-content: space-between; }
-  .log-title { font-family: 'DM Mono', monospace; font-size: 24px; letter-spacing: 3px; line-height: 1.1; max-width: 200px; }
+  .log-title { font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 500; letter-spacing: 1.5px; line-height: 1.15; max-width: 240px; }
   .week-tabs { display: flex; gap: 4px; }
   .w-tab { width: 34px; height: 28px; background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 9px; cursor: pointer; }
   .w-tab.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
 
   .log-ex-card { border-bottom: 1px solid var(--border); }
+
+  /* ── SUPERSET GROUP (gold rail wrapping consecutive paired exercises) ── */
+  .superset-group { position: relative; border-bottom: 1px solid var(--border); padding: 0 0 0 12px; margin: 0; }
+  .superset-group::before { content: ''; position: absolute; top: 14px; bottom: 14px; left: 0; width: 2px; background: var(--accent-dim); }
+  .superset-group-label { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 4px; color: var(--accent); text-transform: uppercase; padding: 14px 16px 4px; }
+  .superset-group .log-ex-card:last-child { border-bottom: none; }
   .log-ex-header { padding: 14px 20px 10px; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; }
   .log-ex-name-row { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
   .log-ex-name { font-family: 'DM Mono', monospace; font-size: 18px; letter-spacing: 2px; }
@@ -201,7 +207,7 @@
   .timer-center { display: flex; flex-direction: column; align-items: center; justify-content: center; flex: 1; }
   .timer-time { font-family: 'DM Mono', monospace; font-size: 96px; font-weight: 500; letter-spacing: 4px; color: var(--text); line-height: 1; margin-bottom: 48px; }
   .timer-next-label { font-size: 9px; letter-spacing: 4px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 12px; }
-  .timer-next-name { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; text-align: center; line-height: 1.2; margin-bottom: 8px; }
+  .timer-next-name { font-family: 'DM Mono', monospace; font-size: 18px; font-weight: 500; letter-spacing: 1.5px; color: var(--accent); text-transform: uppercase; text-align: center; line-height: 1.2; margin-bottom: 8px; }
   .timer-next-target { font-size: 10px; letter-spacing: 3px; color: var(--text); opacity: 0.6; text-transform: uppercase; }
   /* Bottom — actions + duration row */
   .timer-bottom { display: flex; flex-direction: column; align-items: center; gap: 28px; }
@@ -333,7 +339,7 @@
 
   /* ── PROGRESS ── */
   .progress-header { padding: 20px 20px 0; }
-  .progress-title { font-family: 'DM Mono', monospace; font-size: 24px; font-weight: 500; letter-spacing: 3px; }
+  .progress-title { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; letter-spacing: 1.5px; }
   .progress-sub { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); margin-top: 2px; }
   .block-stats { display: grid; grid-template-columns: repeat(2, 1fr); margin: 16px 0 0; border: 1px solid var(--border); border-bottom: none; }
   .block-stat { padding: 14px 16px; border-bottom: 1px solid var(--border); border-right: 1px solid var(--border); }
@@ -365,14 +371,14 @@
 
   /* ── BUILDER ── */
   .builder-header { padding: 20px 20px 16px; border-bottom: 1px solid var(--border); }
-  .builder-title { font-family: 'DM Mono', monospace; font-size: 24px; font-weight: 500; letter-spacing: 3px; }
+  .builder-title { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; letter-spacing: 1.5px; }
   .builder-sub { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); margin-top: 2px; }
 
   .field-section { padding: 16px 20px; border-bottom: 1px solid var(--border); }
   .field-label { font-size: 9px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
   .field-sublabel { font-size: 8px; letter-spacing: 1px; color: var(--text-muted); text-transform: none; }
 
-  .name-field { width: 100%; background: var(--deep); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 22px; letter-spacing: 4px; padding: 10px 14px; outline: none; -webkit-appearance: none; border-radius: 0; }
+  .name-field { width: 100%; background: var(--deep); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 500; letter-spacing: 1.5px; padding: 10px 14px; outline: none; -webkit-appearance: none; border-radius: 0; }
   .name-field:focus { border-color: var(--accent); }
   .name-field::placeholder { color: var(--text-dim); }
 
@@ -449,12 +455,12 @@
 
   /* Archive panel */
   .archive-panel-header { padding: 20px 20px 16px; border-bottom: 1px solid var(--border); }
-  .archive-panel-title { font-family: 'DM Mono', monospace; font-size: 24px; font-weight: 500; letter-spacing: 3px; }
+  .archive-panel-title { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; letter-spacing: 1.5px; }
   .archive-panel-sub { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); margin-top: 2px; }
 
   .archived-block { border: 1px solid var(--border); margin: 16px 20px 0; overflow: hidden; }
   .archived-block-header { background: var(--surface); padding: 14px 16px; border-bottom: 1px solid var(--border); cursor: pointer; display: flex; align-items: flex-start; justify-content: space-between; }
-  .archived-block-name { font-family: 'DM Mono', monospace; font-size: 20px; letter-spacing: 3px; }
+  .archived-block-name { font-family: 'DM Mono', monospace; font-size: 17px; font-weight: 500; letter-spacing: 1.5px; }
   .archived-block-methods { font-size: 9px; color: var(--text); letter-spacing: 1px; margin-top: 3px; opacity: 0.6; }
   .archived-block-meta { font-size: 9px; color: var(--text-muted); letter-spacing: 1px; margin-top: 4px; }
   .archived-block-chevron { color: var(--accent); font-size: 14px; transition: transform 0.2s; flex-shrink: 0; margin-top: 4px; }
@@ -496,7 +502,7 @@
 
   .home-empty-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 40px; text-align: center; }
   .home-empty-icon { font-size: 28px; color: var(--accent-dim); margin-bottom: 20px; }
-  .home-empty-title { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; letter-spacing: 3px; color: var(--text); margin-bottom: 8px; }
+  .home-empty-title { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; letter-spacing: 1.5px; color: var(--text); margin-bottom: 8px; }
   .home-empty-sub { font-size: 11px; letter-spacing: 1px; color: var(--text-muted); line-height: 1.6; margin-bottom: 28px; }
   .home-empty-cta { background: var(--accent-glow); border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; padding: 14px 28px; cursor: pointer; }
   .home-empty-cta:active { background: rgba(201,169,110,0.2); }
@@ -557,7 +563,7 @@
   .upgrade-overlay.open { opacity: 1; pointer-events: all; }
   .upgrade-sheet { width: 100%; background: var(--surface); border-top: 1px solid var(--border); padding: 32px 24px; padding-bottom: calc(32px + env(safe-area-inset-bottom,0px)); transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.32,0.72,0,1); }
   .upgrade-overlay.open .upgrade-sheet { transform: translateY(0); }
-  .upgrade-title { font-family: 'DM Mono', monospace; font-size: 24px; font-weight: 500; letter-spacing: 3px; line-height: 1.1; margin-bottom: 4px; }
+  .upgrade-title { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; letter-spacing: 1.5px; line-height: 1.15; margin-bottom: 4px; }
   .upgrade-sub { font-size: 10px; letter-spacing: 2px; color: var(--text-muted); margin-bottom: 24px; }
   .upgrade-features { display: flex; flex-direction: column; gap: 10px; margin-bottom: 28px; }
   .upgrade-feat { display: flex; align-items: flex-start; gap: 12px; font-size: 12px; color: var(--text-muted); line-height: 1.5; }
@@ -588,7 +594,7 @@
   .builder-fixed-body { padding: 12px 14px; }
   .coaching-hero { padding: 32px 20px 20px; border-bottom: 1px solid var(--border); }
   .coaching-eyebrow { font-size: 9px; letter-spacing: 4px; color: var(--accent); text-transform: uppercase; margin-bottom: 10px; }
-  .coaching-title { font-family: 'DM Mono', monospace; font-size: 28px; font-weight: 500; letter-spacing: 3px; line-height: 1.1; margin-bottom: 12px; }
+  .coaching-title { font-family: 'DM Mono', monospace; font-size: 24px; font-weight: 500; letter-spacing: 1.5px; line-height: 1.15; margin-bottom: 12px; }
   .coaching-desc { font-size: 12px; color: var(--text-muted); line-height: 1.7; }
   .coaching-pillars { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); margin: 20px; }
   .coaching-pillar { background: var(--surface); padding: 16px 14px; }
@@ -644,7 +650,7 @@
   .onboard-step.active { display: flex; }
   @keyframes obFadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
   .onboard-icon { font-size: 32px; color: var(--accent); margin-bottom: 24px; opacity: 0.7; }
-  .onboard-title { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; letter-spacing: 4px; color: var(--text); margin-bottom: 8px; line-height: 1.2; }
+  .onboard-title { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; letter-spacing: 1.5px; color: var(--text); margin-bottom: 8px; line-height: 1.2; }
   .onboard-sub { font-size: 11px; letter-spacing: 1px; color: var(--text-muted); line-height: 1.7; margin-bottom: 36px; max-width: 280px; }
   .onboard-options { display: flex; flex-direction: column; gap: 10px; width: 100%; }
   .onboard-opt { background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 2px; text-transform: uppercase; padding: 16px 20px; cursor: pointer; text-align: center; transition: all 0.2s; }
@@ -1216,7 +1222,7 @@
         <div id="ai-programme-link" style="display:none">
           <div style="padding:28px 20px 24px;border-bottom:1px solid var(--border);background:linear-gradient(180deg, rgba(201,169,110,0.06) 0%, transparent 100%)">
             <div style="font-size:9px;letter-spacing:4px;color:var(--accent);text-transform:uppercase;margin-bottom:10px">✦ FORGE+ AI</div>
-            <div style="font-family:'DM Mono',monospace;font-size:24px;font-weight:500;letter-spacing:3px;line-height:1.1;margin-bottom:10px;color:var(--text)">BUILD MY<br>PROGRAMME</div>
+            <div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:500;letter-spacing:1.5px;line-height:1.15;margin-bottom:10px;color:var(--text)">BUILD MY<br>PROGRAMME</div>
             <div style="font-size:11px;letter-spacing:0.5px;color:var(--text-muted);line-height:1.7;margin-bottom:20px">Answer a few questions about your level and goals. The AI builds a complete training block — personalised exercises, sets, reps, and progression. Finish a block and it reads your data to build the next one smarter.</div>
             <button class="coaching-submit" onclick="navigate('ai')" style="width:100%">START AI ASSESSMENT →</button>
           </div>
@@ -2095,10 +2101,11 @@ function switchBuildTab(tab) {
 }
 
 // ─── CHANGELOG ─────────────────────────────────────────────────
-const FORGE_VERSION = '1.9.3';
+const FORGE_VERSION = '2.0.0';
 const FORGE_CHANGELOG = [
-  'Week progression now triggers at 50% completion — skip a day without getting stuck',
-  'Fixed notification issue when switching between apps'
+  'Refreshed look — cleaner typography and a tighter visual rhythm across every screen',
+  'New in-app number pad for logging sets — no more fighting the iOS keyboard',
+  'Redesigned rest timer with a cinematic countdown and a preview of what is coming next'
 ];
 
 function checkChangelog() {
@@ -2823,38 +2830,74 @@ function startDay(dayId, overrideDay) {
 function renderLogExercises(exercises) {
   const c = document.getElementById('log-exercises-container');
   c.innerHTML = '';
-  exercises.forEach(ex => {
-    const exData = EXERCISES.find(e=>e.id===ex.id); if(!exData) return;
-    const wk = `${currentDayId}_${ex.id}_v${currentWeek}`;
-    const sparkSvg = buildSparkline(ex.id);
-    const saved = sessionLog[wk]||{};
-    const savedNote = saved['note']||'';
-    let lastWeekHint = '';
-    if (currentWeek > 1) {
-      const prevKey = `${currentDayId}_${ex.id}_v${currentWeek - 1}`;
-      const prevEntry = sessionLog[prevKey] || {};
-      const prevWeights = [];
-      const prevReps = [];
-      for (let s = 1; s <= ex.sets; s++) {
-        const pw = parseFloat(prevEntry[`s${s}_w`]);
-        const pr = parseFloat(prevEntry[`s${s}_r`]);
-        if (!isNaN(pw) && pw > 0) prevWeights.push(pw);
-        if (!isNaN(pr) && pr > 0) prevReps.push(pr);
+
+  // Walk exercises; emit consecutive same-group exercises inside one wrapper.
+  let i = 0;
+  let html = '';
+  while (i < exercises.length) {
+    const startEx = exercises[i];
+    if (startEx.supersetGroup) {
+      const g = startEx.supersetGroup;
+      const groupExs = [];
+      while (i < exercises.length && exercises[i].supersetGroup === g) {
+        groupExs.push(exercises[i]);
+        i++;
       }
-      if (prevWeights.length > 0 || prevReps.length > 0) {
-        const topW = prevWeights.length ? Math.max(...prevWeights) : null;
-        const topR = prevReps.length ? Math.max(...prevReps) : null;
-        let hint = 'Last: ';
-        if (topW) hint += topW + 'kg';
-        if (topW && topR) hint += ' × ';
-        if (topR) hint += topR + 'r';
-        lastWeekHint = `<div style="font-size:9px;letter-spacing:1px;color:var(--accent-dim);padding:0 16px 4px">↳ ${hint}</div>`;
-      }
+      const label = groupExs.length === 3 ? `Tri-set ${g}` : `Superset ${g}`;
+      html += `<div class="superset-group" data-group="${g}">`;
+      html += `<div class="superset-group-label">${label}</div>`;
+      groupExs.forEach(ex => { html += _logExerciseCardHTML(ex); });
+      html += `</div>`;
+    } else {
+      html += _logExerciseCardHTML(startEx);
+      i++;
     }
-    c.innerHTML+=`<div class="log-ex-card" data-wk="${wk}" data-sets="${ex.sets}">
+  }
+  c.innerHTML = html;
+
+  // Now populate each card's set-stack (DOM exists, so renderSetStack can find data-exid)
+  exercises.forEach(ex => {
+    const exData = EXERCISES.find(e => e.id === ex.id);
+    if (!exData) return;
+    const wk = `${currentDayId}_${ex.id}_v${currentWeek}`;
+    renderSetStack(wk, ex.sets, exData.name);
+  });
+}
+
+// Extracted: build the HTML for one exercise card (without populating the set-stack)
+function _logExerciseCardHTML(ex) {
+  const exData = EXERCISES.find(e => e.id === ex.id);
+  if (!exData) return '';
+  const wk = `${currentDayId}_${ex.id}_v${currentWeek}`;
+  const sparkSvg = buildSparkline(ex.id);
+  const saved = sessionLog[wk] || {};
+  const savedNote = saved['note'] || '';
+  let lastWeekHint = '';
+  if (currentWeek > 1) {
+    const prevKey = `${currentDayId}_${ex.id}_v${currentWeek - 1}`;
+    const prevEntry = sessionLog[prevKey] || {};
+    const prevWeights = [];
+    const prevReps = [];
+    for (let s = 1; s <= ex.sets; s++) {
+      const pw = parseFloat(prevEntry[`s${s}_w`]);
+      const pr = parseFloat(prevEntry[`s${s}_r`]);
+      if (!isNaN(pw) && pw > 0) prevWeights.push(pw);
+      if (!isNaN(pr) && pr > 0) prevReps.push(pr);
+    }
+    if (prevWeights.length > 0 || prevReps.length > 0) {
+      const topW = prevWeights.length ? Math.max(...prevWeights) : null;
+      const topR = prevReps.length ? Math.max(...prevReps) : null;
+      let hint = 'Last: ';
+      if (topW) hint += topW + 'kg';
+      if (topW && topR) hint += ' × ';
+      if (topR) hint += topR + 'r';
+      lastWeekHint = `<div style="font-size:9px;letter-spacing:1px;color:var(--accent-dim);padding:0 16px 4px">↳ ${hint}</div>`;
+    }
+  }
+  return `<div class="log-ex-card" data-wk="${wk}" data-sets="${ex.sets}" data-exid="${ex.id}">
       <div class="log-ex-header" onclick="openSheet('${exData.id}')">
         <div><div class="log-ex-name-row"><div class="log-ex-name">${exData.name}</div><span class="log-ex-play" aria-hidden="true">▶</span></div><div class="log-ex-target">${ex.sets}×${ex.reps}</div></div>
-        <div class="log-ex-note">${ex.note||''}</div>
+        <div class="log-ex-note">${ex.note || ''}</div>
       </div>
       ${lastWeekHint}
       ${sparkSvg ? `<div class="spark-row"><div class="spark-label">Load trend</div>${sparkSvg}</div>` : ''}
@@ -2866,8 +2909,6 @@ function renderLogExercises(exercises) {
           id="${wk}_note" autocomplete="off" onblur="autoSaveNote('${wk}')">
       </div>
     </div>`;
-    renderSetStack(wk, ex.sets, exData.name);
-  });
 }
 
 // Determine which set is "active": first one without reps logged.
@@ -2880,14 +2921,81 @@ function _activeSetIndex(wk, totalSets) {
   return null; // all complete
 }
 
+// Returns the day.exercises array for the currently logged day, or [] if none.
+function _currentDayExercises() {
+  const day = currentBlock && currentBlock.days
+    ? currentBlock.days.find(d => d.id === currentDayId) : null;
+  return (day && day.exercises) ? day.exercises : [];
+}
+
+// Returns all exercises in a given superset group, in their day-order.
+function _groupExercises(groupLabel) {
+  if (!groupLabel) return [];
+  return _currentDayExercises().filter(e => e.supersetGroup === groupLabel);
+}
+
+// Given an exercise ID, resolve the active set considering any supersetGroup.
+// Returns: integer (this exercise's active set) | null (not its turn or done).
+function _resolveActiveSet(exId, totalSets) {
+  const exs = _currentDayExercises();
+  const ex = exs.find(e => e.id === exId);
+  if (!ex || !ex.supersetGroup) {
+    const wk = `${currentDayId}_${exId}_v${currentWeek}`;
+    return _activeSetIndex(wk, totalSets);
+  }
+  const group = _groupExercises(ex.supersetGroup);
+  const maxRound = Math.max.apply(null, group.map(g => g.sets));
+  for (let round = 1; round <= maxRound; round++) {
+    for (const g of group) {
+      if (round > g.sets) continue;
+      const gWk = `${currentDayId}_${g.id}_v${currentWeek}`;
+      const saved = sessionLog[gWk] || {};
+      const r = saved[`s${round}_r`];
+      if (!r || r === '') return g.id === exId ? round : null;
+    }
+  }
+  return null;
+}
+
+// True if every member of the group has logged reps for the given round.
+function _isGroupRoundComplete(groupLabel, roundNum) {
+  const group = _groupExercises(groupLabel);
+  if (!group.length) return true;
+  return group.every(g => {
+    if (roundNum > g.sets) return true;
+    const gWk = `${currentDayId}_${g.id}_v${currentWeek}`;
+    const saved = sessionLog[gWk] || {};
+    const r = saved[`s${roundNum}_r`];
+    return r && r !== '';
+  });
+}
+
+// Re-render every member of a group (called when one member's set completes,
+// since the active position may shift to another member of the group).
+function _renderGroupSetStacks(groupLabel) {
+  const group = _groupExercises(groupLabel);
+  group.forEach(g => {
+    const exData = EXERCISES.find(e => e.id === g.id);
+    if (!exData) return;
+    const gWk = `${currentDayId}_${g.id}_v${currentWeek}`;
+    renderSetStack(gWk, g.sets, exData.name);
+  });
+}
+
 // Render the set-stack inside an exercise card. Called on initial render and
 // whenever a set completes (to re-evaluate active/completed/pending states).
 function renderSetStack(wk, totalSets, exName, forceActiveSet) {
   const container = document.getElementById('set-stack-' + wk);
   if (!container) return;
   const saved = sessionLog[wk] || {};
+  // Extract exerciseId from wk (format: `${dayId}_${exId}_v${week}`)
+  // To avoid regex fragility, look it up by data attribute on the card
+  let exId = null;
+  const card = document.querySelector(`.log-ex-card[data-wk="${wk}"]`);
+  if (card && card.dataset.exid) exId = card.dataset.exid;
+  // Group-aware active resolution (falls back to legacy for ungrouped exercises)
+  const autoActive = exId ? _resolveActiveSet(exId, totalSets) : _activeSetIndex(wk, totalSets);
   // forceActiveSet lets caller pin an active set (e.g. when user taps a completed row to edit)
-  const autoActive = _activeSetIndex(wk, totalSets);
   const activeSet = forceActiveSet != null ? forceActiveSet : autoActive;
   // Safely embed exName in inline attributes (escapes quotes etc.)
   const exNameAttr = JSON.stringify(exName).replace(/"/g, '&quot;');
@@ -4018,16 +4126,32 @@ function onSetBlur(wk, setNum, exName) {
   if (document.body.classList.contains('numpad-open')) return;
 
   const r = document.getElementById(`${wk}_s${setNum}_r`);
-  if(r && r.value.trim() !== '' && timerEnabled) startTimer(exName, wk, setNum);
-  // Re-render the set stack so this set collapses to its done-row and the
-  // next pending set promotes to active. Only fires when reps is non-empty
-  // (so partial edits don't snap the user away from the active set).
-  if (r && r.value.trim() !== '') {
-    const card = document.querySelector(`.log-ex-card[data-wk="${wk}"]`);
-    if (card) {
-      const totalSets = parseInt(card.dataset.sets, 10);
-      renderSetStack(wk, totalSets, exName);
-    }
+  if (!r || r.value.trim() === '') return;
+
+  // Determine if this exercise is part of a superset group
+  const card = document.querySelector(`.log-ex-card[data-wk="${wk}"]`);
+  if (!card) return;
+  const exId = card.dataset.exid;
+  const totalSets = parseInt(card.dataset.sets, 10);
+  const exs = _currentDayExercises();
+  const exDef = exs.find(e => e.id === exId);
+  const group = exDef ? exDef.supersetGroup : null;
+
+  if (!group) {
+    // Standalone exercise — original behavior
+    if (timerEnabled) startTimer(exName, wk, setNum);
+    renderSetStack(wk, totalSets, exName);
+    return;
+  }
+
+  // Grouped exercise — re-render every member of the group so active state
+  // can shift to the next exercise's round, not the next set on this card.
+  _renderGroupSetStacks(group);
+
+  // Only fire the rest timer when the WHOLE round is complete across the group.
+  // Otherwise, the next group member's set is up next — no rest yet.
+  if (timerEnabled && _isGroupRoundComplete(group, setNum)) {
+    startTimer(exName, wk, setNum);
   }
 }
 
@@ -4088,30 +4212,57 @@ function startTimer(exName, wk, justCompletedSet) {
     : null;
   const card = wk ? document.querySelector(`.log-ex-card[data-wk="${wk}"]`) : null;
   const totalSets = card ? parseInt(card.dataset.sets, 10) : 0;
+  const exId = card ? card.dataset.exid : null;
+  const exDef = exId && day && day.exercises ? day.exercises.find(e => e.id === exId) : null;
+  const group = exDef ? exDef.supersetGroup : null;
 
-  if (justCompletedSet != null && totalSets > 0 && justCompletedSet < totalSets) {
-    // Still more sets on the same exercise — pull rep target by matching name
-    const currentEx = day && day.exercises ? day.exercises.find(e => {
-      const exData = EXERCISES.find(x => x.id === e.id);
-      return exData && exData.name === exName;
-    }) : null;
-    const repTarget = currentEx ? currentEx.reps : '';
+  if (group && day && day.exercises) {
+    // Grouped exercise — round was just completed (only reason timer fired).
+    // Next round = first member of group's set (justCompletedSet + 1). If no
+    // more rounds, move to next exercise after the group.
+    const groupExs = day.exercises.filter(e => e.supersetGroup === group);
+    const maxRound = Math.max.apply(null, groupExs.map(e => e.sets));
+    if (justCompletedSet < maxRound) {
+      // Next round in the group, starting from first member
+      const firstMember = groupExs[0];
+      const firstData = EXERCISES.find(e => e.id === firstMember.id);
+      if (firstData) {
+        nextLabel = firstData.name.toUpperCase();
+        nextTarget = `Set ${justCompletedSet + 1} of ${firstMember.sets} · ${firstMember.reps} reps · Superset ${group}`;
+      }
+    } else {
+      // Group done — find next exercise after the group's last member in day order
+      const lastInGroup = groupExs[groupExs.length - 1];
+      const lastIndex = day.exercises.findIndex(e => e.id === lastInGroup.id);
+      if (lastIndex >= 0 && lastIndex < day.exercises.length - 1) {
+        const nextEx = day.exercises[lastIndex + 1];
+        const nextExData = EXERCISES.find(e => e.id === nextEx.id);
+        if (nextExData) {
+          nextLabel = nextExData.name.toUpperCase();
+          const supLabel = nextEx.supersetGroup ? ` · Superset ${nextEx.supersetGroup}` : '';
+          nextTarget = `Set 1 of ${nextEx.sets} · ${nextEx.reps} reps${supLabel}`;
+        }
+      } else {
+        nextLabel = 'Workout complete';
+        nextTarget = '';
+      }
+    }
+  } else if (justCompletedSet != null && totalSets > 0 && justCompletedSet < totalSets) {
+    // Standalone — still more sets on the same exercise
+    const repTarget = exDef ? exDef.reps : '';
     nextTarget = `Set ${justCompletedSet + 1} of ${totalSets}${repTarget ? ' · ' + repTarget + ' reps' : ''}`;
   } else if (day && day.exercises && totalSets > 0 && justCompletedSet === totalSets) {
-    // Last set of this exercise — find the next exercise in the day
-    const currentIndex = day.exercises.findIndex(e => {
-      const exData = EXERCISES.find(x => x.id === e.id);
-      return exData && exData.name === exName;
-    });
+    // Standalone — last set of this exercise — find the next exercise in the day
+    const currentIndex = exId ? day.exercises.findIndex(e => e.id === exId) : -1;
     if (currentIndex >= 0 && currentIndex < day.exercises.length - 1) {
       const nextEx = day.exercises[currentIndex + 1];
       const nextExData = EXERCISES.find(e => e.id === nextEx.id);
       if (nextExData) {
         nextLabel = nextExData.name.toUpperCase();
-        nextTarget = `Set 1 of ${nextEx.sets} · ${nextEx.reps} reps`;
+        const supLabel = nextEx.supersetGroup ? ` · Superset ${nextEx.supersetGroup}` : '';
+        nextTarget = `Set 1 of ${nextEx.sets} · ${nextEx.reps} reps${supLabel}`;
       }
     } else {
-      // Last set of last exercise — workout done
       nextLabel = 'Workout complete';
       nextTarget = '';
     }
@@ -4932,6 +5083,37 @@ window._resetAllTours = function() {
     Object.keys(localStorage).filter(k => k.startsWith(t.storageKey)).forEach(k => localStorage.removeItem(k));
   });
   console.log('All tours will fire on next visit (all accounts).');
+};
+
+// Dev helpers — manually pair/unpair exercises in the current day for testing
+// supersets before the builder UI is built. Mutates currentBlock in memory,
+// persists to localStorage, and re-renders the log.
+// Usage: _pairSuperset(0, 1, 'A')  // pair exercise index 0 and 1 as group A
+// Usage: _pairSuperset(0, 1, 2, 'B')  // tri-set: indexes 0, 1, 2 as group B
+// Usage: _unpairSuperset()  // clear all groups in current day
+window._pairSuperset = function(...args) {
+  const groupLabel = args.pop();
+  const indexes = args;
+  if (!currentBlock || !currentBlock.days) { console.log('No current block.'); return; }
+  const day = currentBlock.days.find(d => d.id === currentDayId);
+  if (!day || !day.exercises) { console.log('No current day or no exercises.'); return; }
+  indexes.forEach(i => {
+    if (day.exercises[i]) day.exercises[i].supersetGroup = groupLabel;
+  });
+  localStorage.setItem('fw_current_block', JSON.stringify(currentBlock));
+  if (typeof scheduleSync === 'function') scheduleSync();
+  renderLogExercises(day.exercises);
+  console.log(`Paired indexes [${indexes.join(', ')}] as group ${groupLabel}`);
+};
+window._unpairSuperset = function() {
+  if (!currentBlock || !currentBlock.days) { console.log('No current block.'); return; }
+  const day = currentBlock.days.find(d => d.id === currentDayId);
+  if (!day || !day.exercises) { console.log('No current day.'); return; }
+  day.exercises.forEach(e => { delete e.supersetGroup; });
+  localStorage.setItem('fw_current_block', JSON.stringify(currentBlock));
+  if (typeof scheduleSync === 'function') scheduleSync();
+  renderLogExercises(day.exercises);
+  console.log('All supersets cleared from current day.');
 };
 
 // ─── NUMPAD ENGINE (custom in-app number pad) ────────────────────
@@ -6255,7 +6437,7 @@ function showAssignedBlocksNotice(blocks) {
       <div style="font-size:8px;letter-spacing:4px;color:var(--accent);text-transform:uppercase;margin-bottom:12px">
         ${count > 1 ? count + ' New Blocks Assigned' : 'New Block Assigned'}
       </div>
-      <div style="font-family:'DM Mono',monospace;font-size:22px;font-weight:500;letter-spacing:3px;line-height:1.1;margin-bottom:4px">${first.block_name}</div>
+      <div style="font-family:'DM Mono',monospace;font-size:20px;font-weight:500;letter-spacing:1.5px;line-height:1.15;margin-bottom:4px">${first.block_name}</div>
       <div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:16px">From ${first.coach_email}</div>
       ${note}
       <div style="display:flex;gap:8px">
