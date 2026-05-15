@@ -179,7 +179,7 @@
   .log-ex-card { border-bottom: 1px solid var(--border); }
 
   /* ── SUPERSET CONTAINER (merged rounds layout) ── */
-  .ss-container { border-bottom: 1px solid var(--border); padding: 16px 16px 18px; }
+  .ss-container { border-bottom: 1px solid var(--border); border-left: 3px solid var(--accent); padding: 16px 16px 18px 14px; }
   .ss-header { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; margin-bottom: 4px; }
   .ss-subheader { font-family: 'DM Mono', monospace; font-size: 14px; font-weight: 500; letter-spacing: 1px; color: var(--text); margin-bottom: 14px; line-height: 1.3; }
   .ss-round { margin-bottom: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
@@ -459,14 +459,22 @@
   .day-ex-pill { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; padding: 5px 10px; cursor: pointer; transition: all 0.12s; }
   .day-ex-pill.selected { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
 
-  .day-selected-exs { padding: 10px 16px; display: flex; flex-direction: column; gap: 5px; }
+  .day-selected-exs { padding: 10px 16px; display: flex; flex-direction: column; gap: 0; }
   .day-sel-row { display: flex; align-items: center; background: var(--deep); border: 1px solid var(--border); padding: 8px 12px; gap: 6px; }
+  .day-sel-row.grouped { border-left: 3px solid var(--accent-dim); padding-left: 10px; }
+  .day-sel-group-tag { font-family: 'DM Mono', monospace; font-size: 7px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; flex-shrink: 0; opacity: 0.7; }
   .day-sel-name { font-size: 11px; color: var(--text); flex: 1; }
   .day-mini-input { width: 34px; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 11px; padding: 3px 5px; text-align: center; outline: none; -webkit-appearance: none; border-radius: 0; }
   .day-mini-input:focus { border-color: var(--accent); }
   .day-mini-sep { font-size: 9px; color: var(--text-dim); }
   .day-sel-del { background: none; border: none; color: var(--text-dim); font-size: 14px; cursor: pointer; padding: 0 2px; margin-left: 2px; }
   .day-sel-del:active { color: var(--red); }
+  .ss-link-row { display: flex; align-items: center; gap: 6px; padding: 0 4px; height: 22px; }
+  .ss-link-line { flex: 1; height: 1px; background: var(--border); }
+  .ss-link-btn { font-family: 'DM Mono', monospace; font-size: 7px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; background: none; border: 1px solid var(--border); padding: 3px 8px; cursor: pointer; white-space: nowrap; flex-shrink: 0; -webkit-tap-highlight-color: transparent; }
+  .ss-link-btn:active { border-color: var(--accent-dim); color: var(--accent); }
+  .ss-link-row.linked .ss-link-line { background: var(--accent-dim); }
+  .ss-link-row.linked .ss-link-btn { color: var(--accent); border-color: var(--accent-dim); background: var(--accent-glow); }
 
   .add-day-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; margin-top: 10px; }
   .add-day-btn:active { border-color: var(--accent-dim); color: var(--accent); }
@@ -3952,21 +3960,73 @@ function renderDaySelectedList(dayIdx) {
   const day=builderDays[dayIdx];
   const c=document.getElementById('bday-selected-'+dayIdx); if(!c) return;
   if(!day.exercises.length){ c.innerHTML=`<div class="empty-state">No exercises selected</div>`; return; }
-  c.innerHTML=day.exercises.map((ex,i)=>{
+  const parts=[];
+  day.exercises.forEach((ex,i)=>{
     const exData=EXERCISES.find(e=>e.id===ex.id);
     const isFirst=i===0, isLast=i===day.exercises.length-1;
-    return `<div class="day-sel-row">
+    const isGrouped=!!ex.supersetGroup;
+    parts.push(`<div class="day-sel-row${isGrouped?' grouped':''}">
+      ${isGrouped?`<span class="day-sel-group-tag">${ex.supersetGroup}</span>`:''}
       <div style="display:flex;flex-direction:column;gap:2px;margin-right:6px;flex-shrink:0">
         <button onclick="moveDayEx(${dayIdx},${i},-1)" style="background:none;border:none;color:${isFirst?'var(--border)':'var(--text-muted)'};font-size:10px;cursor:${isFirst?'default':'pointer'};padding:0;line-height:1" ${isFirst?'disabled':''}>▲</button>
         <button onclick="moveDayEx(${dayIdx},${i},1)" style="background:none;border:none;color:${isLast?'var(--border)':'var(--text-muted)'};font-size:10px;cursor:${isLast?'default':'pointer'};padding:0;line-height:1" ${isLast?'disabled':''}>▼</button>
       </div>
-      <span class="day-sel-name">${exData?.name}</span>
+      <span class="day-sel-name">${exData?.name||ex.id}</span>
       <input class="day-mini-input" type="text" value="${ex.sets}" placeholder="s" onchange="builderDays[${dayIdx}].exercises[${i}].sets=parseInt(this.value)||3" style="width:30px">
       <span class="day-mini-sep">×</span>
       <input class="day-mini-input" type="text" value="${ex.reps}" placeholder="r" onchange="builderDays[${dayIdx}].exercises[${i}].reps=this.value" style="width:44px">
       <button class="day-sel-del" onclick="removeDayEx(${dayIdx},${i})">✕</button>
-    </div>`;
-  }).join('');
+    </div>`);
+    if(!isLast){
+      const next=day.exercises[i+1];
+      const linked=ex.supersetGroup && ex.supersetGroup===next?.supersetGroup;
+      parts.push(`<div class="ss-link-row${linked?' linked':''}">
+        <div class="ss-link-line"></div>
+        <button class="ss-link-btn" onclick="pairBuilderExercises(${dayIdx},${i})">${linked?`✕ ${ex.supersetGroup}`:'⊕ LINK'}</button>
+        <div class="ss-link-line"></div>
+      </div>`);
+    }
+  });
+  c.innerHTML=parts.join('');
+}
+
+function cleanupBuilderGroups(dayIdx) {
+  const exs=builderDays[dayIdx].exercises;
+  const groups={};
+  exs.forEach((e,i)=>{ if(e.supersetGroup){ if(!groups[e.supersetGroup]) groups[e.supersetGroup]=[]; groups[e.supersetGroup].push(i); } });
+  Object.entries(groups).forEach(([g,indices])=>{
+    const sorted=[...indices].sort((a,b)=>a-b);
+    let ok=sorted.length>=2;
+    for(let k=1;k<sorted.length;k++) if(sorted[k]!==sorted[k-1]+1){ ok=false; break; }
+    if(!ok) sorted.forEach(idx=>{ exs[idx].supersetGroup=null; });
+  });
+}
+
+function pairBuilderExercises(dayIdx, i) {
+  const exs=builderDays[dayIdx].exercises;
+  const a=exs[i], b=exs[i+1];
+  if(!a||!b) return;
+  // Unlink if already in same group
+  if(a.supersetGroup && a.supersetGroup===b.supersetGroup){
+    const g=a.supersetGroup;
+    exs.forEach(e=>{ if(e.supersetGroup===g) e.supersetGroup=null; });
+    renderDaySelectedList(dayIdx);
+    return;
+  }
+  // Sets must match
+  if(parseInt(a.sets)!==parseInt(b.sets)){ showToast('Sets must match to link exercises'); return; }
+  // Determine group label
+  let g=a.supersetGroup||b.supersetGroup;
+  if(!g){
+    const used=new Set(exs.map(e=>e.supersetGroup).filter(Boolean));
+    for(const l of 'ABCDEFGHIJ'){ if(!used.has(l)){ g=l; break; } }
+  }
+  // Max 3 per group
+  const count=exs.filter(e=>e.supersetGroup===g).length;
+  if(count>=3){ showToast('Max 3 exercises per superset'); return; }
+  a.supersetGroup=g;
+  b.supersetGroup=g;
+  renderDaySelectedList(dayIdx);
 }
 
 function moveDayEx(dayIdx, i, dir) {
@@ -3974,11 +4034,13 @@ function moveDayEx(dayIdx, i, dir) {
   const newIdx = i + dir;
   if(newIdx < 0 || newIdx >= exs.length) return;
   [exs[i], exs[newIdx]] = [exs[newIdx], exs[i]];
+  cleanupBuilderGroups(dayIdx);
   renderDaySelectedList(dayIdx);
 }
 
 function removeDayEx(dayIdx, i) {
   builderDays[dayIdx].exercises.splice(i,1);
+  cleanupBuilderGroups(dayIdx);
   renderDaySelectedList(dayIdx);
   renderDayExPicker(dayIdx);
   const countEl=document.getElementById('bday-count-'+dayIdx);
