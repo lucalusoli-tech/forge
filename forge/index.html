@@ -507,6 +507,7 @@
   .archived-block-methods { font-size: 9px; color: var(--text); letter-spacing: 1px; margin-top: 3px; opacity: 0.6; }
   .archived-block-meta { font-size: 9px; color: var(--text-muted); letter-spacing: 1px; margin-top: 4px; }
   .archived-block-chevron { color: var(--accent); font-size: 14px; transition: transform 0.2s; flex-shrink: 0; margin-top: 4px; }
+  .archived-restore-btn { width: calc(100% - 32px); margin: 12px 16px 16px; padding: 12px; background: rgba(201,169,110,0.08); border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; display: block; }
   .archived-block.open .archived-block-chevron { transform: rotate(90deg); }
   .archived-block-body { display: none; }
   .archived-block.open .archived-block-body { display: block; }
@@ -2826,12 +2827,43 @@ function renderArchive() {
       <div class="archived-block-body">
         ${daysHtml}
         ${progressHtml?`<div class="archived-progress"><div class="archived-progress-label">Session Data</div>${progressHtml}</div>`:''}
+        <button class="archived-restore-btn" onclick="event.stopPropagation();restoreArchivedBlock(${bi})">↑ Restore as Active Block</button>
       </div>
     </div>`;
   }).join('');
 }
 
 function toggleArchivedBlock(i) { document.getElementById('ab-'+i)?.classList.toggle('open'); }
+
+function restoreArchivedBlock(bi) {
+  if (!confirm('Restore this block as your active programme?\n\nYour current block will be archived.')) return;
+  const toRestore = archivedBlocks[bi];
+  if (!toRestore) return;
+  if (currentBlock && currentBlock.name) {
+    archivedBlocks.splice(bi, 1);
+    archivedBlocks.unshift({
+      ...currentBlock,
+      sessionLog,
+      archivedAt: new Date().toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'})
+    });
+  } else {
+    archivedBlocks.splice(bi, 1);
+  }
+  currentBlock = { ...toRestore };
+  delete currentBlock.sessionLog;
+  delete currentBlock.archivedAt;
+  currentWeek = 1;
+  sessionLog = toRestore.sessionLog || {};
+  localStorage.setItem('fw_block', JSON.stringify(currentBlock));
+  localStorage.setItem('fw_archive', JSON.stringify(archivedBlocks));
+  localStorage.setItem('fw_week', '1');
+  localStorage.setItem('fw_log', JSON.stringify(sessionLog));
+  renderArchive();
+  renderHomeDays();
+  updateStats();
+  showToast('Restored — ' + currentBlock.name);
+  switchBuildTab('builder');
+}
 
 // ─── SESSION LOG ───────────────────────────────────────────────
 function startDay(dayId, overrideDay) {
