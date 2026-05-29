@@ -196,6 +196,7 @@
   .ss-row { display: flex; align-items: center; gap: 12px; padding: 8px 4px; font-family: 'DM Mono', monospace; -webkit-tap-highlight-color: transparent; }
   .ss-row-name { flex-shrink: 0; width: 100px; font-size: 11px; letter-spacing: 1px; cursor: pointer; }
   .ss-row-name .ss-play { font-size: 9px; color: var(--accent); margin-left: 4px; opacity: 0.7; }
+  .ss-row-name .ss-last { font-size: 8px; letter-spacing: 1px; color: var(--accent-dim); margin-top: 3px; opacity: 0.85; }
   .ss-row-content { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; }
   .ss-row-value { flex: 1; font-size: 13px; letter-spacing: 1px; }
   .ss-row-edit { font-size: 8px; letter-spacing: 2px; color: var(--text-muted); opacity: 0.5; text-transform: uppercase; flex-shrink: 0; }
@@ -507,7 +508,6 @@
   .archived-block-methods { font-size: 9px; color: var(--text); letter-spacing: 1px; margin-top: 3px; opacity: 0.6; }
   .archived-block-meta { font-size: 9px; color: var(--text-muted); letter-spacing: 1px; margin-top: 4px; }
   .archived-block-chevron { color: var(--accent); font-size: 14px; transition: transform 0.2s; flex-shrink: 0; margin-top: 4px; }
-  .archived-restore-btn { width: calc(100% - 32px); margin: 12px 16px 16px; padding: 12px; background: rgba(201,169,110,0.08); border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; display: block; }
   .archived-block.open .archived-block-chevron { transform: rotate(90deg); }
   .archived-block-body { display: none; }
   .archived-block.open .archived-block-body { display: block; }
@@ -2827,43 +2827,12 @@ function renderArchive() {
       <div class="archived-block-body">
         ${daysHtml}
         ${progressHtml?`<div class="archived-progress"><div class="archived-progress-label">Session Data</div>${progressHtml}</div>`:''}
-        <button class="archived-restore-btn" onclick="event.stopPropagation();restoreArchivedBlock(${bi})">↑ Restore as Active Block</button>
       </div>
     </div>`;
   }).join('');
 }
 
 function toggleArchivedBlock(i) { document.getElementById('ab-'+i)?.classList.toggle('open'); }
-
-function restoreArchivedBlock(bi) {
-  if (!confirm('Restore this block as your active programme?\n\nYour current block will be archived.')) return;
-  const toRestore = archivedBlocks[bi];
-  if (!toRestore) return;
-  if (currentBlock && currentBlock.name) {
-    archivedBlocks.splice(bi, 1);
-    archivedBlocks.unshift({
-      ...currentBlock,
-      sessionLog,
-      archivedAt: new Date().toLocaleDateString('en-GB', {day:'numeric',month:'short',year:'numeric'})
-    });
-  } else {
-    archivedBlocks.splice(bi, 1);
-  }
-  currentBlock = { ...toRestore };
-  delete currentBlock.sessionLog;
-  delete currentBlock.archivedAt;
-  currentWeek = 1;
-  sessionLog = toRestore.sessionLog || {};
-  localStorage.setItem('fw_block', JSON.stringify(currentBlock));
-  localStorage.setItem('fw_archive', JSON.stringify(archivedBlocks));
-  localStorage.setItem('fw_week', '1');
-  localStorage.setItem('fw_log', JSON.stringify(sessionLog));
-  renderArchive();
-  renderHomeDays();
-  updateStats();
-  showToast('Restored — ' + currentBlock.name);
-  switchBuildTab('builder');
-}
 
 // ─── SESSION LOG ───────────────────────────────────────────────
 function startDay(dayId, overrideDay) {
@@ -2988,6 +2957,20 @@ function _logExerciseCardHTML(ex) {
     </div>`;
 }
 
+// Returns last week's logged "Xkg × Yr" for a specific exercise + round, or '' if none.
+function _ssLastWeekHint(exId, round) {
+  if (currentWeek <= 1) return '';
+  const prevKey = `${currentDayId}_${exId}_v${currentWeek - 1}`;
+  const prev = sessionLog[prevKey] || {};
+  const pw = prev[`s${round}_w`];
+  const pr = prev[`s${round}_r`];
+  if ((pr === undefined || pr === '') && (pw === undefined || pw === '')) return '';
+  const wNum = parseFloat(pw);
+  const wDisp = (!pw || wNum === 0) ? 'BW' : `${pw}kg`;
+  const rDisp = (pr !== undefined && pr !== '') ? `${pr}r` : '—';
+  return `${wDisp} × ${rDisp}`;
+}
+
 // Render a superset group as a merged round-based container.
 // Reads `currentBlock` for the group's exercises and `sessionLog` for state.
 function renderSupersetGroup(groupLabel) {
@@ -3044,9 +3027,10 @@ function renderSupersetGroup(groupLabel) {
       const isDone = (r !== '' && !isActive);
       const exNameAttr = JSON.stringify(exData.name).replace(/"/g, '&quot;');
 
+      const lwHint = _ssLastWeekHint(g.id, round);
       if (isActive) {
         html += `<div class="ss-row active">
-          <div class="ss-row-name" onclick="openSheet('${exData.id}')">${exData.name}<span class="ss-play" aria-hidden="true">▶</span></div>
+          <div class="ss-row-name" onclick="openSheet('${exData.id}')">${exData.name}<span class="ss-play" aria-hidden="true">▶</span>${lwHint?`<div class="ss-last">↳ ${lwHint}</div>`:''}</div>
           <div class="ss-row-content">
             <input class="set-field" type="text" inputmode="none" placeholder="kg" value="${w}" id="${wk}_s${round}_w"
               autocomplete="one-time-code" data-lpignore="true" data-form-type="other" oninput="autoSaveSet('${wk}',${round})"
@@ -3071,7 +3055,7 @@ function renderSupersetGroup(groupLabel) {
         html += `<div class="ss-row pending" onclick="ssReactivate('${groupLabel}','${g.id}',${round})">
           <div class="ss-row-name">${exData.name}</div>
           <div class="ss-row-content">
-            <div class="ss-row-value">Pending</div>
+            <div class="ss-row-value">${lwHint?`Last: ${lwHint}`:'Pending'}</div>
           </div>
         </div>`;
       }
@@ -3390,6 +3374,10 @@ function isLastScheduledDay(dayId) {
 }
 
 function checkWeekComplete() {
+  // Gate: only prompt to advance week on Saturdays (0=Sun..6=Sat).
+  // Manual W-nav buttons still work any day; this is the auto-prompt only.
+  if (new Date().getDay() !== 6) return;
+
   // Two trigger paths:
   //  1) Last-day trigger: user just logged the last scheduled day of the week.
   //  2) Calendar-elapsed fallback: it's been ≥7 days since the first session
@@ -4383,14 +4371,19 @@ function onSetBlur(wk, setNum, exName) {
   const r = document.getElementById(`${wk}_s${setNum}_r`);
   if (!r || r.value.trim() === '') return;
 
-  // Determine if this exercise is part of a superset group
-  const card = document.querySelector(`.log-ex-card[data-wk="${wk}"]`);
-  if (!card) return;
-  const exId = card.dataset.exid;
-  const totalSets = parseInt(card.dataset.sets, 10);
+  // Resolve exercise identity from the wk key directly (works for both
+  // standalone .log-ex-card AND superset rows which live in .ss-container).
+  // wk format: `${currentDayId}_${exId}_v${currentWeek}` — but dayId/exId can
+  // contain underscores, so derive exId by matching against the day's exercises.
   const exs = _currentDayExercises();
-  const exDef = exs.find(e => e.id === exId);
-  const group = exDef ? exDef.supersetGroup : null;
+  let exDef = null;
+  for (const e of exs) {
+    if (wk === `${currentDayId}_${e.id}_v${currentWeek}`) { exDef = e; break; }
+  }
+  if (!exDef) return;
+  const exId = exDef.id;
+  const totalSets = exDef.sets;
+  const group = exDef.supersetGroup || null;
 
   if (!group) {
     // Standalone exercise — original behavior
@@ -4466,10 +4459,15 @@ function startTimer(exName, wk, justCompletedSet) {
   const day = currentBlock && currentBlock.days
     ? currentBlock.days.find(d => d.id === currentDayId)
     : null;
-  const card = wk ? document.querySelector(`.log-ex-card[data-wk="${wk}"]`) : null;
-  const totalSets = card ? parseInt(card.dataset.sets, 10) : 0;
-  const exId = card ? card.dataset.exid : null;
-  const exDef = exId && day && day.exercises ? day.exercises.find(e => e.id === exId) : null;
+  // Resolve exId from the wk key (works for grouped rows too, which have no .log-ex-card)
+  let exDef = null;
+  if (wk && day && day.exercises) {
+    for (const e of day.exercises) {
+      if (wk === `${currentDayId}_${e.id}_v${currentWeek}`) { exDef = e; break; }
+    }
+  }
+  const totalSets = exDef ? exDef.sets : 0;
+  const exId = exDef ? exDef.id : null;
   const group = exDef ? exDef.supersetGroup : null;
 
   if (group && day && day.exercises) {
