@@ -3374,6 +3374,10 @@ function isLastScheduledDay(dayId) {
 }
 
 function checkWeekComplete() {
+  // Gate: only prompt to advance week on Saturdays (0=Sun..6=Sat).
+  // Manual W-nav buttons still work any day; this is the auto-prompt only.
+  if (new Date().getDay() !== 6) return;
+
   // Two trigger paths:
   //  1) Last-day trigger: user just logged the last scheduled day of the week.
   //  2) Calendar-elapsed fallback: it's been ≥7 days since the first session
