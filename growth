@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FORGE — Growth Roadmap</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --forge-base: #080808;
+    --forge-gold: #c9a96e;
+    --forge-ivory: #e8e2d9;
+    --forge-grey: #6b6560;
+    --forge-gold-dim: rgba(201,169,110,0.12);
+    --forge-gold-border: rgba(201,169,110,0.3);
+    --bg: #0e0e0e;
+    --bg2: #161616;
+    --bg3: #1e1e1c;
+    --border: rgba(255,255,255,0.07);
+    --border-hover: rgba(255,255,255,0.14);
+    --text-primary: #e8e2d9;
+    --text-secondary: #9a9490;
+    --text-tertiary: #5a5652;
+    --blue: #3B8BD4;
+    --amber: #BA7517;
+    --gold: #c9a96e;
+  }
+
+  html { background: var(--bg); color: var(--text-primary); }
+
+  body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    padding: 48px 24px 80px;
+  }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+  }
+
+  /* Header */
+  .header {
+    margin-bottom: 52px;
+  }
+
+  .header-eyebrow {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--forge-gold);
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+
+  .header-title {
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--forge-ivory);
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+    margin-bottom: 10px;
+  }
+
+  .header-sub {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    max-width: 520px;
+  }
+
+  .header-divider {
+    width: 32px;
+    height: 1px;
+    background: var(--forge-gold);
+    margin: 20px 0;
+    opacity: 0.5;
+  }
+
+  /* Phase section */
+  .phase {
+    margin-bottom: 10px;
+  }
+
+  .phase-header {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 10px;
+    padding-left: 2px;
+  }
+
+  .phase-tag {
+    font-size: 9px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--forge-gold);
+    font-weight: 600;
+    min-width: 56px;
+  }
+
+  .phase-name {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-secondary);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .phase-timeline {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-left: auto;
+  }
+
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+
+  @media (max-width: 600px) {
+    .cards-grid { grid-template-columns: 1fr; }
+  }
+
+  .card {
+    background: var(--bg2);
+    border: 0.5px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 15px 14px;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s, transform 0.15s;
+    position: relative;
+    overflow: hidden;
+    user-select: none;
+  }
+
+  .card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1.5px;
+    background: transparent;
+    transition: background 0.2s;
+  }
+
+  .card.gold::after { background: var(--forge-gold); }
+  .card.blue::after { background: var(--blue); }
+  .card.amber::after { background: var(--amber); }
+
+  .card:hover {
+    border-color: var(--border-hover);
+    background: var(--bg3);
+    transform: translateY(-1px);
+  }
+
+  .card.active {
+    border-color: var(--forge-gold-border);
+    background: var(--bg3);
+  }
+
+  .card-icon {
+    font-size: 18px;
+    margin-bottom: 8px;
+    opacity: 0.6;
+  }
+
+  .card-title {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.35;
+    margin-bottom: 5px;
+    letter-spacing: -0.01em;
+  }
+
+  .card-sub {
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 10px;
+  }
+
+  .badge {
+    display: inline-block;
+    font-size: 9px;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 20px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .badge-now { background: rgba(201,169,110,0.15); color: var(--forge-gold); }
+  .badge-build { background: rgba(59,139,212,0.15); color: var(--blue); }
+  .badge-later { background: rgba(186,117,23,0.12); color: var(--amber); }
+
+  /* Detail panel */
+  .detail-panel {
+    display: none;
+    background: var(--bg2);
+    border: 0.5px solid var(--forge-gold-border);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 4px;
+    animation: slideDown 0.18s ease;
+  }
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-6px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .detail-panel.visible { display: block; }
+
+  .detail-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--forge-gold);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+
+  .detail-list {
+    list-style: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px 24px;
+  }
+
+  @media (max-width: 600px) {
+    .detail-list { grid-template-columns: 1fr; }
+  }
+
+  .detail-list li {
+    font-size: 12px;
+    color: var(--text-secondary);
+    padding: 5px 0 5px 16px;
+    position: relative;
+    line-height: 1.5;
+    border-bottom: 0.5px solid var(--border);
+  }
+
+  .detail-list li:last-child { border-bottom: none; }
+
+  .detail-list li::before {
+    content: '—';
+    position: absolute;
+    left: 0;
+    color: var(--forge-gold);
+    font-size: 10px;
+    top: 6px;
+    opacity: 0.7;
+  }
+
+  /* Phase connector */
+  .connector {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 14px 0;
+    padding-left: 2px;
+  }
+
+  .connector-line {
+    width: 1px;
+    height: 20px;
+    background: var(--border);
+    margin-left: 16px;
+  }
+
+  .connector-arrow {
+    font-size: 11px;
+    color: var(--text-tertiary);
+    margin-left: 28px;
+  }
+
+  /* Legend */
+  .legend {
+    display: flex;
+    gap: 20px;
+    margin-top: 28px;
+    flex-wrap: wrap;
+    border-top: 0.5px solid var(--border);
+    padding-top: 20px;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+    color: var(--text-secondary);
+  }
+
+  .legend-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+  }
+
+  /* Footer note */
+  .footer-note {
+    margin-top: 36px;
+    font-size: 11px;
+    color: var(--text-tertiary);
+    line-height: 1.6;
+    border-left: 1.5px solid var(--forge-gold-border);
+    padding-left: 14px;
+  }
+
+  .footer-note strong {
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <div class="header">
+    <div class="header-eyebrow">FORGE Training</div>
+    <h1 class="header-title">Growth Roadmap</h1>
+    <div class="header-divider"></div>
+    <p class="header-sub">Three phases from warm acquisition to organic inbound — mapped from the GEO strategy Alessio used to 2× his leads, applied to your PT business and FORGE platform.</p>
+  </div>
+
+  <!-- PHASE 1 -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-tag">Phase 1</span>
+      <span class="phase-name">Warm acquisition</span>
+      <span class="phase-timeline">Now → July 2025</span>
+    </div>
+
+    <div class="cards-grid">
+      <div class="card gold" onclick="toggle('workshop-leads', this)">
+        <div class="card-icon">◎</div>
+        <div class="card-title">Workshop follow-up</div>
+        <div class="card-sub">April Ministry leads + June/July workshop funnel</div>
+        <span class="badge badge-now">Active</span>
+      </div>
+      <div class="card gold" onclick="toggle('referrals', this)">
+        <div class="card-icon">⇄</div>
+        <div class="card-title">Direct referral asks</div>
+        <div class="card-sub">From current 9 clients + past attendees</div>
+        <span class="badge badge-now">Active</span>
+      </div>
+      <div class="card gold" onclick="toggle('gymbox', this)">
+        <div class="card-icon">◈</div>
+        <div class="card-title">Gymbox floor</div>
+        <div class="card-sub">3-second rule, Old Street daily</div>
+        <span class="badge badge-now">Active</span>
+      </div>
+    </div>
+
+    <div class="detail-panel" id="detail-workshop-leads">
+      <div class="detail-title">Workshop follow-up sequence</div>
+      <ul class="detail-list">
+        <li>Email 1 (day 0): thank you + what they got from the session</li>
+        <li>Email 2 (day 3): one insight they can apply immediately</li>
+        <li>Email 3 (day 7): your methodology + what 1-2-1 looks like</li>
+        <li>Email 4 (day 14): soft CTA — discovery call or next workshop</li>
+        <li>Re-engage cold April leads before June/July workshop</li>
+        <li>Workshop as low-commitment entry point to 1-2-1</li>
+      </ul>
+    </div>
+
+    <div class="detail-panel" id="detail-referrals">
+      <div class="detail-title">Referral system</div>
+      <ul class="detail-list">
+        <li>Ask each of 9 active clients directly — not vaguely</li>
+        <li>Frame: "do you know anyone working towards X goal"</li>
+        <li>Past workshop attendees are warm referral sources too</li>
+        <li>No incentive needed — outcome focus is sufficient</li>
+        <li>Target: 2 new clients per month through this channel</li>
+        <li>Follow up once — don't let the ask go cold</li>
+      </ul>
+    </div>
+
+    <div class="detail-panel" id="detail-gymbox">
+      <div class="detail-title">Gymbox floor conversations</div>
+      <ul class="detail-list">
+        <li>3-second rule — no deliberation window</li>
+        <li>Observe, find a natural entry point, act</li>
+        <li>Target: intermediate practitioners showing technique gaps</li>
+        <li>Offer workshop as a low-commitment first step</li>
+        <li>Don't pitch PT — pitch the conversation</li>
+        <li>Daily exposure compounds — treat as a numbers game</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="connector"><div class="connector-line"></div><span class="connector-arrow">↓ Build while Phase 1 runs</span></div>
+
+  <!-- PHASE 2 -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-tag">Phase 2</span>
+      <span class="phase-name">Content engine</span>
+      <span class="phase-timeline">July → Oct 2025</span>
+    </div>
+
+    <div class="cards-grid">
+      <div class="card blue" onclick="toggle('youtube', this)">
+        <div class="card-icon">▷</div>
+        <div class="card-title">FORGE manifesto video</div>
+        <div class="card-sub">YouTube authority signal — Mark Waters format</div>
+        <span class="badge badge-build">Build</span>
+      </div>
+      <div class="card blue" onclick="toggle('email-nurture', this)">
+        <div class="card-icon">✉</div>
+        <div class="card-title">Email nurture sequence</div>
+        <div class="card-sub">Convert cold traffic into warm leads automatically</div>
+        <span class="badge badge-build">Build</span>
+      </div>
+      <div class="card blue" onclick="toggle('instagram', this)">
+        <div class="card-icon">◻</div>
+        <div class="card-title">Talking-head content</div>
+        <div class="card-sub">Your own data: this outperforms silent cinematic</div>
+        <span class="badge badge-build">Build</span>
+      </div>
+    </div>
+
+    <div class="detail-panel" id="detail-youtube">
+      <div class="detail-title">FORGE manifesto video — structure</div>
+      <ul class="detail-list">
+        <li>Cold open: hook on the problem intermediate practitioners hit</li>
+        <li>Audience filter: "this is not for beginners"</li>
+        <li>Category reframe: why most calisthenics programming fails</li>
+        <li>Credentials after the hook — not first</li>
+        <li>Named framework: introduce FORGE / Overcoming Gravity method</li>
+        <li>CTA: workshop or FORGE app — not generic follow</li>
+      </ul>
+    </div>
+
+    <div class="detail-panel" id="detail-email-nurture">
+      <div class="detail-title">Email nurture sequence — 5-email arc</div>
+      <ul class="detail-list">
+        <li>Email 1: welcome + the single most valuable thing you teach</li>
+        <li>Email 2: common mistake your ideal client makes</li>
+        <li>Email 3: your methodology — why it's different</li>
+        <li>Email 4: proof — a client result or workshop outcome</li>
+        <li>Email 5: CTA — 1-2-1 call, workshop, or FORGE trial</li>
+        <li>Trigger: opt-in via workshop landing page or forgetraining.app</li>
+      </ul>
+    </div>
+
+    <div class="detail-panel" id="detail-instagram">
+      <div class="detail-title">Instagram talking-head content</div>
+      <ul class="detail-list">
+        <li>Your data: talking-head outperforms silent cinematic</li>
+        <li>Format: 60–90s, one specific concept per video</li>
+        <li>Preserve FX30/S-Cinetone as B-roll — keep the aesthetic</li>
+        <li>Topics: programming principles, muscle-up progressions, handstand cues</li>
+        <li>Each video drives to workshop or FORGE free trial</li>
+        <li>Consistency > production value at this stage</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="connector"><div class="connector-line"></div><span class="connector-arrow">↓ Compounds from Oct onward</span></div>
+
+  <!-- PHASE 3 -->
+  <div class="phase">
+    <div class="phase-header">
+      <span class="phase-tag">Phase 3</span>
+      <span class="phase-name">Organic search</span>
+      <span class="phase-timeline">Oct 2025 onward</span>
+    </div>
+
+    <div class="cards-grid">
+      <div class="card amber" onclick="toggle('local-seo', this)">
+        <div class="card-icon">⊙</div>
+        <div class="card-title">Local SEO / GEO</div>
+        <div class="card-sub">Google Maps + search visibility — London PT</div>
+        <span class="badge badge-later">Later</span>
+      </div>
+      <div class="card amber" onclick="toggle('forge-seo', this)">
+        <div class="card-icon">◉</div>
+        <div class="card-title">FORGE content SEO</div>
+        <div class="card-sub">YouTube + blog → inbound calisthenics traffic</div>
+        <span class="badge badge-later">Later</span>
+      </div>
+      <div class="card amber" onclick="toggle('corporate', this)">
+        <div class="card-icon">⬡</div>
+        <div class="card-title">Corporate wellness</div>
+        <div class="card-sub">Cold email to EC1/EC2 businesses — background</div>
+        <span class="badge badge-later">Later</span>
+      </div>
+    </div>
+
+    <div class="detail-panel" id="detail-local-seo">
+      <div class="detail-title">Local SEO — what Alessio's agency actually did</div>
+      <ul class="detail-list">
+        <li>Google Business Profile for "personal trainer Old Street / Farringdon"</li>
+        <li>Consistent NAP across directories</li>
+        <li>Reviews strategy — prompt every happy client</li>
+        <li>Landing page optimised for local search intent</li>
+        <li>Takes 3–6 months to compound — start quietly now</li>
+        <li>No ad spend needed once it's established</li>
+      </ul>
+    </div>
+
+    <div class="detail-panel" id="detail-forge-seo">
+      <div class="detail-title">FORGE content SEO</div>
+      <ul class="detail-list">
+        <li>YouTube is the highest-leverage channel for this</li>
+        <li>Target: "calisthenics programming intermediate", "muscle up programme"</li>
+        <li>Each video = a search asset that compounds over time</li>
+        <li>Blog posts optional — YouTube alone is sufficient</li>
+        <li>Long-tail: "overcoming gravity method", "FORGE training app"</li>
+        <li>Manifesto video (Phase 2) seeds this channel</li>
+      </ul>
+    </div>
+
+    <div class="detail-panel" id="detail-corporate">
+      <div class="detail-title">Corporate wellness outreach</div>
+      <ul class="detail-list">
+        <li>Running as background channel now — low time cost</li>
+        <li>Target: tech companies, agencies in EC1/EC2/N1</li>
+        <li>Angle: staff benefit, lunch workshops, group calisthenics intro</li>
+        <li>Revenue is secondary — each touchpoint generates individual leads</li>
+        <li>Cold email + LinkedIn DM</li>
+        <li>One template, sent in batches of 20</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="legend">
+    <div class="legend-item">
+      <div class="legend-dot" style="background: var(--gold)"></div>
+      <span>Active now — executional, no build required</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background: var(--blue)"></div>
+      <span>Next to build — infrastructure that compounds</span>
+    </div>
+    <div class="legend-item">
+      <div class="legend-dot" style="background: var(--amber)"></div>
+      <span>Later — long-burn, start quietly in background</span>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    <strong>The Alessio principle:</strong> who arrives before the problem competes on value, not price. Phase 1 solves the immediate roster gap. Phase 2 builds the machine that means you never need to solve it again.
+  </div>
+
+</div>
+
+<script>
+  let activeId = null;
+  let activeEl = null;
+
+  function toggle(id, cardEl) {
+    const panel = document.getElementById('detail-' + id);
+    const isOpen = activeId === id;
+
+    if (activeId) {
+      document.getElementById('detail-' + activeId).classList.remove('visible');
+      if (activeEl) activeEl.classList.remove('active');
+    }
+
+    if (!isOpen) {
+      panel.classList.add('visible');
+      cardEl.classList.add('active');
+      activeId = id;
+      activeEl = cardEl;
+      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else {
+      activeId = null;
+      activeEl = null;
+    }
+  }
+</script>
+</body>
+</html>
