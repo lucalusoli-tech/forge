@@ -710,7 +710,94 @@
   .onboard-back:active { color: var(--accent); }
   .onboard-loading-bar { width: 120px; height: 2px; background: var(--border); margin-top: 32px; overflow: hidden; border-radius: 1px; }
   .onboard-loading-fill { width: 0%; height: 100%; background: var(--accent); animation: obLoad 1.8s ease forwards; }
-  @keyframes obLoad { 0% { width: 0%; } 60% { width: 85%; } 100% { width: 100%; } }</style>
+  @keyframes obLoad { 0% { width: 0%; } 60% { width: 85%; } 100% { width: 100%; } }
+
+  /* ── STATS OVERVIEW ───────────────────────────────── */
+  .st-subtoggle{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:3px;margin:0 20px 16px;}
+  .st-subtoggle button{flex:1;background:none;border:none;color:var(--text-muted);font-family:inherit;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;padding:9px;border-radius:8px;cursor:pointer;transition:.25s;}
+  .st-subtoggle button.on{background:var(--accent-glow);color:var(--accent);box-shadow:inset 0 0 0 1px rgba(201,169,110,.25);}
+  #st-overview{padding:0 20px;}
+  .st-hero{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .st-card{background:linear-gradient(160deg,var(--surface),var(--deep));border:1px solid var(--border);border-radius:16px;padding:18px 16px;position:relative;overflow:hidden;}
+  .st-card::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--accent);opacity:.85;}
+  .st-label{font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-muted);font-weight:600;}
+  .st-num{font-family:'DM Mono',monospace;font-size:36px;line-height:1;margin-top:10px;}
+  .st-unit{font-family:'DM Mono',monospace;font-size:12px;color:var(--accent-dim);}
+  .st-meta{font-size:11px;color:var(--text-muted);margin-top:8px;}
+  .st-sec{margin-top:28px;}
+  .st-sechead{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+  .st-sechead h3{font-size:12px;font-weight:600;letter-spacing:.2em;text-transform:uppercase;margin:0;color:var(--text);}
+  .st-sechead .ln{flex:1;height:1px;background:var(--border);}
+  .st-sechead .tg{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent-dim);}
+  .st-rings{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .st-ringcard{background:var(--deep);border:1px solid var(--border);border-radius:16px;padding:18px 10px 14px;display:flex;flex-direction:column;align-items:center;}
+  .st-ringwrap{position:relative;width:104px;height:104px;}
+  .st-ringwrap svg{transform:rotate(-90deg);}
+  .st-ringbg{fill:none;stroke:var(--card);stroke-width:9;}
+  .st-ringfg{fill:none;stroke:var(--accent);stroke-width:9;stroke-linecap:round;stroke-dasharray:283;transition:stroke-dashoffset 1.1s cubic-bezier(.2,.8,.2,1);}
+  .st-ringc{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:21px;color:var(--text);}
+  .st-ringc small{font-size:11px;color:var(--accent-dim);}
+  .st-ringcap{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-muted);font-weight:600;margin-top:10px;}
+  .st-ringgoal{font-family:'DM Mono',monospace;font-size:10px;color:var(--accent-dim);margin-top:3px;}
+  .st-panel{background:var(--deep);border:1px solid var(--border);border-radius:16px;padding:18px 16px;margin-top:12px;}
+  .st-ptop{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:18px;}
+  .st-pcap{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-muted);font-weight:600;}
+  .st-pval{font-family:'DM Mono',monospace;font-size:13px;color:var(--accent);}
+  .st-bars{display:flex;align-items:flex-end;gap:8px;height:120px;}
+  .st-barcol{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;height:100%;justify-content:flex-end;}
+  .st-bar{width:100%;max-width:30px;background:linear-gradient(180deg,var(--accent),var(--accent-dim));border-radius:5px 5px 2px 2px;min-height:3px;}
+  .st-bar.muted{background:var(--card);}
+  .st-barday{font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted);}
+  .st-barn{font-family:'DM Mono',monospace;font-size:9px;color:var(--accent-dim);}
+  .st-split{display:grid;grid-template-columns:104px 1fr;gap:16px;align-items:center;}
+  .st-donutwrap{position:relative;width:104px;height:104px;}
+  .st-donutwrap svg{transform:rotate(-90deg);}
+  .st-donutc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .st-donutc .n{font-family:'DM Mono',monospace;font-size:18px;color:var(--text);}
+  .st-donutc .l{font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-muted);margin-top:2px;}
+  .st-legend{display:flex;flex-direction:column;gap:9px;}
+  .st-leg{display:flex;align-items:center;gap:9px;font-size:12px;color:var(--text);}
+  .st-legdot{width:9px;height:9px;border-radius:2px;flex:none;}
+  .st-legname{flex:1;}
+  .st-legpct{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);}
+  .st-figtoggle{display:flex;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:3px;margin-bottom:14px;}
+  .st-figtoggle button{flex:1;background:none;border:none;color:var(--text-muted);font-family:inherit;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;padding:9px;border-radius:8px;cursor:pointer;transition:.25s;}
+  .st-figtoggle button.on{background:var(--accent-glow);color:var(--accent);box-shadow:inset 0 0 0 1px rgba(201,169,110,.25);}
+  .st-stage{position:relative;display:flex;justify-content:center;min-height:430px;}
+  .st-fig{display:none;width:228px;}
+  .st-fig.on{display:block;}
+  .st-m{stroke:var(--black);stroke-width:1.2;cursor:pointer;transition:fill .5s ease,filter .25s ease;fill:#1c1c1c;}
+  .st-m.l1{fill:rgba(201,169,110,.28);}
+  .st-m.l2{fill:rgba(201,169,110,.45);}
+  .st-m.l3{fill:rgba(201,169,110,.68);}
+  .st-m.l4{fill:var(--accent);}
+  .st-m.over{fill:var(--red)!important;}
+  .st-m:hover{filter:drop-shadow(0 0 6px rgba(201,169,110,.6));}
+  .st-frame{fill:none;stroke:rgba(232,226,217,.10);stroke-width:1;}
+  .st-readout{background:var(--deep);border:1px solid var(--border);border-radius:14px;padding:14px 16px;margin-top:6px;display:flex;align-items:center;justify-content:space-between;min-height:58px;}
+  .st-roname{font-size:13px;font-weight:600;color:var(--text);}
+  .st-rosub{font-family:'DM Mono',monospace;font-size:11px;color:var(--text-muted);margin-top:3px;}
+  .st-badge{font-family:'DM Mono',monospace;font-size:11px;padding:5px 11px;border-radius:20px;}
+  .st-b0{color:var(--text-muted);border:1px solid var(--border);}
+  .st-b1{color:var(--accent-dim);border:1px solid var(--accent-dim);}
+  .st-b4{color:var(--black);background:var(--accent);font-weight:600;}
+  .st-bover{color:#fff;background:var(--red);}
+  .st-scale{margin-top:18px;}
+  .st-scalebar{display:flex;height:8px;border-radius:4px;overflow:hidden;}
+  .st-scalebar span{flex:1;}
+  .st-scalelab{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:9px;color:var(--text-muted);margin-top:7px;}
+  .st-levels{display:flex;flex-direction:column;gap:14px;}
+  .st-lvltop{display:flex;justify-content:space-between;font-size:11px;margin-bottom:6px;color:var(--text);}
+  .st-lvln{font-family:'DM Mono',monospace;color:var(--text-muted);}
+  .st-lvltrack{height:6px;background:var(--card);border-radius:3px;overflow:hidden;}
+  .st-lvlfill{height:100%;border-radius:3px;}
+  .st-perf{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .st-perfcard{background:var(--deep);border:1px solid var(--border);border-radius:14px;padding:16px 14px;}
+  .st-perflabel{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-muted);font-weight:600;}
+  .st-perfval{font-family:'DM Mono',monospace;font-size:26px;margin-top:10px;line-height:1;color:var(--text);}
+  .st-perfval small{font-size:12px;color:var(--accent-dim);}
+  .st-perfsub{font-size:11px;margin-top:7px;color:var(--text-muted);}
+</style>
 </head>
 <body>
 
@@ -1147,7 +1234,9 @@
           <div class="block-stat"><div class="block-stat-label">Week</div><div class="block-stat-val" id="prog-week">W1</div></div>
         </div>
       </div>
-      <div id="progress-container" style="padding-bottom:20px"></div>
+      <div class="st-subtoggle"><button id="st-tab-overview" class="on" onclick="showProgressTab('overview')">Overview</button><button id="st-tab-log" onclick="showProgressTab('log')">Log</button></div>
+      <div id="st-overview"></div>
+      <div id="progress-container" style="padding-bottom:20px;display:none"></div>
     </div>
 
     <!-- BUILD + ARCHIVE -->
@@ -2114,7 +2203,7 @@ function navigate(page, push=true) {
   const isLog = page==='log';
   document.getElementById('back-btn').classList.toggle('visible', isLog);
   document.getElementById('topbar-logo').style.display = isLog ? 'none' : 'block';
-  if (page==='progress') renderProgress();
+  if (page==='progress') { renderProgress(); try{ renderStatsOverview(); }catch(err){ console.warn('overview', err); } }
   if (page==='coaching') {
     loadProgrammes();
   }
@@ -3563,6 +3652,214 @@ function closeSheet(e){if(e.target===document.getElementById('sheet-overlay'))cl
 function closeSheetDirect(){document.getElementById('sheet-overlay').classList.remove('open');}
 
 // ─── PROGRESS ──────────────────────────────────────────────────
+
+// ─── STATS OVERVIEW MODULE ─────────────────────────────────────
+const REGIONS=['chest','front_delts','side_delts','rear_delts','biceps','triceps','forearms','abs','obliques','hip_flexors','lats','traps','lower_back','quads','hamstrings','glutes','calves'];
+const REGION_LABEL={chest:'Chest',front_delts:'Front Delts',side_delts:'Side Delts',rear_delts:'Rear Delts',biceps:'Biceps',triceps:'Triceps',forearms:'Forearms',abs:'Abs / Core',obliques:'Obliques',hip_flexors:'Hip Flexors',lats:'Lats',traps:'Upper / Mid Back',lower_back:'Lower Back',quads:'Quads',hamstrings:'Hamstrings',glutes:'Glutes',calves:'Calves'};
+const CAT_ORDER=['legs','pull','push','core'];
+const CAT_LABEL={legs:'Legs',pull:'Pull',push:'Push',core:'Core'};
+const CAT_COLOR={legs:'var(--green)',pull:'var(--text)',push:'var(--accent)',core:'var(--text-muted)'};
+const LEVELS=['Beginner','Intermediate','Advanced','Elite'];
+// ─── MUSCLE NORMALIZATION MAP ──────────────────────────────────
+// Folds the free-text `target` field into 16 colourable regions.
+// A token may map to one region (string) or several (array).
+// null  = intentionally ignored (not a heat-map muscle).
+// ⚑     = judgment call — confirm or change these.
+//
+// Regions: chest, front_delts, side_delts, rear_delts, biceps,
+//          triceps, forearms, abs, obliques, hip_flexors, lats,
+//          traps, lower_back, quads, hamstrings, glutes, calves  (17)
+
+const MUSCLE_MAP = {
+  // ── Chest ──
+  'Chest': 'chest',
+  'Pectorals': 'chest',
+  'Upper Chest': 'chest',
+  'Lower Chest': 'chest',
+  'Inner Chest': 'chest',
+  'Serratus': 'obliques',         // side-rib → obliques (your call)
+
+  // ── Delts ──
+  'Anterior Delt': 'front_delts',
+  'Anterior Deltoid': 'front_delts',
+  'Shoulder Flexors': 'front_delts',
+  'Lateral Delt': 'side_delts',
+  'Lateral Deltoid': 'side_delts',
+  'Rear Delt': 'rear_delts',
+  'Rear Deltoid': 'rear_delts',
+  'Anterior & Lateral Delt': ['front_delts','side_delts'],
+  'All Three Delt Heads': ['front_delts','side_delts','rear_delts'],
+  'Shoulder Girdle': ['front_delts','side_delts','rear_delts'],   // vague → all heads
+  'Full Shoulder Girdle': ['front_delts','side_delts','rear_delts'],
+  'Shoulders': ['front_delts','side_delts','rear_delts'],
+  'Shoulder': ['front_delts','side_delts','rear_delts'],
+
+  // ── Arms ──
+  'Biceps': 'biceps',
+  'Bicep': 'biceps',
+  'Biceps Brachii': 'biceps',
+  'Biceps Peak': 'biceps',
+  'Biceps Long Head': 'biceps',
+  'Brachialis': 'biceps',
+  'Triceps': 'triceps',
+  'Triceps Long Head': 'triceps',
+  'Triceps Lateral Head': 'triceps',
+  'Lateral Head': 'triceps',
+  'Long Head': 'triceps',
+  'Forearms': 'forearms',
+  'Brachioradialis': 'forearms',
+  'Wrists': 'forearms',
+  'Wrist Flexors': 'forearms',
+  'Extensors': 'forearms',
+  'Grip': 'forearms',             // ⚑ or null (grip ≠ a muscle region)
+
+  // ── Back ──
+  'Lats': 'lats',
+  'Lat': 'lats',
+  'Teres Major': 'lats',
+  'Rhomboids': 'traps',           // ⚑ mid-back — folding into traps region
+  'Rhomboid': 'traps',
+  'Mid-Back': 'traps',            // ⚑
+  'Upper Back': 'traps',          // ⚑
+  'Traps': 'traps',
+  'Trapezius': 'traps',
+  'Upper Traps': 'traps',
+  'Mid-Traps': 'traps',
+  'Lower Traps': 'traps',
+  'Neck': 'traps',                // ⚑ or null
+  'Spinal Erectors': 'lower_back',
+  'Erectors': 'lower_back',
+  'Lower Back': 'lower_back',
+
+  // ── Core ──
+  'Core': 'abs',
+  'Hip Flexors': 'hip_flexors',   // own region (your call)
+  'Obliques': 'obliques',
+  'Anterior Chain': ['abs','hip_flexors'],
+  'Full Anterior Chain': ['abs','hip_flexors'],
+
+  // ── Legs ──
+  'Quads': 'quads',
+  'Quadriceps': 'quads',
+  'Adductors': 'quads',           // ⚑ no dedicated region — folding to quads
+  'Inner Thigh': 'quads',         // ⚑
+  'Hamstrings': 'hamstrings',
+  'Hamstrings (Short Head emphasis)': 'hamstrings',
+  'Biceps Femoris': 'hamstrings',
+  'Glutes': 'glutes',
+  'Glute Medius': 'glutes',
+  'TFL': 'glutes',
+  'Calves': 'calves',
+  'Gastrocnemius': 'calves',
+  'Soleus': 'calves',
+
+  // ── Multi-region chains ──
+  'Posterior Chain': ['hamstrings','glutes','lower_back'],       // ⚑
+  'Full Posterior Chain': ['hamstrings','glutes','lower_back'],  // ⚑
+  'Legs': ['quads','hamstrings','glutes'],                       // ⚑
+  'Full Leg': ['quads','hamstrings','glutes'],                   // ⚑
+
+  // ── Ignored (not heat-map muscles) ──
+  'Balance': null,
+  'CNS': null,
+  'Proprioception': null,
+  'Stabilisers': null,
+  'Shoulder Stabilisers': null,
+  'Ring Stabilisers': null,
+  'Scapular Stabilisers': null,
+  'External Rotators': null,      // ⚑ or rear_delts
+  'Rotator Cuff': null,           // ⚑ or rear_delts
+  'Thoracic Spine': null,
+  'Ligaments': null,
+  'Ankles': null,
+  'Full Body': null,              // ⚑ too vague to colour — ignoring
+  'Full Upper Body': null,        // ⚑
+};
+const FIG_FRONT=`<ellipse class="st-frame" cx="114" cy="34" rx="22" ry="26"/><rect class="st-frame" x="103" y="58" width="22" height="14" rx="4"/><path class="st-m" data-region="side_delts" d="M64 82 q-16 2 -20 24 q12 6 24 2 q3 -16 -4 -26Z"/><path class="st-m" data-region="side_delts" d="M164 82 q16 2 20 24 q-12 6 -24 2 q-3 -16 4 -26Z"/><path class="st-m" data-region="front_delts" d="M76 84 q12 -6 22 -4 q4 14 -2 26 q-14 4 -24 -2 q-2 -14 4 -20Z"/><path class="st-m" data-region="front_delts" d="M152 84 q-12 -6 -22 -4 q-4 14 2 26 q14 4 24 -2 q2 -14 -4 -20Z"/><path class="st-m" data-region="chest" d="M78 92 q36 -10 36 -10 l0 42 q-25 6 -40 -4 q-3 -18 4 -28Z"/><path class="st-m" data-region="chest" d="M150 92 q-36 -10 -36 -10 l0 42 q25 6 40 -4 q3 -18 -4 -28Z"/><path class="st-m" data-region="biceps" d="M52 112 q-8 24 -4 50 q12 4 18 -2 q2 -26 -2 -50Z"/><path class="st-m" data-region="biceps" d="M176 112 q8 24 4 50 q-12 4 -18 -2 q-2 -26 2 -50Z"/><path class="st-m" data-region="forearms" d="M46 166 q-4 26 0 46 q10 2 14 -2 q2 -24 -2 -44Z"/><path class="st-m" data-region="forearms" d="M182 166 q4 26 0 46 q-10 2 -14 -2 q-2 -24 2 -44Z"/><path class="st-m" data-region="abs" d="M96 132 q18 -3 36 0 l-2 52 q-16 5 -32 0Z"/><path class="st-m" data-region="obliques" d="M88 134 q-6 26 4 48 l7 2 l2 -52Z"/><path class="st-m" data-region="obliques" d="M140 134 q6 26 -4 48 l-7 2 l-2 -52Z"/><path class="st-m" data-region="hip_flexors" d="M97 186 q17 -3 34 0 l-4 20 q-13 4 -26 0Z"/><path class="st-m" data-region="quads" d="M88 210 q-8 58 0 112 q15 6 23 -2 q4 -56 -2 -110Z"/><path class="st-m" data-region="quads" d="M140 210 q8 58 0 112 q-15 6 -23 -2 q-4 -56 2 -110Z"/><path class="st-frame" d="M93 328 q-4 44 2 78 q11 4 17 0 q4 -40 0 -78Z"/><path class="st-frame" d="M135 328 q4 44 -2 78 q-11 4 -17 0 q-4 -40 0 -78Z"/>`;
+const FIG_BACK=`<ellipse class="st-frame" cx="114" cy="34" rx="22" ry="26"/><path class="st-m" data-region="traps" d="M91 62 q23 -8 46 0 q6 18 -6 30 q-17 -6 -34 0 q-12 -12 -6 -30Z"/><path class="st-m" data-region="rear_delts" d="M68 84 q-16 2 -20 24 q12 6 24 2 q3 -16 -4 -26Z"/><path class="st-m" data-region="rear_delts" d="M160 84 q16 2 20 24 q-12 6 -24 2 q-3 -16 4 -26Z"/><path class="st-m" data-region="lats" d="M78 96 q36 -6 36 -6 l0 68 q-22 8 -41 -6 q-6 -32 5 -56Z"/><path class="st-m" data-region="lats" d="M150 96 q-36 -6 -36 -6 l0 68 q22 8 41 -6 q6 -32 -5 -56Z"/><path class="st-m" data-region="triceps" d="M52 112 q-8 26 -4 52 q12 4 18 -2 q2 -28 -2 -52Z"/><path class="st-m" data-region="triceps" d="M176 112 q8 26 4 52 q-12 4 -18 -2 q-2 -28 2 -52Z"/><path class="st-m" data-region="forearms" d="M46 168 q-4 26 0 46 q10 2 14 -2 q2 -24 -2 -44Z"/><path class="st-m" data-region="forearms" d="M182 168 q4 26 0 46 q-10 2 -14 -2 q-2 -24 2 -44Z"/><path class="st-m" data-region="lower_back" d="M98 168 q16 -3 32 0 l-3 50 q-13 5 -26 0Z"/><path class="st-m" data-region="glutes" d="M88 222 q26 -8 52 0 q4 22 -8 36 q-18 -7 -36 0 q-12 -14 -8 -36Z"/><path class="st-m" data-region="hamstrings" d="M89 260 q-6 44 0 70 q14 5 22 -2 q3 -34 -1 -68Z"/><path class="st-m" data-region="hamstrings" d="M139 260 q6 44 0 70 q-14 5 -22 -2 q-3 -34 1 -68Z"/><path class="st-m" data-region="calves" d="M93 334 q-4 40 2 70 q11 4 17 0 q4 -34 0 -70Z"/><path class="st-m" data-region="calves" d="M135 334 q4 40 -2 70 q-11 4 -17 0 q-4 -34 0 -70Z"/>`;
+
+function stExById(id){return EXERCISES.find(function(e){return e.id===id;});}
+function regionsForTarget(t){if(!t)return[];var out=new Set();t.split(',').map(function(x){return x.trim();}).forEach(function(tok){var m=MUSCLE_MAP[tok];if(!m)return;(Array.isArray(m)?m:[m]).forEach(function(r){out.add(r);});});return Array.from(out);}
+function primaryCategory(ex){for(var i=0;i<CAT_ORDER.length;i++){if(ex.tags&&ex.tags.includes(CAT_ORDER[i]))return CAT_ORDER[i];}return null;}
+function setsInEntry(entry,maxSets){var n=0,vol=0;for(var s=1;s<=maxSets;s++){var rr=parseFloat(entry['s'+s+'_r']),ww=parseFloat(entry['s'+s+'_w']);var hasR=!isNaN(rr)&&rr>0,hasW=!isNaN(ww)&&ww>0;if(hasR||hasW){n++;if(hasW&&hasR)vol+=ww*rr;}}return{sets:n,vol:vol};}
+function band(sets){if(sets<=0)return'';if(sets<5)return'l1';if(sets<10)return'l3';if(sets<=20)return'l4';return'over';}
+function bandBadge(sets){if(sets<=0)return['st-b0','untrained'];if(sets<10)return['st-b1','building'];if(sets<=20)return['st-b4','optimal'];return['st-bover','over'];}
+
+function computeStats(block,week,log){
+  var weeks=block.weeks||4;var days=block.days||[];
+  var out={week:week,weeks:weeks,plannedDays:days.length,setsByRegion:{},setsByCategory:{},setsByLevel:{},setsByDay:[],weekSets:0,weekVol:0,weekSessions:0,lifetimeSets:0,sessionsLogged:0};
+  REGIONS.forEach(function(r){out.setsByRegion[r]=0;});
+  CAT_ORDER.forEach(function(c){out.setsByCategory[c]=0;});
+  LEVELS.forEach(function(l){out.setsByLevel[l]=0;});
+  days.forEach(function(d,di){
+    var daySets=0,any=false;
+    (d.exercises||[]).forEach(function(ref){
+      var ex=stExById(ref.id);if(!ex)return;
+      var entry=log[d.id+'_'+ref.id+'_v'+week];if(!entry)return;
+      var res=setsInEntry(entry,12);if(res.sets<=0)return;
+      any=true;daySets+=res.sets;out.weekSets+=res.sets;out.weekVol+=res.vol;
+      regionsForTarget(ex.target).forEach(function(r){out.setsByRegion[r]+=res.sets;});
+      var cat=primaryCategory(ex);if(cat)out.setsByCategory[cat]+=res.sets;
+      if(LEVELS.includes(ex.level))out.setsByLevel[ex.level]+=res.sets;
+    });
+    out.setsByDay.push({name:d.name?d.name.split('\u2014')[0].trim():'D'+(di+1),sets:daySets});
+    if(any)out.weekSessions++;
+  });
+  for(var w=1;w<=weeks;w++){days.forEach(function(d){var any=false;(d.exercises||[]).forEach(function(ref){var entry=log[d.id+'_'+ref.id+'_v'+w];if(!entry)return;var res=setsInEntry(entry,12);if(res.sets>0){out.lifetimeSets+=res.sets;any=true;}});if(any)out.sessionsLogged++;});}
+  out.optimalRegions=REGIONS.filter(function(r){return out.setsByRegion[r]>=10;}).length;
+  out.trainedRegions=REGIONS.filter(function(r){return out.setsByRegion[r]>0;}).length;
+  out.coverage=Math.round(100*out.optimalRegions/REGIONS.length);
+  var we=Math.max(1,week);
+  out.frequency=+(out.sessionsLogged/we).toFixed(1);
+  out.completion=Math.round(100*out.sessionsLogged/Math.max(1,out.plannedDays*we));
+  out.avgSets=out.sessionsLogged?Math.round(out.lifetimeSets/out.sessionsLogged):0;
+  out.streak=(typeof calcStreak==='function')?calcStreak():0;
+  return out;
+}
+
+var ST_STATS=null;
+function stRingOff(pct){return 283-(283*Math.min(100,pct)/100);}
+function renderStatsOverview(){
+  var host=document.getElementById('st-overview');if(!host)return;
+  if(!currentBlock||!currentBlock.days||!currentBlock.days.length){host.innerHTML='<div style="font-size:10px;letter-spacing:2px;color:var(--text-dim);text-align:center;padding:40px 20px;text-transform:uppercase">No active block</div>';return;}
+  var s=computeStats(currentBlock,currentWeek,sessionLog);ST_STATS=s;
+  var maxDay=Math.max(1,Math.max.apply(null,s.setsByDay.map(function(d){return d.sets;})));
+  var catTotal=CAT_ORDER.reduce(function(a,c){return a+s.setsByCategory[c];},0);
+  var C=2*Math.PI*42,off=0,arcs='',legend='';
+  CAT_ORDER.forEach(function(c){var v=s.setsByCategory[c];if(!catTotal)return;var frac=v/catTotal,len=C*frac;arcs+='<circle cx="52" cy="52" r="42" fill="none" stroke="'+CAT_COLOR[c]+'" stroke-width="11" stroke-dasharray="'+len+' '+(C-len)+'" stroke-dashoffset="'+(-off)+'"/>';off+=len;legend+='<div class="st-leg"><span class="st-legdot" style="background:'+CAT_COLOR[c]+'"></span><span class="st-legname">'+CAT_LABEL[c]+'</span><span class="st-legpct">'+Math.round(frac*100)+'%</span></div>';});
+  var lvlTotal=LEVELS.reduce(function(a,l){return a+s.setsByLevel[l];},0);
+  var lvlColor={Beginner:'var(--text-muted)',Intermediate:'var(--text)',Advanced:'var(--accent)',Elite:'var(--red)'};
+  var html='<div class="st-hero">'
+    +'<div class="st-card"><div class="st-label">Streak</div><div class="st-num">'+s.streak+'<span class="st-unit">d</span></div><div class="st-meta">'+(s.streak>=2?'keep it going':(s.streak===1?'day one':'no active streak'))+'</div></div>'
+    +'<div class="st-card"><div class="st-label">Workouts</div><div class="st-num">'+s.sessionsLogged+'</div><div class="st-meta">completed this block</div></div></div>'
+    +'<div class="st-sec"><div class="st-sechead"><h3>Weekly Activity</h3><span class="ln"></span><span class="tg">week '+s.week+'</span></div>'
+    +'<div class="st-rings">'
+    +'<div class="st-ringcard"><div class="st-ringwrap"><svg width="104" height="104" viewBox="0 0 104 104"><circle class="st-ringbg" cx="52" cy="52" r="45"/><circle class="st-ringfg" cx="52" cy="52" r="45" style="stroke-dashoffset:'+stRingOff(100*s.weekSessions/Math.max(1,s.plannedDays))+'"/></svg><div class="st-ringc">'+s.weekSessions+'<small>/'+s.plannedDays+'</small></div></div><div class="st-ringcap">Sessions</div><div class="st-ringgoal">of planned</div></div>'
+    +'<div class="st-ringcard"><div class="st-ringwrap"><svg width="104" height="104" viewBox="0 0 104 104"><circle class="st-ringbg" cx="52" cy="52" r="45"/><circle class="st-ringfg" cx="52" cy="52" r="45" style="stroke-dashoffset:'+stRingOff(s.coverage)+'"/></svg><div class="st-ringc">'+s.coverage+'<small>%</small></div></div><div class="st-ringcap">Optimal Coverage</div><div class="st-ringgoal">'+s.optimalRegions+'/'+REGIONS.length+' \u226510 sets</div></div></div>'
+    +'<div class="st-panel"><div class="st-ptop"><span class="st-pcap">Sets by Session</span><span class="st-pval">'+s.weekSets+' sets</span></div><div class="st-bars">'
+    +s.setsByDay.map(function(d){return '<div class="st-barcol"><span class="st-barn">'+(d.sets||'')+'</span><div class="st-bar '+(d.sets?'':'muted')+'" style="height:'+(d.sets?Math.round(100*d.sets/maxDay):6)+'%"></div><span class="st-barday">'+d.name.slice(0,6)+'</span></div>';}).join('')
+    +'</div></div>'
+    +'<div class="st-panel"><div class="st-ptop"><span class="st-pcap">Category Split</span><span class="st-pval">'+catTotal+' sets</span></div><div class="st-split"><div class="st-donutwrap"><svg width="104" height="104" viewBox="0 0 104 104"><circle cx="52" cy="52" r="42" fill="none" stroke="var(--card)" stroke-width="11"/>'+arcs+'</svg><div class="st-donutc"><div class="n">'+catTotal+'</div><div class="l">sets</div></div></div><div class="st-legend">'+(legend||'<div class="st-leg"><span class="st-legname" style="color:var(--text-muted)">Nothing logged yet</span></div>')+'</div></div></div>'
+    +'<div class="st-panel"><div class="st-ptop"><span class="st-pcap">Muscle Map</span><span class="st-pval">sets this week</span></div>'
+    +'<div class="st-figtoggle"><button id="st-bfront" class="on" onclick="showFig(\'front\')">Front</button><button id="st-bback" onclick="showFig(\'back\')">Back</button></div>'
+    +'<div class="st-stage"><svg class="st-fig on" id="st-front" viewBox="0 0 228 440">'+FIG_FRONT+'</svg><svg class="st-fig" id="st-back" viewBox="0 0 228 440">'+FIG_BACK+'</svg></div>'
+    +'<div class="st-readout"><div><div class="st-roname" id="st-roname">Tap a muscle</div><div class="st-rosub" id="st-rosub">to see this week\'s sets</div></div><div class="st-badge st-b0" id="st-robadge">\u2014</div></div>'
+    +'<div class="st-scale"><div class="st-scalebar"><span style="background:#1c1c1c"></span><span style="background:rgba(201,169,110,.28)"></span><span style="background:rgba(201,169,110,.68)"></span><span style="background:var(--accent)"></span><span style="background:var(--red)"></span></div><div class="st-scalelab"><span>0</span><span>building</span><span>10\u201320</span><span>20+</span></div></div></div>'
+    +'<div class="st-panel"><div class="st-ptop"><span class="st-pcap">Level Breakdown</span><span class="st-pval">'+lvlTotal+' sets</span></div><div class="st-levels">'
+    +LEVELS.map(function(l){var v=s.setsByLevel[l];var pct=lvlTotal?Math.round(100*v/lvlTotal):0;return '<div><div class="st-lvltop"><span>'+l+'</span><span class="st-lvln">'+v+' sets \u00b7 '+pct+'%</span></div><div class="st-lvltrack"><div class="st-lvlfill" style="width:'+pct+'%;background:'+lvlColor[l]+'"></div></div></div>';}).join('')
+    +'</div></div></div>'
+    +'<div class="st-sec"><div class="st-sechead"><h3>Performance Summary</h3><span class="ln"></span><span class="tg">block</span></div><div class="st-perf">'
+    +'<div class="st-perfcard"><div class="st-perflabel">Frequency</div><div class="st-perfval">'+s.frequency+'<small>/wk</small></div><div class="st-perfsub">sessions per week</div></div>'
+    +'<div class="st-perfcard"><div class="st-perflabel">Completion</div><div class="st-perfval">'+s.completion+'<small>%</small></div><div class="st-perfsub">of planned</div></div>'
+    +'<div class="st-perfcard"><div class="st-perflabel">Total Sets</div><div class="st-perfval">'+s.lifetimeSets.toLocaleString()+'</div><div class="st-perfsub">this block</div></div>'
+    +'<div class="st-perfcard"><div class="st-perflabel">Avg / Session</div><div class="st-perfval">'+s.avgSets+'</div><div class="st-perfsub">sets</div></div></div></div>';
+  host.innerHTML=html;
+  REGIONS.forEach(function(r){var sets=s.setsByRegion[r]||0;var nodes=host.querySelectorAll('.st-m[data-region="'+r+'"]');for(var i=0;i<nodes.length;i++){nodes[i].setAttribute('class','st-m '+band(sets));nodes[i].setAttribute('data-sets',sets);}});
+}
+function showFig(v){var f=document.getElementById('st-front'),b=document.getElementById('st-back');if(!f)return;f.classList.toggle('on',v==='front');b.classList.toggle('on',v==='back');document.getElementById('st-bfront').classList.toggle('on',v==='front');document.getElementById('st-bback').classList.toggle('on',v==='back');}
+function showProgressTab(tab){var ov=document.getElementById('st-overview'),lg=document.getElementById('progress-container');if(!ov||!lg)return;var isOv=(tab==='overview');ov.style.display=isOv?'':'none';lg.style.display=isOv?'none':'';document.getElementById('st-tab-overview').classList.toggle('on',isOv);document.getElementById('st-tab-log').classList.toggle('on',!isOv);if(isOv)renderStatsOverview();}
+document.addEventListener('click',function(e){var el=e.target.closest?e.target.closest('#st-overview .st-m'):null;if(!el||!ST_STATS)return;var r=el.getAttribute('data-region');var sets=parseInt(el.getAttribute('data-sets'))||0;var nm=document.getElementById('st-roname');if(!nm)return;nm.textContent=REGION_LABEL[r];document.getElementById('st-rosub').textContent=sets+' working sets this week';var bb=bandBadge(sets);var bd=document.getElementById('st-robadge');bd.setAttribute('class','st-badge '+bb[0]);bd.textContent=bb[1];});
+
 function renderProgress(){
   const c=document.getElementById('progress-container'); c.innerHTML='';
   const m=currentBlock.methods||[];
