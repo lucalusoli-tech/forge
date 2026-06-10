@@ -2916,12 +2916,49 @@ function renderArchive() {
       <div class="archived-block-body">
         ${daysHtml}
         ${progressHtml?`<div class="archived-progress"><div class="archived-progress-label">Session Data</div>${progressHtml}</div>`:''}
+        <button onclick="event.stopPropagation(); restoreArchivedBlock(${bi})" style="width:100%;margin-top:14px;padding:12px;background:var(--accent-glow);border:1px solid var(--accent-dim);color:var(--accent);border-radius:10px;font-family:inherit;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;cursor:pointer">&#8593; Restore as Active Block</button>
       </div>
     </div>`;
   }).join('');
 }
 
 function toggleArchivedBlock(i) { document.getElementById('ab-'+i)?.classList.toggle('open'); }
+
+async function restoreArchivedBlock(bi) {
+  if (bi == null || bi < 0 || bi >= archivedBlocks.length) return;
+  // pull the chosen block out of the archive
+  const restored = archivedBlocks.splice(bi, 1)[0];
+  // archive the current block first (unless empty) so nothing is lost
+  if (currentBlock && (currentBlock.days || []).length) {
+    archivedBlocks.unshift({
+      ...currentBlock,
+      archivedAt: new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
+      sessionLog: {...sessionLog},
+    });
+  }
+  // restore: separate the block fields from its saved log
+  const restoredLog = restored.sessionLog || {};
+  const blockFields = {...restored};
+  delete blockFields.sessionLog;
+  delete blockFields.archivedAt;
+  currentBlock = blockFields;
+  sessionLog = {...restoredLog};
+  currentWeek = 1;
+  weekStarts = {};
+  // persist
+  localStorage.setItem('fw_archive', JSON.stringify(archivedBlocks));
+  localStorage.setItem('fw_week', '1');
+  localStorage.setItem('fw_week_starts', JSON.stringify({}));
+  localStorage.setItem('fw_log', JSON.stringify(sessionLog));
+  saveCurrentBlock();
+  // cloud sync — mirror executeArchive ordering
+  try { await syncBlocksToCloud(); await syncLogsToCloud(true); } catch(e) { console.warn('restore sync', e); }
+  // refresh UI
+  updateStats(); renderHomeDays(); renderProgress(); renderArchive();
+  try { renderStatsOverview(); } catch(e) {}
+  showToast('Block restored \u2713');
+  navigate('home');
+}
 
 // ─── SESSION LOG ───────────────────────────────────────────────
 function startDay(dayId, overrideDay) {
