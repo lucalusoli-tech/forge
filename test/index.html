@@ -195,7 +195,8 @@
   /* Each exercise row within a round */
   .ss-row { display: flex; align-items: center; gap: 12px; padding: 8px 4px; font-family: 'DM Mono', monospace; -webkit-tap-highlight-color: transparent; }
   .ss-row-name { flex-shrink: 0; width: 100px; font-size: 11px; letter-spacing: 1px; cursor: pointer; }
-  .ss-row-name .ss-play { font-size: 9px; color: var(--accent); margin-left: 4px; opacity: 0.7; }
+  .ss-row-name .ss-play { display: inline-flex; align-items: center; justify-content: center; width: 13px; height: 13px; margin-left: 6px; border: 1px solid var(--accent-dim); border-radius: 3px; color: var(--accent); opacity: 0.8; vertical-align: middle; }
+  .ss-row-name .ss-play svg { width: 5px; height: 6px; display: block; margin-left: 1px; }
   .ss-row-name .ss-last { font-size: 8px; letter-spacing: 1px; color: var(--accent-dim); margin-top: 3px; opacity: 0.85; }
   .ss-row-content { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; }
   .ss-row-value { flex: 1; font-size: 13px; letter-spacing: 1px; }
@@ -220,9 +221,10 @@
   .ss-note-input { flex: 1; background: transparent; border: none; border-bottom: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 11px; padding: 4px 0; outline: none; }
   .ss-note-input:focus { border-bottom-color: var(--accent); }
   .log-ex-header { padding: 14px 20px 10px; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; }
-  .log-ex-name-row { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
+  .log-ex-name-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
   .log-ex-name { font-family: 'DM Mono', monospace; font-size: 18px; letter-spacing: 2px; }
-  .log-ex-play { color: var(--accent); font-size: 11px; line-height: 1; flex-shrink: 0; transform: translateY(-1px); }
+  .log-ex-play { display: inline-flex; align-items: center; justify-content: center; width: 17px; height: 17px; flex-shrink: 0; border: 1px solid var(--accent-dim); border-radius: 4px; color: var(--accent); }
+  .log-ex-play svg { width: 7px; height: 8px; display: block; margin-left: 1px; }
   .log-ex-target { font-size: 10px; color: var(--text-muted); letter-spacing: 1px; margin-top: 2px; }
   .log-ex-note { font-size: 9px; color: var(--text); letter-spacing: 1px; text-align: right; max-width: 110px; flex-shrink: 0; line-height: 1.4; opacity: 0.7; }
   .log-ex-body { padding: 0 20px 16px; }
@@ -1473,7 +1475,7 @@
       <div class="info-line"><span class="info-line-label">Target</span><span class="info-line-val" id="sheet-target"></span></div>
       <div class="info-line"><span class="info-line-label">Intensity</span><span class="info-line-val" id="sheet-intensity"></span></div>
       <div class="info-line"><span class="info-line-label">Cue</span><span class="info-line-val" id="sheet-cue"></span></div>
-      <a href="#" id="sheet-video" class="video-btn" target="_blank">▶ Watch Reference</a>
+      <a href="#" id="sheet-video" class="video-btn" target="_blank"><svg viewBox="0 0 8 10" width="8" height="10" fill="currentColor" style="flex-shrink:0" aria-hidden="true"><path d="M1 1 L7 5 L1 9 Z"/></svg> Watch Reference</a>
     </div>
   </div>
 </div>
@@ -3068,7 +3070,7 @@ function _logExerciseCardHTML(ex) {
   }
   return `<div class="log-ex-card" data-wk="${wk}" data-sets="${ex.sets}" data-exid="${ex.id}">
       <div class="log-ex-header" onclick="openSheet('${exData.id}')">
-        <div><div class="log-ex-name-row"><div class="log-ex-name">${exData.name}</div><span class="log-ex-play" aria-hidden="true">▶</span></div><div class="log-ex-target">${ex.sets}×${ex.reps}</div></div>
+        <div><div class="log-ex-name-row"><div class="log-ex-name">${exData.name}</div><span class="log-ex-play" aria-hidden="true"><svg viewBox="0 0 8 10" fill="currentColor"><path d="M1 1 L7 5 L1 9 Z"/></svg></span></div><div class="log-ex-target">${ex.sets}×${ex.reps}</div></div>
         <div class="log-ex-note">${ex.note || ''}</div>
       </div>
       ${lastWeekHint}
@@ -3156,7 +3158,7 @@ function renderSupersetGroup(groupLabel) {
       const lwHint = _ssLastWeekHint(g.id, round);
       if (isActive) {
         html += `<div class="ss-row active">
-          <div class="ss-row-name" onclick="openSheet('${exData.id}')">${exData.name}<span class="ss-play" aria-hidden="true">▶</span>${lwHint?`<div class="ss-last">↳ ${lwHint}</div>`:''}</div>
+          <div class="ss-row-name" onclick="openSheet('${exData.id}')">${exData.name}<span class="ss-play" aria-hidden="true"><svg viewBox="0 0 8 10" fill="currentColor"><path d="M1 1 L7 5 L1 9 Z"/></svg></span>${lwHint?`<div class="ss-last">↳ ${lwHint}</div>`:''}</div>
           <div class="ss-row-content">
             <input class="set-field" type="text" inputmode="none" placeholder="kg" value="${w}" id="${wk}_s${round}_w"
               autocomplete="one-time-code" data-lpignore="true" data-form-type="other" oninput="autoSaveSet('${wk}',${round})"
@@ -3649,7 +3651,7 @@ function renderExItem(ex, progressionNum) {
       <div class="info-line"><span class="info-line-label">Target</span><span class="info-line-val">${ex.target}</span></div>
       <div class="info-line"><span class="info-line-label">Intensity</span><span class="info-line-val">${ex.intensity}</span></div>
       <div class="info-line"><span class="info-line-label">Cue</span><span class="info-line-val">${ex.cue}</span></div>
-      <a href="${ex.video}" class="video-btn" target="_blank">▶ Watch Reference</a>
+      <a href="${ex.video}" class="video-btn" target="_blank"><svg viewBox="0 0 8 10" width="8" height="10" fill="currentColor" style="flex-shrink:0" aria-hidden="true"><path d="M1 1 L7 5 L1 9 Z"/></svg> Watch Reference</a>
       <div style="height:12px"></div>
     </div>
   </div>`;
