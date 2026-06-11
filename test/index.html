@@ -1120,7 +1120,7 @@
     <div class="topbar-logo" id="topbar-logo">FORGE</div>
     <div class="topbar-right">
       <div class="week-pill" id="week-pill"
-        onclick="cycleWeek()"
+        onclick="weekPillTap()"
         oncontextmenu="event.preventDefault();weekBack()"
         ontouchstart="startWeekHold()" ontouchend="clearWeekHold()" ontouchmove="clearWeekHold()">
         W<span id="current-week">1</span><span id="week-total-pill" style="color:var(--accent-dim)">/4</span>
@@ -2095,17 +2095,32 @@ function updateStats() {
   document.getElementById('dash-last').textContent = lastDay ? lastDay.name.split('—')[0].trim() : '—';
 }
 
+function applyWeek(w) {
+  const total = currentBlock.weeks || 4;
+  w = Math.max(1, Math.min(total, w));
+  currentWeek = w;
+  localStorage.setItem('fw_week', currentWeek);
+  updateStats();
+  scheduleSync();
+  // Keep the log view's week tabs in sync with the active week
+  document.querySelectorAll('.w-tab').forEach((b,i) => b.classList.toggle('active', i+1===currentWeek));
+  // If the log page is open, refresh the visible session so inputs match the new week
+  const day = currentDayId ? currentBlock.days.find(d => d.id === currentDayId) : null;
+  const logOpen = document.getElementById('page-log')?.classList.contains('active');
+  if (day && logOpen) {
+    renderLogExercises(day.exercises);
+    const notesEl = document.getElementById('session-notes');
+    if (notesEl) notesEl.value = sessionLog[`${currentDayId}_notes_v${currentWeek}`] || '';
+  }
+}
+
 function cycleWeek() {
   const total = currentBlock.weeks || 4;
   if (currentWeek >= total) {
     openBlockEndPrompt();
     return;
   }
-  currentWeek++;
-  localStorage.setItem('fw_week', currentWeek);
-  updateStats();
-  scheduleSync();
-  document.querySelectorAll('.w-tab').forEach((b,i) => b.classList.toggle('active', i+1===currentWeek));
+  applyWeek(currentWeek + 1);
 }
 
 function setBlockWeeks(n, btn) {
@@ -3427,15 +3442,7 @@ document.addEventListener('click', e => {
 function populateAddSelect() { /* replaced by search */ }
 
 function selectWeek(w,btn) {
-  currentWeek=w; updateStats(); scheduleSync();
-  document.querySelectorAll('.w-tab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  const day=currentBlock.days.find(d=>d.id===currentDayId);
-  if(day) renderLogExercises(day.exercises);
-  // Load session notes for this week
-  const notesKey = `${currentDayId}_notes_v${currentWeek}`;
-  const notesEl = document.getElementById('session-notes');
-  if(notesEl) notesEl.value = sessionLog[notesKey] || '';
+  applyWeek(w);
 }
 
 function saveSession() {
@@ -6078,16 +6085,20 @@ function aiAutoProgress() {
 
 // ─── WEEK BACK (long press) ─────────────────────────────────────
 let weekHoldTimer = null;
+let weekHoldFired = false;
 function startWeekHold() {
-  weekHoldTimer = setTimeout(() => { weekBack(); weekHoldTimer = null; }, 500);
+  weekHoldFired = false;
+  weekHoldTimer = setTimeout(() => { weekHoldFired = true; weekBack(); weekHoldTimer = null; }, 500);
 }
 function clearWeekHold() { if(weekHoldTimer) { clearTimeout(weekHoldTimer); weekHoldTimer = null; } }
+function weekPillTap() {
+  // A long-press already triggered weekBack — swallow the trailing synthesized click
+  if (weekHoldFired) { weekHoldFired = false; return; }
+  cycleWeek();
+}
 function weekBack() {
   if(currentWeek <= 1) { showToast('Already at W1'); return; }
-  currentWeek--;
-  localStorage.setItem('fw_week', currentWeek);
-  updateStats();
-  scheduleSync();
+  applyWeek(currentWeek - 1);
   showToast('← W'+currentWeek);
 }
 
