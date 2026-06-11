@@ -16,7 +16,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
@@ -29,7 +29,7 @@
   }
 
   html { background: #080808 !important; }
-  html, body { height: 100%; overflow: hidden; background: #080808 !important; color: var(--text); font-family: 'DM Mono', monospace; }
+  html, body { height: 100%; overflow: hidden; background: #080808 !important; color: var(--text); font-family: 'Inter', sans-serif; }
 
   body::after {
     content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9998;
@@ -2234,11 +2234,11 @@ function switchBuildTab(tab) {
 }
 
 // ─── CHANGELOG ─────────────────────────────────────────────────
-const FORGE_VERSION = '2.0.0';
+const FORGE_VERSION = '2.1.0';
 const FORGE_CHANGELOG = [
-  'Refreshed look — cleaner typography and a tighter visual rhythm across every screen',
-  'New in-app number pad for logging sets — no more fighting the iOS keyboard',
-  'Redesigned rest timer with a cinematic countdown and a preview of what is coming next'
+  'New Statistics overview in your Progress tab — your whole block at a glance',
+  'Muscle heat-map — every region lights up as you bank sets toward growth',
+  'Weekly activity, category split, level breakdown and a lifetime performance summary'
 ];
 
 function checkChangelog() {
@@ -2916,12 +2916,49 @@ function renderArchive() {
       <div class="archived-block-body">
         ${daysHtml}
         ${progressHtml?`<div class="archived-progress"><div class="archived-progress-label">Session Data</div>${progressHtml}</div>`:''}
+        <button onclick="event.stopPropagation(); restoreArchivedBlock(${bi})" style="width:100%;margin-top:14px;padding:12px;background:var(--accent-glow);border:1px solid var(--accent-dim);color:var(--accent);border-radius:10px;font-family:inherit;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;cursor:pointer">&#8593; Restore as Active Block</button>
       </div>
     </div>`;
   }).join('');
 }
 
 function toggleArchivedBlock(i) { document.getElementById('ab-'+i)?.classList.toggle('open'); }
+
+async function restoreArchivedBlock(bi) {
+  if (bi == null || bi < 0 || bi >= archivedBlocks.length) return;
+  // pull the chosen block out of the archive
+  const restored = archivedBlocks.splice(bi, 1)[0];
+  // archive the current block first (unless empty) so nothing is lost
+  if (currentBlock && (currentBlock.days || []).length) {
+    archivedBlocks.unshift({
+      ...currentBlock,
+      archivedAt: new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
+      sessionLog: {...sessionLog},
+    });
+  }
+  // restore: separate the block fields from its saved log
+  const restoredLog = restored.sessionLog || {};
+  const blockFields = {...restored};
+  delete blockFields.sessionLog;
+  delete blockFields.archivedAt;
+  currentBlock = blockFields;
+  sessionLog = {...restoredLog};
+  currentWeek = 1;
+  weekStarts = {};
+  // persist
+  localStorage.setItem('fw_archive', JSON.stringify(archivedBlocks));
+  localStorage.setItem('fw_week', '1');
+  localStorage.setItem('fw_week_starts', JSON.stringify({}));
+  localStorage.setItem('fw_log', JSON.stringify(sessionLog));
+  saveCurrentBlock();
+  // cloud sync — mirror executeArchive ordering
+  try { await syncBlocksToCloud(); await syncLogsToCloud(true); } catch(e) { console.warn('restore sync', e); }
+  // refresh UI
+  updateStats(); renderHomeDays(); renderProgress(); renderArchive();
+  try { renderStatsOverview(); } catch(e) {}
+  showToast('Block restored \u2713');
+  navigate('home');
+}
 
 // ─── SESSION LOG ───────────────────────────────────────────────
 function startDay(dayId, overrideDay) {
@@ -3923,51 +3960,34 @@ function renderFixedPicker(section) {
   const pickerEl = document.getElementById(section + '-ex-picker');
   const added = new Set(arr.map(e => e.id));
 
-  if(section === 'warmup') {
-    const exs = EXERCISES.filter(e => e.tags.includes('warmup'));
-    if(!exs.length) { pickerEl.innerHTML = `<div style="font-size:10px;color:var(--text-dim);padding:8px">No warmup exercises found</div>`; return; }
-    pickerEl.innerHTML = exs.map(e => `
-      <div class="day-ex-chip ${added.has(e.id) ? 'active' : ''}" style="margin-bottom:4px;display:inline-block;margin-right:4px"
-        onclick="toggleFixedEx('warmup','${e.id}',this)">${e.name}</div>
-    `).join('');
+  // Linear list, sorted by difficulty tier (Beginner → Intermediate → Advanced → Elite),
+  // then alphabetically within tier. Tier headers replace the old skill-name groups.
+  const RANK = { Beginner: 1, Intermediate: 2, Advanced: 3, Elite: 4 };
+  const TIER_COLOR = { Beginner:'var(--text-muted)', Intermediate:'var(--text)', Advanced:'var(--accent)', Elite:'var(--red)' };
+
+  const exs = EXERCISES
+    .filter(e => e.tags.includes(tag))
+    .slice()
+    .sort((a, b) => (RANK[a.level] || 99) - (RANK[b.level] || 99) || a.name.localeCompare(b.name));
+
+  if(!exs.length) {
+    pickerEl.innerHTML = `<div style="font-size:10px;color:var(--text-dim);padding:8px">No ${tag} exercises found</div>`;
     return;
   }
 
-  // Skill section — grouped by skill name
-  const GROUP_LABELS = {
-    'muscle-up':  'Muscle-Up',
-    'front-lever':'Front Lever',
-    'back-lever': 'Back Lever',
-    'planche':    'Planche',
-    'handstand':  'Handstand',
-    'l-sit':      'L-Sit & Manna',
-  };
-  const usedIds = new Set();
   let html = '';
+  let lastTier = null;
+  exs.forEach(e => {
+    if(e.level !== lastTier) {
+      lastTier = e.level;
+      const col = TIER_COLOR[e.level] || 'var(--text-dim)';
+      html += `<div style="width:100%;font-size:8px;letter-spacing:3px;color:${col};text-transform:uppercase;padding:10px 0 6px;border-top:1px solid var(--border);margin-top:4px">${e.level || 'Other'}</div>`;
+    }
+    html += `<div class="day-ex-chip ${added.has(e.id) ? 'active' : ''}" style="margin-bottom:4px;display:inline-block;margin-right:4px"
+        onclick="toggleFixedEx('${section}','${e.id}',this)">${e.name}</div>`;
+  });
 
-  for(const [key, label] of Object.entries(GROUP_LABELS)) {
-    const ids = SKILL_GROUPS[key] || [];
-    const exs = ids.map(id => EXERCISES.find(e => e.id === id)).filter(Boolean).filter(e => e.tags.includes('skill'));
-    if(!exs.length) continue;
-    exs.forEach(e => usedIds.add(e.id));
-    html += `<div style="font-size:8px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;padding:10px 0 6px;border-top:1px solid var(--border);margin-top:4px">${label}</div>`;
-    html += exs.map(e => `
-      <div class="day-ex-chip ${added.has(e.id) ? 'active' : ''}" style="margin-bottom:4px;display:inline-block;margin-right:4px"
-        onclick="toggleFixedEx('skill','${e.id}',this)">${e.name}</div>
-    `).join('');
-  }
-
-  // Any remaining skill-tagged exercises not in a group
-  const remaining = EXERCISES.filter(e => e.tags.includes('skill') && !usedIds.has(e.id));
-  if(remaining.length) {
-    html += `<div style="font-size:8px;letter-spacing:3px;color:var(--text-dim);text-transform:uppercase;padding:10px 0 6px;border-top:1px solid var(--border);margin-top:4px">Other</div>`;
-    html += remaining.map(e => `
-      <div class="day-ex-chip ${added.has(e.id) ? 'active' : ''}" style="margin-bottom:4px;display:inline-block;margin-right:4px"
-        onclick="toggleFixedEx('skill','${e.id}',this)">${e.name}</div>
-    `).join('');
-  }
-
-  pickerEl.innerHTML = html || `<div style="font-size:10px;color:var(--text-dim);padding:8px">No skill exercises found</div>`;
+  pickerEl.innerHTML = html;
 }
 
 function toggleFixedEx(section, exId, btn) {
@@ -4458,15 +4478,36 @@ function saveBlockOnly() {
   showToast('Block saved ✓');
 }
 
-function saveAndStart() {
+async function saveAndStart() {
   const name=document.getElementById('custom-name').value.trim();
   if(!name){showToast('Add a block name');return;}
   if(!builderDays.length){showToast('Add at least 1 day');return;}
   const days=getBuiltDays();
+
+  // Archive the outgoing block (with its log) before replacing it — mirrors the AI path.
+  // Session-log keys are day+exercise+week (not block-scoped), so a fresh block that reuses
+  // day_1/day_2/day_3 would otherwise inherit the previous block's logged numbers.
+  if (currentBlock.name && currentBlock.days && currentBlock.days.length > 0) {
+    archivedBlocks.unshift({
+      ...currentBlock,
+      archivedAt: new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
+      sessionLog: {...sessionLog},
+    });
+    localStorage.setItem('fw_archive', JSON.stringify(archivedBlocks));
+    await syncBlocksToCloud(); // persist the archived log before clearing
+  }
+
   currentBlock={name:name.toUpperCase(),methods:[...builderMethods],weeks:builderWeeks,warmup:[...builderWarmup],skill:[...builderSkill],days};
-  saveCurrentBlock();
   currentWeek=1;
+  // Fresh block → clear the live session log so old values don't surface
+  sessionLog={};
+  weekStarts={};
+  localStorage.setItem('fw_week','1');
+  localStorage.setItem('fw_log', JSON.stringify({}));
+  localStorage.setItem('fw_week_starts', JSON.stringify({}));
+  saveCurrentBlock();
   saveBlockOnly();
+  await syncLogsToCloud(true); // force — legitimate clear after archive
   updateStats();
   renderHomeDays();
   renderHomeFixedSections();
