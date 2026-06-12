@@ -3980,39 +3980,50 @@ let builderWarmup = [];
 let builderSkill  = [];
 
 function renderFixedPicker(section) {
-  const tag = section === 'warmup' ? 'warmup' : 'skill';
   const arr = section === 'warmup' ? builderWarmup : builderSkill;
   const pickerEl = document.getElementById(section + '-ex-picker');
   const added = new Set(arr.map(e => e.id));
-
-  // Linear list, sorted by difficulty tier (Beginner → Intermediate → Advanced → Elite),
-  // then alphabetically within tier. Tier headers replace the old skill-name groups.
   const RANK = { Beginner: 1, Intermediate: 2, Advanced: 3, Elite: 4 };
-  const TIER_COLOR = { Beginner:'var(--text-muted)', Intermediate:'var(--text)', Advanced:'var(--accent)', Elite:'var(--red)' };
+  const byDifficulty = (a, b) => (RANK[a.level] || 99) - (RANK[b.level] || 99) || a.name.localeCompare(b.name);
+  const chip = e => `<div class="day-ex-chip ${added.has(e.id) ? 'active' : ''}" style="margin-bottom:4px;display:inline-block;margin-right:4px" onclick="toggleFixedEx('${section}','${e.id}',this)">${e.name}</div>`;
 
-  const exs = EXERCISES
-    .filter(e => e.tags.includes(tag))
-    .slice()
-    .sort((a, b) => (RANK[a.level] || 99) - (RANK[b.level] || 99) || a.name.localeCompare(b.name));
-
-  if(!exs.length) {
-    pickerEl.innerHTML = `<div style="font-size:10px;color:var(--text-dim);padding:8px">No ${tag} exercises found</div>`;
+  // WARMUP — flat list, ordered by difficulty (no skill categories here)
+  if (section === 'warmup') {
+    const exs = EXERCISES.filter(e => e.tags.includes('warmup')).slice().sort(byDifficulty);
+    pickerEl.innerHTML = exs.length
+      ? exs.map(chip).join('')
+      : `<div style="font-size:10px;color:var(--text-dim);padding:8px">No warmup exercises found</div>`;
     return;
   }
 
+  // SKILL — grouped by skill (Handstand, Front Lever, …); within each group, sorted Beginner → Elite
+  const GROUP_LABELS = {
+    'muscle-up':  'Muscle-Up',
+    'front-lever':'Front Lever',
+    'back-lever': 'Back Lever',
+    'planche':    'Planche',
+    'handstand':  'Handstand',
+    'l-sit':      'L-Sit & Manna',
+  };
+  const groupHeader = (label, dim) => `<div style="width:100%;font-size:8px;letter-spacing:3px;color:${dim ? 'var(--text-dim)' : 'var(--accent)'};text-transform:uppercase;padding:10px 0 6px;border-top:1px solid var(--border);margin-top:4px">${label}</div>`;
+  const usedIds = new Set();
   let html = '';
-  let lastTier = null;
-  exs.forEach(e => {
-    if(e.level !== lastTier) {
-      lastTier = e.level;
-      const col = TIER_COLOR[e.level] || 'var(--text-dim)';
-      html += `<div style="width:100%;font-size:8px;letter-spacing:3px;color:${col};text-transform:uppercase;padding:10px 0 6px;border-top:1px solid var(--border);margin-top:4px">${e.level || 'Other'}</div>`;
-    }
-    html += `<div class="day-ex-chip ${added.has(e.id) ? 'active' : ''}" style="margin-bottom:4px;display:inline-block;margin-right:4px"
-        onclick="toggleFixedEx('${section}','${e.id}',this)">${e.name}</div>`;
-  });
 
-  pickerEl.innerHTML = html;
+  for (const [key, label] of Object.entries(GROUP_LABELS)) {
+    const exs = (SKILL_GROUPS[key] || [])
+      .map(id => EXERCISES.find(e => e.id === id))
+      .filter(e => e && e.tags.includes('skill'))
+      .sort(byDifficulty);
+    if (!exs.length) continue;
+    exs.forEach(e => usedIds.add(e.id));
+    html += groupHeader(label) + exs.map(chip).join('');
+  }
+
+  // Any skill-tagged exercise not in a named group
+  const remaining = EXERCISES.filter(e => e.tags.includes('skill') && !usedIds.has(e.id)).slice().sort(byDifficulty);
+  if (remaining.length) html += groupHeader('Other', true) + remaining.map(chip).join('');
+
+  pickerEl.innerHTML = html || `<div style="font-size:10px;color:var(--text-dim);padding:8px">No skill exercises found</div>`;
 }
 
 function toggleFixedEx(section, exId, btn) {
