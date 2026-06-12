@@ -160,6 +160,9 @@
   .day-card-exercises { display: none; padding: 0 20px 16px; }
   .day-card.open .day-card-exercises { display: block; }
   .day-card.open .day-chevron { transform: rotate(90deg); }
+  .day-done-badge { font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 2px; color: var(--accent); border: 1px solid var(--accent-dim); border-radius: 20px; padding: 3px 9px; margin-right: 12px; white-space: nowrap; flex-shrink: 0; }
+  .day-card.is-done .day-tag { color: var(--text); opacity: 0.62; }
+  .start-btn.is-review { border-color: var(--accent-dim); color: var(--accent-dim); }
 
   .ex-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
   .ex-row:last-of-type { border-bottom: none; margin-bottom: 8px; }
@@ -2730,6 +2733,14 @@ function getOnboardingTemplate(goal, level, days, equipment) {
 }
 
 // ─── HOME ──────────────────────────────────────────────────────
+function isDayLoggedForWeek(day, week) {
+  return (day.exercises || []).some(e => {
+    const entry = sessionLog[`${day.id}_${e.id}_v${week}`];
+    if (!entry) return false;
+    return Object.keys(entry).some(k => (k.endsWith('_w') || k.endsWith('_r')) && String(entry[k] ?? '').trim() !== '');
+  });
+}
+
 function renderHomeDays() {
   const c = document.getElementById('home-day-cards');
   const blockSection = document.getElementById('home-block-section');
@@ -2814,14 +2825,16 @@ function renderHomeDays() {
       return `<div class="ex-row"><span class="ex-name">${ex?.name||e.id}</span><span class="ex-scheme">${e.sets}×${e.reps}</span></div>`;
     }).join('');
     const more = day.exercises.length>5 ? `<div style="font-size:10px;color:var(--text-dim);padding:6px 0 0">+${day.exercises.length-5} more</div>` : '';
+    const done = isDayLoggedForWeek(day, currentWeek);
     c.innerHTML += `
-      <div class="day-card" id="dc-${day.id}">
+      <div class="day-card${done?' is-done':''}" id="dc-${day.id}">
         <div class="day-card-header" onclick="toggleDayCard('${day.id}')">
           <div class="day-card-left"><div class="day-tag">${day.name}</div><div class="day-type">${day.type||''}</div></div>
+          ${done ? `<div class="day-done-badge">✓ W${currentWeek} LOGGED</div>` : ''}
           <div class="day-chevron">›</div>
         </div>
         <div class="day-card-exercises">${rows}${more}
-          <button class="start-btn" onclick="startDay('${day.id}')">START SESSION →</button>
+          <button class="start-btn${done?' is-review':''}" onclick="startDay('${day.id}')">${done ? 'REVIEW SESSION ✓' : 'START SESSION →'}</button>
         </div>
       </div>`;
   });
@@ -5335,6 +5348,24 @@ function aiAskNext() {
 }
 
 function aiStartChat() {
+  // If a programme is already active, don't silently restart a fresh assessment —
+  // that generic intro reads as "starting over". Offer the progress path explicitly.
+  if (currentBlock.days?.length > 0) {
+    document.getElementById('ai-chat').innerHTML = '';
+    document.getElementById('ai-result').style.display = 'none';
+    aiHideInputs();
+    aiAddCoachMsg("Welcome back. You're on <strong>" + (currentBlock.name || 'your current block') + "</strong> · Week " + currentWeek + ". Want me to build your next block from your progress, or start a fresh assessment?");
+    const wrap = document.getElementById('ai-replies');
+    wrap.innerHTML = '';
+    const mk = (label, fn) => { const b = document.createElement('button'); b.className = 'ai-reply-chip'; b.innerHTML = label; b.onclick = fn; wrap.appendChild(b); };
+    mk('Progress my next block →', () => { aiHideInputs(); aiAutoProgress(); });
+    mk('Start fresh assessment', () => { aiHideInputs(); aiStartFresh(); });
+    return;
+  }
+  aiStartFresh();
+}
+
+function aiStartFresh() {
   aiStep = 0;
   aiFlow = [...AI_BASE_START]; // start with base, branch gets added after goal
   Object.keys(aiData).forEach(k => delete aiData[k]);
