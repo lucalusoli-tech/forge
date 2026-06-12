@@ -195,7 +195,8 @@
   /* Each exercise row within a round */
   .ss-row { display: flex; align-items: center; gap: 12px; padding: 8px 4px; font-family: 'DM Mono', monospace; -webkit-tap-highlight-color: transparent; }
   .ss-row-name { flex-shrink: 0; width: 100px; font-size: 11px; letter-spacing: 1px; cursor: pointer; }
-  .ss-row-name .ss-play { font-size: 9px; color: var(--accent); margin-left: 4px; opacity: 0.7; }
+  .ss-row-name .ss-play { display: inline-flex; align-items: center; justify-content: center; width: 13px; height: 13px; margin-left: 6px; border: 1px solid var(--accent-dim); border-radius: 3px; color: var(--accent); opacity: 0.8; vertical-align: middle; }
+  .ss-row-name .ss-play svg { width: 5px; height: 6px; display: block; margin-left: 1px; }
   .ss-row-name .ss-last { font-size: 8px; letter-spacing: 1px; color: var(--accent-dim); margin-top: 3px; opacity: 0.85; }
   .ss-row-content { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; }
   .ss-row-value { flex: 1; font-size: 13px; letter-spacing: 1px; }
@@ -220,9 +221,10 @@
   .ss-note-input { flex: 1; background: transparent; border: none; border-bottom: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 11px; padding: 4px 0; outline: none; }
   .ss-note-input:focus { border-bottom-color: var(--accent); }
   .log-ex-header { padding: 14px 20px 10px; display: flex; align-items: center; justify-content: space-between; gap: 12px; cursor: pointer; }
-  .log-ex-name-row { display: flex; align-items: baseline; gap: 6px; min-width: 0; }
+  .log-ex-name-row { display: flex; align-items: center; gap: 8px; min-width: 0; }
   .log-ex-name { font-family: 'DM Mono', monospace; font-size: 18px; letter-spacing: 2px; }
-  .log-ex-play { color: var(--accent); font-size: 11px; line-height: 1; flex-shrink: 0; transform: translateY(-1px); }
+  .log-ex-play { display: inline-flex; align-items: center; justify-content: center; width: 17px; height: 17px; flex-shrink: 0; border: 1px solid var(--accent-dim); border-radius: 4px; color: var(--accent); }
+  .log-ex-play svg { width: 7px; height: 8px; display: block; margin-left: 1px; }
   .log-ex-target { font-size: 10px; color: var(--text-muted); letter-spacing: 1px; margin-top: 2px; }
   .log-ex-note { font-size: 9px; color: var(--text); letter-spacing: 1px; text-align: right; max-width: 110px; flex-shrink: 0; line-height: 1.4; opacity: 0.7; }
   .log-ex-body { padding: 0 20px 16px; }
@@ -1118,7 +1120,7 @@
     <div class="topbar-logo" id="topbar-logo">FORGE</div>
     <div class="topbar-right">
       <div class="week-pill" id="week-pill"
-        onclick="cycleWeek()"
+        onclick="weekPillTap()"
         oncontextmenu="event.preventDefault();weekBack()"
         ontouchstart="startWeekHold()" ontouchend="clearWeekHold()" ontouchmove="clearWeekHold()">
         W<span id="current-week">1</span><span id="week-total-pill" style="color:var(--accent-dim)">/4</span>
@@ -1473,7 +1475,7 @@
       <div class="info-line"><span class="info-line-label">Target</span><span class="info-line-val" id="sheet-target"></span></div>
       <div class="info-line"><span class="info-line-label">Intensity</span><span class="info-line-val" id="sheet-intensity"></span></div>
       <div class="info-line"><span class="info-line-label">Cue</span><span class="info-line-val" id="sheet-cue"></span></div>
-      <a href="#" id="sheet-video" class="video-btn" target="_blank">▶ Watch Reference</a>
+      <a href="#" id="sheet-video" class="video-btn" target="_blank"><svg viewBox="0 0 8 10" width="8" height="10" fill="currentColor" style="flex-shrink:0" aria-hidden="true"><path d="M1 1 L7 5 L1 9 Z"/></svg> Watch Reference</a>
     </div>
   </div>
 </div>
@@ -2093,17 +2095,32 @@ function updateStats() {
   document.getElementById('dash-last').textContent = lastDay ? lastDay.name.split('—')[0].trim() : '—';
 }
 
+function applyWeek(w) {
+  const total = currentBlock.weeks || 4;
+  w = Math.max(1, Math.min(total, w));
+  currentWeek = w;
+  localStorage.setItem('fw_week', currentWeek);
+  updateStats();
+  scheduleSync();
+  // Keep the log view's week tabs in sync with the active week
+  document.querySelectorAll('.w-tab').forEach((b,i) => b.classList.toggle('active', i+1===currentWeek));
+  // If the log page is open, refresh the visible session so inputs match the new week
+  const day = currentDayId ? currentBlock.days.find(d => d.id === currentDayId) : null;
+  const logOpen = document.getElementById('page-log')?.classList.contains('active');
+  if (day && logOpen) {
+    renderLogExercises(day.exercises);
+    const notesEl = document.getElementById('session-notes');
+    if (notesEl) notesEl.value = sessionLog[`${currentDayId}_notes_v${currentWeek}`] || '';
+  }
+}
+
 function cycleWeek() {
   const total = currentBlock.weeks || 4;
   if (currentWeek >= total) {
     openBlockEndPrompt();
     return;
   }
-  currentWeek++;
-  localStorage.setItem('fw_week', currentWeek);
-  updateStats();
-  scheduleSync();
-  document.querySelectorAll('.w-tab').forEach((b,i) => b.classList.toggle('active', i+1===currentWeek));
+  applyWeek(currentWeek + 1);
 }
 
 function setBlockWeeks(n, btn) {
@@ -3068,7 +3085,7 @@ function _logExerciseCardHTML(ex) {
   }
   return `<div class="log-ex-card" data-wk="${wk}" data-sets="${ex.sets}" data-exid="${ex.id}">
       <div class="log-ex-header" onclick="openSheet('${exData.id}')">
-        <div><div class="log-ex-name-row"><div class="log-ex-name">${exData.name}</div><span class="log-ex-play" aria-hidden="true">▶</span></div><div class="log-ex-target">${ex.sets}×${ex.reps}</div></div>
+        <div><div class="log-ex-name-row"><div class="log-ex-name">${exData.name}</div><span class="log-ex-play" aria-hidden="true"><svg viewBox="0 0 8 10" fill="currentColor"><path d="M1 1 L7 5 L1 9 Z"/></svg></span></div><div class="log-ex-target">${ex.sets}×${ex.reps}</div></div>
         <div class="log-ex-note">${ex.note || ''}</div>
       </div>
       ${lastWeekHint}
@@ -3156,7 +3173,7 @@ function renderSupersetGroup(groupLabel) {
       const lwHint = _ssLastWeekHint(g.id, round);
       if (isActive) {
         html += `<div class="ss-row active">
-          <div class="ss-row-name" onclick="openSheet('${exData.id}')">${exData.name}<span class="ss-play" aria-hidden="true">▶</span>${lwHint?`<div class="ss-last">↳ ${lwHint}</div>`:''}</div>
+          <div class="ss-row-name" onclick="openSheet('${exData.id}')">${exData.name}<span class="ss-play" aria-hidden="true"><svg viewBox="0 0 8 10" fill="currentColor"><path d="M1 1 L7 5 L1 9 Z"/></svg></span>${lwHint?`<div class="ss-last">↳ ${lwHint}</div>`:''}</div>
           <div class="ss-row-content">
             <input class="set-field" type="text" inputmode="none" placeholder="kg" value="${w}" id="${wk}_s${round}_w"
               autocomplete="one-time-code" data-lpignore="true" data-form-type="other" oninput="autoSaveSet('${wk}',${round})"
@@ -3425,15 +3442,7 @@ document.addEventListener('click', e => {
 function populateAddSelect() { /* replaced by search */ }
 
 function selectWeek(w,btn) {
-  currentWeek=w; updateStats(); scheduleSync();
-  document.querySelectorAll('.w-tab').forEach(b=>b.classList.remove('active'));
-  btn.classList.add('active');
-  const day=currentBlock.days.find(d=>d.id===currentDayId);
-  if(day) renderLogExercises(day.exercises);
-  // Load session notes for this week
-  const notesKey = `${currentDayId}_notes_v${currentWeek}`;
-  const notesEl = document.getElementById('session-notes');
-  if(notesEl) notesEl.value = sessionLog[notesKey] || '';
+  applyWeek(w);
 }
 
 function saveSession() {
@@ -3649,7 +3658,7 @@ function renderExItem(ex, progressionNum) {
       <div class="info-line"><span class="info-line-label">Target</span><span class="info-line-val">${ex.target}</span></div>
       <div class="info-line"><span class="info-line-label">Intensity</span><span class="info-line-val">${ex.intensity}</span></div>
       <div class="info-line"><span class="info-line-label">Cue</span><span class="info-line-val">${ex.cue}</span></div>
-      <a href="${ex.video}" class="video-btn" target="_blank">▶ Watch Reference</a>
+      <a href="${ex.video}" class="video-btn" target="_blank"><svg viewBox="0 0 8 10" width="8" height="10" fill="currentColor" style="flex-shrink:0" aria-hidden="true"><path d="M1 1 L7 5 L1 9 Z"/></svg> Watch Reference</a>
       <div style="height:12px"></div>
     </div>
   </div>`;
@@ -3960,51 +3969,34 @@ function renderFixedPicker(section) {
   const pickerEl = document.getElementById(section + '-ex-picker');
   const added = new Set(arr.map(e => e.id));
 
-  if(section === 'warmup') {
-    const exs = EXERCISES.filter(e => e.tags.includes('warmup'));
-    if(!exs.length) { pickerEl.innerHTML = `<div style="font-size:10px;color:var(--text-dim);padding:8px">No warmup exercises found</div>`; return; }
-    pickerEl.innerHTML = exs.map(e => `
-      <div class="day-ex-chip ${added.has(e.id) ? 'active' : ''}" style="margin-bottom:4px;display:inline-block;margin-right:4px"
-        onclick="toggleFixedEx('warmup','${e.id}',this)">${e.name}</div>
-    `).join('');
+  // Linear list, sorted by difficulty tier (Beginner → Intermediate → Advanced → Elite),
+  // then alphabetically within tier. Tier headers replace the old skill-name groups.
+  const RANK = { Beginner: 1, Intermediate: 2, Advanced: 3, Elite: 4 };
+  const TIER_COLOR = { Beginner:'var(--text-muted)', Intermediate:'var(--text)', Advanced:'var(--accent)', Elite:'var(--red)' };
+
+  const exs = EXERCISES
+    .filter(e => e.tags.includes(tag))
+    .slice()
+    .sort((a, b) => (RANK[a.level] || 99) - (RANK[b.level] || 99) || a.name.localeCompare(b.name));
+
+  if(!exs.length) {
+    pickerEl.innerHTML = `<div style="font-size:10px;color:var(--text-dim);padding:8px">No ${tag} exercises found</div>`;
     return;
   }
 
-  // Skill section — grouped by skill name
-  const GROUP_LABELS = {
-    'muscle-up':  'Muscle-Up',
-    'front-lever':'Front Lever',
-    'back-lever': 'Back Lever',
-    'planche':    'Planche',
-    'handstand':  'Handstand',
-    'l-sit':      'L-Sit & Manna',
-  };
-  const usedIds = new Set();
   let html = '';
+  let lastTier = null;
+  exs.forEach(e => {
+    if(e.level !== lastTier) {
+      lastTier = e.level;
+      const col = TIER_COLOR[e.level] || 'var(--text-dim)';
+      html += `<div style="width:100%;font-size:8px;letter-spacing:3px;color:${col};text-transform:uppercase;padding:10px 0 6px;border-top:1px solid var(--border);margin-top:4px">${e.level || 'Other'}</div>`;
+    }
+    html += `<div class="day-ex-chip ${added.has(e.id) ? 'active' : ''}" style="margin-bottom:4px;display:inline-block;margin-right:4px"
+        onclick="toggleFixedEx('${section}','${e.id}',this)">${e.name}</div>`;
+  });
 
-  for(const [key, label] of Object.entries(GROUP_LABELS)) {
-    const ids = SKILL_GROUPS[key] || [];
-    const exs = ids.map(id => EXERCISES.find(e => e.id === id)).filter(Boolean).filter(e => e.tags.includes('skill'));
-    if(!exs.length) continue;
-    exs.forEach(e => usedIds.add(e.id));
-    html += `<div style="font-size:8px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;padding:10px 0 6px;border-top:1px solid var(--border);margin-top:4px">${label}</div>`;
-    html += exs.map(e => `
-      <div class="day-ex-chip ${added.has(e.id) ? 'active' : ''}" style="margin-bottom:4px;display:inline-block;margin-right:4px"
-        onclick="toggleFixedEx('skill','${e.id}',this)">${e.name}</div>
-    `).join('');
-  }
-
-  // Any remaining skill-tagged exercises not in a group
-  const remaining = EXERCISES.filter(e => e.tags.includes('skill') && !usedIds.has(e.id));
-  if(remaining.length) {
-    html += `<div style="font-size:8px;letter-spacing:3px;color:var(--text-dim);text-transform:uppercase;padding:10px 0 6px;border-top:1px solid var(--border);margin-top:4px">Other</div>`;
-    html += remaining.map(e => `
-      <div class="day-ex-chip ${added.has(e.id) ? 'active' : ''}" style="margin-bottom:4px;display:inline-block;margin-right:4px"
-        onclick="toggleFixedEx('skill','${e.id}',this)">${e.name}</div>
-    `).join('');
-  }
-
-  pickerEl.innerHTML = html || `<div style="font-size:10px;color:var(--text-dim);padding:8px">No skill exercises found</div>`;
+  pickerEl.innerHTML = html;
 }
 
 function toggleFixedEx(section, exId, btn) {
@@ -4495,15 +4487,36 @@ function saveBlockOnly() {
   showToast('Block saved ✓');
 }
 
-function saveAndStart() {
+async function saveAndStart() {
   const name=document.getElementById('custom-name').value.trim();
   if(!name){showToast('Add a block name');return;}
   if(!builderDays.length){showToast('Add at least 1 day');return;}
   const days=getBuiltDays();
+
+  // Archive the outgoing block (with its log) before replacing it — mirrors the AI path.
+  // Session-log keys are day+exercise+week (not block-scoped), so a fresh block that reuses
+  // day_1/day_2/day_3 would otherwise inherit the previous block's logged numbers.
+  if (currentBlock.name && currentBlock.days && currentBlock.days.length > 0) {
+    archivedBlocks.unshift({
+      ...currentBlock,
+      archivedAt: new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
+      sessionLog: {...sessionLog},
+    });
+    localStorage.setItem('fw_archive', JSON.stringify(archivedBlocks));
+    await syncBlocksToCloud(); // persist the archived log before clearing
+  }
+
   currentBlock={name:name.toUpperCase(),methods:[...builderMethods],weeks:builderWeeks,warmup:[...builderWarmup],skill:[...builderSkill],days};
-  saveCurrentBlock();
   currentWeek=1;
+  // Fresh block → clear the live session log so old values don't surface
+  sessionLog={};
+  weekStarts={};
+  localStorage.setItem('fw_week','1');
+  localStorage.setItem('fw_log', JSON.stringify({}));
+  localStorage.setItem('fw_week_starts', JSON.stringify({}));
+  saveCurrentBlock();
   saveBlockOnly();
+  await syncLogsToCloud(true); // force — legitimate clear after archive
   updateStats();
   renderHomeDays();
   renderHomeFixedSections();
@@ -6072,16 +6085,20 @@ function aiAutoProgress() {
 
 // ─── WEEK BACK (long press) ─────────────────────────────────────
 let weekHoldTimer = null;
+let weekHoldFired = false;
 function startWeekHold() {
-  weekHoldTimer = setTimeout(() => { weekBack(); weekHoldTimer = null; }, 500);
+  weekHoldFired = false;
+  weekHoldTimer = setTimeout(() => { weekHoldFired = true; weekBack(); weekHoldTimer = null; }, 500);
 }
 function clearWeekHold() { if(weekHoldTimer) { clearTimeout(weekHoldTimer); weekHoldTimer = null; } }
+function weekPillTap() {
+  // A long-press already triggered weekBack — swallow the trailing synthesized click
+  if (weekHoldFired) { weekHoldFired = false; return; }
+  cycleWeek();
+}
 function weekBack() {
   if(currentWeek <= 1) { showToast('Already at W1'); return; }
-  currentWeek--;
-  localStorage.setItem('fw_week', currentWeek);
-  updateStats();
-  scheduleSync();
+  applyWeek(currentWeek - 1);
   showToast('← W'+currentWeek);
 }
 
