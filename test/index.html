@@ -160,6 +160,9 @@
   .day-card-exercises { display: none; padding: 0 20px 16px; }
   .day-card.open .day-card-exercises { display: block; }
   .day-card.open .day-chevron { transform: rotate(90deg); }
+  .day-done-badge { font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 2px; color: var(--accent); border: 1px solid var(--accent-dim); border-radius: 20px; padding: 3px 9px; margin-right: 12px; white-space: nowrap; flex-shrink: 0; }
+  .day-card.is-done .day-tag { color: var(--text); opacity: 0.62; }
+  .start-btn.is-review { border-color: var(--accent-dim); color: var(--accent-dim); }
 
   .ex-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
   .ex-row:last-of-type { border-bottom: none; margin-bottom: 8px; }
@@ -1332,11 +1335,6 @@
           <button class="save-btn" style="background:transparent;border-color:var(--border);color:var(--text-muted)" onclick="saveBlockOnly()">Save Only</button>
         </div>
 
-        <!-- Saved blocks -->
-        <div class="saved-blocks-section">
-          <div class="section-label" style="padding:0 0 10px;border-bottom:1px solid var(--border);margin-bottom:12px">SAVED BLOCKS</div>
-          <div id="builder-saved-list"></div>
-        </div>
         <div style="height:20px"></div>
       </div>
 
@@ -1363,42 +1361,23 @@
           </div>
         </div>
 
-        <!-- PROGRAMMES FEED -->
+        <!-- TRAINING BLOCKS -->
         <div class="coaching-hero">
-          <div class="coaching-eyebrow">Monthly Drops</div>
+          <div class="coaching-eyebrow">Your Training</div>
           <div class="coaching-title">PROGRAMMES</div>
-          <div class="coaching-desc">Coached training blocks — built by a certified PT, dropped every month. Load directly into your app and train.</div>
+          <div class="coaching-desc">Every block you've built or been assigned. Set one as current to start training.</div>
         </div>
 
-        <!-- ADMIN: Publish panel (only visible to admin) -->
-        <div id="admin-publish-panel" style="display:none;margin:20px;border:1px solid var(--accent-dim);padding:20px;background:var(--surface)">
-          <div style="font-size:8px;letter-spacing:4px;color:var(--accent);margin-bottom:16px">ADMIN — PUBLISH PROGRAMME</div>
-          <input class="coaching-input" type="text" id="prog-title" placeholder="Programme title e.g. FORGE BLOCK 01">
-          <input class="coaching-input" type="text" id="prog-month" placeholder="Month e.g. April 2026">
-          <textarea class="coaching-textarea" id="prog-desc" placeholder="Short description — who it's for, what it focuses on..."></textarea>
-          <div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:8px;margin-top:4px">AUDIENCE</div>
-          <div style="display:flex;gap:8px;margin-bottom:14px" id="prog-type-chips">
-            <button class="day-ex-chip active" id="prog-type-coached" onclick="selectProgType('coached',this)" style="flex:1;text-align:center">✦ COACHED — All coached users</button>
-            <button class="day-ex-chip" id="prog-type-personal" onclick="selectProgType('personal',this)" style="flex:1;text-align:center">◉ PERSONAL — 1-2-1 only</button>
-          </div>
-          <input type="hidden" id="prog-type" value="coached">
-          <div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:8px">SELECT BLOCK TO PUBLISH</div>
-          <select class="coaching-input" id="prog-block-select" style="-webkit-appearance:none;color:var(--text-muted);margin-bottom:10px">
-            <option value="" disabled selected>Select a saved block...</option>
-          </select>
-          <button class="coaching-submit" onclick="publishProgramme()" style="margin-bottom:0">PUBLISH SELECTED BLOCK AS PROGRAMME →</button>
-        </div>
-
-        <!-- PROGRAMMES LIST -->
-        <div id="programmes-list" style="padding:0 20px 20px">
-          <div style="padding:32px 0;text-align:center;font-size:9px;letter-spacing:3px;color:var(--text-dim)" id="programmes-empty">Loading programmes...</div>
+        <!-- SAVED BLOCKS (moved here from the Builder tab) -->
+        <div class="saved-blocks-section" id="programmes-blocks-section">
+          <div id="builder-saved-list"></div>
         </div>
 
         <!-- DIVIDER -->
-        <div style="border-top:1px solid var(--border);margin:0 20px"></div>
+        <div id="coaching-enquiry-divider" style="border-top:1px solid var(--border);margin:0 20px"></div>
 
         <!-- COACHING ENQUIRY -->
-        <div class="coaching-form">
+        <div class="coaching-form" id="coaching-enquiry">
           <div class="coaching-eyebrow" style="padding-top:20px">1-2-1 Personal Training</div>
           <div class="coaching-title" style="font-size:32px;margin-bottom:8px">TRAIN WITH<br>A COACH</div>
           <div class="coaching-desc" style="margin-bottom:20px">Fully personalised programming. Built around your body, schedule, and goals.</div>
@@ -1556,6 +1535,9 @@ const EXERCISES = [
   {id:'squat-jump',name:'Squat Jump',tags:['legs'],sets:'3×8',target:'Quads, Calves, CNS',intensity:'Explosive',level:'Beginner',cue:'Triple extension, land soft, reset fully',video:'https://www.youtube.com/results?search_query=squat+jump+tutorial',desc:'Plyometric power. Maximise height every rep.'},
   {id:'lateral-raises',name:'Lateral Raises',tags:['push'],sets:'3×8-15',target:'Lateral Deltoid',intensity:'Light',level:'Beginner',cue:'Lead with elbow, slight forward lean',video:'https://www.youtube.com/results?search_query=lateral+raises+form',desc:'Shoulder width isolation. Full range, control at top.'},
   {id:'bicep-curl',name:'Bicep Curl',tags:['pull'],sets:'3×8-15',target:'Biceps Brachii',intensity:'Light',level:'Beginner',cue:'Full supination at top, no swing',video:'https://www.youtube.com/results?search_query=bicep+curl+form',desc:'Direct bicep work after vertical pulling.'},
+  {id:'zottman-curl',name:'Zottman Curl',tags:['pull'],sets:'3×8-12',target:'Biceps, Forearms',intensity:'Light',level:'Beginner',cue:'Supinate on the way up, rotate to pronated at the top, lower under control',video:'https://www.youtube.com/results?search_query=zottman+curl+form',desc:'Curl up supinated, lower pronated — trains the biceps and forearm extensors in a single rep.'},
+  {id:'reverse-curl',name:'Reverse Bicep Curl',tags:['pull'],sets:'3×10-15',target:'Brachioradialis, Forearms, Biceps',intensity:'Light',level:'Beginner',cue:'Pronated grip, no swing, squeeze at the top',video:'https://www.youtube.com/results?search_query=reverse+curl+form',desc:'Pronated curl emphasising the brachioradialis and forearms. Builds elbow stability for pulling.'},
+  {id:'crunch-machine',name:'Crunch Machine',tags:['core'],sets:'3×12-15',target:'Core, Obliques',intensity:'Moderate',level:'Beginner',cue:'Round the spine, exhale into the crunch, control the return',video:'https://www.youtube.com/results?search_query=machine+crunch+form',desc:'Loaded spinal flexion for direct rectus abdominis work. Progress the resistance over time.'},
   {id:'oah',name:'One Arm Handstand',tags:['skill','push','calisthenics'],sets:'Practice',target:'Full Body, Wrists, Proprioception',intensity:'Max skill',level:'Elite',cue:'Shift weight gradually, finger pressure control',video:'https://www.youtube.com/results?search_query=one+arm+handstand+tutorial',desc:'The summit. Reserve for peak conditions.'},
 
   // ── BWF HORIZONTAL PULL — BACK ────────────────────────────────
@@ -2251,11 +2233,14 @@ function switchBuildTab(tab) {
 }
 
 // ─── CHANGELOG ─────────────────────────────────────────────────
-const FORGE_VERSION = '2.1.0';
+const FORGE_VERSION = '2.1.1';
 const FORGE_CHANGELOG = [
-  'New Statistics overview in your Progress tab — your whole block at a glance',
-  'Muscle heat-map — every region lights up as you bank sets toward growth',
-  'Weekly activity, category split, level breakdown and a lifetime performance summary'
+  'AI-built programmes now name each day by focus, like "Day 1 — Strength", so your week reads at a glance',
+  'Day cards show a ✓ LOGGED badge once you\'ve trained them this week — no more guessing what\'s done',
+  'New blocks start clean — last block\'s numbers no longer carry across',
+  'Smoother week switching — the pill and week tabs stay in sync and remember where you left off',
+  'Returning to your AI coach now lets you progress your next block or start fresh — no surprise restarts',
+  'Building manually? Exercises now sort by difficulty, Beginner through Elite'
 ];
 
 function checkChangelog() {
@@ -2730,6 +2715,14 @@ function getOnboardingTemplate(goal, level, days, equipment) {
 }
 
 // ─── HOME ──────────────────────────────────────────────────────
+function isDayLoggedForWeek(day, week) {
+  return (day.exercises || []).some(e => {
+    const entry = sessionLog[`${day.id}_${e.id}_v${week}`];
+    if (!entry) return false;
+    return Object.keys(entry).some(k => (k.endsWith('_w') || k.endsWith('_r')) && String(entry[k] ?? '').trim() !== '');
+  });
+}
+
 function renderHomeDays() {
   const c = document.getElementById('home-day-cards');
   const blockSection = document.getElementById('home-block-section');
@@ -2814,14 +2807,16 @@ function renderHomeDays() {
       return `<div class="ex-row"><span class="ex-name">${ex?.name||e.id}</span><span class="ex-scheme">${e.sets}×${e.reps}</span></div>`;
     }).join('');
     const more = day.exercises.length>5 ? `<div style="font-size:10px;color:var(--text-dim);padding:6px 0 0">+${day.exercises.length-5} more</div>` : '';
+    const done = isDayLoggedForWeek(day, currentWeek);
     c.innerHTML += `
-      <div class="day-card" id="dc-${day.id}">
+      <div class="day-card${done?' is-done':''}" id="dc-${day.id}">
         <div class="day-card-header" onclick="toggleDayCard('${day.id}')">
           <div class="day-card-left"><div class="day-tag">${day.name}</div><div class="day-type">${day.type||''}</div></div>
+          ${done ? `<div class="day-done-badge">✓ W${currentWeek} LOGGED</div>` : ''}
           <div class="day-chevron">›</div>
         </div>
         <div class="day-card-exercises">${rows}${more}
-          <button class="start-btn" onclick="startDay('${day.id}')">START SESSION →</button>
+          <button class="start-btn${done?' is-review':''}" onclick="startDay('${day.id}')">${done ? 'REVIEW SESSION ✓' : 'START SESSION →'}</button>
         </div>
       </div>`;
   });
@@ -3964,39 +3959,50 @@ let builderWarmup = [];
 let builderSkill  = [];
 
 function renderFixedPicker(section) {
-  const tag = section === 'warmup' ? 'warmup' : 'skill';
   const arr = section === 'warmup' ? builderWarmup : builderSkill;
   const pickerEl = document.getElementById(section + '-ex-picker');
   const added = new Set(arr.map(e => e.id));
-
-  // Linear list, sorted by difficulty tier (Beginner → Intermediate → Advanced → Elite),
-  // then alphabetically within tier. Tier headers replace the old skill-name groups.
   const RANK = { Beginner: 1, Intermediate: 2, Advanced: 3, Elite: 4 };
-  const TIER_COLOR = { Beginner:'var(--text-muted)', Intermediate:'var(--text)', Advanced:'var(--accent)', Elite:'var(--red)' };
+  const byDifficulty = (a, b) => (RANK[a.level] || 99) - (RANK[b.level] || 99) || a.name.localeCompare(b.name);
+  const chip = e => `<div class="day-ex-chip ${added.has(e.id) ? 'active' : ''}" style="margin-bottom:4px;display:inline-block;margin-right:4px" onclick="toggleFixedEx('${section}','${e.id}',this)">${e.name}</div>`;
 
-  const exs = EXERCISES
-    .filter(e => e.tags.includes(tag))
-    .slice()
-    .sort((a, b) => (RANK[a.level] || 99) - (RANK[b.level] || 99) || a.name.localeCompare(b.name));
-
-  if(!exs.length) {
-    pickerEl.innerHTML = `<div style="font-size:10px;color:var(--text-dim);padding:8px">No ${tag} exercises found</div>`;
+  // WARMUP — flat list, ordered by difficulty (no skill categories here)
+  if (section === 'warmup') {
+    const exs = EXERCISES.filter(e => e.tags.includes('warmup')).slice().sort(byDifficulty);
+    pickerEl.innerHTML = exs.length
+      ? exs.map(chip).join('')
+      : `<div style="font-size:10px;color:var(--text-dim);padding:8px">No warmup exercises found</div>`;
     return;
   }
 
+  // SKILL — grouped by skill (Handstand, Front Lever, …); within each group, sorted Beginner → Elite
+  const GROUP_LABELS = {
+    'muscle-up':  'Muscle-Up',
+    'front-lever':'Front Lever',
+    'back-lever': 'Back Lever',
+    'planche':    'Planche',
+    'handstand':  'Handstand',
+    'l-sit':      'L-Sit & Manna',
+  };
+  const groupHeader = (label, dim) => `<div style="width:100%;font-size:8px;letter-spacing:3px;color:${dim ? 'var(--text-dim)' : 'var(--accent)'};text-transform:uppercase;padding:10px 0 6px;border-top:1px solid var(--border);margin-top:4px">${label}</div>`;
+  const usedIds = new Set();
   let html = '';
-  let lastTier = null;
-  exs.forEach(e => {
-    if(e.level !== lastTier) {
-      lastTier = e.level;
-      const col = TIER_COLOR[e.level] || 'var(--text-dim)';
-      html += `<div style="width:100%;font-size:8px;letter-spacing:3px;color:${col};text-transform:uppercase;padding:10px 0 6px;border-top:1px solid var(--border);margin-top:4px">${e.level || 'Other'}</div>`;
-    }
-    html += `<div class="day-ex-chip ${added.has(e.id) ? 'active' : ''}" style="margin-bottom:4px;display:inline-block;margin-right:4px"
-        onclick="toggleFixedEx('${section}','${e.id}',this)">${e.name}</div>`;
-  });
 
-  pickerEl.innerHTML = html;
+  for (const [key, label] of Object.entries(GROUP_LABELS)) {
+    const exs = (SKILL_GROUPS[key] || [])
+      .map(id => EXERCISES.find(e => e.id === id))
+      .filter(e => e && e.tags.includes('skill'))
+      .sort(byDifficulty);
+    if (!exs.length) continue;
+    exs.forEach(e => usedIds.add(e.id));
+    html += groupHeader(label) + exs.map(chip).join('');
+  }
+
+  // Any skill-tagged exercise not in a named group
+  const remaining = EXERCISES.filter(e => e.tags.includes('skill') && !usedIds.has(e.id)).slice().sort(byDifficulty);
+  if (remaining.length) html += groupHeader('Other', true) + remaining.map(chip).join('');
+
+  pickerEl.innerHTML = html || `<div style="font-size:10px;color:var(--text-dim);padding:8px">No skill exercises found</div>`;
 }
 
 function toggleFixedEx(section, exId, btn) {
@@ -5335,6 +5341,24 @@ function aiAskNext() {
 }
 
 function aiStartChat() {
+  // If a programme is already active, don't silently restart a fresh assessment —
+  // that generic intro reads as "starting over". Offer the progress path explicitly.
+  if (currentBlock.days?.length > 0) {
+    document.getElementById('ai-chat').innerHTML = '';
+    document.getElementById('ai-result').style.display = 'none';
+    aiHideInputs();
+    aiAddCoachMsg("Welcome back. You're on <strong>" + (currentBlock.name || 'your current block') + "</strong> · Week " + currentWeek + ". Want me to build your next block from your progress, or start a fresh assessment?");
+    const wrap = document.getElementById('ai-replies');
+    wrap.innerHTML = '';
+    const mk = (label, fn) => { const b = document.createElement('button'); b.className = 'ai-reply-chip'; b.innerHTML = label; b.onclick = fn; wrap.appendChild(b); };
+    mk('Progress my next block →', () => { aiHideInputs(); aiAutoProgress(); });
+    mk('Start fresh assessment', () => { aiHideInputs(); aiStartFresh(); });
+    return;
+  }
+  aiStartFresh();
+}
+
+function aiStartFresh() {
   aiStep = 0;
   aiFlow = [...AI_BASE_START]; // start with base, branch gets added after goal
   Object.keys(aiData).forEach(k => delete aiData[k]);
@@ -6675,9 +6699,9 @@ function updateUserBar() {
 
     if(tier === 'premium' || tier === 'coached' || tier === 'admin' || tier === 'pt') {
       // Paid user — show tier badge, no upgrade prompt
-      // Show/hide Programmes tab based on tier
+      // Programmes tab now holds the saved/assigned blocks — visible to all tiers, incl. 1-2-1 (pt)
       const progNav = document.getElementById('nav-coaching');
-      if(progNav) progNav.style.display = (tier === 'pt') ? 'none' : 'flex';
+      if(progNav) progNav.style.display = 'flex';
       
       if(tier === 'admin') {
         upgradeBtn.textContent = '⬡ ADMIN';
@@ -6827,162 +6851,27 @@ function checkBlockLimit() {
 
 // ─── COACHING ──────────────────────────────────────────────────
 // ─── PROGRAMMES ────────────────────────────────────────────────
+// This tab lists the training blocks built in / assigned to this account.
+// Legacy "Monthly Drops" publish panel + DB programmes feed removed 15 Jun —
+// programmes are now assigned to clients from the coach app, not published here.
 async function loadProgrammes() {
-  const list = document.getElementById('programmes-list');
-  const empty = document.getElementById('programmes-empty');
-  if(!list) return;
-
-  const userTier = currentUser?.tier;
+  const userTier  = currentUser?.tier;
   const isAdmin   = userTier === 'admin';
   const isCoached = userTier === 'coached' || isAdmin;
+  const isPt      = userTier === 'pt';
 
-  // Show admin publish panel only to admin
-  if(isAdmin) {
-    const panel = document.getElementById('admin-publish-panel');
-    if(panel) {
-      panel.style.display = 'block';
-      populatePublishBlockSelector();
-    }
-  }
+  // AI generator entry — FORGE+ (coached) and admin only
+  const aiLink = document.getElementById('ai-programme-link');
+  if(aiLink) aiLink.style.display = isCoached ? 'block' : 'none';
 
-  // Show AI programme link for FORGE+ users (coached + admin)
-  if(isCoached) {
-    const aiLink = document.getElementById('ai-programme-link');
-    if(aiLink) aiLink.style.display = 'block';
-  }
+  // 1-2-1 clients already have a coach — hide the "request a coach" enquiry for them
+  const enquiry    = document.getElementById('coaching-enquiry');
+  const enquiryDiv = document.getElementById('coaching-enquiry-divider');
+  if(enquiry)    enquiry.style.display    = isPt ? 'none' : 'block';
+  if(enquiryDiv) enquiryDiv.style.display = isPt ? 'none' : 'block';
 
-  // Gate — trial and premium users see a locked state, not the programmes
-  if(!isCoached) {
-    if(empty) empty.style.display = 'none';
-    list.innerHTML = `
-      <div style="border:1px solid var(--border);background:var(--card);margin-bottom:12px;padding:32px 20px;text-align:center">
-        <div style="font-size:28px;margin-bottom:16px">✦</div>
-        <div style="font-family:'DM Mono',monospace;font-size:22px;letter-spacing:3px;margin-bottom:8px">FORGE+</div>
-        <div style="font-size:10px;letter-spacing:1px;color:var(--text-muted);line-height:1.8;margin-bottom:20px">New training programme every month — built by a certified L3 PT and loaded straight into your app. Plus AI-generated blocks on demand.</div>
-        <button onclick="openUpgrade()" style="width:100%;padding:12px;background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer">UPGRADE TO FORGE+ →</button>
-      </div>`;
-    return;
-  }
-
-  const { data: programmes, error } = await supa
-    .from('programmes')
-    .select('*')
-    .order('published_at', { ascending: false });
-
-  if(error || !programmes?.length) {
-    if(empty) empty.textContent = 'No programmes published yet. Check back soon.';
-    return;
-  }
-
-  if(empty) empty.style.display = 'none';
-
-  list.innerHTML = programmes.map(p => `
-    <div style="border:1px solid var(--border);background:var(--card);margin-bottom:12px;padding:20px">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-        <div style="font-size:8px;letter-spacing:3px;color:var(--text);opacity:0.6">${p.month||''}</div>
-        ${isAdmin ? `<div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;padding:2px 8px;border:1px solid ${p.type==='personal'?'var(--accent-dim)':'var(--border)'};color:${p.type==='personal'?'var(--accent)':'var(--text-dim)'}">${p.type||'coached'}</div>` : ''}
-      </div>
-      <div style="font-family:'DM Mono',monospace;font-size:24px;letter-spacing:3px;color:var(--text);margin-bottom:8px">${p.title}</div>
-      <div style="font-size:10px;letter-spacing:1px;color:var(--text-muted);line-height:1.8;margin-bottom:16px">${p.description||''}</div>
-      <button onclick="loadProgrammeAsBlock('${p.id}')" style="width:100%;padding:12px;background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer">LOAD INTO APP →</button>
-      ${isAdmin ? `
-        <button onclick="deleteProgramme('${p.id}')" style="width:100%;margin-top:8px;padding:10px;background:none;border:1px solid var(--border);color:var(--text-dim);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;cursor:pointer">✕ DELETE</button>
-      ` : ''}
-    </div>
-  `).join('');
-}
-
-function populatePublishBlockSelector() {
-  const sel = document.getElementById('prog-block-select');
-  if(!sel) return;
-  sel.innerHTML = '<option value="" disabled selected>Select a saved block...</option>';
-  customWorkouts.forEach(w => {
-    const opt = document.createElement('option');
-    opt.value = w.id;
-    opt.textContent = w.name + (w.days?.length ? '  ·  ' + w.days.length + ' days' : '');
-    sel.appendChild(opt);
-  });
-  if(!customWorkouts.length) {
-    const opt = document.createElement('option');
-    opt.disabled = true;
-    opt.textContent = 'No saved blocks — save a block in Builder first';
-    sel.appendChild(opt);
-  }
-}
-
-function selectProgType(type, btn) {
-  document.getElementById('prog-type').value = type;
-  document.querySelectorAll('#prog-type-chips .day-ex-chip').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-}
-
-async function publishProgramme() {
-  const title   = document.getElementById('prog-title').value.trim();
-  const month   = document.getElementById('prog-month').value.trim();
-  const desc    = document.getElementById('prog-desc').value.trim();
-  const blockId = document.getElementById('prog-block-select').value;
-  const type    = document.getElementById('prog-type').value || 'coached';
-  if(!title || !month) { showToast('Title and month required'); return; }
-  if(!blockId) { showToast('Select a block to publish'); return; }
-
-  // Resolve the selected block data
-  const found = customWorkouts.find(w => w.id === blockId);
-  if(!found) { showToast('Block not found'); return; }
-  const blockData = found;
-
-  const { data, error } = await supa.from('programmes').insert({
-    title,
-    month,
-    description: desc,
-    type,
-    data: { currentBlock: blockData },
-    created_by: currentUser.id
-  }).select().single();
-  if(error) { showToast('Publish failed: ' + error.message); return; }
-  showToast('Programme published ✦');
-  document.getElementById('prog-title').value = '';
-  document.getElementById('prog-month').value = '';
-  document.getElementById('prog-desc').value = '';
-  document.getElementById('prog-block-select').selectedIndex = 0;
-  document.getElementById('prog-type').value = 'coached';
-  document.querySelectorAll('#prog-type-chips .day-ex-chip').forEach(b => b.classList.remove('active'));
-  document.getElementById('prog-type-coached').classList.add('active');
-  loadProgrammes();
-}
-
-async function deleteProgramme(progId) {
-  if(!confirm('Delete this programme? This cannot be undone.')) return;
-  const { error } = await supa.from('programmes').delete().eq('id', progId);
-  if(error) { showToast('Delete failed: ' + error.message); return; }
-  // Also remove from builder saved blocks if it was loaded there
-  customWorkouts = customWorkouts.filter(w => w.id !== 'prog_' + progId);
-  localStorage.setItem('fw_customs', JSON.stringify(customWorkouts));
-  syncBlocksToCloud();
-  showToast('Programme deleted');
+  // Render the saved / assigned blocks (the list element now lives in this tab)
   renderBuilderSaved();
-  loadProgrammes();
-}
-
-async function loadProgrammeAsBlock(progId) {
-  const { data, error } = await supa.from('programmes').select('*').eq('id', progId).single();
-  if(error || !data) { showToast('Failed to load programme'); return; }
-  const block = data.data?.currentBlock;
-  if(!block) { showToast('No block data found'); return; }
-  // Check if already loaded
-  if(customWorkouts.find(w => w.id === 'prog_' + progId)) {
-    showToast('Already in your Builder');
-    setTimeout(() => navigate('builder'), 600);
-    return;
-  }
-  const newBlock = { ...block, id: 'prog_' + progId, name: data.title };
-  if(!newBlock.warmup) newBlock.warmup = [];
-  if(!newBlock.skill)  newBlock.skill  = [];
-  customWorkouts.unshift(newBlock);
-  localStorage.setItem('fw_customs', JSON.stringify(customWorkouts));
-  syncBlocksToCloud();
-  renderBuilderSaved();
-  showToast('Programme added to Builder ✦');
-  setTimeout(() => navigate('builder'), 800);
 }
 
 async function submitCoachingRequest() {
