@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FORGE · 1-2-1 Growth Plan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#080808; --panel:#0e0e0e; --panel-2:#121212;
+    --gold:#c9a96e; --gold-dim:rgba(201,169,110,.5);
+    --ivory:#e8e2d9; --ivory-dim:rgba(232,226,217,.52);
+    --ivory-faint:rgba(232,226,217,.28);
+    --line:rgba(201,169,110,.16); --line-soft:rgba(232,226,217,.08);
+    --ok:#9fcf8e; --warn:#d8a24b;
+    --mono:'DM Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+    --sans:'Inter',system-ui,-apple-system,Segoe UI,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ivory);font-family:var(--sans);-webkit-font-smoothing:antialiased}
+  body::before{ /* grain */
+    content:"";position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:.045;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:40px 22px 80px}
+  .fade{opacity:0;transform:translateY(10px);animation:rise .7s cubic-bezier(.2,.7,.2,1) forwards}
+  @keyframes rise{to{opacity:1;transform:none}}
+  @media (prefers-reduced-motion:reduce){.fade{animation:none;opacity:1;transform:none}}
+
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.34em;text-transform:uppercase;color:var(--gold-dim)}
+  h1{font-family:var(--mono);font-weight:500;font-size:clamp(30px,7vw,46px);letter-spacing:-.01em;margin:14px 0 10px;color:var(--ivory)}
+  .lede{color:var(--ivory-dim);max-width:48ch;font-size:15px;line-height:1.55;margin:0}
+  .rule{height:1px;background:var(--line);margin:34px 0}
+
+  .sect-label{font-family:var(--mono);font-size:11px;letter-spacing:.28em;text-transform:uppercase;color:var(--ivory-faint);margin:0 0 16px}
+
+  .targets{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--line-soft);border:1px solid var(--line-soft)}
+  .tcard{background:var(--panel);padding:18px 16px}
+  .tcard .k{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ivory-faint)}
+  .tcard .v{font-family:var(--mono);font-size:24px;color:var(--gold);margin-top:10px;line-height:1}
+  .tcard .s{font-size:11px;color:var(--ivory-dim);margin-top:7px}
+
+  .model{display:grid;grid-template-columns:.85fr 1.15fr;gap:1px;background:var(--line-soft);border:1px solid var(--line-soft)}
+  .pane{background:var(--panel);padding:24px 22px}
+  .field{margin-bottom:18px}
+  .field:last-child{margin-bottom:0}
+  .field label{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--ivory-dim);margin-bottom:8px}
+  .field input{width:100%;background:var(--panel-2);border:1px solid var(--line-soft);color:var(--ivory);font-family:var(--mono);font-size:16px;padding:11px 13px;border-radius:0;outline:none;transition:border-color .2s}
+  .field input:focus{border-color:var(--gold-dim)}
+  .hint{font-size:10px;color:var(--ivory-faint);margin-top:6px;line-height:1.4}
+
+  .hero-out{margin-bottom:22px}
+  .hero-out .k{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--ivory-faint)}
+  .hero-out .v{font-family:var(--mono);font-size:clamp(34px,8vw,52px);line-height:1;margin-top:8px;color:var(--ivory);transition:color .25s}
+  .hero-out .v.hit{color:var(--gold)}
+  .hero-out .ref{font-family:var(--mono);font-size:11px;color:var(--ivory-dim);margin-top:9px}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:4px}
+  .out{}
+  .out .k{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ivory-faint)}
+  .out .v{font-family:var(--mono);font-size:21px;margin-top:7px;color:var(--ivory)}
+  .out .v small{font-size:12px;color:var(--ivory-dim)}
+  .out .v.warn{color:var(--warn)}
+
+  .rail{margin-top:22px}
+  .rail .row{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--ivory-faint);margin-bottom:7px}
+  .rail .row b{color:var(--ivory-dim);font-weight:500}
+  .track{height:4px;background:var(--panel-2);position:relative;overflow:hidden}
+  .track .fill{position:absolute;inset:0 auto 0 0;background:var(--gold);width:0;transition:width .4s cubic-bezier(.2,.7,.2,1)}
+  .track.ceil .fill{background:var(--ivory-faint)}
+  .rail + .rail{margin-top:14px}
+
+  /* log */
+  .logbar{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+  .logbar .field{margin:0;flex:1;min-width:96px}
+  .btn{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;background:transparent;color:var(--gold);border:1px solid var(--gold-dim);padding:12px 18px;cursor:pointer;transition:background .2s,color .2s;white-space:nowrap}
+  .btn:hover{background:var(--gold);color:var(--bg)}
+  .btn:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+  .entries{margin-top:22px;display:flex;flex-direction:column;gap:1px;background:var(--line-soft)}
+  .entry{background:var(--panel);display:grid;grid-template-columns:1.2fr 1fr 1fr auto;gap:12px;align-items:center;padding:13px 16px;font-family:var(--mono);font-size:13px}
+  .entry .m{color:var(--ivory)}
+  .entry .c{color:var(--gold)}
+  .entry .n{color:var(--ivory-dim);font-size:12px}
+  .entry .del{background:none;border:none;color:var(--ivory-faint);cursor:pointer;font-family:var(--mono);font-size:14px;padding:2px 6px}
+  .entry .del:hover{color:var(--warn)}
+  .empty{background:var(--panel);padding:22px 16px;color:var(--ivory-faint);font-size:13px;font-family:var(--mono)}
+
+  .spark{display:flex;align-items:flex-end;gap:5px;height:54px;margin-top:18px;padding-top:4px}
+  .spark .b{flex:1;background:var(--gold-dim);min-height:3px;transition:height .4s}
+  .spark .b.last{background:var(--gold)}
+
+  .foot{margin-top:30px;font-size:11px;color:var(--ivory-faint);line-height:1.6;font-family:var(--mono)}
+
+  @media(max-width:720px){
+    .targets{grid-template-columns:1fr 1fr}
+    .model{grid-template-columns:1fr}
+    .entry{grid-template-columns:1fr auto;row-gap:4px}
+    .entry .n{grid-column:1 / -1}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="fade" style="animation-delay:.02s">
+    <div class="eyebrow">FORGE · 1-2-1 Growth Plan</div>
+    <h1>The Book</h1>
+    <p class="lede">9 → 14 → ceiling. Concrete numbers to run outreach against — log where you are, watch the gap close.</p>
+  </header>
+
+  <div class="rule fade" style="animation-delay:.06s"></div>
+
+  <!-- LOCKED TARGETS -->
+  <section class="fade" style="animation-delay:.1s">
+    <p class="sect-label">The targets · locked</p>
+    <div class="targets">
+      <div class="tcard"><div class="k">Target book</div><div class="v">14</div><div class="s">clients · ceiling ~20</div></div>
+      <div class="tcard"><div class="k">Tenure goal</div><div class="v">8<span style="font-size:13px"> mo</span></div><div class="s">up from ~4</div></div>
+      <div class="tcard"><div class="k">Rate floor</div><div class="v">£85</div><div class="s">new clients · £80 blended</div></div>
+      <div class="tcard"><div class="k">New / month</div><div class="v">~1.5</div><div class="s">to hold · +1 to grow</div></div>
+    </div>
+  </section>
+
+  <div class="rule fade" style="animation-delay:.12s"></div>
+
+  <!-- LIVE MODEL -->
+  <section class="fade" style="animation-delay:.16s">
+    <p class="sect-label">Where you are now · live</p>
+    <div class="model">
+      <div class="pane">
+        <div class="field">
+          <label for="clients">Active clients</label>
+          <input id="clients" type="number" inputmode="numeric" min="0" step="1" value="9">
+        </div>
+        <div class="field">
+          <label for="sess">Avg sessions / week / client</label>
+          <input id="sess" type="number" inputmode="decimal" min="0" step="0.1" value="1.2">
+          <div class="hint">11 sessions ÷ 9 clients ≈ 1.2 today</div>
+        </div>
+        <div class="field">
+          <label for="tenure">Avg tenure (months)</label>
+          <input id="tenure" type="number" inputmode="decimal" min="1" step="0.5" value="4">
+          <div class="hint">your 2 anchors don't churn — this is the rest</div>
+        </div>
+        <div class="field">
+          <label for="rate">Blended rate (£ / session)</label>
+          <input id="rate" type="number" inputmode="decimal" min="0" step="0.5" value="72.5">
+        </div>
+        <div class="field">
+          <label for="rent">Monthly rent (£)</label>
+          <input id="rent" type="number" inputmode="numeric" min="0" step="50" value="1000">
+        </div>
+      </div>
+
+      <div class="pane">
+        <div class="hero-out">
+          <div class="k">Contribution / month · after rent</div>
+          <div class="v" id="o-contrib">£0</div>
+          <div class="ref">target £5,580 · ceiling £8,700</div>
+        </div>
+        <div class="grid2">
+          <div class="out"><div class="k">Revenue / month</div><div class="v" id="o-rev">£0</div></div>
+          <div class="out"><div class="k">Sessions / week</div><div class="v" id="o-sess">0</div></div>
+          <div class="out"><div class="k">New clients / mo to hold</div><div class="v" id="o-tread">0</div></div>
+          <div class="out"><div class="k">Annual · after rent</div><div class="v" id="o-ann">£0</div></div>
+        </div>
+
+        <div class="rail" style="margin-top:26px">
+          <div class="row"><span>Toward target</span><b id="r14">0 / 14</b></div>
+          <div class="track"><div class="fill" id="f14"></div></div>
+        </div>
+        <div class="rail">
+          <div class="row"><span>Toward ceiling</span><b id="r20">0 / 20</b></div>
+          <div class="track ceil"><div class="fill" id="f20"></div></div>
+        </div>
+      </div>
+    </div>
+    <p class="hint" style="margin-top:12px">Saves automatically. Past ~28 sessions/week you're into your hours ceiling — that's the signal to ship the app, not take more 1-2-1.</p>
+  </section>
+
+  <div class="rule fade" style="animation-delay:.2s"></div>
+
+  <!-- MONTHLY LOG -->
+  <section class="fade" style="animation-delay:.24s">
+    <p class="sect-label">Monthly check-in</p>
+    <div class="logbar">
+      <div class="field"><label for="l-month">Month</label><input id="l-month" type="month"></div>
+      <div class="field"><label for="l-clients">Clients</label><input id="l-clients" type="number" inputmode="numeric" min="0" step="1" placeholder="—"></div>
+      <div class="field"><label for="l-new">New this mo</label><input id="l-new" type="number" inputmode="numeric" min="0" step="1" placeholder="—"></div>
+      <button class="btn" id="addBtn">Log it</button>
+    </div>
+
+    <div class="spark" id="spark" style="display:none"></div>
+    <div class="entries" id="entries"></div>
+  </section>
+
+  <p class="foot fade" style="animation-delay:.28s">
+    Levers, in order of leverage: 1 · stretch tenure 4→8 mo (doubles client value, halves the treadmill) — 2 · convert 1x→2x and sell blocks — 3 · raise the floor to £85 — 4 · ship FORGE Online to break the hours ceiling.
+  </p>
+
+</div>
+
+<script>
+(function(){
+  var WEEKS = 4.33;
+  var TARGET = 14, CEIL = 20, RENT_TARGET_CONTRIB = 5580, CEIL_CONTRIB = 8700;
+  var hasStore = (typeof window !== 'undefined' && window.storage);
+  var mem = {}; // fallback if storage unavailable
+
+  var ids = ['clients','sess','tenure','rate','rent'];
+  var el = {};
+  ids.forEach(function(i){ el[i] = document.getElementById(i); });
+
+  function gbp(n){
+    if(!isFinite(n)) n = 0;
+    return '£' + Math.round(n).toLocaleString('en-GB');
+  }
+
+  function compute(){
+    var clients = parseFloat(el.clients.value)||0;
+    var sess = parseFloat(el.sess.value)||0;
+    var tenure = parseFloat(el.tenure.value)||0;
+    var rate = parseFloat(el.rate.value)||0;
+    var rent = parseFloat(el.rent.value)||0;
+
+    var weekly = clients * sess;
+    var revenue = weekly * WEEKS * rate;
+    var contrib = revenue - rent;
+    var tread = tenure > 0 ? (clients / tenure) : 0;
+
+    document.getElementById('o-rev').textContent = gbp(revenue);
+    document.getElementById('o-ann').textContent = gbp(contrib*12);
+    document.getElementById('o-tread').textContent = (Math.round(tread*10)/10);
+
+    var sessEl = document.getElementById('o-sess');
+    sessEl.innerHTML = (Math.round(weekly*10)/10);
+    sessEl.className = 'v' + (weekly > 28 ? ' warn' : '');
+
+    var cEl = document.getElementById('o-contrib');
+    cEl.textContent = gbp(contrib);
+    cEl.className = 'v' + (contrib >= RENT_TARGET_CONTRIB ? ' hit' : '');
+
+    var p14 = Math.max(0, Math.min(1, clients/TARGET));
+    var p20 = Math.max(0, Math.min(1, clients/CEIL));
+    document.getElementById('f14').style.width = (p14*100)+'%';
+    document.getElementById('f20').style.width = (p20*100)+'%';
+    document.getElementById('r14').textContent = clients + ' / ' + TARGET;
+    document.getElementById('r20').textContent = clients + ' / ' + CEIL;
+
+    saveInputs();
+  }
+
+  // ---- persistence: inputs ----
+  function inputObj(){
+    var o = {}; ids.forEach(function(i){ o[i] = el[i].value; }); return o;
+  }
+  function saveInputs(){
+    var o = inputObj();
+    if(hasStore){
+      try{ window.storage.set('forge:plan:inputs', JSON.stringify(o), false); }catch(e){}
+    } else { mem.inputs = o; }
+  }
+  async function loadInputs(){
+    var o = null;
+    if(hasStore){
+      try{ var r = await window.storage.get('forge:plan:inputs', false); if(r&&r.value) o = JSON.parse(r.value); }catch(e){ o = null; }
+    } else { o = mem.inputs || null; }
+    if(o){ ids.forEach(function(i){ if(o[i]!==undefined) el[i].value = o[i]; }); }
+  }
+
+  // ---- persistence: log ----
+  var logCache = [];
+  async function loadLog(){
+    if(hasStore){
+      try{ var r = await window.storage.get('forge:plan:log', false); if(r&&r.value) logCache = JSON.parse(r.value); }catch(e){ logCache = []; }
+    } else { logCache = mem.log || []; }
+    if(!Array.isArray(logCache)) logCache = [];
+  }
+  function saveLog(){
+    if(hasStore){ try{ window.storage.set('forge:plan:log', JSON.stringify(logCache), false); }catch(e){} }
+    else { mem.log = logCache; }
+  }
+
+  function fmtMonth(m){
+    if(!m) return '—';
+    var p = m.split('-'); if(p.length<2) return m;
+    var names=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    return names[(parseInt(p[1],10)-1)] + ' ' + p[0];
+  }
+
+  function renderLog(){
+    var box = document.getElementById('entries');
+    var spark = document.getElementById('spark');
+    box.innerHTML='';
+    if(!logCache.length){
+      box.innerHTML = '<div class="empty">No check-ins yet. Log this month to start the trend.</div>';
+      spark.style.display='none';
+      return;
+    }
+    var sorted = logCache.slice().sort(function(a,b){ return (a.month||'').localeCompare(b.month||''); });
+    // sparkline
+    spark.style.display='flex';
+    spark.innerHTML='';
+    var max = Math.max.apply(null, sorted.map(function(e){return e.clients||0;}).concat([TARGET]));
+    sorted.forEach(function(e,i){
+      var b=document.createElement('div');
+      b.className='b'+(i===sorted.length-1?' last':'');
+      b.style.height = Math.max(3, Math.round(((e.clients||0)/max)*54)) + 'px';
+      b.title = fmtMonth(e.month)+': '+(e.clients||0)+' clients';
+      spark.appendChild(b);
+    });
+    // newest-first list
+    var rev = sorted.slice().reverse();
+    rev.forEach(function(e){
+      var row=document.createElement('div'); row.className='entry';
+      row.innerHTML =
+        '<span class="m">'+fmtMonth(e.month)+'</span>'+
+        '<span class="c">'+(e.clients!=null?e.clients+' clients':'—')+'</span>'+
+        '<span class="n">'+(e.newCount!=null?('+'+e.newCount+' new'):'')+'</span>'+
+        '<button class="del" aria-label="Delete" data-id="'+e.id+'">✕</button>';
+      box.appendChild(row);
+    });
+    Array.prototype.forEach.call(box.querySelectorAll('.del'), function(btn){
+      btn.addEventListener('click', function(){
+        var id = btn.getAttribute('data-id');
+        logCache = logCache.filter(function(x){ return String(x.id)!==String(id); });
+        saveLog(); renderLog();
+      });
+    });
+  }
+
+  function addEntry(){
+    var m = document.getElementById('l-month').value;
+    var c = document.getElementById('l-clients').value;
+    var n = document.getElementById('l-new').value;
+    if(!m && c===''){ return; }
+    // replace if same month exists
+    logCache = logCache.filter(function(x){ return x.month !== m; });
+    logCache.push({
+      id: Date.now(),
+      month: m,
+      clients: c===''?null:parseInt(c,10),
+      newCount: n===''?null:parseInt(n,10)
+    });
+    saveLog(); renderLog();
+    document.getElementById('l-clients').value='';
+    document.getElementById('l-new').value='';
+  }
+
+  // wire up
+  ids.forEach(function(i){ el[i].addEventListener('input', compute); });
+  document.getElementById('addBtn').addEventListener('click', addEntry);
+
+  // default month = current
+  (function(){
+    var d=new Date(); var mm=(d.getMonth()+1).toString().padStart(2,'0');
+    document.getElementById('l-month').value = d.getFullYear()+'-'+mm;
+  })();
+
+  // init
+  (async function(){
+    await loadInputs();
+    await loadLog();
+    compute();
+    renderLog();
+  })();
+})();
+</script>
+</body>
+</html>
