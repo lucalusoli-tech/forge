@@ -6858,17 +6858,10 @@ async function loadProgrammes() {
   const userTier  = currentUser?.tier;
   const isAdmin   = userTier === 'admin';
   const isCoached = userTier === 'coached' || isAdmin;
-  const isPt      = userTier === 'pt';
 
   // AI generator entry — FORGE+ (coached) and admin only
   const aiLink = document.getElementById('ai-programme-link');
   if(aiLink) aiLink.style.display = isCoached ? 'block' : 'none';
-
-  // 1-2-1 clients already have a coach — hide the "request a coach" enquiry for them
-  const enquiry    = document.getElementById('coaching-enquiry');
-  const enquiryDiv = document.getElementById('coaching-enquiry-divider');
-  if(enquiry)    enquiry.style.display    = isPt ? 'none' : 'block';
-  if(enquiryDiv) enquiryDiv.style.display = isPt ? 'none' : 'block';
 
   // Render the saved / assigned blocks (the list element now lives in this tab)
   renderBuilderSaved();
