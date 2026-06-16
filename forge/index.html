@@ -556,10 +556,6 @@
   .home-empty-cta { background: var(--accent-glow); border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 3px; text-transform: uppercase; padding: 14px 28px; cursor: pointer; }
   .home-empty-cta:active { background: rgba(201,169,110,0.2); }
 
-  /* Seed data btn */
-  .seed-btn { display: block; margin: 0 20px 16px; padding: 10px; background: transparent; border: 1px dashed var(--border); color: var(--text-dim); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; width: calc(100% - 40px); }
-  .seed-btn:active { border-color: var(--accent-dim); color: var(--accent); }
-
   .toast { position: fixed; bottom: calc(var(--nav-h) + 16px + var(--safe-bottom)); left: 50%; transform: translateX(-50%) translateY(20px); background: var(--card); border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; padding: 10px 18px; z-index: 9999; opacity: 0; transition: all 0.25s; pointer-events: none; white-space: nowrap; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
@@ -610,7 +606,7 @@
   /* ── UPGRADE MODAL ── */
   .upgrade-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.92); z-index: 500; display: flex; align-items: flex-end; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
   .upgrade-overlay.open { opacity: 1; pointer-events: all; }
-  .upgrade-sheet { width: 100%; background: var(--surface); border-top: 1px solid var(--border); padding: 32px 24px; padding-bottom: calc(32px + env(safe-area-inset-bottom,0px)); transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.32,0.72,0,1); }
+  .upgrade-sheet { width: 100%; background: var(--surface); border-top: 1px solid var(--border); padding: 32px 24px; padding-bottom: calc(32px + env(safe-area-inset-bottom,0px)); transform: translateY(100%); transition: transform 0.35s cubic-bezier(0.32,0.72,0,1); max-height: 90vh; max-height: 90dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; }
   .upgrade-overlay.open .upgrade-sheet { transform: translateY(0); }
   .upgrade-title { font-family: 'DM Mono', monospace; font-size: 22px; font-weight: 500; letter-spacing: 1.5px; line-height: 1.15; margin-bottom: 4px; }
   .upgrade-sub { font-size: 10px; letter-spacing: 2px; color: var(--text-muted); margin-bottom: 24px; }
@@ -1335,11 +1331,6 @@
           <button class="save-btn" style="background:transparent;border-color:var(--border);color:var(--text-muted)" onclick="saveBlockOnly()">Save Only</button>
         </div>
 
-        <!-- Saved blocks -->
-        <div class="saved-blocks-section">
-          <div class="section-label" style="padding:0 0 10px;border-bottom:1px solid var(--border);margin-bottom:12px">SAVED BLOCKS</div>
-          <div id="builder-saved-list"></div>
-        </div>
         <div style="height:20px"></div>
       </div>
 
@@ -1366,42 +1357,23 @@
           </div>
         </div>
 
-        <!-- PROGRAMMES FEED -->
+        <!-- TRAINING BLOCKS -->
         <div class="coaching-hero">
-          <div class="coaching-eyebrow">Monthly Drops</div>
+          <div class="coaching-eyebrow">Your Training</div>
           <div class="coaching-title">PROGRAMMES</div>
-          <div class="coaching-desc">Coached training blocks — built by a certified PT, dropped every month. Load directly into your app and train.</div>
+          <div class="coaching-desc">Every block you've built or been assigned. Set one as current to start training.</div>
         </div>
 
-        <!-- ADMIN: Publish panel (only visible to admin) -->
-        <div id="admin-publish-panel" style="display:none;margin:20px;border:1px solid var(--accent-dim);padding:20px;background:var(--surface)">
-          <div style="font-size:8px;letter-spacing:4px;color:var(--accent);margin-bottom:16px">ADMIN — PUBLISH PROGRAMME</div>
-          <input class="coaching-input" type="text" id="prog-title" placeholder="Programme title e.g. FORGE BLOCK 01">
-          <input class="coaching-input" type="text" id="prog-month" placeholder="Month e.g. April 2026">
-          <textarea class="coaching-textarea" id="prog-desc" placeholder="Short description — who it's for, what it focuses on..."></textarea>
-          <div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:8px;margin-top:4px">AUDIENCE</div>
-          <div style="display:flex;gap:8px;margin-bottom:14px" id="prog-type-chips">
-            <button class="day-ex-chip active" id="prog-type-coached" onclick="selectProgType('coached',this)" style="flex:1;text-align:center">✦ COACHED — All coached users</button>
-            <button class="day-ex-chip" id="prog-type-personal" onclick="selectProgType('personal',this)" style="flex:1;text-align:center">◉ PERSONAL — 1-2-1 only</button>
-          </div>
-          <input type="hidden" id="prog-type" value="coached">
-          <div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:8px">SELECT BLOCK TO PUBLISH</div>
-          <select class="coaching-input" id="prog-block-select" style="-webkit-appearance:none;color:var(--text-muted);margin-bottom:10px">
-            <option value="" disabled selected>Select a saved block...</option>
-          </select>
-          <button class="coaching-submit" onclick="publishProgramme()" style="margin-bottom:0">PUBLISH SELECTED BLOCK AS PROGRAMME →</button>
-        </div>
-
-        <!-- PROGRAMMES LIST -->
-        <div id="programmes-list" style="padding:0 20px 20px">
-          <div style="padding:32px 0;text-align:center;font-size:9px;letter-spacing:3px;color:var(--text-dim)" id="programmes-empty">Loading programmes...</div>
+        <!-- SAVED BLOCKS (moved here from the Builder tab) -->
+        <div class="saved-blocks-section" id="programmes-blocks-section">
+          <div id="builder-saved-list"></div>
         </div>
 
         <!-- DIVIDER -->
-        <div style="border-top:1px solid var(--border);margin:0 20px"></div>
+        <div id="coaching-enquiry-divider" style="border-top:1px solid var(--border);margin:0 20px"></div>
 
         <!-- COACHING ENQUIRY -->
-        <div class="coaching-form">
+        <div class="coaching-form" id="coaching-enquiry">
           <div class="coaching-eyebrow" style="padding-top:20px">1-2-1 Personal Training</div>
           <div class="coaching-title" style="font-size:32px;margin-bottom:8px">TRAIN WITH<br>A COACH</div>
           <div class="coaching-desc" style="margin-bottom:20px">Fully personalised programming. Built around your body, schedule, and goals.</div>
@@ -1559,6 +1531,9 @@ const EXERCISES = [
   {id:'squat-jump',name:'Squat Jump',tags:['legs'],sets:'3×8',target:'Quads, Calves, CNS',intensity:'Explosive',level:'Beginner',cue:'Triple extension, land soft, reset fully',video:'https://www.youtube.com/results?search_query=squat+jump+tutorial',desc:'Plyometric power. Maximise height every rep.'},
   {id:'lateral-raises',name:'Lateral Raises',tags:['push'],sets:'3×8-15',target:'Lateral Deltoid',intensity:'Light',level:'Beginner',cue:'Lead with elbow, slight forward lean',video:'https://www.youtube.com/results?search_query=lateral+raises+form',desc:'Shoulder width isolation. Full range, control at top.'},
   {id:'bicep-curl',name:'Bicep Curl',tags:['pull'],sets:'3×8-15',target:'Biceps Brachii',intensity:'Light',level:'Beginner',cue:'Full supination at top, no swing',video:'https://www.youtube.com/results?search_query=bicep+curl+form',desc:'Direct bicep work after vertical pulling.'},
+  {id:'zottman-curl',name:'Zottman Curl',tags:['pull'],sets:'3×8-12',target:'Biceps, Forearms',intensity:'Light',level:'Beginner',cue:'Supinate on the way up, rotate to pronated at the top, lower under control',video:'https://www.youtube.com/results?search_query=zottman+curl+form',desc:'Curl up supinated, lower pronated — trains the biceps and forearm extensors in a single rep.'},
+  {id:'reverse-curl',name:'Reverse Bicep Curl',tags:['pull'],sets:'3×10-15',target:'Brachioradialis, Forearms, Biceps',intensity:'Light',level:'Beginner',cue:'Pronated grip, no swing, squeeze at the top',video:'https://www.youtube.com/results?search_query=reverse+curl+form',desc:'Pronated curl emphasising the brachioradialis and forearms. Builds elbow stability for pulling.'},
+  {id:'crunch-machine',name:'Crunch Machine',tags:['core'],sets:'3×12-15',target:'Core, Obliques',intensity:'Moderate',level:'Beginner',cue:'Round the spine, exhale into the crunch, control the return',video:'https://www.youtube.com/results?search_query=machine+crunch+form',desc:'Loaded spinal flexion for direct rectus abdominis work. Progress the resistance over time.'},
   {id:'oah',name:'One Arm Handstand',tags:['skill','push','calisthenics'],sets:'Practice',target:'Full Body, Wrists, Proprioception',intensity:'Max skill',level:'Elite',cue:'Shift weight gradually, finger pressure control',video:'https://www.youtube.com/results?search_query=one+arm+handstand+tutorial',desc:'The summit. Reserve for peak conditions.'},
 
   // ── BWF HORIZONTAL PULL — BACK ────────────────────────────────
@@ -2042,10 +2017,6 @@ document.addEventListener('DOMContentLoaded', () => {
   renderArchive();
   populateAddSelect();
   initFixedSectionPickers();
-  if(Object.keys(sessionLog).length > 0) {
-    const btn = document.getElementById('seed-btn');
-    if(btn) btn.style.display = 'none';
-  }
 
   // Auth gate — let Supabase session check decide what to show
   const isGuest = localStorage.getItem('fw_guest') === '1';
@@ -2114,6 +2085,11 @@ function applyWeek(w) {
     renderLogExercises(day.exercises);
     const notesEl = document.getElementById('session-notes');
     if (notesEl) notesEl.value = sessionLog[`${currentDayId}_notes_v${currentWeek}`] || '';
+  }
+  // The home day-card "✓ LOGGED" chips are week-specific — recompute them for the new week,
+  // otherwise the chip stays frozen on whatever week was last rendered and looks logged on all weeks.
+  if (document.getElementById('page-home')?.classList.contains('active')) {
+    renderHomeDays();
   }
 }
 
@@ -2223,6 +2199,7 @@ function navigate(page, push=true) {
   const isLog = page==='log';
   document.getElementById('back-btn').classList.toggle('visible', isLog);
   document.getElementById('topbar-logo').style.display = isLog ? 'none' : 'block';
+  if (page==='home') renderHomeDays();
   if (page==='progress') { renderProgress(); try{ renderStatsOverview(); }catch(err){ console.warn('overview', err); } }
   if (page==='coaching') {
     loadProgrammes();
@@ -2865,7 +2842,7 @@ async function executeArchive() {
     currentBlock = { name:'', methods:[], weeks:4, warmup:[], skill:[], days:[] };
   } else if (customWorkouts.length > 0) {
     const next = customWorkouts[0];
-    currentBlock = { name:next.name, methods:next.methods||[], days:next.days||[] };
+    currentBlock = { name:next.name, methods:next.methods||[], weeks:next.weeks||4, warmup:next.warmup||[], skill:next.skill||[], days:next.days||[] };
   } else {
     currentBlock = { name:'NEW BLOCK', methods:[], days:[] };
   }
@@ -4514,15 +4491,16 @@ function saveBlockOnly() {
   showToast('Block saved ✓');
 }
 
-async function saveAndStart() {
-  const name=document.getElementById('custom-name').value.trim();
-  if(!name){showToast('Add a block name');return;}
-  if(!builderDays.length){showToast('Add at least 1 day');return;}
-  const days=getBuiltDays();
-
-  // Archive the outgoing block (with its log) before replacing it — mirrors the AI path.
-  // Session-log keys are day+exercise+week (not block-scoped), so a fresh block that reuses
-  // day_1/day_2/day_3 would otherwise inherit the previous block's logged numbers.
+// ─── BLOCK ACTIVATION — SINGLE SOURCE OF TRUTH ─────────────────
+// EVERY path that makes a block "current" MUST call this. The live session log is keyed
+// day+exercise+week (NOT block-scoped) and day ids repeat across blocks (day_1, day_2…), so a
+// new block that reuses those ids would otherwise inherit the previous block's logged kg/reps
+// AND its "logged" day chips. Funnelling all switches through one function is what prevents
+// that from ever recurring: it archives the outgoing block (with its log snapshot), wipes the
+// live log + week starts, and force-syncs the empty log so loadFromCloud can't re-hydrate it.
+// DO NOT clear the log inline anywhere else — add new switch paths here.
+async function activateBlock(newBlock){
+  // Archive the outgoing block (with its log) before replacing it
   if (currentBlock.name && currentBlock.days && currentBlock.days.length > 0) {
     archivedBlocks.unshift({
       ...currentBlock,
@@ -4533,17 +4511,32 @@ async function saveAndStart() {
     await syncBlocksToCloud(); // persist the archived log before clearing
   }
 
-  currentBlock={name:name.toUpperCase(),methods:[...builderMethods],weeks:builderWeeks,warmup:[...builderWarmup],skill:[...builderSkill],days};
-  currentWeek=1;
-  // Fresh block → clear the live session log so old values don't surface
-  sessionLog={};
-  weekStarts={};
-  localStorage.setItem('fw_week','1');
+  currentBlock = {
+    name: newBlock.name || 'My Block',
+    methods: newBlock.methods || [],
+    weeks: newBlock.weeks || 4,
+    warmup: newBlock.warmup || [],
+    skill: newBlock.skill || [],
+    days: newBlock.days || []
+  };
+  currentWeek = 1;
+  sessionLog = {};
+  weekStarts = {};
+  localStorage.setItem('fw_block', JSON.stringify(currentBlock));
+  localStorage.setItem('fw_week', '1');
   localStorage.setItem('fw_log', JSON.stringify({}));
   localStorage.setItem('fw_week_starts', JSON.stringify({}));
+  await syncLogsToCloud(true); // force the empty log up — stops loadFromCloud re-hydrating stale data
   saveCurrentBlock();
+}
+
+async function saveAndStart() {
+  const name=document.getElementById('custom-name').value.trim();
+  if(!name){showToast('Add a block name');return;}
+  if(!builderDays.length){showToast('Add at least 1 day');return;}
+  const days=getBuiltDays();
+  await activateBlock({name:name.toUpperCase(),methods:[...builderMethods],weeks:builderWeeks,warmup:[...builderWarmup],skill:[...builderSkill],days});
   saveBlockOnly();
-  await syncLogsToCloud(true); // force — legitimate clear after archive
   updateStats();
   renderHomeDays();
   renderHomeFixedSections();
@@ -4640,16 +4633,17 @@ function editSavedBlock(id){
   renderFixedPicker('warmup');
   renderFixedPicker('skill');
   showToast('Block loaded for editing');
-  // Switch to Builder tab
-  document.querySelector('[onclick="showBuildTab(\'builder\')"]')?.click();
+  // Jump to the Builder (the saved-block list lives on the Programmes tab now)
+  switchBuildTab('build');
+  navigate('builder');
 }
 
-function setAsCurrentBlock(id){
+async function setAsCurrentBlock(id){
   const wk=customWorkouts.find(w=>w.id===id); if(!wk) return;
-  currentBlock={name:wk.name,methods:wk.methods||[],weeks:wk.weeks||4,warmup:wk.warmup||[],skill:wk.skill||[],days:wk.days||[]};
-  currentWeek=1;
-  localStorage.setItem('fw_week','1');
-  saveCurrentBlock(); updateStats(); renderHomeDays();
+  await activateBlock(wk);
+  updateStats(); renderHomeDays();
+  if(typeof renderHomeFixedSections === 'function') renderHomeFixedSections();
+  renderBuilderSaved();
   showToast('Block set ✓');
   setTimeout(()=>navigate('home'),350);
 }
@@ -5516,37 +5510,7 @@ function renderAiResult(block) {
 async function aiLoadBlock() {
   const block = window._aiGeneratedBlock;
   if (!block) { showToast('No programme to load'); return; }
-
-  // Archive current block first
-  if (currentBlock.name && currentBlock.days && currentBlock.days.length > 0) {
-    archivedBlocks.unshift({
-      ...currentBlock,
-      archivedAt: new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
-      sessionLog: {...sessionLog},
-    });
-    localStorage.setItem('fw_archive', JSON.stringify(archivedBlocks));
-    // Sync the archive (with session log saved inside) before clearing
-    await syncBlocksToCloud();
-  }
-
-  currentBlock = {
-    name: block.name || 'AI Programme',
-    methods: block.methods || [],
-    weeks: block.weeks || 4,
-    warmup: block.warmup || [],
-    skill: block.skill || [],
-    days: block.days || []
-  };
-  currentWeek = 1;
-  // Clear session log for the new block
-  sessionLog = {};
-  weekStarts = {};
-  localStorage.setItem('fw_block', JSON.stringify(currentBlock));
-  localStorage.setItem('fw_week', '1');
-  localStorage.setItem('fw_log', JSON.stringify({}));
-  localStorage.setItem('fw_week_starts', JSON.stringify({}));
-  await syncLogsToCloud(true); // force — legitimate clear after archive
-  saveCurrentBlock();
+  await activateBlock(block);
   updateStats();
   renderHomeDays();
   renderBuilderDays();
@@ -6147,46 +6111,6 @@ function weekBack() {
   showToast('← W'+currentWeek);
 }
 
-// ─── SEED DEMO DATA ────────────────────────────────────────────
-function seedDemoData() {
-  const total = currentBlock.weeks || 4;
-  const days = currentBlock.days || [];
-  if (!days.length) { showToast('No block to seed'); return; }
-
-  days.forEach(day => {
-    day.exercises.forEach(ex => {
-      // Base weights per exercise
-      const bases = {
-        'muscle-up':0,'weighted-dips':20,'chin-ups':10,'pppu':0,'adv-pl-rows':0,
-        'l-sit':0,'hollow-body':0,'front-lever':0,'squat':60,'rdl':50,
-        'bar-dips':0,'leg-raises':0,'squat-jump':0,'lateral-raises':8,'bicep-curl':12,'oah':0
-      };
-      const base = bases[ex.id] ?? 0;
-      for(let w=1; w<=total; w++) {
-        const key = `${day.id}_${ex.id}_v${w}`;
-        const entry = {};
-        const progression = w * (2 + Math.random()*2);
-        for(let s=1; s<=ex.sets; s++) {
-          if(base > 0) {
-            entry[`s${s}_w`] = (base + progression - (s-1)*2).toFixed(1);
-            entry[`s${s}_r`] = String(Math.round(6 + Math.random()*4));
-          } else {
-            entry[`s${s}_r`] = String(Math.round(4 + w + Math.random()*2));
-          }
-        }
-        sessionLog[key] = entry;
-      }
-    });
-  });
-
-  localStorage.setItem('fw_log', JSON.stringify(sessionLog));
-  // Hide seed button after seeding
-  const btn = document.getElementById('seed-btn');
-  if(btn) btn.style.display = 'none';
-  renderProgress();
-  showToast('Demo data seeded ✓');
-}
-
 // ─── UTILS ─────────────────────────────────────────────────────
 function showToast(msg){
   const t=document.getElementById('toast');
@@ -6720,9 +6644,9 @@ function updateUserBar() {
 
     if(tier === 'premium' || tier === 'coached' || tier === 'admin' || tier === 'pt') {
       // Paid user — show tier badge, no upgrade prompt
-      // Show/hide Programmes tab based on tier
+      // Programmes tab now holds the saved/assigned blocks — visible to all tiers, incl. 1-2-1 (pt)
       const progNav = document.getElementById('nav-coaching');
-      if(progNav) progNav.style.display = (tier === 'pt') ? 'none' : 'flex';
+      if(progNav) progNav.style.display = 'flex';
       
       if(tier === 'admin') {
         upgradeBtn.textContent = '⬡ ADMIN';
@@ -6872,162 +6796,20 @@ function checkBlockLimit() {
 
 // ─── COACHING ──────────────────────────────────────────────────
 // ─── PROGRAMMES ────────────────────────────────────────────────
+// This tab lists the training blocks built in / assigned to this account.
+// Legacy "Monthly Drops" publish panel + DB programmes feed removed 15 Jun —
+// programmes are now assigned to clients from the coach app, not published here.
 async function loadProgrammes() {
-  const list = document.getElementById('programmes-list');
-  const empty = document.getElementById('programmes-empty');
-  if(!list) return;
-
-  const userTier = currentUser?.tier;
+  const userTier  = currentUser?.tier;
   const isAdmin   = userTier === 'admin';
   const isCoached = userTier === 'coached' || isAdmin;
 
-  // Show admin publish panel only to admin
-  if(isAdmin) {
-    const panel = document.getElementById('admin-publish-panel');
-    if(panel) {
-      panel.style.display = 'block';
-      populatePublishBlockSelector();
-    }
-  }
+  // AI generator entry — FORGE+ (coached) and admin only
+  const aiLink = document.getElementById('ai-programme-link');
+  if(aiLink) aiLink.style.display = isCoached ? 'block' : 'none';
 
-  // Show AI programme link for FORGE+ users (coached + admin)
-  if(isCoached) {
-    const aiLink = document.getElementById('ai-programme-link');
-    if(aiLink) aiLink.style.display = 'block';
-  }
-
-  // Gate — trial and premium users see a locked state, not the programmes
-  if(!isCoached) {
-    if(empty) empty.style.display = 'none';
-    list.innerHTML = `
-      <div style="border:1px solid var(--border);background:var(--card);margin-bottom:12px;padding:32px 20px;text-align:center">
-        <div style="font-size:28px;margin-bottom:16px">✦</div>
-        <div style="font-family:'DM Mono',monospace;font-size:22px;letter-spacing:3px;margin-bottom:8px">FORGE+</div>
-        <div style="font-size:10px;letter-spacing:1px;color:var(--text-muted);line-height:1.8;margin-bottom:20px">New training programme every month — built by a certified L3 PT and loaded straight into your app. Plus AI-generated blocks on demand.</div>
-        <button onclick="openUpgrade()" style="width:100%;padding:12px;background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer">UPGRADE TO FORGE+ →</button>
-      </div>`;
-    return;
-  }
-
-  const { data: programmes, error } = await supa
-    .from('programmes')
-    .select('*')
-    .order('published_at', { ascending: false });
-
-  if(error || !programmes?.length) {
-    if(empty) empty.textContent = 'No programmes published yet. Check back soon.';
-    return;
-  }
-
-  if(empty) empty.style.display = 'none';
-
-  list.innerHTML = programmes.map(p => `
-    <div style="border:1px solid var(--border);background:var(--card);margin-bottom:12px;padding:20px">
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
-        <div style="font-size:8px;letter-spacing:3px;color:var(--text);opacity:0.6">${p.month||''}</div>
-        ${isAdmin ? `<div style="font-size:8px;letter-spacing:2px;text-transform:uppercase;padding:2px 8px;border:1px solid ${p.type==='personal'?'var(--accent-dim)':'var(--border)'};color:${p.type==='personal'?'var(--accent)':'var(--text-dim)'}">${p.type||'coached'}</div>` : ''}
-      </div>
-      <div style="font-family:'DM Mono',monospace;font-size:24px;letter-spacing:3px;color:var(--text);margin-bottom:8px">${p.title}</div>
-      <div style="font-size:10px;letter-spacing:1px;color:var(--text-muted);line-height:1.8;margin-bottom:16px">${p.description||''}</div>
-      <button onclick="loadProgrammeAsBlock('${p.id}')" style="width:100%;padding:12px;background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent);font-family:'DM Mono',monospace;font-size:10px;letter-spacing:3px;text-transform:uppercase;cursor:pointer">LOAD INTO APP →</button>
-      ${isAdmin ? `
-        <button onclick="deleteProgramme('${p.id}')" style="width:100%;margin-top:8px;padding:10px;background:none;border:1px solid var(--border);color:var(--text-dim);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:2px;text-transform:uppercase;cursor:pointer">✕ DELETE</button>
-      ` : ''}
-    </div>
-  `).join('');
-}
-
-function populatePublishBlockSelector() {
-  const sel = document.getElementById('prog-block-select');
-  if(!sel) return;
-  sel.innerHTML = '<option value="" disabled selected>Select a saved block...</option>';
-  customWorkouts.forEach(w => {
-    const opt = document.createElement('option');
-    opt.value = w.id;
-    opt.textContent = w.name + (w.days?.length ? '  ·  ' + w.days.length + ' days' : '');
-    sel.appendChild(opt);
-  });
-  if(!customWorkouts.length) {
-    const opt = document.createElement('option');
-    opt.disabled = true;
-    opt.textContent = 'No saved blocks — save a block in Builder first';
-    sel.appendChild(opt);
-  }
-}
-
-function selectProgType(type, btn) {
-  document.getElementById('prog-type').value = type;
-  document.querySelectorAll('#prog-type-chips .day-ex-chip').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-}
-
-async function publishProgramme() {
-  const title   = document.getElementById('prog-title').value.trim();
-  const month   = document.getElementById('prog-month').value.trim();
-  const desc    = document.getElementById('prog-desc').value.trim();
-  const blockId = document.getElementById('prog-block-select').value;
-  const type    = document.getElementById('prog-type').value || 'coached';
-  if(!title || !month) { showToast('Title and month required'); return; }
-  if(!blockId) { showToast('Select a block to publish'); return; }
-
-  // Resolve the selected block data
-  const found = customWorkouts.find(w => w.id === blockId);
-  if(!found) { showToast('Block not found'); return; }
-  const blockData = found;
-
-  const { data, error } = await supa.from('programmes').insert({
-    title,
-    month,
-    description: desc,
-    type,
-    data: { currentBlock: blockData },
-    created_by: currentUser.id
-  }).select().single();
-  if(error) { showToast('Publish failed: ' + error.message); return; }
-  showToast('Programme published ✦');
-  document.getElementById('prog-title').value = '';
-  document.getElementById('prog-month').value = '';
-  document.getElementById('prog-desc').value = '';
-  document.getElementById('prog-block-select').selectedIndex = 0;
-  document.getElementById('prog-type').value = 'coached';
-  document.querySelectorAll('#prog-type-chips .day-ex-chip').forEach(b => b.classList.remove('active'));
-  document.getElementById('prog-type-coached').classList.add('active');
-  loadProgrammes();
-}
-
-async function deleteProgramme(progId) {
-  if(!confirm('Delete this programme? This cannot be undone.')) return;
-  const { error } = await supa.from('programmes').delete().eq('id', progId);
-  if(error) { showToast('Delete failed: ' + error.message); return; }
-  // Also remove from builder saved blocks if it was loaded there
-  customWorkouts = customWorkouts.filter(w => w.id !== 'prog_' + progId);
-  localStorage.setItem('fw_customs', JSON.stringify(customWorkouts));
-  syncBlocksToCloud();
-  showToast('Programme deleted');
+  // Render the saved / assigned blocks (the list element now lives in this tab)
   renderBuilderSaved();
-  loadProgrammes();
-}
-
-async function loadProgrammeAsBlock(progId) {
-  const { data, error } = await supa.from('programmes').select('*').eq('id', progId).single();
-  if(error || !data) { showToast('Failed to load programme'); return; }
-  const block = data.data?.currentBlock;
-  if(!block) { showToast('No block data found'); return; }
-  // Check if already loaded
-  if(customWorkouts.find(w => w.id === 'prog_' + progId)) {
-    showToast('Already in your Builder');
-    setTimeout(() => navigate('builder'), 600);
-    return;
-  }
-  const newBlock = { ...block, id: 'prog_' + progId, name: data.title };
-  if(!newBlock.warmup) newBlock.warmup = [];
-  if(!newBlock.skill)  newBlock.skill  = [];
-  customWorkouts.unshift(newBlock);
-  localStorage.setItem('fw_customs', JSON.stringify(customWorkouts));
-  syncBlocksToCloud();
-  renderBuilderSaved();
-  showToast('Programme added to Builder ✦');
-  setTimeout(() => navigate('builder'), 800);
 }
 
 async function submitCoachingRequest() {
