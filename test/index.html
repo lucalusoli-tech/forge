@@ -2086,6 +2086,11 @@ function applyWeek(w) {
     const notesEl = document.getElementById('session-notes');
     if (notesEl) notesEl.value = sessionLog[`${currentDayId}_notes_v${currentWeek}`] || '';
   }
+  // The home day-card "✓ LOGGED" chips are week-specific — recompute them for the new week,
+  // otherwise the chip stays frozen on whatever week was last rendered and looks logged on all weeks.
+  if (document.getElementById('page-home')?.classList.contains('active')) {
+    renderHomeDays();
+  }
 }
 
 function cycleWeek() {
@@ -2194,6 +2199,7 @@ function navigate(page, push=true) {
   const isLog = page==='log';
   document.getElementById('back-btn').classList.toggle('visible', isLog);
   document.getElementById('topbar-logo').style.display = isLog ? 'none' : 'block';
+  if (page==='home') renderHomeDays();
   if (page==='progress') { renderProgress(); try{ renderStatsOverview(); }catch(err){ console.warn('overview', err); } }
   if (page==='coaching') {
     loadProgrammes();
