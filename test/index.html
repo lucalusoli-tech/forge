@@ -4616,12 +4616,35 @@ function editSavedBlock(id){
   navigate('builder');
 }
 
-function setAsCurrentBlock(id){
+async function setAsCurrentBlock(id){
   const wk=customWorkouts.find(w=>w.id===id); if(!wk) return;
+
+  // Archive the outgoing block (with its log) before replacing it — mirrors saveAndStart / aiLoadBlock.
+  // Session-log keys are day+exercise+week (NOT block-scoped) and day ids repeat across blocks, so
+  // without this a freshly-assigned block inherits the previous block's logged kg/reps AND its
+  // "logged" day chips. This is the path a client uses to activate a coach-assigned programme.
+  if (currentBlock.name && currentBlock.days && currentBlock.days.length > 0) {
+    archivedBlocks.unshift({
+      ...currentBlock,
+      archivedAt: new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}),
+      sessionLog: {...sessionLog},
+    });
+    localStorage.setItem('fw_archive', JSON.stringify(archivedBlocks));
+    await syncBlocksToCloud(); // persist the archived log before clearing
+  }
+
   currentBlock={name:wk.name,methods:wk.methods||[],weeks:wk.weeks||4,warmup:wk.warmup||[],skill:wk.skill||[],days:wk.days||[]};
   currentWeek=1;
+  // Fresh block → wipe the live session log + week starts so old values don't surface
+  sessionLog={};
+  weekStarts={};
   localStorage.setItem('fw_week','1');
+  localStorage.setItem('fw_log', JSON.stringify({}));
+  localStorage.setItem('fw_week_starts', JSON.stringify({}));
+  await syncLogsToCloud(true); // force — legitimate clear after archive (stops loadFromCloud re-hydrating stale log)
   saveCurrentBlock(); updateStats(); renderHomeDays();
+  if(typeof renderHomeFixedSections === 'function') renderHomeFixedSections();
+  renderBuilderSaved();
   showToast('Block set ✓');
   setTimeout(()=>navigate('home'),350);
 }
