@@ -6924,11 +6924,10 @@ async function acceptAssignedBlock(assignmentId) {
         .update({ status: 'accepted', accepted_at: new Date().toISOString() })
         .eq('id', assignmentId);
 
-      // Set as current block and go to home
-      currentBlock = { name: newBlock.name, methods: newBlock.methods || [], weeks: newBlock.weeks || 4, warmup: newBlock.warmup || [], skill: newBlock.skill || [], days: newBlock.days || [] };
-      currentWeek = 1;
-      localStorage.setItem('fw_week', '1');
-      saveCurrentBlock();
+      // Activate the assigned block — route through activateBlock so the previous
+      // programme's session log is archived + cleared. Without this, a coach-assigned
+      // block inherits the client's old logged kg/reps and "logged" day chips.
+      await activateBlock(newBlock);
       updateStats();
       renderHomeDays();
 
