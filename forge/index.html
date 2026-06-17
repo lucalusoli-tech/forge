@@ -6902,9 +6902,14 @@ async function acceptAssignedBlock(assignmentId) {
       const newId = 'assigned_' + assignmentId;
       // Check if already added (prevent duplicates)
       if(customWorkouts.some(w => w.id === newId)) {
-        console.log('Block already exists, skipping');
+        // Already accepted on a previous session — clear the pending flag so the notice
+        // stops re-appearing on every launch. Do NOT re-activate: the client may be mid-way
+        // through this block and activating would archive + wipe their live log.
+        await supa.from('assigned_blocks')
+          .update({ status: 'accepted', accepted_at: new Date().toISOString() })
+          .eq('id', assignmentId);
         dismissAssignedNotice();
-        showToast('Block already in Builder');
+        showToast('Block already in your Programmes');
         return;
       }
       const newBlock = { ...block, id: newId, name: row.block_name };
