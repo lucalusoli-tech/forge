@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FORGE — Free Movement Session</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0a0a;
+    --bg-1: #111111;
+    --bg-2: #181818;
+    --gold: #c9a96e;
+    --gold-dim: rgba(201,169,110,0.15);
+    --gold-border: rgba(201,169,110,0.25);
+    --ivory: #e8e2d9;
+    --muted: #6b6560;
+    --body: Inter, sans-serif;
+    --mono: 'DM Mono', monospace;
+  }
+
+  html { background: var(--bg); color: var(--ivory); font-family: var(--body); min-height: 100vh; }
+
+  body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 0 1.25rem 3rem;
+    background:
+      radial-gradient(ellipse 60% 40% at 50% 0%, rgba(201,169,110,0.07) 0%, transparent 70%),
+      var(--bg);
+  }
+
+  .grain {
+    position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    background-size: 200px 200px;
+  }
+
+  .wrap { position: relative; z-index: 1; width: 100%; max-width: 420px; }
+
+  header {
+    padding: 2.5rem 0 2rem;
+    text-align: center;
+  }
+
+  .wordmark {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.25em;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 2rem;
+  }
+
+  .hero-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 0.75rem;
+  }
+
+  h1 {
+    font-size: clamp(28px, 8vw, 38px);
+    font-weight: 300;
+    line-height: 1.15;
+    color: var(--ivory);
+    margin-bottom: 1rem;
+    letter-spacing: -0.02em;
+  }
+
+  h1 em {
+    font-style: normal;
+    color: var(--gold);
+    font-weight: 400;
+  }
+
+  .sub {
+    font-size: 14px;
+    color: var(--muted);
+    line-height: 1.7;
+    max-width: 320px;
+    margin: 0 auto;
+  }
+
+  .divider {
+    width: 40px;
+    height: 1px;
+    background: var(--gold-border);
+    margin: 2rem auto;
+  }
+
+  .contact-block {
+    background: var(--bg-1);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .contact-block-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 1rem;
+  }
+
+  .contact-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .contact-row:last-child { border-bottom: none; }
+
+  .contact-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    background: var(--gold-dim);
+    border: 1px solid var(--gold-border);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .contact-icon svg { width: 15px; height: 15px; stroke: var(--gold); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+
+  .contact-label {
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 1px;
+    font-family: var(--mono);
+    letter-spacing: 0.05em;
+  }
+
+  .contact-value {
+    font-size: 14px;
+    color: var(--ivory);
+    font-weight: 400;
+  }
+
+  .contact-value a {
+    color: var(--ivory);
+    text-decoration: none;
+  }
+
+  .form-block {
+    background: var(--bg-1);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .form-label-top {
+    font-family: var(--mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 1.25rem;
+  }
+
+  .field {
+    margin-bottom: 1rem;
+  }
+
+  .field label {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-family: var(--mono);
+    letter-spacing: 0.05em;
+  }
+
+  .field input {
+    width: 100%;
+    background: var(--bg-2);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    padding: 11px 14px;
+    font-size: 15px;
+    color: var(--ivory);
+    font-family: var(--body);
+    outline: none;
+    transition: border-color 0.2s;
+    -webkit-appearance: none;
+  }
+
+  .field input::placeholder { color: var(--muted); }
+  .field input:focus { border-color: var(--gold-border); }
+
+  .btn {
+    width: 100%;
+    background: var(--gold);
+    color: #0a0a0a;
+    border: none;
+    border-radius: 8px;
+    padding: 13px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: var(--mono);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: opacity 0.2s;
+    margin-top: 0.25rem;
+  }
+
+  .btn:hover { opacity: 0.88; }
+  .btn:active { opacity: 0.75; }
+
+  .success-msg {
+    display: none;
+    text-align: center;
+    padding: 1.5rem 1rem;
+  }
+
+  .success-msg .tick {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: var(--gold-dim);
+    border: 1px solid var(--gold-border);
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1rem;
+  }
+
+  .success-msg .tick svg { width: 20px; height: 20px; stroke: var(--gold); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+
+  .success-msg p { font-size: 14px; color: var(--muted); line-height: 1.6; }
+  .success-msg strong { color: var(--ivory); font-weight: 500; }
+
+  .footer-note {
+    text-align: center;
+    font-size: 12px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--gold-dim);
+    border: 1px solid var(--gold-border);
+    border-radius: 100px;
+    padding: 4px 12px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--gold);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 1.25rem;
+  }
+
+  .pill-dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: var(--gold);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="wrap">
+
+  <header>
+    <div class="wordmark">FORGE — by Luca Lusoli</div>
+    <div class="pill"><span class="pill-dot"></span> UCL Happiness Week</div>
+    <p class="hero-label">Free lunchtime session</p>
+    <h1>Move better.<br><em>Feel it today.</em></h1>
+    <p class="sub">45 minutes of posture reset, mobility work, and bodyweight strength. No experience needed. Just show up.</p>
+  </header>
+
+  <div class="divider"></div>
+
+  <div class="contact-block">
+    <p class="contact-block-label">Get in touch</p>
+
+    <div class="contact-row">
+      <div class="contact-icon">
+        <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.67A2 2 0 012 1h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
+      </div>
+      <div>
+        <p class="contact-label">Phone</p>
+        <p class="contact-value"><a href="tel:+447936613140">+44 07936 613 140</a></p>
+      </div>
+    </div>
+
+    <div class="contact-row">
+      <div class="contact-icon">
+        <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      </div>
+      <div>
+        <p class="contact-label">Email</p>
+        <p class="contact-value"><a href="mailto:Luca@trainingforge.app">Luca@trainingforge.app</a></p>
+      </div>
+    </div>
+
+    <div class="contact-row">
+      <div class="contact-icon">
+        <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+      </div>
+      <div>
+        <p class="contact-label">Instagram</p>
+        <p class="contact-value"><a href="https://instagram.com/luca_calisthenics" target="_blank">@luca_calisthenics</a></p>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="form-block">
+    <p class="form-label-top">Stay in the loop</p>
+
+    <form id="contact-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
+      <div class="field">
+        <label for="name">Your name</label>
+        <input type="text" id="name" name="name" placeholder="First name" required autocomplete="given-name">
+      </div>
+      <div class="field">
+        <label for="email">Email address</label>
+        <input type="email" id="email" name="email" placeholder="you@example.com" required autocomplete="email">
+      </div>
+      <input type="hidden" name="_subject" value="New FORGE lead — UCL Happiness Week">
+      <button type="submit" class="btn">Send →</button>
+    </form>
+
+    <div class="success-msg" id="success">
+      <div class="tick">
+        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <p><strong>You're in.</strong><br>Luca will be in touch shortly.</p>
+    </div>
+  </div>
+
+  <p class="footer-note">FORGE Personal Training · Old Street, London<br>forgetraining.app</p>
+
+</div>
+
+<script>
+  const form = document.getElementById('contact-form');
+  const success = document.getElementById('success');
+
+  form.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const data = new FormData(form);
+    try {
+      const res = await fetch(form.action, {
+        method: 'POST',
+        body: data,
+        headers: { 'Accept': 'application/json' }
+      });
+      if (res.ok) {
+        form.style.display = 'none';
+        success.style.display = 'block';
+      }
+    } catch(err) {
+      console.error(err);
+    }
+  });
+</script>
+</body>
+</html>
