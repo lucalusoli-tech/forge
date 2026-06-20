@@ -1534,6 +1534,9 @@ const EXERCISES = [
   {id:'zottman-curl',name:'Zottman Curl',tags:['pull'],sets:'3×8-12',target:'Biceps, Forearms',intensity:'Light',level:'Beginner',cue:'Supinate on the way up, rotate to pronated at the top, lower under control',video:'https://www.youtube.com/results?search_query=zottman+curl+form',desc:'Curl up supinated, lower pronated — trains the biceps and forearm extensors in a single rep.'},
   {id:'reverse-curl',name:'Reverse Bicep Curl',tags:['pull'],sets:'3×10-15',target:'Brachioradialis, Forearms, Biceps',intensity:'Light',level:'Beginner',cue:'Pronated grip, no swing, squeeze at the top',video:'https://www.youtube.com/results?search_query=reverse+curl+form',desc:'Pronated curl emphasising the brachioradialis and forearms. Builds elbow stability for pulling.'},
   {id:'crunch-machine',name:'Crunch Machine',tags:['core'],sets:'3×12-15',target:'Core, Obliques',intensity:'Moderate',level:'Beginner',cue:'Round the spine, exhale into the crunch, control the return',video:'https://www.youtube.com/results?search_query=machine+crunch+form',desc:'Loaded spinal flexion for direct rectus abdominis work. Progress the resistance over time.'},
+  {id:'hyperextension',name:'Hyperextension',tags:['core'],sets:'3×12-15',target:'Erectors, Glutes, Hamstrings',intensity:'Bodyweight',level:'Beginner',cue:'Hinge at the hips, extend to a straight line — don\'t overarch',video:'https://www.youtube.com/results?search_query=hyperextension+back+extension+form',desc:'Posterior-chain extension on a roman chair. Strengthens the lower back, glutes and hamstrings.'},
+  {id:'reverse-hyperextension',name:'Reverse Hyperextension',tags:['core'],sets:'3×12-15',target:'Glutes, Hamstrings, Erectors',intensity:'Bodyweight',level:'Beginner',cue:'Torso fixed, raise the legs by squeezing the glutes, control the lowering',video:'https://www.youtube.com/results?search_query=reverse+hyperextension+form',desc:'Legs lever against a fixed torso. Glute and hamstring drive with minimal spinal load.'},
+  {id:'side-hyperextension',name:'Side Hyperextension',tags:['core'],sets:'3×12-15',target:'Obliques, Lower Back',intensity:'Bodyweight',level:'Beginner',cue:'Lateral hinge, raise the torso sideways — no twisting',video:'https://www.youtube.com/results?search_query=side+hyperextension+oblique+form',desc:'Lateral-flexion variation on the roman chair. Targets the obliques and quadratus lumborum.'},
   {id:'oah',name:'One Arm Handstand',tags:['skill','push','calisthenics'],sets:'Practice',target:'Full Body, Wrists, Proprioception',intensity:'Max skill',level:'Elite',cue:'Shift weight gradually, finger pressure control',video:'https://www.youtube.com/results?search_query=one+arm+handstand+tutorial',desc:'The summit. Reserve for peak conditions.'},
 
   // ── BWF HORIZONTAL PULL — BACK ────────────────────────────────
@@ -4466,8 +4469,9 @@ function saveBlockOnly() {
   const name=document.getElementById('custom-name').value.trim();
   if(!name){showToast('Add a block name');return;}
   if(!builderDays.length){showToast('Add at least 1 day');return;}
+  const editingId = window._editingBlockId;
   const block={
-    id: window._editingBlockId || 'cw_'+Date.now(),
+    id: editingId || 'cw_'+Date.now(),
     name:name.toUpperCase(),
     methods:[...builderMethods],
     weeks: builderWeeks,
@@ -4475,8 +4479,8 @@ function saveBlockOnly() {
     skill:  [...builderSkill],
     days:getBuiltDays(),
   };
-  if(window._editingBlockId) {
-    const idx = customWorkouts.findIndex(w=>w.id===window._editingBlockId);
+  if(editingId) {
+    const idx = customWorkouts.findIndex(w=>w.id===editingId);
     if(idx > -1) customWorkouts[idx] = block;
     else customWorkouts.push(block);
     window._editingBlockId = null;
@@ -4485,10 +4489,33 @@ function saveBlockOnly() {
     customWorkouts.push(block);
   }
   localStorage.setItem('fw_customs',JSON.stringify(customWorkouts));
+
+  // If the block we just edited is the one currently being trained, apply the edit to the
+  // LIVE block in place — KEEPING the session log/progress. (Set as Current is the only path
+  // that resets progress.) sourceId links the live block to its saved source; fall back to a
+  // name match for blocks that were activated before sourceId existed, and heal sourceId then.
+  const isCurrent = editingId && (
+    currentBlock.sourceId === editingId ||
+    (!currentBlock.sourceId && currentBlock.name === block.name)
+  );
+  if(isCurrent) {
+    currentBlock = {
+      ...currentBlock,
+      sourceId: editingId,
+      name: block.name, methods: block.methods, weeks: block.weeks,
+      warmup: block.warmup, skill: block.skill, days: block.days
+    };
+    localStorage.setItem('fw_block', JSON.stringify(currentBlock));
+    saveCurrentBlock();
+    updateStats();
+    renderHomeDays();
+    if(typeof renderHomeFixedSections === 'function') renderHomeFixedSections();
+  }
+
   syncBlocksToCloud();
   resetBuilder();
   renderBuilderSaved();
-  showToast('Block saved ✓');
+  showToast(isCurrent ? 'Current block updated ✓' : 'Block saved ✓');
 }
 
 // ─── BLOCK ACTIVATION — SINGLE SOURCE OF TRUTH ─────────────────
@@ -4517,7 +4544,8 @@ async function activateBlock(newBlock){
     weeks: newBlock.weeks || 4,
     warmup: newBlock.warmup || [],
     skill: newBlock.skill || [],
-    days: newBlock.days || []
+    days: newBlock.days || [],
+    sourceId: newBlock.id || newBlock.sourceId || null // links the live block to its saved source (for in-place edits)
   };
   currentWeek = 1;
   sessionLog = {};
