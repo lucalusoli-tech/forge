@@ -1,542 +1,153 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>FORGE — 8-Week Pull-Up Accelerator</title>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FORGE — 12 Week Pull-Up Programme</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
-    --bg: #080808;
-    --bg-1: #111111;
-    --bg-2: #181818;
-    --gold: #c9a96e;
-    --gold-dim: rgba(201,169,110,0.12);
-    --gold-border: rgba(201,169,110,0.25);
-    --ivory: #e8e2d9;
-    --muted: #6b6560;
-    --body: Inter, sans-serif;
-    --mono: 'DM Mono', monospace;
+    --bg: #080808; --bg-1: #0f0f0f; --bg-2: #141414; --bg-3: #1a1a1a;
+    --gold: #c9a96e; --gold-dim: rgba(201,169,110,0.10); --gold-line: rgba(201,169,110,0.25);
+    --ivory: #e8e2d9; --muted: #6b6560;
+    --body-font: 'Inter', sans-serif; --mono-font: 'DM Mono', monospace;
   }
-
-  html { background: var(--bg); color: var(--ivory); font-family: var(--body); }
-
-  body {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 0 1.25rem 4rem;
-    background:
-      radial-gradient(ellipse 70% 35% at 50% 0%, rgba(201,169,110,0.08) 0%, transparent 65%),
-      var(--bg);
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--ivory); font-family: var(--body-font); font-size: 15px; line-height: 1.7; -webkit-font-smoothing: antialiased; }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 0; opacity: 0.4;
   }
+  .wrap { position: relative; z-index: 1; max-width: 480px; margin: 0 auto; padding: 0 24px; }
 
-  .wrap { width: 100%; max-width: 440px; }
+  /* TOP BAR */
+  .top-bar { position: relative; z-index: 1; padding: 20px 24px; text-align: center; border-bottom: 1px solid var(--bg-3); }
+  .brand { font-family: var(--mono-font); font-size: 11px; letter-spacing: 0.3em; color: var(--gold); text-transform: uppercase; }
 
-  /* HEADER */
-  header { padding: 2.5rem 0 2rem; text-align: center; }
+  /* HERO */
+  .hero { padding: 40px 0 32px; text-align: center; }
+  .hero h1 { font-size: clamp(24px, 7vw, 36px); font-weight: 700; line-height: 1.2; letter-spacing: -0.02em; color: var(--ivory); margin-bottom: 14px; }
+  .hero h1 em { font-style: normal; color: var(--gold); }
+  .hero-sub { font-size: 14px; color: var(--muted); max-width: 380px; margin: 0 auto 32px; line-height: 1.6; }
+  .hero-sub strong { color: var(--ivory); }
 
-  .wordmark {
-    font-family: var(--mono);
-    font-size: 12px;
-    letter-spacing: 0.3em;
-    color: var(--gold);
-    text-transform: uppercase;
-    margin-bottom: 2rem;
+  /* VIDEO */
+  .video-wrap {
+    position: relative; background: var(--bg-2); border: 1px solid var(--bg-3);
+    border-radius: 8px; overflow: hidden; margin-bottom: 32px;
+    aspect-ratio: 16/9; display: flex; align-items: center;
+    justify-content: center; flex-direction: column; gap: 12px;
   }
-
-  .pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 7px;
-    background: var(--gold-dim);
-    border: 1px solid var(--gold-border);
-    border-radius: 100px;
-    padding: 5px 14px;
-    font-family: var(--mono);
-    font-size: 11px;
-    color: var(--gold);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-bottom: 1.5rem;
-  }
-
-  .pill-dot {
-    width: 5px; height: 5px;
-    border-radius: 50%;
-    background: var(--gold);
-    animation: pulse 2s ease-in-out infinite;
-  }
-
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.25} }
-
-  h1 {
-    font-size: clamp(30px, 9vw, 42px);
-    font-weight: 300;
-    line-height: 1.12;
-    letter-spacing: -0.025em;
-    margin-bottom: 1rem;
-  }
-
-  h1 em { font-style: normal; color: var(--gold); }
-
-  .hero-sub {
-    font-size: 15px;
-    color: var(--muted);
-    line-height: 1.7;
-    max-width: 340px;
-    margin: 0 auto;
-  }
-
-  /* DIVIDER */
-  .divider { width: 1px; height: 40px; background: linear-gradient(to bottom, var(--gold-border), transparent); margin: 2rem auto; }
-
-  /* SECTION LABEL */
-  .section-label {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.25em;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 1rem;
-  }
-
-  /* WHAT YOU GET */
-  .card {
-    background: var(--bg-1);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 16px;
-    padding: 1.5rem;
-    margin-bottom: 1rem;
-  }
-
-  .includes-list { list-style: none; display: flex; flex-direction: column; gap: 0; }
-
-  .includes-list li {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    padding: 11px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-    font-size: 14px;
-    color: var(--ivory);
-    line-height: 1.5;
-  }
-
-  .includes-list li:last-child { border-bottom: none; }
-
-  .check {
-    width: 18px; height: 18px;
-    border-radius: 50%;
-    background: var(--gold-dim);
-    border: 1px solid var(--gold-border);
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    margin-top: 1px;
-  }
-
-  .check svg { width: 9px; height: 9px; stroke: var(--gold); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-
-  .bonus-tag {
-    font-family: var(--mono);
-    font-size: 10px;
-    color: var(--gold);
-    letter-spacing: 0.08em;
-    background: var(--gold-dim);
-    border: 1px solid var(--gold-border);
-    border-radius: 4px;
-    padding: 2px 6px;
-    margin-left: auto;
-    flex-shrink: 0;
-    align-self: center;
-  }
-
-  /* PRICING */
-  .pricing-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 1rem;
-  }
-
-  .price-card {
-    background: var(--bg-1);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 14px;
-    padding: 1.25rem 1rem;
-    text-align: center;
-  }
-
-  .price-card.featured {
-    border-color: var(--gold-border);
-    background: linear-gradient(135deg, rgba(201,169,110,0.06) 0%, var(--bg-1) 60%);
-  }
-
-  .price-location {
-    font-family: var(--mono);
-    font-size: 10px;
-    letter-spacing: 0.15em;
-    color: var(--muted);
-    text-transform: uppercase;
-    margin-bottom: 0.5rem;
-  }
-
-  .price-amount {
-    font-size: 28px;
-    font-weight: 300;
-    color: var(--ivory);
-    letter-spacing: -0.02em;
-    margin-bottom: 0.25rem;
-  }
-
-  .price-amount span {
-    font-size: 14px;
-    color: var(--muted);
-    font-weight: 400;
-  }
-
-  .price-note {
-    font-size: 11px;
-    color: var(--muted);
-    line-height: 1.5;
-  }
+  .video-placeholder-icon { width: 56px; height: 56px; border: 2px solid var(--gold-line); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+  .video-placeholder-icon::after { content: ''; width: 0; height: 0; border-top: 10px solid transparent; border-bottom: 10px solid transparent; border-left: 16px solid var(--gold); margin-left: 4px; }
+  .video-label { font-family: var(--mono-font); font-size: 10px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; }
 
   /* GUARANTEE */
-  .guarantee {
-    background: var(--gold-dim);
-    border: 1px solid var(--gold-border);
-    border-radius: 14px;
-    padding: 1.25rem 1.5rem;
-    margin-bottom: 1rem;
-    display: flex;
-    gap: 14px;
-    align-items: flex-start;
-  }
+  .guarantee-strip { background: var(--gold-dim); border: 1px solid var(--gold-line); border-radius: 6px; padding: 16px 20px; text-align: center; margin-bottom: 36px; }
+  .guarantee-strip p { font-size: 14px; line-height: 1.55; }
+  .guarantee-strip strong { color: var(--gold); }
 
-  .guarantee-icon {
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    background: rgba(201,169,110,0.15);
-    border: 1px solid var(--gold-border);
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
+  /* PRICING */
+  .pricing-label { font-family: var(--mono-font); font-size: 10px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; text-align: center; margin-bottom: 16px; }
 
-  .guarantee-icon svg { width: 16px; height: 16px; stroke: var(--gold); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+  /* SIDE BY SIDE TIERS */
+  .tiers { display: flex; flex-direction: row; gap: 10px; margin-bottom: 40px; align-items: stretch; }
+  .tier-card { flex: 1; min-width: 0; background: var(--bg-1); border: 1px solid var(--bg-3); border-radius: 8px; padding: 16px 12px; display: flex; flex-direction: column; }
+  .tier-card.featured { border-color: var(--gold-line); background: var(--bg-2); }
+  .featured-tag { display: inline-block; font-family: var(--mono-font); font-size: 8px; letter-spacing: 0.12em; color: var(--bg); background: var(--gold); padding: 2px 6px; border-radius: 2px; text-transform: uppercase; margin-bottom: 8px; }
+  .tier-name { font-size: 13px; font-weight: 600; color: var(--ivory); margin-bottom: 4px; }
+  .tier-price { font-family: var(--mono-font); font-size: 20px; font-weight: 500; color: var(--gold); line-height: 1; margin-bottom: 2px; }
+  .tier-price span { font-size: 10px; color: var(--muted); }
+  .tier-min { font-family: var(--mono-font); font-size: 9px; color: var(--muted); margin-bottom: 14px; }
+  .tier-features { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; flex: 1; }
+  .tier-feature { display: flex; align-items: flex-start; gap: 7px; font-size: 11px; line-height: 1.45; color: var(--ivory); }
+  .tier-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--gold); margin-top: 6px; flex-shrink: 0; }
+  .tier-cta { display: block; width: 100%; background: var(--gold); color: var(--bg); border: none; border-radius: 4px; padding: 12px 8px; font-family: var(--body-font); font-size: 12px; font-weight: 700; cursor: pointer; text-align: center; text-decoration: none; transition: opacity 0.2s; margin-top: auto; }
+  .tier-cta.outline { background: transparent; color: var(--gold); border: 1px solid var(--gold-line); }
+  .tier-cta:active { opacity: 0.85; }
 
-  .guarantee p { font-size: 13px; color: var(--ivory); line-height: 1.6; }
-  .guarantee p strong { color: var(--gold); font-weight: 500; }
+  /* FOOTER */
+  footer { position: relative; z-index: 1; border-top: 1px solid var(--bg-3); padding: 24px 0 40px; text-align: center; }
+  .footer-text { font-family: var(--mono-font); font-size: 10px; letter-spacing: 0.2em; color: var(--muted); text-transform: uppercase; margin-bottom: 8px; }
+  .footer-links { font-size: 12px; color: var(--muted); }
+  .footer-links a { color: var(--muted); text-decoration: underline; }
 
-  /* ABOUT */
-  .about-card {
-    background: var(--bg-1);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 16px;
-    padding: 1.5rem;
-    margin-bottom: 1rem;
-  }
-
-  .about-card p {
-    font-size: 14px;
-    color: var(--muted);
-    line-height: 1.75;
-  }
-
-  .about-card p strong { color: var(--ivory); font-weight: 500; }
-
-  /* CONTACT */
-  .contact-block {
-    background: var(--bg-1);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 16px;
-    padding: 1.25rem 1.5rem;
-    margin-bottom: 1rem;
-  }
-
-  .contact-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.05);
-  }
-
-  .contact-row:last-child { border-bottom: none; }
-
-  .contact-icon {
-    width: 32px; height: 32px;
-    border-radius: 8px;
-    background: var(--gold-dim);
-    border: 1px solid var(--gold-border);
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-  }
-
-  .contact-icon svg { width: 14px; height: 14px; stroke: var(--gold); fill: none; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
-
-  .contact-meta { font-size: 11px; color: var(--muted); margin-bottom: 2px; font-family: var(--mono); letter-spacing: 0.05em; }
-  .contact-value { font-size: 14px; color: var(--ivory); }
-  .contact-value a { color: var(--ivory); text-decoration: none; }
-
-  /* FORM */
-  .form-block {
-    background: var(--bg-1);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 16px;
-    padding: 1.5rem;
-    margin-bottom: 1rem;
-  }
-
-  .form-heading {
-    font-size: 17px;
-    font-weight: 400;
-    color: var(--ivory);
-    margin-bottom: 0.4rem;
-  }
-
-  .form-sub {
-    font-size: 13px;
-    color: var(--muted);
-    line-height: 1.6;
-    margin-bottom: 1.5rem;
-  }
-
-  .field { margin-bottom: 1rem; }
-
-  .field label {
-    display: block;
-    font-size: 11px;
-    color: var(--muted);
-    margin-bottom: 6px;
-    font-family: var(--mono);
-    letter-spacing: 0.06em;
-  }
-
-  .field input {
-    width: 100%;
-    background: var(--bg-2);
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 8px;
-    padding: 12px 14px;
-    font-size: 15px;
-    color: var(--ivory);
-    font-family: var(--body);
-    outline: none;
-    transition: border-color 0.2s;
-    -webkit-appearance: none;
-  }
-
-  .field input::placeholder { color: var(--muted); }
-  .field input:focus { border-color: var(--gold-border); }
-
-  .btn {
-    width: 100%;
-    background: var(--gold);
-    color: #080808;
-    border: none;
-    border-radius: 8px;
-    padding: 14px;
-    font-size: 13px;
-    font-weight: 600;
-    font-family: var(--mono);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    cursor: pointer;
-    transition: opacity 0.2s;
-    margin-top: 0.25rem;
-  }
-
-  .btn:hover { opacity: 0.85; }
-  .btn:active { opacity: 0.7; }
-
-  .success-msg {
-    display: none;
-    text-align: center;
-    padding: 1.5rem 1rem;
-  }
-
-  .tick {
-    width: 44px; height: 44px;
-    border-radius: 50%;
-    background: var(--gold-dim);
-    border: 1px solid var(--gold-border);
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 1rem;
-  }
-
-  .tick svg { width: 18px; height: 18px; stroke: var(--gold); fill: none; stroke-width: 2.5; stroke-linecap: round; stroke-linejoin: round; }
-
-  .success-msg p { font-size: 14px; color: var(--muted); line-height: 1.6; }
-  .success-msg strong { color: var(--ivory); font-weight: 500; }
-
-  .footer-note {
-    text-align: center;
-    font-size: 12px;
-    color: var(--muted);
-    line-height: 1.8;
-    margin-top: 1rem;
-  }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+  .fade-1 { animation: fadeUp 0.5s ease both; }
+  .fade-2 { animation: fadeUp 0.5s ease 0.1s both; }
+  .fade-3 { animation: fadeUp 0.5s ease 0.2s both; }
+  @media (prefers-reduced-motion: reduce) { .fade-1, .fade-2, .fade-3 { animation: none; } }
 </style>
 </head>
 <body>
+
+<div class="top-bar fade-1">
+  <div class="brand">FORGE</div>
+</div>
+
 <div class="wrap">
 
-  <header>
-    <div class="wordmark">FORGE</div>
-    <div class="pill"><span class="pill-dot"></span> UCL Happiness Week</div>
-    <h1>Your first<br>pull-up in<br><em>8 weeks.</em></h1>
-    <p class="hero-sub">A structured programme for desk workers who want to build real, lasting upper-body strength.</p>
-  </header>
+  <section class="hero fade-2">
+    <h1>You've built the foundation.<br>Now get <em>5–10 pull-ups.</em></h1>
+    <p class="hero-sub">The 12-week system that takes you from your first pull-up to <strong>owning your bodyweight</strong> — week by week, zero guesswork.</p>
+  </section>
 
-  <div class="divider"></div>
-
-  <!-- WHAT'S INCLUDED -->
-  <p class="section-label">What's included</p>
-  <div class="card">
-    <ul class="includes-list">
-      <li>
-        <span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
-        16 coached sessions over 8 weeks
-      </li>
-      <li>
-        <span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
-        Full progressive programme — no guesswork
-      </li>
-      <li>
-        <span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
-        Posture & mobility work built in
-      </li>
-      <li>
-        <span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
-        Access to FORGE training app
-        <span class="bonus-tag">BONUS</span>
-      </li>
-      <li>
-        <span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
-        Nutrition guidance for your goal
-        <span class="bonus-tag">BONUS</span>
-      </li>
-      <li>
-        <span class="check"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></span>
-        WhatsApp support between sessions
-        <span class="bonus-tag">BONUS</span>
-      </li>
-    </ul>
+  <div class="video-wrap fade-2">
+    <!-- REPLACE WITH: <iframe width="100%" height="100%" src="https://www.youtube.com/embed/YOUR_ID" frameborder="0" allowfullscreen></iframe> -->
+    <div class="video-placeholder-icon"></div>
+    <p class="video-label">Replace with your video</p>
   </div>
 
-  <!-- PRICING -->
-  <p class="section-label">Investment</p>
-  <div class="pricing-grid">
-    <div class="price-card featured">
-      <p class="price-location">At UCL</p>
-      <p class="price-amount">£1,200 <span>/ 8 wks</span></p>
-      <p class="price-note">Sessions at your facility</p>
-    </div>
-    <div class="price-card">
-      <p class="price-location">At Gymbox</p>
-      <p class="price-amount">£1,365 <span>/ 8 wks</span></p>
-      <p class="price-note">Old Street — no membership needed</p>
-    </div>
+  <div class="guarantee-strip fade-3">
+    <p><strong>FORGE Guarantee —</strong> If you don't reach the goal we set together, I keep working with you for free until you do. No small print.</p>
   </div>
 
-  <!-- GUARANTEE -->
-  <div class="guarantee">
-    <div class="guarantee-icon">
-      <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+  <p class="pricing-label fade-3">Choose your level</p>
+
+  <div class="tiers fade-3">
+
+    <div class="tier-card">
+      <p class="tier-name">FORGE Online</p>
+      <p class="tier-price">£150 <span>/ mo</span></p>
+      <p class="tier-min">3-month min</p>
+      <div class="tier-features">
+        <div class="tier-feature"><div class="tier-dot"></div><span>FORGE app + personal programme</span></div>
+        <div class="tier-feature"><div class="tier-dot"></div><span>Weekly 15-min check-in</span></div>
+        <div class="tier-feature"><div class="tier-dot"></div><span>Video correction weekly</span></div>
+        <div class="tier-feature"><div class="tier-dot"></div><span>Programme updated to your progress</span></div>
+      </div>
+      <a href="[CHECKOUT LINK]" class="tier-cta outline">Get your pull-ups</a>
     </div>
-    <p><strong>Results guarantee.</strong> Do the work and don't get your first pull-up in 8 weeks — I keep coaching you until you do. No extra charge.</p>
+
+    <div class="tier-card featured">
+      <span class="featured-tag">Most Complete</span>
+      <p class="tier-name">FORGE Coached</p>
+      <p class="tier-price">£450 <span>/ mo</span></p>
+      <p class="tier-min">3-month min</p>
+      <div class="tier-features">
+        <div class="tier-feature"><div class="tier-dot"></div><span>Everything in Online</span></div>
+        <div class="tier-feature"><div class="tier-dot"></div><span>Daily check-ins</span></div>
+        <div class="tier-feature"><div class="tier-dot"></div><span>Friday coaching call</span></div>
+        <div class="tier-feature"><div class="tier-dot"></div><span>Nutrition + macros</span></div>
+        <div class="tier-feature"><div class="tier-dot"></div><span>Weight + body tracking</span></div>
+      </div>
+      <a href="[CHECKOUT LINK]" class="tier-cta">Get your pull-ups</a>
+    </div>
+
   </div>
-
-  <div class="divider"></div>
-
-  <!-- ABOUT -->
-  <p class="section-label">Who I am</p>
-  <div class="about-card">
-    <p>I'm <strong>Luca Lusoli</strong>, a Level 3 Personal Trainer specialising in calisthenics and bodyweight strength, based at <strong>Gymbox Old Street</strong>. I trained in hand balance at the London School of Hand Balance and coach clients across London through <strong>FORGE</strong> — a coaching brand built around sustainable, progressive strength for real people.</p>
-  </div>
-
-  <!-- CONTACT -->
-  <p class="section-label">Get in touch</p>
-  <div class="contact-block">
-    <div class="contact-row">
-      <div class="contact-icon">
-        <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.67A2 2 0 012 1h3a2 2 0 012 1.72c.127.96.361 1.903.7 2.81a2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0122 16.92z"/></svg>
-      </div>
-      <div>
-        <p class="contact-meta">Phone</p>
-        <p class="contact-value"><a href="tel:+447936613140">+44 07936 613 140</a></p>
-      </div>
-    </div>
-    <div class="contact-row">
-      <div class="contact-icon">
-        <svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-      </div>
-      <div>
-        <p class="contact-meta">Email</p>
-        <p class="contact-value"><a href="mailto:Luca@trainingforge.app">Luca@trainingforge.app</a></p>
-      </div>
-    </div>
-    <div class="contact-row">
-      <div class="contact-icon">
-        <svg viewBox="0 0 24 24"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
-      </div>
-      <div>
-        <p class="contact-meta">Instagram</p>
-        <p class="contact-value"><a href="https://instagram.com/luca_calisthenics" target="_blank">@luca_calisthenics</a></p>
-      </div>
-    </div>
-  </div>
-
-  <!-- FORM -->
-  <div class="form-block">
-    <p class="form-heading">Register your interest</p>
-    <p class="form-sub">Leave your name and email and I'll be in touch within 24 hours.</p>
-
-    <form id="contact-form" action="https://formspree.io/f/xnjkqnev" method="POST">
-      <div class="field">
-        <label for="name">Your name</label>
-        <input type="text" id="name" name="name" placeholder="First name" required autocomplete="given-name">
-      </div>
-      <div class="field">
-        <label for="email">Email address</label>
-        <input type="email" id="email" name="email" placeholder="you@example.com" required autocomplete="email">
-      </div>
-      <input type="hidden" name="_subject" value="New lead — UCL Happiness Week">
-      <button type="submit" class="btn">I'm interested →</button>
-    </form>
-
-    <div class="success-msg" id="success">
-      <div class="tick">
-        <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
-      </div>
-      <p><strong>You're in.</strong><br>Luca will be in touch within 24 hours.</p>
-    </div>
-  </div>
-
-  <p class="footer-note">FORGE Personal Training · Old Street, London<br>forgetraining.app</p>
 
 </div>
 
-<script>
-  const form = document.getElementById('contact-form');
-  const success = document.getElementById('success');
-  form.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    try {
-      const res = await fetch(form.action, {
-        method: 'POST',
-        body: new FormData(form),
-        headers: { 'Accept': 'application/json' }
-      });
-      if (res.ok) {
-        form.style.display = 'none';
-        success.style.display = 'block';
-      }
-    } catch(err) { console.error(err); }
-  });
-</script>
+<footer>
+  <p class="footer-text">FORGE © 2026</p>
+  <p class="footer-links">
+    <a href="#">Privacy Policy</a> &nbsp;·&nbsp; <a href="#">T&Cs</a>
+    &nbsp;·&nbsp; Questions? <a href="mailto:[YOUR EMAIL]">Email Luca</a>
+  </p>
+</footer>
+
 </body>
 </html>
