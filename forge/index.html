@@ -3496,40 +3496,28 @@ function isWeekComplete(week) {
   return days.every(d => isDayLogged(d.id, week));
 }
 
-function isLastScheduledDay(dayId) {
-  // True if dayId is the final entry in currentBlock.days (i.e. the
-  // last day of the scheduled week). User just logged the "end of week" session.
-  const days = currentBlock.days || [];
-  if (!days.length) return false;
-  return days[days.length - 1].id === dayId;
-}
+let weekPromptDismissed = {};
 
 function checkWeekComplete() {
-  // Gate: only prompt to advance week on Saturdays (0=Sun..6=Sat).
-  // Manual W-nav buttons still work any day; this is the auto-prompt only.
-  if (new Date().getDay() !== 6) return;
-
-  // Two trigger paths:
-  //  1) Last-day trigger: user just logged the last scheduled day of the week.
-  //  2) Calendar-elapsed fallback: it's been ≥7 days since the first session
-  //     of this week AND any session is logged AND the last day still isn't.
+  // Prompt to advance when the week's training is actually finished — on ANY weekday.
+  // (Previously gated to Saturdays only, so finishing your week midweek never prompted.)
   const days = currentBlock.days || [];
   if (!days.length) return;
 
-  const lastDayLogged = isLastScheduledDay(currentDayId);
-  const anyLogged = days.some(d => isDayLogged(d.id, currentWeek));
+  const weekDone = isWeekComplete(currentWeek);            // every scheduled day logged (any order)
   const lastDayId = days[days.length - 1].id;
   const lastDayDone = isDayLogged(lastDayId, currentWeek);
+  const anyLogged = days.some(d => isDayLogged(d.id, currentWeek));
   const elapsed = daysSinceWeekStart(currentWeek);
   const calendarElapsed = elapsed !== null && elapsed >= 7 && anyLogged && !lastDayDone;
 
-  if (!lastDayLogged && !calendarElapsed) return;
+  if (!weekDone && !calendarElapsed) return;
+
+  // Don't re-nag if the user already chose to stay on this week
+  const dismissKey = (currentBlock.name || 'block') + '_w' + currentWeek;
+  if (weekPromptDismissed[dismissKey]) return;
 
   const total = currentBlock.weeks || 4;
-  const title = document.getElementById('weekcomplete-title');
-  const desc = document.getElementById('weekcomplete-desc');
-  const actions = document.getElementById('weekcomplete-actions');
-
   if (currentWeek >= total) {
     // Final week — trigger block end instead
     openBlockEndPrompt();
@@ -3538,21 +3526,23 @@ function checkWeekComplete() {
 
   const daysLogged = days.filter(d => isDayLogged(d.id, currentWeek)).length;
   const totalDays = days.length;
-  const fullyComplete = daysLogged === totalDays;
+  const title = document.getElementById('weekcomplete-title');
+  const desc = document.getElementById('weekcomplete-desc');
+  const actions = document.getElementById('weekcomplete-actions');
 
   title.textContent = 'WEEK ' + currentWeek + ' COMPLETE';
-  if (fullyComplete) {
+  if (weekDone) {
     desc.textContent = 'All ' + totalDays + ' sessions logged. Move to Week ' + (currentWeek + 1) + '?';
-  } else if (calendarElapsed) {
-    desc.textContent = '7 days since you started this week. ' + daysLogged + ' of ' + totalDays + ' sessions logged. Advance anyway?';
   } else {
-    desc.textContent = 'You\'ve logged ' + daysLogged + ' of ' + totalDays + ' sessions. Advance anyway?';
+    desc.textContent = '7 days since you started this week. ' + daysLogged + ' of ' + totalDays + ' sessions logged. Advance anyway?';
   }
   actions.innerHTML = `<button class="confirm-yes" onclick="closeWeekComplete();cycleWeek()">NEXT WEEK →</button>`;
   document.getElementById('weekcomplete-overlay').classList.add('open');
 }
 
 function closeWeekComplete() {
+  // Remember the dismissal so we don't re-prompt for the same week after they choose to stay
+  weekPromptDismissed[(currentBlock.name || 'block') + '_w' + currentWeek] = true;
   document.getElementById('weekcomplete-overlay').classList.remove('open');
 }
 
@@ -6227,15 +6217,34 @@ async function syncBlocksToCloud() {
 
 async function syncLogsToCloud(force = false) {
   if(!currentUser?.id) return;
-  // SAFETY: never overwrite cloud log with empty data unless forced (e.g. after archive)
+  // SAFETY: never overwrite cloud log with empty data unless forced (e.g. after archive/activate)
   if(!force && (!sessionLog || Object.keys(sessionLog).length === 0)) {
     console.log('Sync skipped: session log is empty, preserving cloud data');
     return;
   }
   try {
+    if(force) {
+      // Deliberate replace (after archiving/activating a block, or restoring one) — write as-is.
+      await supa.from('logs').upsert({
+        user_id: currentUser.id,
+        data: sessionLog,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' });
+      return;
+    }
+    // Normal sync: MERGE with the current cloud log before writing, so a partial or stale local
+    // (a second device, or a sync firing before loadFromCloud finishes) can never delete
+    // cloud-only entries — which is how a whole week was disappearing. Union of keys; local wins
+    // on conflict since it's the active edit. This also pulls in any other-device additions.
+    const { data: cloudRow } = await supa.from('logs')
+      .select('data').eq('user_id', currentUser.id).maybeSingle();
+    const cloudLog = (cloudRow && cloudRow.data) ? cloudRow.data : {};
+    const merged = { ...cloudLog, ...sessionLog };
+    sessionLog = merged;
+    localStorage.setItem('fw_log', JSON.stringify(merged));
     await supa.from('logs').upsert({
       user_id: currentUser.id,
-      data: sessionLog,
+      data: merged,
       updated_at: new Date().toISOString()
     }, { onConflict: 'user_id' });
   } catch(e) { console.warn('Log sync failed:', e); }
