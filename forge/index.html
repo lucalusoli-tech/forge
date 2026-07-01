@@ -6930,56 +6930,83 @@ async function acceptAssignedBlock(assignmentId) {
       .select('*')
       .eq('id', assignmentId)
       .single();
-    console.log('Assigned block row:', row);
     if(error || !row) { showToast('Failed to load block'); return; }
 
     const block = row.block_data?.currentBlock;
-    console.log('Block data:', block);
-    if(block) {
-      const newId = 'assigned_' + assignmentId;
-      // Check if already added (prevent duplicates)
-      if(customWorkouts.some(w => w.id === newId)) {
-        // Already accepted on a previous session — clear the pending flag so the notice
-        // stops re-appearing on every launch. Do NOT re-activate: the client may be mid-way
-        // through this block and activating would archive + wipe their live log.
-        await supa.from('assigned_blocks')
-          .update({ status: 'accepted', accepted_at: new Date().toISOString() })
-          .eq('id', assignmentId);
-        dismissAssignedNotice();
-        showToast('Block already in your Programmes');
-        return;
-      }
-      const newBlock = { ...block, id: newId, name: row.block_name };
-      if(!newBlock.warmup) newBlock.warmup = [];
-      if(!newBlock.skill)  newBlock.skill  = [];
-      console.log('New block to add:', newBlock);
-      console.log('customWorkouts before:', customWorkouts.length);
-      customWorkouts.unshift(newBlock);
-      console.log('customWorkouts after:', customWorkouts.length);
-      localStorage.setItem('fw_customs', JSON.stringify(customWorkouts));
-      syncBlocksToCloud();
-      renderBuilderSaved();
+    if(!block) { showToast('Block data missing'); return; }
 
-      // Update status in Supabase
-      await supa
-        .from('assigned_blocks')
+    const newId = 'assigned_' + assignmentId;
+
+    // Already accepted on a previous session — just clear the pending flag.
+    if(customWorkouts.some(w => w.id === newId)) {
+      await supa.from('assigned_blocks')
         .update({ status: 'accepted', accepted_at: new Date().toISOString() })
         .eq('id', assignmentId);
+      dismissAssignedNotice();
+      showToast('Block already in your Programmes');
+      return;
+    }
 
-      // Activate the assigned block — route through activateBlock so the previous
-      // programme's session log is archived + cleared. Without this, a coach-assigned
-      // block inherits the client's old logged kg/reps and "logged" day chips.
+    const newBlock = { ...block, id: newId, name: row.block_name };
+    if(!newBlock.warmup) newBlock.warmup = [];
+    if(!newBlock.skill)  newBlock.skill  = [];
+
+    // Decide: UPDATE the current programme in place (KEEP logs) or start a NEW one (fresh start).
+    // The coach's explicit choice (block_data.mode) wins. If it's an older push with no mode set,
+    // fall back to a name match with the current block so a same-name update never wipes progress.
+    const hasCurrent = currentBlock && currentBlock.name && (currentBlock.days || []).length > 0;
+    let mode = row.block_data?.mode;
+    if(!mode) {
+      mode = (hasCurrent && currentBlock.name.trim().toUpperCase() === (newBlock.name || '').trim().toUpperCase())
+        ? 'update' : 'new';
+    }
+
+    // Mark accepted + stop the notice re-appearing, regardless of branch
+    await supa.from('assigned_blocks')
+      .update({ status: 'accepted', accepted_at: new Date().toISOString() })
+      .eq('id', assignmentId);
+
+    if(mode === 'update' && hasCurrent) {
+      // ── UPDATE IN PLACE ── replace the programme's structure but KEEP the session log and
+      // current week. Logs are keyed day+exercise+week, so any day/exercise the coach left
+      // unchanged keeps its logged sets; changed exercises simply start empty. No archive, no wipe.
+      const savedId = currentBlock.sourceId || newId;
+      const savedEntry = { ...newBlock, id: savedId };
+      const idx = customWorkouts.findIndex(w => w.id === savedId);
+      if(idx > -1) customWorkouts[idx] = savedEntry; else customWorkouts.unshift(savedEntry);
+      localStorage.setItem('fw_customs', JSON.stringify(customWorkouts));
+
+      currentBlock = {
+        ...currentBlock,
+        name: newBlock.name,
+        methods: newBlock.methods || [],
+        weeks: newBlock.weeks || currentBlock.weeks || 4,
+        warmup: newBlock.warmup || [],
+        skill: newBlock.skill || [],
+        days: newBlock.days || [],
+        sourceId: savedId
+      };
+      currentWeek = Math.min(currentWeek || 1, currentBlock.weeks);
+      localStorage.setItem('fw_block', JSON.stringify(currentBlock));
+      localStorage.setItem('fw_week', currentWeek);
+      saveCurrentBlock();
+      await syncBlocksToCloud();
+      updateStats(); renderHomeDays(); renderBuilderSaved();
+      if(typeof renderHomeFixedSections === 'function') renderHomeFixedSections();
+      dismissAssignedNotice();
+      showToast('Programme updated — progress kept ✓');
+      setTimeout(() => navigate('home'), 400);
+    } else {
+      // ── NEW PROGRAMME ── add to the list and start fresh (archives current, clears log).
+      customWorkouts.unshift(newBlock);
+      localStorage.setItem('fw_customs', JSON.stringify(customWorkouts));
+      await syncBlocksToCloud();
+      renderBuilderSaved();
       await activateBlock(newBlock);
-      updateStats();
-      renderHomeDays();
-
+      updateStats(); renderHomeDays();
       dismissAssignedNotice();
       showToast('Block ready — let\'s train ✦');
       setTimeout(() => navigate('home'), 400);
-    } else {
-      console.error('No block data found in row.block_data.currentBlock');
-      showToast('Block data missing');
-      return;
     }
   } catch(e) {
     console.error('acceptAssignedBlock error:', e);
@@ -7025,7 +7052,14 @@ async function openPushUpdate(blockId) {
       <div style="background:var(--surface);border:1px solid var(--border);max-width:360px;width:100%;padding:24px" onclick="event.stopPropagation()">
         <div style="font-family:'DM Mono',monospace;font-size:20px;letter-spacing:2px;margin-bottom:4px">PUSH UPDATE</div>
         <div style="font-size:10px;color:var(--text-muted);letter-spacing:1px;margin-bottom:20px">${block.name}</div>
-        
+
+        <div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:8px">UPDATE TYPE</div>
+        <div style="display:flex;gap:8px;margin-bottom:16px">
+          <button type="button" id="push-mode-update" onclick="setPushMode('update')" style="flex:1;padding:11px 8px;background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;cursor:pointer;line-height:1.4">UPDATE<br><span style="font-size:8px;opacity:0.7">keeps progress</span></button>
+          <button type="button" id="push-mode-new" onclick="setPushMode('new')" style="flex:1;padding:11px 8px;background:none;border:1px solid var(--border);color:var(--text-muted);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;cursor:pointer;line-height:1.4">NEW<br><span style="font-size:8px;opacity:0.7">fresh start</span></button>
+        </div>
+        <input type="hidden" id="push-mode" value="update">
+
         <div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:8px">SELECT CLIENT</div>
         <select id="push-client-select" style="width:100%;padding:12px;background:var(--deep);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:12px;margin-bottom:16px">
           <option value="">Choose a client...</option>
@@ -7048,34 +7082,47 @@ function closePushModal() {
   pushBlockId = null;
 }
 
+function setPushMode(mode) {
+  document.getElementById('push-mode').value = mode;
+  const upd = document.getElementById('push-mode-update');
+  const nw  = document.getElementById('push-mode-new');
+  const on  = { bg:'var(--accent-glow)', bd:'var(--accent)', col:'var(--accent)' };
+  const off = { bg:'none', bd:'var(--border)', col:'var(--text-muted)' };
+  const a = mode === 'update' ? on : off;
+  const b = mode === 'new' ? on : off;
+  upd.style.background = a.bg; upd.style.borderColor = a.bd; upd.style.color = a.col;
+  nw.style.background  = b.bg; nw.style.borderColor  = b.bd; nw.style.color  = b.col;
+}
+
 async function executePushUpdate() {
   const clientEmail = document.getElementById('push-client-select').value;
   if(!clientEmail) { showToast('Select a client'); return; }
   if(!pushBlockId) { showToast('No block selected'); return; }
-  
+
   const block = customWorkouts.find(w => w.id === pushBlockId);
   if(!block) { showToast('Block not found'); return; }
-  
-  // Create a new assignment with the updated block
-  // This will show as a new pending block for the client
+
+  const mode = document.getElementById('push-mode')?.value || 'update';
+
+  // mode 'update' → client keeps their logs (applied in place). mode 'new' → fresh start.
   const { error } = await supa.from('assigned_blocks').insert({
     coach_id: currentUser.id,
     coach_email: currentUser.email,
     client_email: clientEmail,
-    block_name: block.name + ' (Updated)',
-    block_data: { currentBlock: block },
-    note: 'Updated version of your block',
+    block_name: block.name,
+    block_data: { currentBlock: block, mode },
+    note: mode === 'update' ? 'Updated version of your programme — your progress is kept' : 'New programme',
     status: 'pending'
   });
-  
+
   if(error) {
     console.error('Push update error:', error);
     showToast('Failed to push update');
     closePushModal();
     return;
   }
-  
-  showToast('Update sent to ' + clientEmail.split('@')[0] + ' ✦');
+
+  showToast((mode === 'update' ? 'Update' : 'New programme') + ' sent to ' + clientEmail.split('@')[0] + ' ✦');
   closePushModal();
 }
 
