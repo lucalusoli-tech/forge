@@ -3056,7 +3056,7 @@ function _logExerciseCardHTML(ex) {
   const wk = `${currentDayId}_${ex.id}_v${currentWeek}`;
   const sparkSvg = buildSparkline(ex.id);
   const saved = sessionLog[wk] || {};
-  const savedNote = saved['note'] || '';
+  const savedNote = (sessionLog[`${currentDayId}_${ex.id}_note`] ?? saved['note'] ?? '').replace(/"/g, '&quot;');
   let lastWeekHint = '';
   if (currentWeek > 1) {
     const prevKey = `${currentDayId}_${ex.id}_v${currentWeek - 1}`;
@@ -3210,7 +3210,7 @@ function renderSupersetGroup(groupLabel) {
     if (!exData) return;
     const wk = `${currentDayId}_${g.id}_v${currentWeek}`;
     const saved = sessionLog[wk] || {};
-    const savedNote = (saved['note'] || '').replace(/"/g, '&quot;');
+    const savedNote = (sessionLog[`${currentDayId}_${g.id}_note`] ?? saved['note'] ?? '').replace(/"/g, '&quot;');
     html += `<div class="ss-note-row">
       <div class="ss-note-label">${exData.name}</div>
       <input class="ss-note-input" type="text" placeholder="Note — technique, feel, load…" value="${savedNote}"
@@ -3453,7 +3453,7 @@ function saveSession() {
       if(ri) entry[`s${s}_r`]=ri.value;
     }
     const noteEl = document.getElementById(`${wk}_note`);
-    if(noteEl) entry['note'] = noteEl.value;
+    if(noteEl) sessionLog[`${currentDayId}_${ex.id}_note`] = noteEl.value; // block-level note (persists across weeks)
     sessionLog[wk]=entry;
   });
   sessionLog[`${currentDayId}_notes_v${currentWeek}`]=document.getElementById('session-notes').value;
@@ -5085,9 +5085,12 @@ function setTimerDuration(secs, btn) {
 
 function autoSaveNote(wk) {
   const el = document.getElementById(`${wk}_note`); if(!el) return;
-  if(!sessionLog[wk]) sessionLog[wk] = {};
-  sessionLog[wk]['note'] = el.value;
+  // Exercise notes are block-level — they persist across every week. Store under a
+  // week-independent key (dayId_exId_note) rather than inside the per-week log entry.
+  const noteKey = wk.replace(/_v\d+$/, '') + '_note';
+  sessionLog[noteKey] = el.value;
   localStorage.setItem('fw_log', JSON.stringify(sessionLog));
+  scheduleSync();
 }
 
 // ─── SPARKLINE ─────────────────────────────────────────────────
