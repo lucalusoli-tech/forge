@@ -667,6 +667,9 @@
   .ai-replies { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; animation: ai-fade 0.3s ease; }
   .ai-reply-chip { background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; padding: 10px 16px; cursor: pointer; transition: all 0.15s; }
   .ai-reply-chip:active { border-color: var(--accent); background: var(--accent-glow); color: var(--accent); }
+  .ai-reply-chip.selected { border-color: var(--accent); background: var(--accent-glow); color: var(--accent); }
+  .ai-reply-chip.selected::before { content: '✓ '; }
+  .ai-reply-done { border-color: var(--accent); color: var(--accent); font-weight: 500; }
   .ai-input-wrap { display: flex; gap: 8px; margin-bottom: 12px; }
   .ai-text-input { flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; padding: 12px 16px; outline: none; -webkit-appearance: none; border-radius: 0; }
   .ai-text-input:focus { border-color: var(--accent); }
@@ -5201,6 +5204,7 @@ const AI_BRANCHES = {
       key: 'targetSkills',
       msg: "Which skills are you working towards? Pick all that apply.",
       type: 'chips',
+      multi: true,
       options: ['Muscle-up', 'Front Lever', 'Planche', 'Handstand', 'Back Lever', 'Human Flag']
     },
     {
@@ -5308,6 +5312,37 @@ function aiShowChips(options) {
   });
 }
 
+function aiShowMultiChips(options) {
+  // Multi-select: tap chips to toggle, then confirm with Done. (For "Pick all that apply" questions.)
+  const wrap = document.getElementById('ai-replies');
+  wrap.innerHTML = '';
+  const selected = new Set();
+  const done = document.createElement('button');
+  const refreshDone = () => {
+    done.textContent = selected.size ? `Done (${selected.size}) →` : 'Pick at least one';
+    done.disabled = selected.size === 0;
+    done.style.opacity = selected.size === 0 ? '0.4' : '1';
+  };
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'ai-reply-chip';
+    btn.textContent = opt;
+    btn.onclick = () => {
+      if (selected.has(opt)) { selected.delete(opt); btn.classList.remove('selected'); }
+      else { selected.add(opt); btn.classList.add('selected'); }
+      refreshDone();
+    };
+    wrap.appendChild(btn);
+  });
+  done.className = 'ai-reply-chip ai-reply-done';
+  done.onclick = () => {
+    if (!selected.size) return;
+    aiAnswer(options.filter(o => selected.has(o)).join(', ')); // preserve display order
+  };
+  wrap.appendChild(done);
+  refreshDone();
+}
+
 function aiShowTextInput(placeholder) {
   const wrap = document.getElementById('ai-input-wrap');
   const input = document.getElementById('ai-text-input');
@@ -5369,7 +5404,8 @@ function aiAskNext() {
 
   setTimeout(() => {
     if (step.type === 'chips') {
-      aiShowChips(step.options);
+      if (step.multi) aiShowMultiChips(step.options);
+      else aiShowChips(step.options);
     } else {
       aiShowTextInput(step.placeholder);
     }
