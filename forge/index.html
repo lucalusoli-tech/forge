@@ -6854,7 +6854,13 @@ function activatePremium(tier='premium') {
   if (tier === 'coached' && plusBilling === 'yearly') key = 'coached_yearly';
   const base = urls[key] || urls.premium;
   const email = currentUser.email || '';
-  const dest = email ? base + '?prefilled_customer[email]=' + encodeURIComponent(email) : base;
+  // Carry the Supabase user id through checkout so the webhook can match the payment to
+  // the right account by ID — not by email. (Users often pay with a different address
+  // than they signed up with, which silently broke tier upgrades/downgrades.)
+  const params = [];
+  if (currentUser.id) params.push('client_reference_id=' + encodeURIComponent(currentUser.id));
+  if (email) params.push('prefilled_customer[email]=' + encodeURIComponent(email));
+  const dest = params.length ? base + '?' + params.join('&') : base;
   window.location.href = dest;
 }
 
