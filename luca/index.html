@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The guy that couldn't do a pull-up — FORGE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#080808;
+  --s1:#0f0f0f;
+  --s2:#141414;
+  --s3:#1a1a1a;
+  --gold:#c9a96e;
+  --ivory:#e8e2d9;
+  --grey:#6b6560;
+  --red:#c94040;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--ivory);
+  font-family:'Inter',system-ui,sans-serif;
+  font-weight:300;
+  -webkit-font-smoothing:antialiased;
+  line-height:1.6;
+  overflow-x:hidden;
+}
+.wrap{max-width:1080px;margin:0 auto;padding:0 28px}
+.narrow{max-width:660px}
+
+/* type scale */
+h1{
+  font-size:clamp(2.6rem,7.5vw,5.4rem);
+  font-weight:300;
+  letter-spacing:-0.035em;
+  line-height:0.98;
+}
+h2{
+  font-size:clamp(1.7rem,3.6vw,2.7rem);
+  font-weight:300;
+  letter-spacing:-0.03em;
+  line-height:1.12;
+}
+h3{font-size:1.05rem;font-weight:500;letter-spacing:-0.01em}
+p{color:#b8b2aa;font-size:1.03rem}
+.lead{font-size:clamp(1.05rem,1.6vw,1.22rem);color:#c9c3ba}
+.mono{
+  font-family:'DM Mono',monospace;
+  font-size:0.7rem;
+  font-weight:400;
+  letter-spacing:0.22em;
+  text-transform:uppercase;
+  color:var(--grey);
+}
+.gold{color:var(--gold)}
+
+/* ————— nav ————— */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:50;
+  padding:20px 0;
+  background:linear-gradient(to bottom,rgba(8,8,8,.94),rgba(8,8,8,0));
+  backdrop-filter:blur(2px);
+}
+nav .wrap{display:flex;justify-content:space-between;align-items:center}
+.logo{font-family:'DM Mono',monospace;font-size:.82rem;letter-spacing:.42em;color:var(--ivory);text-transform:uppercase}
+.nav-cta{
+  font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:.18em;text-transform:uppercase;
+  color:var(--gold);text-decoration:none;border-bottom:1px solid rgba(201,169,110,.35);padding-bottom:3px;
+  transition:border-color .3s;
+}
+.nav-cta:hover{border-color:var(--gold)}
+
+/* ————— hero ————— */
+header{
+  min-height:100svh;display:flex;align-items:center;
+  position:relative;padding:120px 0 80px;
+}
+header::after{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 70% 55% at 15% 45%,rgba(201,169,110,.055),transparent 70%);
+}
+.hero-inner{position:relative;z-index:2;max-width:900px}
+.hero-eyebrow{margin-bottom:38px;display:block}
+h1 .dim{color:var(--grey)}
+h1 .em{
+  color:var(--ivory);
+  position:relative;display:inline-block;
+}
+h1 .em::after{
+  content:'';position:absolute;left:-2px;right:-2px;bottom:.12em;height:2px;
+  background:var(--gold);transform:scaleX(0);transform-origin:left;
+  animation:strike 1s cubic-bezier(.22,1,.36,1) 1.1s forwards;
+}
+@keyframes strike{to{transform:scaleX(1)}}
+.hero-sub{margin-top:40px;max-width:520px;border-left:1px solid var(--s3);padding-left:24px}
+.hero-actions{margin-top:52px;display:flex;gap:28px;align-items:center;flex-wrap:wrap}
+
+/* ————— buttons ————— */
+.btn{
+  display:inline-block;
+  background:var(--gold);color:#080808;
+  font-family:'DM Mono',monospace;font-size:.74rem;font-weight:500;
+  letter-spacing:.16em;text-transform:uppercase;
+  padding:17px 34px;text-decoration:none;border:1px solid var(--gold);
+  transition:background .3s,color .3s;
+}
+.btn:hover{background:transparent;color:var(--gold)}
+.btn-ghost{
+  background:transparent;color:var(--grey);border-color:var(--s3);
+}
+.btn-ghost:hover{background:transparent;color:var(--ivory);border-color:var(--grey)}
+
+/* ————— sections ————— */
+section{padding:120px 0}
+.rule{height:1px;background:var(--s3);border:0}
+
+/* fear block */
+.fear{background:var(--s1)}
+.fear-grid{display:grid;grid-template-columns:1fr;gap:44px}
+@media(min-width:820px){.fear-grid{grid-template-columns:1fr 1fr;gap:80px}}
+.fear-card{border-top:1px solid var(--s3);padding-top:22px}
+.fear-card .mono{display:block;margin-bottom:14px}
+
+/* ————— the spine (signature) ————— */
+.story{position:relative;background:var(--bg)}
+.spine{position:relative;padding-left:44px}
+@media(min-width:820px){.spine{padding-left:130px}}
+.spine::before{
+  content:'';position:absolute;left:7px;top:8px;bottom:8px;width:1px;
+  background:linear-gradient(to bottom,
+    var(--grey) 0%,
+    #2a2724 22%,
+    #121110 46%,
+    #0d0c0b 56%,
+    var(--gold) 72%,
+    var(--gold) 100%);
+  opacity:.55;
+}
+@media(min-width:820px){.spine::before{left:93px}}
+.beat{position:relative;padding-bottom:62px}
+.beat:last-child{padding-bottom:0}
+.beat .tick{
+  position:absolute;left:-44px;top:7px;
+  width:15px;height:15px;border-radius:50%;
+  background:var(--bg);border:1px solid var(--s3);
+}
+@media(min-width:820px){.beat .tick{left:-130px}}
+.beat .stat{
+  position:absolute;left:-130px;top:34px;width:78px;
+  text-align:left;font-family:'DM Mono',monospace;font-size:.68rem;
+  letter-spacing:.06em;color:var(--grey);line-height:1.45;text-transform:uppercase;
+  display:none;
+}
+@media(min-width:820px){.beat .stat{display:block}}
+.beat-stat-inline{display:block;margin-bottom:10px}
+@media(min-width:820px){.beat-stat-inline{display:none}}
+.beat p{max-width:640px}
+.beat p + p{margin-top:14px}
+.beat.low .tick{border-color:#1f1d1b}
+.beat.low p{color:#8b857e}
+.beat.turn .tick{border-color:var(--gold);box-shadow:0 0 0 4px rgba(201,169,110,.12)}
+.beat.turn .stat{color:var(--gold)}
+.beat.up .tick{background:var(--gold);border-color:var(--gold)}
+.beat.up .stat{color:var(--gold)}
+.beat .said{
+  display:block;margin-top:16px;padding-left:18px;border-left:1px solid var(--s3);
+  color:var(--ivory);font-size:1.08rem;font-weight:300;font-style:italic;
+}
+
+/* ————— be your hero ————— */
+.hero-line{
+  background:var(--s1);text-align:center;padding:150px 0;
+  border-top:1px solid var(--s2);border-bottom:1px solid var(--s2);
+}
+.hero-line h2{font-size:clamp(2.4rem,7vw,4.6rem);letter-spacing:-0.04em}
+.hero-line .mono{display:block;margin-bottom:34px}
+.hero-line p{margin:34px auto 0;max-width:460px}
+
+/* ————— offer ————— */
+.offer{background:var(--bg)}
+.offer-head{max-width:620px;margin-bottom:70px}
+.days{
+  display:grid;grid-template-columns:1fr;gap:1px;background:var(--s2);
+  border:1px solid var(--s2);margin-bottom:70px;
+}
+@media(min-width:700px){.days{grid-template-columns:repeat(3,1fr)}}
+.day{background:var(--s1);padding:34px 28px}
+.day .mono{display:block;margin-bottom:16px;color:var(--gold)}
+.day h3{margin-bottom:10px}
+.day p{font-size:.94rem}
+
+/* form */
+.capture{
+  background:var(--s1);border:1px solid var(--s2);padding:clamp(32px,5vw,60px);
+  display:grid;grid-template-columns:1fr;gap:34px;align-items:center;
+}
+@media(min-width:860px){.capture{grid-template-columns:1.1fr 1fr;gap:60px}}
+.field{display:flex;flex-direction:column;gap:12px}
+.field label{font-family:'DM Mono',monospace;font-size:.66rem;letter-spacing:.2em;text-transform:uppercase;color:var(--grey)}
+.field input{
+  background:var(--bg);border:1px solid var(--s3);color:var(--ivory);
+  padding:16px 18px;font-family:'Inter',sans-serif;font-size:1rem;font-weight:300;
+  transition:border-color .25s;
+}
+.field input::placeholder{color:#4a4642}
+.field input:focus{outline:none;border-color:var(--gold)}
+.capture button{
+  width:100%;cursor:pointer;margin-top:6px;
+  background:var(--gold);color:#080808;border:1px solid var(--gold);
+  font-family:'DM Mono',monospace;font-size:.74rem;font-weight:500;
+  letter-spacing:.16em;text-transform:uppercase;padding:17px 30px;
+  transition:background .3s,color .3s;
+}
+.capture button:hover{background:transparent;color:var(--gold)}
+.finep{font-size:.82rem;color:var(--grey);margin-top:16px}
+
+/* footer */
+footer{padding:60px 0;border-top:1px solid var(--s2);background:var(--bg)}
+footer .wrap{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;align-items:center}
+footer a{color:var(--grey);text-decoration:none;transition:color .25s}
+footer a:hover{color:var(--gold)}
+
+/* focus */
+a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+
+/* reveal */
+.rv{opacity:0;transform:translateY(18px);transition:opacity .8s cubic-bezier(.22,1,.36,1),transform .8s cubic-bezier(.22,1,.36,1)}
+.rv.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){
+  *{animation:none!important;transition:none!important}
+  .rv{opacity:1;transform:none}
+  h1 .em::after{transform:scaleX(1)}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <span class="logo">Forge</span>
+    <a class="nav-cta" href="#start">Start the 14 days</a>
+  </div>
+</nav>
+
+<header>
+  <div class="wrap">
+    <div class="hero-inner">
+      <span class="mono hero-eyebrow">A true story — Luca Lusoli, Founder of FORGE</span>
+      <h1>The guy that <span class="em">couldn't</span><br><span class="dim">do a single</span> pull-up.</h1>
+      <div class="hero-sub">
+        <p class="lead">I thought I had reached my peak in my 30s. I thought from there it was only downhill.</p>
+      </div>
+      <div class="hero-actions">
+        <a class="btn" href="#start">Start the 14 days — free</a>
+        <a class="btn btn-ghost btn" href="#story" style="background:transparent;color:var(--grey);border-color:var(--s3)">Read what happened</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<section class="fear">
+  <div class="wrap">
+    <div class="fear-grid rv">
+      <div>
+        <h2>I was scared of being weak.</h2>
+        <p class="lead" style="margin-top:22px">Not of the bar. Of what being weak meant — not being accepted by the others.</p>
+      </div>
+      <div style="display:grid;gap:34px;align-content:start">
+        <div class="fear-card">
+          <span class="mono">What I did about it</span>
+          <p>I beat myself with training to the point that it broke me. Training in the dark, literally, chasing results I could show, so I would be accepted into the tribe.</p>
+        </div>
+        <div class="fear-card">
+          <span class="mono">What it cost</span>
+          <p>Six months of pain. Joints that wouldn't let me move. And zero to show for it.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="story" id="story">
+  <div class="wrap">
+    <span class="mono rv" style="display:block;margin-bottom:56px">The log — how it actually went</span>
+    <div class="spine">
+
+      <div class="beat rv">
+        <span class="tick"></span>
+        <span class="stat">Day one<br>The invitation</span>
+        <span class="mono beat-stat-inline">Day one — the invitation</span>
+        <p>A friend invited me to a new calisthenics class in my city. Just come and play, he said. So I went to play.</p>
+        <p>I was confident. Very strong in pushing, coming from a dancing background. I had nothing to worry about.</p>
+      </div>
+
+      <div class="beat low rv">
+        <span class="tick"></span>
+        <span class="stat">0 reps<br>Halfway, one arm</span>
+        <span class="mono beat-stat-inline">0 reps — halfway, one arm</span>
+        <p>Halfway through the class: "OK guys, let's do some pull-ups."</p>
+        <p>I grabbed the bar, squeezed with everything in my palms, and — <em>PULL!</em> My back switched on. And I couldn't even get halfway.</p>
+        <span class="said">"Wait, that's not possible. One more time."</span>
+        <p style="margin-top:16px">Grasped the bar again, squeezed firmly, up — zero. Nada. Caput. Halfway again, and only with one arm. The other didn't even try.</p>
+      </div>
+
+      <div class="beat low rv">
+        <span class="tick"></span>
+        <span class="stat">The hole</span>
+        <span class="mono beat-stat-inline">The hole</span>
+        <p>I was so embarrassed, so humbled, so reality-checked, that I stopped talking and fell into a deep black mental hole.</p>
+      </div>
+
+      <div class="beat low rv">
+        <span class="tick"></span>
+        <span class="stat">2×/day<br>2 hrs each</span>
+        <span class="mono beat-stat-inline">2×/day — 2 hrs each</span>
+        <p>From there I went nuclear. Training twice a day, two hours each time.</p>
+        <p>I made a deal with myself: I didn't deserve any human interaction if I wasn't strong. I felt inferior in every conversation.</p>
+      </div>
+
+      <div class="beat low rv">
+        <span class="tick"></span>
+        <span class="stat">6 months<br>0 results</span>
+        <span class="mono beat-stat-inline">6 months — 0 results</span>
+        <p>I had to figure it out by myself. I trained like a mad man for six months. Every muscle and joint was hurting, I couldn't move from the pain — and I wanted it so badly.</p>
+        <p>After all of that, I got zero results.</p>
+      </div>
+
+      <div class="beat low rv">
+        <span class="tick"></span>
+        <span class="stat">Age 39</span>
+        <span class="mono beat-stat-inline">Age 39</span>
+        <p>I was clocking 39 and I was ready to give up and accept my fate.</p>
+      </div>
+
+      <div class="beat turn rv">
+        <span class="tick"></span>
+        <span class="stat">The turn<br>I hired a coach</span>
+        <span class="mono beat-stat-inline gold">The turn — I hired a coach</span>
+        <p>I decided to give it one more chance. I hired a coach. He gave me a foundation programme that I still remember.</p>
+        <span class="said">"That's too easy."</span>
+        <p style="margin-top:16px">But I said I would do it. So I did it.</p>
+      </div>
+
+      <div class="beat up rv">
+        <span class="tick"></span>
+        <span class="stat">1 month later<br>First muscle-up</span>
+        <span class="mono beat-stat-inline gold">1 month later — first muscle-up</span>
+        <p>One month later I had my first muscle-up. I couldn't believe it.</p>
+        <p>Six months alone got me nothing. One month of the right foundations got me everything. That's when I became a foundation devotee — and it's the whole reason FORGE exists.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="hero-line">
+  <div class="wrap">
+    <span class="mono">The point of all this</span>
+    <h2>Be your <span class="gold">hero</span>.</h2>
+    <p>Don't go through what I went through. Learn straight away what you actually need to crack your goal — in the shortest amount of time.</p>
+  </div>
+</section>
+
+<section class="offer" id="start">
+  <div class="wrap">
+    <div class="offer-head rv">
+      <span class="mono" style="display:block;margin-bottom:22px">Free — 14 days</span>
+      <h2>The 14-Day First Pull-Up Challenge</h2>
+      <p class="lead" style="margin-top:22px">The foundation programme I wish someone had handed me at 39. Fourteen days, one short session a day, no gym required — just a bar and something to stand on.</p>
+    </div>
+
+    <div class="days rv">
+      <div class="day">
+        <span class="mono">Days 1–4</span>
+        <h3>Own the hang</h3>
+        <p>Scapular control and grip. Most people can't pull because they've never learned to hang properly. This is where the back switches on.</p>
+      </div>
+      <div class="day">
+        <span class="mono">Days 5–9</span>
+        <h3>Build the pull</h3>
+        <p>Rows and negatives, loaded at the level you're actually at. Progression you can measure every session, not guess at.</p>
+      </div>
+      <div class="day">
+        <span class="mono">Days 10–14</span>
+        <h3>Take the rep</h3>
+        <p>Assisted to unassisted, with the exact cues I use on the gym floor. Day 14 you test. Most people surprise themselves.</p>
+      </div>
+    </div>
+
+    <div class="capture rv">
+      <div>
+        <h2 style="font-size:clamp(1.4rem,2.6vw,1.9rem)">Send me the 14 days.</h2>
+        <p style="margin-top:16px">Day one lands in your inbox immediately. One email a day after that — the session, the standard, and what to look for. Nothing else.</p>
+      </div>
+      <!-- Point action= at your AWeber list (or Formspree endpoint) before publishing -->
+      <form class="field" action="#" method="post">
+        <label for="fname">First name</label>
+        <input id="fname" name="name" type="text" placeholder="Luca" required>
+        <label for="email" style="margin-top:8px">Email</label>
+        <input id="email" name="email" type="email" placeholder="you@email.com" required>
+        <button type="submit">Send me day one</button>
+        <p class="finep">No spam. Leave whenever you want.</p>
+      </form>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <span class="logo">Forge</span>
+    <span class="mono">London — Calisthenics coaching</span>
+    <a class="mono" href="mailto:luca@forgetraining.app" style="color:var(--grey)">luca@forgetraining.app</a>
+  </div>
+</footer>
+
+<script>
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+},{threshold:0.15,rootMargin:'0px 0px -60px 0px'});
+document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>
