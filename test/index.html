@@ -573,6 +573,11 @@
   .auth-input { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 14px; padding: 14px 16px; outline: none; -webkit-appearance: none; border-radius: 0; box-sizing: border-box; display: block; }
   .auth-input:focus { border-color: var(--accent); }
   .auth-input::placeholder { color: var(--text-dim); font-size: 12px; }
+  .auth-pass-wrap { position: relative; display: block; }
+  .auth-pass-wrap .auth-input { padding-right: 48px; }
+  .auth-pass-eye { position: absolute; top: 0; right: 0; height: 100%; width: 44px; display: flex; align-items: center; justify-content: center; background: none; border: none; color: var(--text-dim); cursor: pointer; -webkit-appearance: none; padding: 0; }
+  .auth-pass-eye:active { color: var(--accent); }
+  .auth-pass-eye svg { width: 20px; height: 20px; display: block; }
   .auth-btn-primary { width: 100%; padding: 16px; background: var(--accent); border: none; color: #080808; font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; font-weight: 500; }
   .auth-btn-primary:active { background: #b8943d; }
   .auth-btn-ghost { width: 100%; padding: 14px; background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
@@ -667,6 +672,9 @@
   .ai-replies { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; animation: ai-fade 0.3s ease; }
   .ai-reply-chip { background: var(--surface); border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; padding: 10px 16px; cursor: pointer; transition: all 0.15s; }
   .ai-reply-chip:active { border-color: var(--accent); background: var(--accent-glow); color: var(--accent); }
+  .ai-reply-chip.selected { border-color: var(--accent); background: var(--accent-glow); color: var(--accent); }
+  .ai-reply-chip.selected::before { content: '✓ '; }
+  .ai-reply-done { border-color: var(--accent); color: var(--accent); font-weight: 500; }
   .ai-input-wrap { display: flex; gap: 8px; margin-bottom: 12px; }
   .ai-text-input { flex: 1; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; padding: 12px 16px; outline: none; -webkit-appearance: none; border-radius: 0; }
   .ai-text-input:focus { border-color: var(--accent); }
@@ -979,15 +987,22 @@
   </div>
   <div class="auth-form">
     <div class="auth-title">SIGN IN</div>
-    <form id="login-form" onsubmit="event.preventDefault(); handleLogin(); return false;" action="#" method="post" style="display:contents">
+    <form id="login-form" onsubmit="event.preventDefault(); handleLogin(); return false;" action="#" method="post" style="display:flex;flex-direction:column;gap:inherit">
       <input class="auth-input" type="email" id="login-email" name="email" placeholder="Email address" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" inputmode="email">
-      <input class="auth-input" type="password" id="login-pass" name="password" placeholder="Password" autocomplete="current-password">
+      <div class="auth-pass-wrap">
+        <input class="auth-input" type="password" id="login-pass" name="password" placeholder="Password" autocomplete="current-password">
+        <button type="button" class="auth-pass-eye" aria-label="Show password" onclick="togglePass('login-pass', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
       <div class="auth-error" id="login-error"></div>
       <button class="auth-btn-primary" type="submit">SIGN IN →</button>
     </form>
     <div class="auth-switch" style="margin-top:6px"><span onclick="showAuthScreen('reset')">Forgot password?</span></div>
     <div class="auth-divider"><div class="auth-divider-line"></div><div class="auth-divider-text">NO ACCOUNT?</div><div class="auth-divider-line"></div></div>
     <button class="auth-btn-ghost" type="button" onclick="showAuthScreen('signup')">CREATE ACCOUNT</button>
+    <button class="auth-btn-ghost" type="button" onclick="testFaceID()" style="margin-top:10px;border-color:var(--accent-dim);color:var(--accent)">🔒 TEST FACE ID</button>
+    <div class="auth-error" id="faceid-result" style="margin-top:8px"></div>
     <div class="auth-switch"><span onclick="showAuthScreen('splash')">← Back</span></div>
   </div>
 </div>
@@ -1040,7 +1055,12 @@
     <form id="signup-form" onsubmit="event.preventDefault(); handleSignup(); return false;" action="#" method="post" style="display:contents">
       <input class="auth-input" type="text" id="signup-name" name="name" placeholder="Your name" autocomplete="name">
       <input class="auth-input" type="email" id="signup-email" name="email" placeholder="Email address" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" inputmode="email">
-      <input class="auth-input" type="password" id="signup-pass" name="password" placeholder="Password" autocomplete="new-password">
+      <div class="auth-pass-wrap">
+        <input class="auth-input" type="password" id="signup-pass" name="password" placeholder="Password" autocomplete="new-password">
+        <button type="button" class="auth-pass-eye" aria-label="Show password" onclick="togglePass('signup-pass', this)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+        </button>
+      </div>
       <div class="auth-error" id="signup-error"></div>
       <button class="auth-btn-primary" type="submit">START FREE TRIAL →</button>
     </form>
@@ -3056,7 +3076,7 @@ function _logExerciseCardHTML(ex) {
   const wk = `${currentDayId}_${ex.id}_v${currentWeek}`;
   const sparkSvg = buildSparkline(ex.id);
   const saved = sessionLog[wk] || {};
-  const savedNote = saved['note'] || '';
+  const savedNote = (sessionLog[`${currentDayId}_${ex.id}_note`] ?? saved['note'] ?? '').replace(/"/g, '&quot;');
   let lastWeekHint = '';
   if (currentWeek > 1) {
     const prevKey = `${currentDayId}_${ex.id}_v${currentWeek - 1}`;
@@ -3210,7 +3230,7 @@ function renderSupersetGroup(groupLabel) {
     if (!exData) return;
     const wk = `${currentDayId}_${g.id}_v${currentWeek}`;
     const saved = sessionLog[wk] || {};
-    const savedNote = (saved['note'] || '').replace(/"/g, '&quot;');
+    const savedNote = (sessionLog[`${currentDayId}_${g.id}_note`] ?? saved['note'] ?? '').replace(/"/g, '&quot;');
     html += `<div class="ss-note-row">
       <div class="ss-note-label">${exData.name}</div>
       <input class="ss-note-input" type="text" placeholder="Note — technique, feel, load…" value="${savedNote}"
@@ -3453,7 +3473,7 @@ function saveSession() {
       if(ri) entry[`s${s}_r`]=ri.value;
     }
     const noteEl = document.getElementById(`${wk}_note`);
-    if(noteEl) entry['note'] = noteEl.value;
+    if(noteEl) sessionLog[`${currentDayId}_${ex.id}_note`] = noteEl.value; // block-level note (persists across weeks)
     sessionLog[wk]=entry;
   });
   sessionLog[`${currentDayId}_notes_v${currentWeek}`]=document.getElementById('session-notes').value;
@@ -5085,9 +5105,12 @@ function setTimerDuration(secs, btn) {
 
 function autoSaveNote(wk) {
   const el = document.getElementById(`${wk}_note`); if(!el) return;
-  if(!sessionLog[wk]) sessionLog[wk] = {};
-  sessionLog[wk]['note'] = el.value;
+  // Exercise notes are block-level — they persist across every week. Store under a
+  // week-independent key (dayId_exId_note) rather than inside the per-week log entry.
+  const noteKey = wk.replace(/_v\d+$/, '') + '_note';
+  sessionLog[noteKey] = el.value;
   localStorage.setItem('fw_log', JSON.stringify(sessionLog));
+  scheduleSync();
 }
 
 // ─── SPARKLINE ─────────────────────────────────────────────────
@@ -5198,6 +5221,7 @@ const AI_BRANCHES = {
       key: 'targetSkills',
       msg: "Which skills are you working towards? Pick all that apply.",
       type: 'chips',
+      multi: true,
       options: ['Muscle-up', 'Front Lever', 'Planche', 'Handstand', 'Back Lever', 'Human Flag']
     },
     {
@@ -5305,6 +5329,37 @@ function aiShowChips(options) {
   });
 }
 
+function aiShowMultiChips(options) {
+  // Multi-select: tap chips to toggle, then confirm with Done. (For "Pick all that apply" questions.)
+  const wrap = document.getElementById('ai-replies');
+  wrap.innerHTML = '';
+  const selected = new Set();
+  const done = document.createElement('button');
+  const refreshDone = () => {
+    done.textContent = selected.size ? `Done (${selected.size}) →` : 'Pick at least one';
+    done.disabled = selected.size === 0;
+    done.style.opacity = selected.size === 0 ? '0.4' : '1';
+  };
+  options.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'ai-reply-chip';
+    btn.textContent = opt;
+    btn.onclick = () => {
+      if (selected.has(opt)) { selected.delete(opt); btn.classList.remove('selected'); }
+      else { selected.add(opt); btn.classList.add('selected'); }
+      refreshDone();
+    };
+    wrap.appendChild(btn);
+  });
+  done.className = 'ai-reply-chip ai-reply-done';
+  done.onclick = () => {
+    if (!selected.size) return;
+    aiAnswer(options.filter(o => selected.has(o)).join(', ')); // preserve display order
+  };
+  wrap.appendChild(done);
+  refreshDone();
+}
+
 function aiShowTextInput(placeholder) {
   const wrap = document.getElementById('ai-input-wrap');
   const input = document.getElementById('ai-text-input');
@@ -5366,7 +5421,8 @@ function aiAskNext() {
 
   setTimeout(() => {
     if (step.type === 'chips') {
-      aiShowChips(step.options);
+      if (step.multi) aiShowMultiChips(step.options);
+      else aiShowChips(step.options);
     } else {
       aiShowTextInput(step.placeholder);
     }
@@ -6217,15 +6273,34 @@ async function syncBlocksToCloud() {
 
 async function syncLogsToCloud(force = false) {
   if(!currentUser?.id) return;
-  // SAFETY: never overwrite cloud log with empty data unless forced (e.g. after archive)
+  // SAFETY: never overwrite cloud log with empty data unless forced (e.g. after archive/activate)
   if(!force && (!sessionLog || Object.keys(sessionLog).length === 0)) {
     console.log('Sync skipped: session log is empty, preserving cloud data');
     return;
   }
   try {
+    if(force) {
+      // Deliberate replace (after archiving/activating a block, or restoring one) — write as-is.
+      await supa.from('logs').upsert({
+        user_id: currentUser.id,
+        data: sessionLog,
+        updated_at: new Date().toISOString()
+      }, { onConflict: 'user_id' });
+      return;
+    }
+    // Normal sync: MERGE with the current cloud log before writing, so a partial or stale local
+    // (a second device, or a sync firing before loadFromCloud finishes) can never delete
+    // cloud-only entries — which is how a whole week was disappearing. Union of keys; local wins
+    // on conflict since it's the active edit. This also pulls in any other-device additions.
+    const { data: cloudRow } = await supa.from('logs')
+      .select('data').eq('user_id', currentUser.id).maybeSingle();
+    const cloudLog = (cloudRow && cloudRow.data) ? cloudRow.data : {};
+    const merged = { ...cloudLog, ...sessionLog };
+    sessionLog = merged;
+    localStorage.setItem('fw_log', JSON.stringify(merged));
     await supa.from('logs').upsert({
       user_id: currentUser.id,
-      data: sessionLog,
+      data: merged,
       updated_at: new Date().toISOString()
     }, { onConflict: 'user_id' });
   } catch(e) { console.warn('Log sync failed:', e); }
@@ -6284,6 +6359,60 @@ function scheduleSync() {
 }
 
 // ─── AUTH ──────────────────────────────────────────────────────
+// ── TEMPORARY: Face ID / WebAuthn probe ─────────────────────────────
+// Client-only proof that the platform biometric prompt fires inside the installed PWA.
+// NOT a real login — no server, nothing stored. Remove once the passkey backend is built.
+async function testFaceID() {
+  const out = document.getElementById('faceid-result');
+  const show = (msg, ok) => { if (out) { out.textContent = msg; out.style.color = ok ? '#5a8a5a' : '#c94040'; } };
+
+  if (!window.PublicKeyCredential || !navigator.credentials) {
+    show('WebAuthn not available on this browser.', false);
+    return;
+  }
+  show('Prompting… (Face ID should appear)', true);
+
+  const rand = (n) => { const a = new Uint8Array(n); crypto.getRandomValues(a); return a; };
+
+  try {
+    const cred = await navigator.credentials.create({
+      publicKey: {
+        challenge: rand(32),
+        rp: { name: 'FORGE', id: location.hostname },
+        user: { id: rand(16), name: 'faceid-test@forge', displayName: 'FORGE Test' },
+        pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+        authenticatorSelection: {
+          authenticatorAttachment: 'platform', // on-device (Face ID / Touch ID), not a security key
+          userVerification: 'required',         // force biometric/passcode
+          residentKey: 'preferred'
+        },
+        timeout: 60000,
+        attestation: 'none'
+      }
+    });
+    show(cred ? '✓ Face ID fired — passkey created on device. It works.' : 'No credential returned.', !!cred);
+    console.log('[FACEID TEST] credential id:', cred && cred.id);
+  } catch (e) {
+    // NotAllowedError = user cancelled or the prompt was blocked by the context
+    show('✗ ' + (e && e.name ? e.name : 'Error') + ': ' + (e && e.message ? e.message : e), false);
+    console.warn('[FACEID TEST] failed:', e);
+  }
+}
+
+function togglePass(id, btn) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const show = el.type === 'password';
+  el.type = show ? 'text' : 'password';
+  if (btn) {
+    btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+    // swap to an eye-off icon when visible
+    btn.innerHTML = show
+      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 12s3.5-7 10-7c2 0 3.8.7 5.3 1.6M22 12s-3.5 7-10 7c-2 0-3.8-.7-5.3-1.6"/><path d="M3 3l18 18"/><path d="M9.5 9.6a3 3 0 0 0 4.2 4.2"/></svg>'
+      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
+  }
+}
+
 function showAuthScreen(screen) {
   // Hide loader and all auth screens, then show the requested one
   const loader = document.getElementById('auth-loader');
@@ -6796,7 +6925,13 @@ function activatePremium(tier='premium') {
   if (tier === 'coached' && plusBilling === 'yearly') key = 'coached_yearly';
   const base = urls[key] || urls.premium;
   const email = currentUser.email || '';
-  const dest = email ? base + '?prefilled_customer[email]=' + encodeURIComponent(email) : base;
+  // Carry the Supabase user id through checkout so the webhook can match the payment to
+  // the right account by ID — not by email. (Users often pay with a different address
+  // than they signed up with, which silently broke tier upgrades/downgrades.)
+  const params = [];
+  if (currentUser.id) params.push('client_reference_id=' + encodeURIComponent(currentUser.id));
+  if (email) params.push('prefilled_customer[email]=' + encodeURIComponent(email));
+  const dest = params.length ? base + '?' + params.join('&') : base;
   window.location.href = dest;
 }
 
@@ -6911,56 +7046,83 @@ async function acceptAssignedBlock(assignmentId) {
       .select('*')
       .eq('id', assignmentId)
       .single();
-    console.log('Assigned block row:', row);
     if(error || !row) { showToast('Failed to load block'); return; }
 
     const block = row.block_data?.currentBlock;
-    console.log('Block data:', block);
-    if(block) {
-      const newId = 'assigned_' + assignmentId;
-      // Check if already added (prevent duplicates)
-      if(customWorkouts.some(w => w.id === newId)) {
-        // Already accepted on a previous session — clear the pending flag so the notice
-        // stops re-appearing on every launch. Do NOT re-activate: the client may be mid-way
-        // through this block and activating would archive + wipe their live log.
-        await supa.from('assigned_blocks')
-          .update({ status: 'accepted', accepted_at: new Date().toISOString() })
-          .eq('id', assignmentId);
-        dismissAssignedNotice();
-        showToast('Block already in your Programmes');
-        return;
-      }
-      const newBlock = { ...block, id: newId, name: row.block_name };
-      if(!newBlock.warmup) newBlock.warmup = [];
-      if(!newBlock.skill)  newBlock.skill  = [];
-      console.log('New block to add:', newBlock);
-      console.log('customWorkouts before:', customWorkouts.length);
-      customWorkouts.unshift(newBlock);
-      console.log('customWorkouts after:', customWorkouts.length);
-      localStorage.setItem('fw_customs', JSON.stringify(customWorkouts));
-      syncBlocksToCloud();
-      renderBuilderSaved();
+    if(!block) { showToast('Block data missing'); return; }
 
-      // Update status in Supabase
-      await supa
-        .from('assigned_blocks')
+    const newId = 'assigned_' + assignmentId;
+
+    // Already accepted on a previous session — just clear the pending flag.
+    if(customWorkouts.some(w => w.id === newId)) {
+      await supa.from('assigned_blocks')
         .update({ status: 'accepted', accepted_at: new Date().toISOString() })
         .eq('id', assignmentId);
+      dismissAssignedNotice();
+      showToast('Block already in your Programmes');
+      return;
+    }
 
-      // Activate the assigned block — route through activateBlock so the previous
-      // programme's session log is archived + cleared. Without this, a coach-assigned
-      // block inherits the client's old logged kg/reps and "logged" day chips.
+    const newBlock = { ...block, id: newId, name: row.block_name };
+    if(!newBlock.warmup) newBlock.warmup = [];
+    if(!newBlock.skill)  newBlock.skill  = [];
+
+    // Decide: UPDATE the current programme in place (KEEP logs) or start a NEW one (fresh start).
+    // The coach's explicit choice (block_data.mode) wins. If it's an older push with no mode set,
+    // fall back to a name match with the current block so a same-name update never wipes progress.
+    const hasCurrent = currentBlock && currentBlock.name && (currentBlock.days || []).length > 0;
+    let mode = row.block_data?.mode;
+    if(!mode) {
+      mode = (hasCurrent && currentBlock.name.trim().toUpperCase() === (newBlock.name || '').trim().toUpperCase())
+        ? 'update' : 'new';
+    }
+
+    // Mark accepted + stop the notice re-appearing, regardless of branch
+    await supa.from('assigned_blocks')
+      .update({ status: 'accepted', accepted_at: new Date().toISOString() })
+      .eq('id', assignmentId);
+
+    if(mode === 'update' && hasCurrent) {
+      // ── UPDATE IN PLACE ── replace the programme's structure but KEEP the session log and
+      // current week. Logs are keyed day+exercise+week, so any day/exercise the coach left
+      // unchanged keeps its logged sets; changed exercises simply start empty. No archive, no wipe.
+      const savedId = currentBlock.sourceId || newId;
+      const savedEntry = { ...newBlock, id: savedId };
+      const idx = customWorkouts.findIndex(w => w.id === savedId);
+      if(idx > -1) customWorkouts[idx] = savedEntry; else customWorkouts.unshift(savedEntry);
+      localStorage.setItem('fw_customs', JSON.stringify(customWorkouts));
+
+      currentBlock = {
+        ...currentBlock,
+        name: newBlock.name,
+        methods: newBlock.methods || [],
+        weeks: newBlock.weeks || currentBlock.weeks || 4,
+        warmup: newBlock.warmup || [],
+        skill: newBlock.skill || [],
+        days: newBlock.days || [],
+        sourceId: savedId
+      };
+      currentWeek = Math.min(currentWeek || 1, currentBlock.weeks);
+      localStorage.setItem('fw_block', JSON.stringify(currentBlock));
+      localStorage.setItem('fw_week', currentWeek);
+      saveCurrentBlock();
+      await syncBlocksToCloud();
+      updateStats(); renderHomeDays(); renderBuilderSaved();
+      if(typeof renderHomeFixedSections === 'function') renderHomeFixedSections();
+      dismissAssignedNotice();
+      showToast('Programme updated — progress kept ✓');
+      setTimeout(() => navigate('home'), 400);
+    } else {
+      // ── NEW PROGRAMME ── add to the list and start fresh (archives current, clears log).
+      customWorkouts.unshift(newBlock);
+      localStorage.setItem('fw_customs', JSON.stringify(customWorkouts));
+      await syncBlocksToCloud();
+      renderBuilderSaved();
       await activateBlock(newBlock);
-      updateStats();
-      renderHomeDays();
-
+      updateStats(); renderHomeDays();
       dismissAssignedNotice();
       showToast('Block ready — let\'s train ✦');
       setTimeout(() => navigate('home'), 400);
-    } else {
-      console.error('No block data found in row.block_data.currentBlock');
-      showToast('Block data missing');
-      return;
     }
   } catch(e) {
     console.error('acceptAssignedBlock error:', e);
@@ -7006,7 +7168,14 @@ async function openPushUpdate(blockId) {
       <div style="background:var(--surface);border:1px solid var(--border);max-width:360px;width:100%;padding:24px" onclick="event.stopPropagation()">
         <div style="font-family:'DM Mono',monospace;font-size:20px;letter-spacing:2px;margin-bottom:4px">PUSH UPDATE</div>
         <div style="font-size:10px;color:var(--text-muted);letter-spacing:1px;margin-bottom:20px">${block.name}</div>
-        
+
+        <div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:8px">UPDATE TYPE</div>
+        <div style="display:flex;gap:8px;margin-bottom:16px">
+          <button type="button" id="push-mode-update" onclick="setPushMode('update')" style="flex:1;padding:11px 8px;background:var(--accent-glow);border:1px solid var(--accent);color:var(--accent);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;cursor:pointer;line-height:1.4">UPDATE<br><span style="font-size:8px;opacity:0.7">keeps progress</span></button>
+          <button type="button" id="push-mode-new" onclick="setPushMode('new')" style="flex:1;padding:11px 8px;background:none;border:1px solid var(--border);color:var(--text-muted);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;cursor:pointer;line-height:1.4">NEW<br><span style="font-size:8px;opacity:0.7">fresh start</span></button>
+        </div>
+        <input type="hidden" id="push-mode" value="update">
+
         <div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:8px">SELECT CLIENT</div>
         <select id="push-client-select" style="width:100%;padding:12px;background:var(--deep);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:12px;margin-bottom:16px">
           <option value="">Choose a client...</option>
@@ -7029,34 +7198,47 @@ function closePushModal() {
   pushBlockId = null;
 }
 
+function setPushMode(mode) {
+  document.getElementById('push-mode').value = mode;
+  const upd = document.getElementById('push-mode-update');
+  const nw  = document.getElementById('push-mode-new');
+  const on  = { bg:'var(--accent-glow)', bd:'var(--accent)', col:'var(--accent)' };
+  const off = { bg:'none', bd:'var(--border)', col:'var(--text-muted)' };
+  const a = mode === 'update' ? on : off;
+  const b = mode === 'new' ? on : off;
+  upd.style.background = a.bg; upd.style.borderColor = a.bd; upd.style.color = a.col;
+  nw.style.background  = b.bg; nw.style.borderColor  = b.bd; nw.style.color  = b.col;
+}
+
 async function executePushUpdate() {
   const clientEmail = document.getElementById('push-client-select').value;
   if(!clientEmail) { showToast('Select a client'); return; }
   if(!pushBlockId) { showToast('No block selected'); return; }
-  
+
   const block = customWorkouts.find(w => w.id === pushBlockId);
   if(!block) { showToast('Block not found'); return; }
-  
-  // Create a new assignment with the updated block
-  // This will show as a new pending block for the client
+
+  const mode = document.getElementById('push-mode')?.value || 'update';
+
+  // mode 'update' → client keeps their logs (applied in place). mode 'new' → fresh start.
   const { error } = await supa.from('assigned_blocks').insert({
     coach_id: currentUser.id,
     coach_email: currentUser.email,
     client_email: clientEmail,
-    block_name: block.name + ' (Updated)',
-    block_data: { currentBlock: block },
-    note: 'Updated version of your block',
+    block_name: block.name,
+    block_data: { currentBlock: block, mode },
+    note: mode === 'update' ? 'Updated version of your programme — your progress is kept' : 'New programme',
     status: 'pending'
   });
-  
+
   if(error) {
     console.error('Push update error:', error);
     showToast('Failed to push update');
     closePushModal();
     return;
   }
-  
-  showToast('Update sent to ' + clientEmail.split('@')[0] + ' ✦');
+
+  showToast((mode === 'update' ? 'Update' : 'New programme') + ' sent to ' + clientEmail.split('@')[0] + ' ✦');
   closePushModal();
 }
 
