@@ -988,7 +988,7 @@
   <div class="auth-form">
     <div class="auth-title">SIGN IN</div>
     <form id="login-form" onsubmit="event.preventDefault(); handleLogin(); return false;" action="#" method="post" style="display:flex;flex-direction:column;gap:inherit">
-      <input class="auth-input" type="email" id="login-email" name="email" placeholder="Email address" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" inputmode="email">
+      <input class="auth-input" type="email" id="login-email" name="email" placeholder="Email address" autocomplete="username webauthn" autocapitalize="none" autocorrect="off" spellcheck="false" inputmode="email">
       <div class="auth-pass-wrap">
         <input class="auth-input" type="password" id="login-pass" name="password" placeholder="Password" autocomplete="current-password">
         <button type="button" class="auth-pass-eye" aria-label="Show password" onclick="togglePass('login-pass', this)">
@@ -999,8 +999,6 @@
       <button class="auth-btn-primary" type="submit">SIGN IN →</button>
     </form>
     <div class="auth-switch" style="margin-top:6px"><span onclick="showAuthScreen('reset')">Forgot password?</span></div>
-    <div class="auth-divider" id="passkey-divider"><div class="auth-divider-line"></div><div class="auth-divider-text">OR</div><div class="auth-divider-line"></div></div>
-    <button class="auth-btn-ghost" type="button" id="passkey-signin-btn" onclick="signInWithPasskey()" style="border-color:var(--accent-dim);color:var(--accent)">SIGN IN WITH FACE ID</button>
     <div class="auth-divider"><div class="auth-divider-line"></div><div class="auth-divider-text">NO ACCOUNT?</div><div class="auth-divider-line"></div></div>
     <button class="auth-btn-ghost" type="button" onclick="showAuthScreen('signup')">CREATE ACCOUNT</button>
     <div class="auth-switch"><span onclick="showAuthScreen('splash')">← Back</span></div>
@@ -1126,7 +1124,6 @@
       <div class="signout-name" id="signout-sheet-name"></div>
       <div class="signout-email" id="signout-sheet-email"></div>
       <button class="upgrade-cta" id="signout-upgrade-btn" onclick="closeSignOutSheet();openUpgrade()" style="width:100%;margin-bottom:10px;display:none">UPGRADE ✦</button>
-      <button class="auth-btn-ghost" type="button" id="passkey-manage-btn" onclick="togglePasskeyFromSettings()" style="margin-bottom:10px;display:none;border-color:var(--accent-dim);color:var(--accent)">ENABLE FACE ID SIGN-IN</button>
       <button class="signout-btn" onclick="handleSignOut()">Sign Out</button>
       <div style="display:flex;justify-content:center;gap:16px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
         <a href="https://forgetraining.app/terms" target="_blank" style="font-size:9px;letter-spacing:1px;color:var(--text-dim);text-transform:uppercase;text-decoration:none">Terms</a>
@@ -6360,226 +6357,6 @@ function scheduleSync() {
 }
 
 // ─── AUTH ──────────────────────────────────────────────────────
-// ─── PASSKEYS / FACE ID ────────────────────────────────────────
-// Real WebAuthn sign-in. Register once while signed in with a password,
-// then authenticate with Face ID / Touch ID thereafter.
-//   Edge Functions: passkey-register (JWT ON) · passkey-auth (JWT OFF)
-//   rpID/origin are pinned to forgetraining.app inside those functions.
-const PASSKEY_SUPPORTED = !!(window.PublicKeyCredential && navigator.credentials && navigator.credentials.create);
-
-function b64uToBuf(s) {
-  const p = s.replace(/-/g, '+').replace(/_/g, '/');
-  const bin = atob(p + '='.repeat((4 - (p.length % 4)) % 4));
-  const u = new Uint8Array(bin.length);
-  for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
-  return u.buffer;
-}
-function bufToB64u(buf) {
-  const u = new Uint8Array(buf);
-  let s = '';
-  for (let i = 0; i < u.length; i++) s += String.fromCharCode(u[i]);
-  return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-}
-// supabase-js turns any non-2xx into a generic FunctionsHttpError; the real
-// message is in the un-read Response hanging off error.context.
-async function passkeyErr(error, data, fallback) {
-  if (data && data.error) return data.error;
-  try {
-    if (error && error.context && typeof error.context.json === 'function') {
-      const j = await error.context.json();
-      if (j && j.error) return j.error;
-    }
-  } catch (e) { /* body already consumed or not JSON */ }
-  return (error && error.message) || fallback;
-}
-function passkeyDeviceLabel() {
-  const ua = navigator.userAgent;
-  if (/iPhone/.test(ua)) return 'iPhone';
-  if (/iPad/.test(ua)) return 'iPad';
-  if (/Macintosh/.test(ua)) return 'Mac';
-  if (/Android/.test(ua)) return 'Android';
-  if (/Windows/.test(ua)) return 'Windows';
-  return 'Device';
-}
-
-// ── Register this device (requires an active session) ──────────
-async function registerPasskey(opts) {
-  const silent = !!(opts && opts.silent);
-  if (!PASSKEY_SUPPORTED) { if (!silent) showToast('Passkeys not supported here'); return false; }
-  try {
-    const { data: options, error } = await supa.functions.invoke('passkey-register', {
-      body: { action: 'options', label: passkeyDeviceLabel() }
-    });
-    if (error || !options || options.error) throw new Error(await passkeyErr(error, options, 'Could not start'));
-
-    const publicKey = Object.assign({}, options, {
-      challenge: b64uToBuf(options.challenge),
-      user: Object.assign({}, options.user, { id: b64uToBuf(options.user.id) }),
-      excludeCredentials: (options.excludeCredentials || []).map(c => Object.assign({}, c, { id: b64uToBuf(c.id) }))
-    });
-
-    const cred = await navigator.credentials.create({ publicKey });
-    if (!cred) throw new Error('No credential returned');
-
-    const payload = {
-      id: cred.id,
-      rawId: bufToB64u(cred.rawId),
-      type: cred.type,
-      clientExtensionResults: cred.getClientExtensionResults(),
-      authenticatorAttachment: cred.authenticatorAttachment || undefined,
-      response: {
-        clientDataJSON: bufToB64u(cred.response.clientDataJSON),
-        attestationObject: bufToB64u(cred.response.attestationObject),
-        transports: typeof cred.response.getTransports === 'function' ? cred.response.getTransports() : []
-      }
-    };
-
-    const { data: res, error: vErr } = await supa.functions.invoke('passkey-register', {
-      body: { action: 'verify', response: payload, label: passkeyDeviceLabel() }
-    });
-    if (vErr || !res || !res.verified) throw new Error(await passkeyErr(vErr, res, 'Verification failed'));
-
-    localStorage.removeItem('forge_passkey_declined');
-    if (!silent) showToast('Face ID enabled');
-    return true;
-  } catch (e) {
-    if (e && e.name === 'InvalidStateError') {
-      // Already registered on this authenticator — treat as success.
-      if (!silent) showToast('Face ID already set up here');
-      return true;
-    }
-    if (e && e.name === 'NotAllowedError') { if (!silent) showToast('Cancelled'); return false; }
-    console.warn('[FORGE PASSKEY] register failed:', e);
-    if (!silent) showToast((e && e.message) || 'Could not enable Face ID');
-    return false;
-  }
-}
-
-// ── Sign in with Face ID ───────────────────────────────────────
-async function signInWithPasskey() {
-  if (!PASSKEY_SUPPORTED) { showToast('Passkeys not supported here'); return false; }
-  const btn = document.getElementById('passkey-signin-btn');
-  const errEl = document.getElementById('login-error');
-  const original = btn ? btn.textContent : null;
-  if (btn) { btn.disabled = true; btn.textContent = 'WAITING FOR FACE ID…'; }
-  if (errEl) { errEl.style.color = ''; errEl.textContent = ''; }
-
-  try {
-    const { data, error } = await supa.functions.invoke('passkey-auth', { body: { action: 'options' } });
-    if (error || !data || data.error) throw new Error(await passkeyErr(error, data, 'Could not start'));
-    const options = data.options;
-    const challengeId = data.challengeId;
-
-    const publicKey = Object.assign({}, options, {
-      challenge: b64uToBuf(options.challenge),
-      allowCredentials: (options.allowCredentials || []).map(c => Object.assign({}, c, { id: b64uToBuf(c.id) }))
-    });
-
-    const cred = await navigator.credentials.get({ publicKey });
-    if (!cred) throw new Error('No credential returned');
-
-    const payload = {
-      id: cred.id,
-      rawId: bufToB64u(cred.rawId),
-      type: cred.type,
-      clientExtensionResults: cred.getClientExtensionResults(),
-      authenticatorAttachment: cred.authenticatorAttachment || undefined,
-      response: {
-        clientDataJSON: bufToB64u(cred.response.clientDataJSON),
-        authenticatorData: bufToB64u(cred.response.authenticatorData),
-        signature: bufToB64u(cred.response.signature),
-        userHandle: cred.response.userHandle ? bufToB64u(cred.response.userHandle) : null
-      }
-    };
-
-    const { data: res, error: vErr } = await supa.functions.invoke('passkey-auth', {
-      body: { action: 'verify', challengeId, response: payload }
-    });
-    if (vErr || !res || !res.verified) throw new Error(await passkeyErr(vErr, res, 'Sign-in failed'));
-
-    // Redeem the one-time token hash for a real Supabase session.
-    // Mirrors handleLogin: flag in progress so onAuthStateChange doesn't double-run afterAuth.
-    _authInProgress = true;
-    try {
-      const { data: otp, error: otpErr } = await supa.auth.verifyOtp({
-        type: 'magiclink',
-        token_hash: res.token_hash
-      });
-      if (otpErr) throw otpErr;
-      const user = (otp && otp.user) || (otp && otp.session && otp.session.user);
-      if (!user) throw new Error('No session returned');
-      await afterAuth(user, false);
-    } finally {
-      _authInProgress = false;
-    }
-    return true;
-  } catch (e) {
-    if (e && e.name === 'NotAllowedError') {
-      if (errEl) errEl.textContent = 'Cancelled';
-    } else {
-      console.warn('[FORGE PASSKEY] sign-in failed:', e);
-      if (errEl) errEl.textContent = (e && e.message) || 'Face ID sign-in failed — use your password';
-    }
-    return false;
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = original; }
-  }
-}
-
-// ── Offer enrolment once, after a password sign-in ─────────────
-async function maybeOfferPasskey() {
-  if (!PASSKEY_SUPPORTED) return;
-  if (localStorage.getItem('forge_passkey_declined')) return;
-  try {
-    const { data, error } = await supa.from('passkeys').select('id').limit(1);
-    if (error) return;
-    if (data && data.length) return; // already enrolled (iCloud syncs it across devices)
-  } catch (e) { return; }
-  const ok = await registerPasskey({ silent: true });
-  if (ok) showToast('Face ID sign-in enabled');
-  else localStorage.setItem('forge_passkey_declined', '1');
-}
-
-// ── Settings row (sign-out sheet) ──────────────────────────────
-async function refreshPasskeyRow() {
-  const btn = document.getElementById('passkey-manage-btn');
-  if (!btn) return;
-  if (!PASSKEY_SUPPORTED || !currentUser) { btn.style.display = 'none'; return; }
-  btn.style.display = 'block';
-  btn.disabled = true;
-  btn.textContent = '…';
-  const { data, error } = await supa.from('passkeys').select('id').limit(10);
-  btn.disabled = false;
-  if (error) { btn.style.display = 'none'; return; }
-  const n = (data && data.length) || 0;
-  btn.dataset.count = String(n);
-  btn.textContent = n ? 'FACE ID ON · ' + n + (n === 1 ? ' DEVICE' : ' DEVICES') : 'ENABLE FACE ID SIGN-IN';
-}
-
-async function togglePasskeyFromSettings() {
-  const btn = document.getElementById('passkey-manage-btn');
-  const n = btn ? parseInt(btn.dataset.count || '0', 10) : 0;
-  if (n > 0) {
-    if (!confirm('Remove Face ID sign-in from all devices?')) return;
-    const { error } = await supa.from('passkeys').delete().eq('user_id', currentUser.id);
-    if (error) { showToast('Could not remove'); return; }
-    localStorage.removeItem('forge_passkey_declined');
-    showToast('Face ID removed');
-  } else {
-    const ok = await registerPasskey();
-    if (!ok) return;
-  }
-  refreshPasskeyRow();
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  if (PASSKEY_SUPPORTED) return;
-  const btn = document.getElementById('passkey-signin-btn');
-  const div = document.getElementById('passkey-divider');
-  if (btn) btn.style.display = 'none';
-  if (div) div.style.display = 'none';
-});
-
 function togglePass(id, btn) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -6617,8 +6394,6 @@ async function handleLogin() {
     const { data, error } = await supa.auth.signInWithPassword({ email, password: pass });
     if(error) { errEl.textContent = error.message; _authInProgress = false; return; }
     await afterAuth(data.user, false);
-    // Offer Face ID enrolment once the app has settled — iOS's own sheet is the prompt
-    setTimeout(() => { maybeOfferPasskey(); }, 1200);
   } finally {
     _authInProgress = false;
   }
@@ -7052,7 +6827,6 @@ function openSignOutSheet() {
       upgradeBtn.style.display = 'block';
     }
   }
-  refreshPasskeyRow();
   document.getElementById('signout-sheet').classList.add('open');
 }
 
