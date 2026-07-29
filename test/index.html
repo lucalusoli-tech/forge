@@ -6371,6 +6371,55 @@ function togglePass(id, btn) {
   }
 }
 
+// ─── PASSKEY CONDITIONAL UI ────────────────────────────────────
+// The login email field carries autocomplete="username webauthn", which
+// tells iOS this page will make a WebAuthn request. Without an actual
+// request pending, tapping the key icon hangs waiting for one. This
+// satisfies that expectation so the Passwords sheet resolves normally.
+// There is no server-side verification, so selecting a *passkey* can't
+// sign anyone in — password autofill is the point.
+let _pkConditionalAbort = null;
+
+async function startConditionalPasskeyUI() {
+  try {
+    if (!window.PublicKeyCredential) return;
+    if (typeof PublicKeyCredential.isConditionalMediationAvailable !== 'function') return;
+    if (!(await PublicKeyCredential.isConditionalMediationAvailable())) return;
+
+    stopConditionalPasskeyUI();
+    _pkConditionalAbort = new AbortController();
+
+    const challenge = new Uint8Array(32);
+    crypto.getRandomValues(challenge);
+
+    const cred = await navigator.credentials.get({
+      mediation: 'conditional',
+      signal: _pkConditionalAbort.signal,
+      publicKey: { challenge, userVerification: 'preferred', allowCredentials: [] }
+    });
+
+    // A passkey was chosen. Nothing can be done with it without a verifying
+    // backend, so say so rather than failing silently.
+    if (cred) {
+      const errEl = document.getElementById('login-error');
+      if (errEl) errEl.textContent = 'Passkey sign-in isn\'t set up — use your password';
+    }
+  } catch (e) {
+    // AbortError is the normal path when leaving the screen. Everything else
+    // is non-fatal: password autofill keeps working regardless.
+    if (!e || e.name !== 'AbortError') console.warn('[FORGE] conditional UI:', e);
+  } finally {
+    _pkConditionalAbort = null;
+  }
+}
+
+function stopConditionalPasskeyUI() {
+  if (_pkConditionalAbort) {
+    try { _pkConditionalAbort.abort(); } catch (e) {}
+    _pkConditionalAbort = null;
+  }
+}
+
 function showAuthScreen(screen) {
   // Hide loader and all auth screens, then show the requested one
   const loader = document.getElementById('auth-loader');
@@ -6381,6 +6430,9 @@ function showAuthScreen(screen) {
   const se = document.getElementById('signup-error');
   if(le) le.textContent = '';
   if(se) se.textContent = '';
+  // Keep exactly one conditional WebAuthn request alive, and only on login.
+  if (screen === 'login') requestAnimationFrame(() => startConditionalPasskeyUI());
+  else stopConditionalPasskeyUI();
 }
 
 async function handleLogin() {
