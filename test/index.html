@@ -6372,53 +6372,84 @@ function togglePass(id, btn) {
 }
 
 // ─── PASSKEY CONDITIONAL UI ────────────────────────────────────
-// The login email field carries autocomplete="username webauthn", which
-// tells iOS this page will make a WebAuthn request. Without an actual
-// request pending, tapping the key icon hangs waiting for one. This
-// satisfies that expectation so the Passwords sheet resolves normally.
-// There is no server-side verification, so selecting a *passkey* can't
-// sign anyone in — password autofill is the point.
-let _pkConditionalAbort = null;
+// The login email field carries autocomplete="username webauthn", telling iOS
+// this page will make a WebAuthn request. If no request is pending, tapping the
+// key icon hangs waiting for one. So one must be kept alive the whole time the
+// login screen is visible — including after it resolves, and after the PWA is
+// resumed from the background. There is no server-side verification, so picking
+// a *passkey* can't sign anyone in; password autofill is the point.
+let _pkAbort = null;
+let _pkRunning = false;
+let _pkFastFails = 0;
+
+function _loginScreenVisible() {
+  const el = document.getElementById('auth-login');
+  return !!el && !el.classList.contains('hidden');
+}
 
 async function startConditionalPasskeyUI() {
+  if (_pkRunning) return;
+  if (!_loginScreenVisible()) return;
+  if (_pkFastFails >= 3) return; // something is structurally wrong; stop spinning
   try {
     if (!window.PublicKeyCredential) return;
     if (typeof PublicKeyCredential.isConditionalMediationAvailable !== 'function') return;
     if (!(await PublicKeyCredential.isConditionalMediationAvailable())) return;
+  } catch (e) { return; }
 
-    stopConditionalPasskeyUI();
-    _pkConditionalAbort = new AbortController();
+  _pkRunning = true;
+  _pkAbort = new AbortController();
+  const startedAt = Date.now();
 
+  try {
     const challenge = new Uint8Array(32);
     crypto.getRandomValues(challenge);
-
     const cred = await navigator.credentials.get({
       mediation: 'conditional',
-      signal: _pkConditionalAbort.signal,
+      signal: _pkAbort.signal,
       publicKey: { challenge, userVerification: 'preferred', allowCredentials: [] }
     });
-
-    // A passkey was chosen. Nothing can be done with it without a verifying
-    // backend, so say so rather than failing silently.
+    _pkFastFails = 0;
     if (cred) {
       const errEl = document.getElementById('login-error');
       if (errEl) errEl.textContent = 'Passkey sign-in isn\'t set up — use your password';
     }
   } catch (e) {
-    // AbortError is the normal path when leaving the screen. Everything else
-    // is non-fatal: password autofill keeps working regardless.
-    if (!e || e.name !== 'AbortError') console.warn('[FORGE] conditional UI:', e);
+    if (e && e.name === 'AbortError') {
+      _pkFastFails = 0;
+    } else {
+      // Rejecting instantly means re-arming would spin. Count it.
+      if (Date.now() - startedAt < 500) _pkFastFails++;
+      console.warn('[FORGE] conditional UI:', e && e.name, e);
+    }
   } finally {
-    _pkConditionalAbort = null;
+    _pkAbort = null;
+    _pkRunning = false;
+    // Re-arm, so the key icon always has a live request to resolve against.
+    if (_loginScreenVisible()) setTimeout(startConditionalPasskeyUI, 300);
   }
 }
 
 function stopConditionalPasskeyUI() {
-  if (_pkConditionalAbort) {
-    try { _pkConditionalAbort.abort(); } catch (e) {}
-    _pkConditionalAbort = null;
-  }
+  if (_pkAbort) { try { _pkAbort.abort(); } catch (e) {} }
+  _pkAbort = null;
 }
+
+// Re-arm on the events that leave a PWA with a stale request: resume from
+// background, restore from bfcache, or the user tapping back into the field.
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && _loginScreenVisible()) {
+    _pkFastFails = 0;
+    startConditionalPasskeyUI();
+  }
+});
+window.addEventListener('pageshow', () => {
+  if (_loginScreenVisible()) { _pkFastFails = 0; startConditionalPasskeyUI(); }
+});
+document.addEventListener('DOMContentLoaded', () => {
+  const email = document.getElementById('login-email');
+  if (email) email.addEventListener('focus', () => { _pkFastFails = 0; startConditionalPasskeyUI(); });
+});
 
 function showAuthScreen(screen) {
   // Hide loader and all auth screens, then show the requested one
@@ -6431,7 +6462,7 @@ function showAuthScreen(screen) {
   if(le) le.textContent = '';
   if(se) se.textContent = '';
   // Keep exactly one conditional WebAuthn request alive, and only on login.
-  if (screen === 'login') requestAnimationFrame(() => startConditionalPasskeyUI());
+  if (screen === 'login') { _pkFastFails = 0; requestAnimationFrame(() => startConditionalPasskeyUI()); }
   else stopConditionalPasskeyUI();
 }
 
