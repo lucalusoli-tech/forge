@@ -29,7 +29,7 @@
   }
 
   html { background: #080808 !important; }
-  html, body { height: 100dvh; overflow: hidden; background: #080808; }
+  html, body { height: 100dvh; overflow: hidden; background: #080808 !important; color: var(--text); font-family: 'Inter', sans-serif; }
 
   body::after {
     content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 9998;
@@ -563,9 +563,9 @@
   *::-webkit-scrollbar { display: none; }
 
   /* ── AUTH ── */
-  .auth-screen { position: fixed; inset: 0; background: #080808; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: env(safe-area-inset-bottom, 24px); }
+  .auth-screen { position: fixed; top: 0; left: 0; right: 0; height: 100dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; background: #080808; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; padding-bottom: env(safe-area-inset-bottom, 24px); }
   .auth-screen.hidden { display: none; }
-  .auth-logo-wrap { position: absolute; top: 0; left: 0; right: 0; bottom: 40%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .auth-logo-wrap { flex: 1 0 auto; min-height: 40dvh; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding-top: env(safe-area-inset-top, 0px); }
   .auth-logo { font-family: 'DM Mono', monospace; font-size: 44px; font-weight: 500; letter-spacing: 10px; color: var(--accent); line-height: 1; }
   .auth-tagline { font-size: 10px; letter-spacing: 4px; color: var(--text-muted); text-transform: uppercase; margin-top: 8px; }
   .auth-form { width: 100%; padding: 0 24px 32px; display: flex; flex-direction: column; gap: 12px; position: relative; z-index: 1; }
@@ -573,11 +573,6 @@
   .auth-input { width: 100%; background: var(--surface); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 14px; padding: 14px 16px; outline: none; -webkit-appearance: none; border-radius: 0; box-sizing: border-box; display: block; }
   .auth-input:focus { border-color: var(--accent); }
   .auth-input::placeholder { color: var(--text-dim); font-size: 12px; }
-  .auth-pass-wrap { position: relative; display: block; }
-  .auth-pass-wrap .auth-input { padding-right: 48px; }
-  .auth-pass-eye { position: absolute; top: 0; right: 0; height: 100%; width: 44px; display: flex; align-items: center; justify-content: center; background: none; border: none; color: var(--text-dim); cursor: pointer; -webkit-appearance: none; padding: 0; }
-  .auth-pass-eye:active { color: var(--accent); }
-  .auth-pass-eye svg { width: 20px; height: 20px; display: block; }
   .auth-btn-primary { width: 100%; padding: 16px; background: var(--accent); border: none; color: #080808; font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; cursor: pointer; font-weight: 500; }
   .auth-btn-primary:active { background: #b8943d; }
   .auth-btn-ghost { width: 100%; padding: 14px; background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; }
@@ -987,14 +982,9 @@
   </div>
   <div class="auth-form">
     <div class="auth-title">SIGN IN</div>
-    <form id="login-form" onsubmit="event.preventDefault(); handleLogin(); return false;" action="#" method="post" style="display:flex;flex-direction:column;gap:inherit">
-      <input class="auth-input" type="email" id="login-email" name="email" placeholder="Email address" autocomplete="username webauthn" autocapitalize="none" autocorrect="off" spellcheck="false" inputmode="email">
-      <div class="auth-pass-wrap">
-        <input class="auth-input" type="password" id="login-pass" name="password" placeholder="Password" autocomplete="current-password">
-        <button type="button" class="auth-pass-eye" aria-label="Show password" onclick="togglePass('login-pass', this)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-        </button>
-      </div>
+    <form id="login-form" onsubmit="event.preventDefault(); handleLogin(); return false;" action="#" method="post" style="display:contents">
+      <input class="auth-input" type="email" id="login-email" name="email" placeholder="Email address" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" inputmode="email">
+      <input class="auth-input" type="password" id="login-pass" name="password" placeholder="Password" autocomplete="current-password">
       <div class="auth-error" id="login-error"></div>
       <button class="auth-btn-primary" type="submit">SIGN IN →</button>
     </form>
@@ -1053,12 +1043,7 @@
     <form id="signup-form" onsubmit="event.preventDefault(); handleSignup(); return false;" action="#" method="post" style="display:contents">
       <input class="auth-input" type="text" id="signup-name" name="name" placeholder="Your name" autocomplete="name">
       <input class="auth-input" type="email" id="signup-email" name="email" placeholder="Email address" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" inputmode="email">
-      <div class="auth-pass-wrap">
-        <input class="auth-input" type="password" id="signup-pass" name="password" placeholder="Password" autocomplete="new-password">
-        <button type="button" class="auth-pass-eye" aria-label="Show password" onclick="togglePass('signup-pass', this)">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
-        </button>
-      </div>
+      <input class="auth-input" type="password" id="signup-pass" name="password" placeholder="Password" autocomplete="new-password">
       <div class="auth-error" id="signup-error"></div>
       <button class="auth-btn-primary" type="submit">START FREE TRIAL →</button>
     </form>
@@ -6357,100 +6342,6 @@ function scheduleSync() {
 }
 
 // ─── AUTH ──────────────────────────────────────────────────────
-function togglePass(id, btn) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  const show = el.type === 'password';
-  el.type = show ? 'text' : 'password';
-  if (btn) {
-    btn.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
-    // swap to an eye-off icon when visible
-    btn.innerHTML = show
-      ? '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 12s3.5-7 10-7c2 0 3.8.7 5.3 1.6M22 12s-3.5 7-10 7c-2 0-3.8-.7-5.3-1.6"/><path d="M3 3l18 18"/><path d="M9.5 9.6a3 3 0 0 0 4.2 4.2"/></svg>'
-      : '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>';
-  }
-}
-
-// ─── PASSKEY CONDITIONAL UI ────────────────────────────────────
-// The login email field carries autocomplete="username webauthn", telling iOS
-// this page will make a WebAuthn request. If no request is pending, tapping the
-// key icon hangs waiting for one. So one must be kept alive the whole time the
-// login screen is visible — including after it resolves, and after the PWA is
-// resumed from the background. There is no server-side verification, so picking
-// a *passkey* can't sign anyone in; password autofill is the point.
-let _pkAbort = null;
-let _pkRunning = false;
-let _pkFastFails = 0;
-
-function _loginScreenVisible() {
-  const el = document.getElementById('auth-login');
-  return !!el && !el.classList.contains('hidden');
-}
-
-async function startConditionalPasskeyUI() {
-  if (_pkRunning) return;
-  if (!_loginScreenVisible()) return;
-  if (_pkFastFails >= 3) return; // something is structurally wrong; stop spinning
-  try {
-    if (!window.PublicKeyCredential) return;
-    if (typeof PublicKeyCredential.isConditionalMediationAvailable !== 'function') return;
-    if (!(await PublicKeyCredential.isConditionalMediationAvailable())) return;
-  } catch (e) { return; }
-
-  _pkRunning = true;
-  _pkAbort = new AbortController();
-  const startedAt = Date.now();
-
-  try {
-    const challenge = new Uint8Array(32);
-    crypto.getRandomValues(challenge);
-    const cred = await navigator.credentials.get({
-      mediation: 'conditional',
-      signal: _pkAbort.signal,
-      publicKey: { challenge, userVerification: 'preferred', allowCredentials: [] }
-    });
-    _pkFastFails = 0;
-    if (cred) {
-      const errEl = document.getElementById('login-error');
-      if (errEl) errEl.textContent = 'Passkey sign-in isn\'t set up — use your password';
-    }
-  } catch (e) {
-    if (e && e.name === 'AbortError') {
-      _pkFastFails = 0;
-    } else {
-      // Rejecting instantly means re-arming would spin. Count it.
-      if (Date.now() - startedAt < 500) _pkFastFails++;
-      console.warn('[FORGE] conditional UI:', e && e.name, e);
-    }
-  } finally {
-    _pkAbort = null;
-    _pkRunning = false;
-    // Re-arm, so the key icon always has a live request to resolve against.
-    if (_loginScreenVisible()) setTimeout(startConditionalPasskeyUI, 300);
-  }
-}
-
-function stopConditionalPasskeyUI() {
-  if (_pkAbort) { try { _pkAbort.abort(); } catch (e) {} }
-  _pkAbort = null;
-}
-
-// Re-arm on the events that leave a PWA with a stale request: resume from
-// background, restore from bfcache, or the user tapping back into the field.
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible' && _loginScreenVisible()) {
-    _pkFastFails = 0;
-    startConditionalPasskeyUI();
-  }
-});
-window.addEventListener('pageshow', () => {
-  if (_loginScreenVisible()) { _pkFastFails = 0; startConditionalPasskeyUI(); }
-});
-document.addEventListener('DOMContentLoaded', () => {
-  const email = document.getElementById('login-email');
-  if (email) email.addEventListener('focus', () => { _pkFastFails = 0; startConditionalPasskeyUI(); });
-});
-
 function showAuthScreen(screen) {
   // Hide loader and all auth screens, then show the requested one
   const loader = document.getElementById('auth-loader');
@@ -6461,9 +6352,6 @@ function showAuthScreen(screen) {
   const se = document.getElementById('signup-error');
   if(le) le.textContent = '';
   if(se) se.textContent = '';
-  // Keep exactly one conditional WebAuthn request alive, and only on login.
-  if (screen === 'login') { _pkFastFails = 0; requestAnimationFrame(() => startConditionalPasskeyUI()); }
-  else stopConditionalPasskeyUI();
 }
 
 async function handleLogin() {
@@ -6966,13 +6854,7 @@ function activatePremium(tier='premium') {
   if (tier === 'coached' && plusBilling === 'yearly') key = 'coached_yearly';
   const base = urls[key] || urls.premium;
   const email = currentUser.email || '';
-  // Carry the Supabase user id through checkout so the webhook can match the payment to
-  // the right account by ID — not by email. (Users often pay with a different address
-  // than they signed up with, which silently broke tier upgrades/downgrades.)
-  const params = [];
-  if (currentUser.id) params.push('client_reference_id=' + encodeURIComponent(currentUser.id));
-  if (email) params.push('prefilled_customer[email]=' + encodeURIComponent(email));
-  const dest = params.length ? base + '?' + params.join('&') : base;
+  const dest = email ? base + '?prefilled_customer[email]=' + encodeURIComponent(email) : base;
   window.location.href = dest;
 }
 
