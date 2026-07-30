@@ -47,10 +47,15 @@ nav .wrap{display:flex;justify-content:space-between;align-items:center;gap:20px
 
 /* hero */
 header{min-height:100svh;display:flex;align-items:center;position:relative;padding:130px 0 80px;overflow:hidden}
-.hero-bg{position:absolute;inset:0;z-index:0;background:var(--bg);
-  background-size:cover;background-position:center right}
+.hero-bg{position:absolute;inset:0;z-index:0;background-color:var(--bg);
+  background-image:url('images/hero-portrait.jpg');
+  background-size:cover;background-position:78% center;background-repeat:no-repeat}
 .hero-bg::after{content:'';position:absolute;inset:0;
-  background:linear-gradient(100deg,rgba(8,8,8,.97) 0%,rgba(8,8,8,.92) 42%,rgba(8,8,8,.6) 100%)}
+  background:linear-gradient(100deg,rgba(8,8,8,.98) 0%,rgba(8,8,8,.95) 38%,rgba(8,8,8,.72) 68%,rgba(8,8,8,.42) 100%)}
+@media(max-width:899px){
+  .hero-bg{background-position:66% top}
+  .hero-bg::after{background:linear-gradient(180deg,rgba(8,8,8,.9) 0%,rgba(8,8,8,.88) 40%,rgba(8,8,8,.97) 88%)}
+}
 header::after{content:'';position:absolute;inset:0;pointer-events:none;z-index:1;
   background:radial-gradient(ellipse 70% 55% at 15% 45%,rgba(201,169,110,.055),transparent 70%)}
 .hero-inner{position:relative;z-index:2;max-width:900px}
@@ -73,13 +78,6 @@ h1 .em::after{content:'';position:absolute;left:-2px;right:-2px;bottom:.12em;hei
 .btn.ghost:hover{color:var(--ivory);border-color:var(--grey)}
 
 section{padding:120px 0}
-
-/* image slot */
-.slot{position:relative;background:var(--s1);border:1px solid var(--s2);
-  display:flex;align-items:center;justify-content:center;overflow:hidden}
-.slot img{width:100%;height:100%;object-fit:cover;display:block}
-.slot .slot-label{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.2em;
-  text-transform:uppercase;color:#3a3733;text-align:center;padding:20px;line-height:1.8}
 
 /* fear */
 .fear{background:var(--s1)}
@@ -117,7 +115,10 @@ section{padding:120px 0}
 .beat.up .stat{color:var(--gold)}
 .beat .said{display:block;margin-top:16px;padding-left:18px;border-left:1px solid var(--s3);
   color:var(--ivory);font-size:1.08rem;font-weight:300;font-style:italic}
-.beat .slot{margin-top:32px;max-width:640px;aspect-ratio:16/9}
+.beat .frame{margin-top:34px;max-width:400px;border:1px solid var(--s2);overflow:hidden;line-height:0}
+.beat .frame img{width:100%;height:auto;display:block;aspect-ratio:3/4;object-fit:cover;object-position:center 22%}
+.beat .frame figcaption{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--grey);padding:14px 16px;background:var(--s1);line-height:1.6}
 
 /* hero line */
 .hero-line{background:var(--s1);text-align:center;padding:150px 0;
@@ -137,7 +138,14 @@ section{padding:120px 0}
 @media(min-width:820px){.pr{grid-template-columns:200px 1fr;gap:50px;padding:40px 0}}
 .pr .mono{padding-top:4px}
 .pr h3{margin-bottom:10px}
-.method .slot{margin-top:70px;aspect-ratio:21/9}
+.method-img{margin-top:80px;display:grid;grid-template-columns:1fr;gap:34px;align-items:end}
+@media(min-width:820px){.method-img{grid-template-columns:minmax(0,420px) 1fr;gap:60px}}
+.method-img .frame{border:1px solid var(--s2);overflow:hidden;line-height:0}
+.method-img .frame img{width:100%;height:auto;display:block;aspect-ratio:3/4;
+  object-fit:cover;object-position:center 42%}
+.method-img blockquote{font-size:clamp(1.2rem,2.2vw,1.6rem);font-weight:300;letter-spacing:-0.02em;
+  line-height:1.35;color:var(--ivory);padding-bottom:10px}
+.method-img .mono{display:block;margin-top:20px}
 
 /* working together */
 .work{background:var(--s1)}
@@ -226,8 +234,6 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
 </nav>
 
 <header id="top">
-  <!-- HERO IMAGE: set the url below, keep it dark and shot from the right so the type stays clear
-       style="background-image:url('images/hero.jpg')" -->
   <div class="hero-bg"></div>
   <div class="wrap">
     <div class="hero-inner">
@@ -333,8 +339,10 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
         <span class="mono beat-stat-inline gold">1 month later / first muscle-up</span>
         <p>One month later I had my first muscle-up. I couldn't believe it.</p>
         <p>Six months alone got me nothing. One month of the right foundations got me everything. That is the reason I coach the way I coach.</p>
-        <!-- IMAGE: the muscle-up, or you on the bar. The one bright frame on the page. -->
-        <div class="slot"><span class="slot-label">Image slot<br>The turn</span></div>
+        <figure class="frame">
+          <img src="images/the-turn.jpg" alt="Luca at the top of the bar, above the rings of a pull-up rack" loading="lazy" width="1100" height="1956">
+          <figcaption>Top of the bar / where it stopped being impossible</figcaption>
+        </figure>
       </div>
 
     </div>
@@ -388,8 +396,15 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
       </div>
     </div>
 
-    <!-- IMAGE: coaching on the floor, hands-on, or a clean skill frame -->
-    <div class="slot rv"><span class="slot-label">Image slot<br>Method / coaching in action</span></div>
+    <div class="method-img rv">
+      <figure class="frame">
+        <img src="images/method-loaded.jpg" alt="Luca performing a weighted dip with a loaded chain belt" loading="lazy" width="1100" height="1956">
+      </figure>
+      <div>
+        <blockquote>Load is the last thing you add, not the first thing you chase.</blockquote>
+        <span class="mono">Weighted dip / a progression earned, not borrowed</span>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -439,15 +454,15 @@ a:focus-visible,button:focus-visible,input:focus-visible,textarea:focus-visible,
     </div>
     <div class="quotes rv">
       <div class="q">
-        <blockquote>Replace with a real quote. Ask for one specific thing that changed, and the thing they were sure they couldn't do.</blockquote>
+        <blockquote>"I learn more in one session than in a year of training in other classes."</blockquote>
         <span class="who">Marios<span>2+ years</span></span>
       </div>
       <div class="q">
-        <blockquote>Replace with a real quote. Short is better than polished. Their words, not corrected.</blockquote>
+        <blockquote>"I couldn't even bend my arm attempting a pull-up. Now I've cracked 8 reps with 15kg."</blockquote>
         <span class="who">Alejandro<span>2+ years</span></span>
       </div>
       <div class="q">
-        <blockquote>Replace with a real quote. If you can get a number in it, a rep count or a date, use that one.</blockquote>
+        <blockquote>"Working with Luca was enlightening. I started very lazy, now I'm trying to find time for a third session in the week."</blockquote>
         <span class="who">Raphael<span>2+ years</span></span>
       </div>
     </div>
