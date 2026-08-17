@@ -376,6 +376,22 @@
   .info-line { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 11px; }
   .info-line-label { color: var(--text-muted); }
   .info-line-val { color: var(--text); text-align: right; max-width: 60%; }
+  /* ═══ SELF-HOSTED VIDEO PLAYER ═══ */
+  .fv-media{position:relative;margin-top:12px;border-radius:9px;overflow:hidden;background:var(--card);border:1px solid var(--border);aspect-ratio:16/9;cursor:pointer;}
+  .fv-media img.fv-poster,.fv-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:var(--card);}
+  .fv-media video{opacity:0;transition:opacity .25s;}
+  .fv-media.live video{opacity:1;}
+  .fv-media.live .fv-scrim,.fv-media.live .fv-play,.fv-media.live .fv-badge{opacity:0;pointer-events:none;}
+  .fv-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,8,8,.12),rgba(8,8,8,.55));transition:opacity .25s;}
+  .fv-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:48px;height:48px;border-radius:50%;border:1px solid var(--accent-dim);background:rgba(8,8,8,.55);display:grid;place-items:center;transition:opacity .25s;}
+  .fv-play svg{width:13px;height:15px;fill:var(--accent);margin-left:3px;}
+  .fv-badge{position:absolute;left:9px;bottom:8px;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--text);background:rgba(8,8,8,.6);padding:3px 6px;border-radius:3px;transition:opacity .25s;}
+  .fv-speed{position:absolute;right:9px;bottom:8px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--text-muted);background:rgba(8,8,8,.65);border:1px solid var(--border);border-radius:4px;padding:4px 8px;opacity:0;pointer-events:none;transition:opacity .25s;cursor:pointer;}
+  .fv-media.live .fv-speed{opacity:1;pointer-events:auto;}
+  .fv-media.live .fv-speed.on{color:var(--accent);border-color:var(--accent-dim);}
+  .fv-fail{position:absolute;inset:0;display:none;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);text-align:center;padding:12px;}
+  .fv-media.failed .fv-fail{display:flex;}
+  .fv-media.failed .fv-play,.fv-media.failed .fv-badge,.fv-media.failed .fv-scrim{opacity:0;}
   .video-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background: transparent; border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; text-decoration: none; margin-top: 12px; }
 
   /* ── PROGRESS ── */
@@ -1585,6 +1601,7 @@
       <div class="info-line"><span class="info-line-label">Target</span><span class="info-line-val" id="sheet-target"></span></div>
       <div class="info-line"><span class="info-line-label">Intensity</span><span class="info-line-val" id="sheet-intensity"></span></div>
       <div class="info-line"><span class="info-line-label">Cue</span><span class="info-line-val" id="sheet-cue"></span></div>
+      <div id="sheet-player"></div>
       <a href="#" id="sheet-video" class="video-btn" target="_blank"><svg viewBox="0 0 8 10" width="8" height="10" fill="currentColor" style="flex-shrink:0" aria-hidden="true"><path d="M1 1 L7 5 L1 9 Z"/></svg> Watch Reference</a>
     </div>
   </div>
@@ -1742,7 +1759,16 @@ const EXERCISES = [
   {id:'bwf-hs-pu',name:'HS PU',tags:['skill','calisthenics','push'],sets:'3×5',target:'Anterior Delt, Triceps, Traps',intensity:'Very hard',level:'Intermediate',cue:'Straight body, head to floor, press to lockout',video:'https://www.youtube.com/results?search_query=freestanding+handstand+push+up',desc:'Freestanding handstand push-up. Requires balance and pressing strength simultaneously.'},
   {id:'bwf-ring-hs',name:'Ring HS',tags:['skill','calisthenics','push'],sets:'5×10-20s',target:'Wrists, Shoulder Girdle, Stabilisers',intensity:'Elite',level:'Intermediate',cue:'Rings tight to body, turn out at top, straight line',video:'https://www.youtube.com/results?search_query=ring+handstand+tutorial',desc:'Freestanding handstand on rings. One of the most demanding balance skills in calisthenics.'},
   {id:'bwf-ring-strap-hs-pu',name:'Ring Strap HS PU',tags:['skill','calisthenics','push'],sets:'3×3-5',target:'Anterior Delt, Triceps, Ring Stabilisers',intensity:'Elite',level:'Intermediate',cue:'Rings at fixed strap, press from handstand position',video:'https://www.youtube.com/results?search_query=ring+handstand+push+up',desc:'Handstand push-up on strapped rings. Extreme difficulty. True elite upper body pressing.'},
-  {id:'bwf-tuck-handstand',name:'Tuck Handstand',tags:['skill','calisthenics','push'],sets:'5×15-30s',target:'Wrists, Shoulder Girdle, Balance',intensity:'Skill work',level:'Intermediate',cue:'Knees tucked, find balance over wrists, extend gradually',video:'https://www.youtube.com/results?search_query=tuck+handstand+balance',desc:'Handstand with knees tucked. Easier balance point to develop kick-up and hold.'},
+  {id:'bwf-tuck-handstand',name:'Full Tuck Handstand',tags:['skill','calisthenics','push'],sets:'5\u00d715-30s',target:'Wrists, Shoulder Girdle, Core, Balance',intensity:'Skill work',level:'Intermediate',cue:'Knees pulled tight to the chest, heels to the seat \u2014 hold the compression actively, balance on the fingers',video:'https://www.youtube.com/results?search_query=tuck+handstand+balance',desc:'Fully compacted tuck held with active compression. Tighter and more demanding on the core than the half tuck \u2014 the shape to own before opening out to straddle.'},
+  // ── HAND BALANCE DRILLS (London School of Hand Balance) ──────
+  {id:'hs-long-lunge-stretch',name:'Long Lunge to Straight Leg',tags:['skill','warmup','calisthenics'],sets:'2\u00d75-8 each side',target:'Hip Flexors, Hamstrings, Adductors',intensity:'Easy',level:'Beginner',cue:'Long lunge, back knee off the floor \u2014 shift the hips back and straighten the front leg, then return',video:'https://www.youtube.com/results?search_query=lunge+to+hamstring+stretch+handstand+warm+up',desc:'Dynamic lunge to straight-leg stretch. Opens the hip flexors and hamstrings that set the entry position for every kick-up.'},
+  {id:'hs-swing-kick-l',name:'Swing and Kick \u2014 L Position',tags:['skill','warmup','calisthenics','push'],sets:'3\u00d75-8',target:'Wrists, Shoulder Girdle, Core, Hip Flexors',intensity:'Easy-Moderate',level:'Beginner',cue:'Swing the arms up, step into the lunge, kick the lead leg to vertical and stop in the L \u2014 trail leg stays low',video:'https://www.youtube.com/results?search_query=handstand+kick+up+L+position+drill',desc:'Kick-up stopped in the L shape \u2014 one leg vertical, one leg horizontal. Teaches a controlled entry and the feel of stacking over the hands before committing to a full handstand.'},
+  {id:'hs-swing-kick-straight',name:'Swing and Kick \u2014 Straight',tags:['skill','warmup','calisthenics','push'],sets:'3\u00d75-8',target:'Wrists, Shoulder Girdle, Core, Balance',intensity:'Moderate',level:'Beginner',cue:'Same swing and lunge, but bring both legs together to the straight line \u2014 push the floor away, ribs down',video:'https://www.youtube.com/results?search_query=handstand+kick+up+drill+straight+line',desc:'Full kick-up to the straight handstand shape. The L drill with both legs joined at the top. Practise until the entry needs no thought.'},
+  {id:'hs-forehead-wall',name:'Forehead Facing the Wall',tags:['skill','calisthenics','push'],sets:'3\u00d720-40s',target:'Wrists, Shoulder Girdle, Core',intensity:'Moderate',level:'Beginner',cue:'Chest to wall, hands close in, forehead towards the wall \u2014 open the shoulders and stack the hips over the hands',video:'https://www.youtube.com/results?search_query=chest+to+wall+handstand+alignment+drill',desc:'Chest-to-wall hold with the head towards the wall. Forces shoulder opening and a stacked line rather than the banana shape a back-to-wall handstand allows.'},
+  {id:'hs-chin-chest',name:'Chin on Your Chest',tags:['skill','calisthenics','push'],sets:'3\u00d720-40s',target:'Wrists, Shoulder Girdle, Core, Neck',intensity:'Moderate',level:'Beginner',cue:'Tuck the chin to the chest and hold the line \u2014 balance with the fingers, not by looking around',video:'https://www.youtube.com/results?search_query=handstand+head+position+chin+tucked+neutral',desc:'Head position drill with the chin tucked. Removes the visual reference so balance comes from the fingers and the whole line, not from craning the neck.'},
+  {id:'hs-one-bent-one-straight',name:'One Bent One Straight (Wall)',tags:['skill','calisthenics','push'],sets:'3\u00d720-30s each',target:'Wrists, Shoulder Girdle, Core, Hip Flexors',intensity:'Moderate',level:'Beginner',cue:'On the wall, one leg straight to the ceiling, the other bent with the foot to the knee \u2014 hips stay square',video:'https://www.youtube.com/results?search_query=handstand+wall+shape+one+leg+bent+drill',desc:'Wall handstand with asymmetric legs. Trains shape awareness and square hips while the wall still carries some of the balance.'},
+  {id:'hs-half-tuck',name:'Half Tuck Handstand',tags:['skill','calisthenics','push'],sets:'5\u00d710-20s',target:'Wrists, Shoulder Girdle, Core, Balance',intensity:'Skill work',level:'Intermediate',cue:'Knees bent to roughly 90\u00b0, legs relaxed under you \u2014 stack the hips over the hands and balance on the fingers',video:'https://www.youtube.com/results?search_query=half+tuck+handstand+balance+drill',desc:'Knees bent to about 90\u00b0 with the legs hanging under the hips. The first freestanding shape \u2014 little compression required, so the whole job is finding balance over the hands.'},
+  {id:'hs-straddle',name:'Straddle Handstand',tags:['skill','calisthenics','push'],sets:'5\u00d710-30s',target:'Wrists, Shoulder Girdle, Core, Adductors, Balance',intensity:'Skill work',level:'Intermediate',cue:'Legs wide and straight, toes pointed \u2014 push tall through the shoulders, hips stacked',video:'https://www.youtube.com/results?search_query=straddle+handstand+balance+tutorial',desc:'Legs wide and straight. Lowers the centre of mass slightly against the straight handstand while demanding full straight-leg control. The last shape before a clean straight line.'},
   {id:'bwf-ring-wide-hs-pu',name:'Ring Wide HS PU',tags:['skill','calisthenics','push'],sets:'3×3',target:'Chest, Anterior Delt, Stabilisers',intensity:'Elite',level:'Intermediate',cue:'Wide ring grip inverted, press from head level',video:'https://www.youtube.com/results?search_query=ring+wide+handstand+push+up',desc:'Wide grip handstand push-up on rings. Extraordinary chest and shoulder demand.'},
 
   // ── BWF HORIZONTAL PUSH ───────────────────────────────────────
@@ -2020,7 +2046,7 @@ const SKILL_GROUPS = {
   'front-lever':['bwf-l-hang','bwf-tuck-front-lever','bwf-adv-tuck-front-lever','bwf-one-leg-fl','bwf-straddle-fl','front-lever','bwf-tuck-fl-row','bwf-adv-tuck-fl-row','adv-pl-rows'],
   'back-lever':  ['bwf-german-hang','bwf-tuck-skin-cat','bwf-adv-tuck-skin-cat','bwf-pike-skin-cat','bwf-tuck-back-lever','bwf-adv-tuck-back-lever','bwf-one-leg-back-lever','bwf-straddle-back-lever','bwf-back-lever'],
   'planche':     ['pppu','bwf-straight-arm-frog','bwf-tuck-planche','bwf-tuck-planche-pu','bwf-adv-tuck-pl','bwf-adv-tuck-pl-pu','bwf-str-planche','bwf-full-planche','bwf-rto-pp-pu'],
-  'handstand':   ['bwf-wall-plank','bwf-wall-headstand','bwf-wall-handstand','bwf-tuck-handstand','bwf-handstand','oah','bwf-wall-hes-pu-neg','bwf-wall-hes-pu','bwf-headstand-pu','bwf-hs-pu','bwf-ring-hs','bwf-ring-strap-hs-pu','bwf-ring-wide-hs-pu'],
+  'handstand':   ['hs-long-lunge-stretch','bwf-wall-plank','bwf-wall-headstand','hs-swing-kick-l','hs-swing-kick-straight','bwf-wall-handstand','hs-forehead-wall','hs-chin-chest','hs-one-bent-one-straight','hs-half-tuck','bwf-tuck-handstand','hs-straddle','bwf-handstand','oah','bwf-wall-hes-pu-neg','bwf-wall-hes-pu','bwf-headstand-pu','bwf-hs-pu','bwf-ring-hs','bwf-ring-strap-hs-pu','bwf-ring-wide-hs-pu'],
   'l-sit':       ['bwf-foot-sup-l-sit','bwf-tuck-l-sit','bwf-one-leg-l-sit','bwf-one-leg-bent-l-sit','bwf-l-sit','l-sit','bwf-straddle-l-sit','bwf-v-sit','bwf-manna','bwf-tuck-l-sit-dip','bwf-l-sit-dip','bwf-ring-l-sit-dip','bwf-l-sit-pu','bwf-ring-l-sit-pu','bwf-l-sit-mu'],
   'muscle-up':   ['bwf-scapular-pull','bwf-arch-hang','bwf-pull-up-neg','bwf-pull-up','chin-ups','bwf-c2b-pull-up','bwf-mu-neg','bwf-kipping-mu','bwf-pullover','muscle-up','bwf-wide-mu','bwf-strict-bar-mu'],
 };
@@ -2031,7 +2057,7 @@ const EX_META = {};
 // Ring exercises
 const RING_IDS = ['bwf-ring-l-sit-pu','bwf-ring-wide-pu','bwf-ring-wide-lpu','bwf-ring-dip','bwf-rto-dip','bwf-ring-l-sit-dip','bwf-ring-wide-dip','bwf-rto-45-dip','bwf-rto-75-dip','bwf-ring-hs','bwf-ring-strap-hs-pu','bwf-ring-wide-hs-pu','bwf-ring-sup-hold','bwf-rto-sup-hold','bwf-ring-push-up','bwf-ring-wide-pu','bwf-ring-archer-pu','bwf-rto-push-up','bwf-rto-archer-pu','bwf-rto-pp-pu','bwf-ring-str-oa-pu','bwf-ring-l-sit-dip'];
 // Floor/ground exercises
-const FLOOR_IDS = ['hollow-body','bwf-reverse-plank','bwf-shoulder-bridge','bwf-table-bridge','bwf-angled-bridge','bwf-head-bridge','bwf-bridge-wheel','bwf-decline-bridge','bwf-one-leg-bridge','bwf-decline-ol-bridge','pppu','bwf-pp-push-up','bwf-straight-arm-frog','bwf-tuck-planche','bwf-tuck-planche-pu','bwf-adv-tuck-pl','bwf-adv-tuck-pl-pu','bwf-str-planche','bwf-incline-pu','bwf-push-up','bwf-diamond-pu','bwf-pike-push-up','bwf-decline-pike-pu','bwf-archer-push-up','bwf-incline-oa-pu','bwf-straddle-oa-pu','bwf-one-arm-push-up','bwf-foot-sup-l-sit','bwf-one-leg-l-sit','bwf-tuck-l-sit','bwf-one-leg-bent-l-sit','bwf-l-sit','l-sit','bwf-straddle-l-sit','bwf-v-sit','bwf-manna','bwf-wall-plank','bwf-wall-headstand','bwf-wall-handstand','bwf-tuck-handstand','bwf-handstand','oah','bwf-deadbugs','bwf-gmb-wrist-prep'];
+const FLOOR_IDS = ['hollow-body','bwf-reverse-plank','bwf-shoulder-bridge','bwf-table-bridge','bwf-angled-bridge','bwf-head-bridge','bwf-bridge-wheel','bwf-decline-bridge','bwf-one-leg-bridge','bwf-decline-ol-bridge','pppu','bwf-pp-push-up','bwf-straight-arm-frog','bwf-tuck-planche','bwf-tuck-planche-pu','bwf-adv-tuck-pl','bwf-adv-tuck-pl-pu','bwf-str-planche','bwf-incline-pu','bwf-push-up','bwf-diamond-pu','bwf-pike-push-up','bwf-decline-pike-pu','bwf-archer-push-up','bwf-incline-oa-pu','bwf-straddle-oa-pu','bwf-one-arm-push-up','bwf-foot-sup-l-sit','bwf-one-leg-l-sit','bwf-tuck-l-sit','bwf-one-leg-bent-l-sit','bwf-l-sit','l-sit','bwf-straddle-l-sit','bwf-v-sit','bwf-manna','bwf-wall-plank','bwf-wall-headstand','bwf-wall-handstand','bwf-tuck-handstand','bwf-handstand','oah','bwf-deadbugs','bwf-gmb-wrist-prep','hs-long-lunge-stretch','hs-swing-kick-l','hs-swing-kick-straight','hs-forehead-wall','hs-chin-chest','hs-one-bent-one-straight','hs-half-tuck','hs-straddle'];
 
 EXERCISES.forEach(ex => {
   const t = ex.tags;
@@ -3229,6 +3255,7 @@ function _logExerciseCardHTML(ex) {
       ${lastWeekHint}
       ${sparkSvg ? `<div class="spark-row"><div class="spark-label">Load trend</div>${sparkSvg}</div>` : ''}
       <div class="log-ex-body">
+        ${fvPlayerHTML(exData, {suffix:'-log', ratio:'16/9'})}
         <div class="set-stack" id="set-stack-${wk}"></div>
       </div>
       <div class="set-note-row">
@@ -3786,7 +3813,8 @@ function renderExItem(ex, progressionNum) {
       <div class="info-line"><span class="info-line-label">Target</span><span class="info-line-val">${ex.target}</span></div>
       <div class="info-line"><span class="info-line-label">Intensity</span><span class="info-line-val">${ex.intensity}</span></div>
       <div class="info-line"><span class="info-line-label">Cue</span><span class="info-line-val">${ex.cue}</span></div>
-      <a href="${ex.video}" class="video-btn" target="_blank"><svg viewBox="0 0 8 10" width="8" height="10" fill="currentColor" style="flex-shrink:0" aria-hidden="true"><path d="M1 1 L7 5 L1 9 Z"/></svg> Watch Reference</a>
+      ${fvPlayerHTML(ex, {suffix:'-db', ratio:'16/9'})}
+      <a href="${ex.video}" class="video-btn" target="_blank" style="${fvHas(ex)?'opacity:.5;font-size:9px;padding:9px':''}"><svg viewBox="0 0 8 10" width="8" height="10" fill="currentColor" style="flex-shrink:0" aria-hidden="true"><path d="M1 1 L7 5 L1 9 Z"/></svg> Watch Reference</a>
       <div style="height:12px"></div>
     </div>
   </div>`;
@@ -3810,6 +3838,89 @@ function toggleDBItem(id) {
   }
 }
 
+
+// ─── SELF-HOSTED VIDEO PLAYER ──────────────────────────────────
+// Two-tier by design:
+//   ex.videoSrc present  → inline poster + <video>, never leaves the PWA
+//   ex.videoSrc absent   → the existing "Watch Reference" YouTube link
+// So a clip can be added one exercise at a time with no migration, and a
+// dead/blocked file silently reverts to the link rather than showing a
+// broken box mid-session.
+const VIDEO_BASE = '';   // e.g. 'https://media.forgetraining.app/' once R2 is live
+
+function fvUrl(path){
+  if(!path) return '';
+  return /^https?:\/\//i.test(path) ? path : VIDEO_BASE + path;
+}
+function fvHas(ex){ return !!(ex && ex.videoSrc); }
+
+// Inline player markup. Poster only — the video element carries no src until
+// tapped, so a library of 285 exercises costs 285 small images, not 285 videos.
+function fvPlayerHTML(ex, opts){
+  opts = opts || {};
+  if(!fvHas(ex)) return '';
+  const src    = fvUrl(ex.videoSrc);
+  const poster = fvUrl(ex.poster || '');
+  const ratio  = opts.ratio || '16/9';
+  const uid    = 'fv-' + ex.id + (opts.suffix || '');
+  return `<div class="fv-media" id="${uid}" style="aspect-ratio:${ratio}"
+      role="button" tabindex="0" aria-label="Play ${ex.name} demonstration"
+      onclick="fvToggle('${uid}','${src}')"
+      onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();fvToggle('${uid}','${src}')}">
+    ${poster ? `<img class="fv-poster" src="${poster}" alt="" loading="lazy" decoding="async">` : ''}
+    <video playsinline muted loop preload="none" disablepictureinpicture></video>
+    <div class="fv-scrim"></div>
+    <div class="fv-play"><svg viewBox="0 0 8 10"><path d="M1 1 L7 5 L1 9 Z"/></svg></div>
+    <div class="fv-badge">Luca \u00b7 FORGE</div>
+    <button class="fv-speed" onclick="event.stopPropagation();fvSpeed('${uid}')">1\u00d7</button>
+    <div class="fv-fail">Demo unavailable \u2014 tap Watch Reference below</div>
+  </div>`;
+}
+
+function fvToggle(uid, src){
+  const box = document.getElementById(uid); if(!box) return;
+  const vid = box.querySelector('video'); if(!vid) return;
+
+  if(box.classList.contains('live')){          // second tap stops and resets
+    vid.pause(); box.classList.remove('live'); return;
+  }
+  // Only one clip plays at a time, so scrolling the log doesn't stack audio-less
+  // decoders and chew battery.
+  document.querySelectorAll('.fv-media.live').forEach(o => {
+    if(o.id !== uid){ const v=o.querySelector('video'); if(v) v.pause(); o.classList.remove('live'); }
+  });
+
+  if(!vid.getAttribute('src')){
+    vid.setAttribute('src', src);
+    vid.addEventListener('error', () => {
+      // Network gone, file missing, or the CDN is blocked — fall back visibly
+      box.classList.add('failed'); box.classList.remove('live');
+    }, { once:true });
+  }
+  box.classList.add('live');
+  const p = vid.play();
+  if(p && p.catch) p.catch(() => { box.classList.add('failed'); box.classList.remove('live'); });
+}
+
+// Half speed for entries and skill work; the two states are enough on a phone.
+function fvSpeed(uid){
+  const box=document.getElementById(uid); if(!box) return;
+  const vid=box.querySelector('video'), btn=box.querySelector('.fv-speed');
+  if(!vid||!btn) return;
+  const half = vid.playbackRate !== 0.5;
+  vid.playbackRate = half ? 0.5 : 1;
+  btn.textContent = half ? '0.5\u00d7' : '1\u00d7';
+  btn.classList.toggle('on', half);
+}
+
+// Pause everything when the tab is backgrounded or the log is left
+function fvPauseAll(){
+  document.querySelectorAll('.fv-media.live').forEach(o => {
+    const v=o.querySelector('video'); if(v) v.pause(); o.classList.remove('live');
+  });
+}
+document.addEventListener('visibilitychange', () => { if(document.hidden) fvPauseAll(); });
+
 // ─── SHEET ─────────────────────────────────────────────────────
 function openSheet(id){
   const ex=EXERCISES.find(e=>e.id===id); if(!ex) return;
@@ -3819,11 +3930,17 @@ function openSheet(id){
   document.getElementById('sheet-intensity').textContent=ex.intensity;
   document.getElementById('sheet-cue').textContent=ex.cue;
   document.getElementById('sheet-video').href=ex.video;
+  // Inline clip when we have one; the YouTube link stays as the fallback
+  const sp=document.getElementById('sheet-player');
+  sp.innerHTML = fvPlayerHTML(ex, {suffix:'-sheet', ratio:'16/9'});
+  const sv=document.getElementById('sheet-video');
+  sv.style.opacity = fvHas(ex) ? '.5' : '';
+  sv.style.fontSize = fvHas(ex) ? '9px' : '';
   document.getElementById('sheet-tags').innerHTML=ex.tags.map(t=>`<span class="tag ${t}">${t}</span>`).join('');
   document.getElementById('sheet-overlay').classList.add('open');
 }
 function closeSheet(e){if(e.target===document.getElementById('sheet-overlay'))closeSheetDirect();}
-function closeSheetDirect(){document.getElementById('sheet-overlay').classList.remove('open');}
+function closeSheetDirect(){fvPauseAll();document.getElementById('sheet-overlay').classList.remove('open');}
 
 // ─── PROGRESS ──────────────────────────────────────────────────
 
