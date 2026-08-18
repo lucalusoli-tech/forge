@@ -377,7 +377,7 @@
   .info-line-label { color: var(--text-muted); }
   .info-line-val { color: var(--text); text-align: right; max-width: 60%; }
   /* ═══ SELF-HOSTED VIDEO PLAYER ═══ */
-  .fv-media{position:relative;margin-top:12px;border-radius:9px;overflow:hidden;background:var(--card);border:1px solid var(--border);aspect-ratio:16/9;cursor:pointer;}
+  .fv-media{position:relative;margin-top:12px;max-height:52vh;margin-left:auto;margin-right:auto;border-radius:9px;overflow:hidden;background:var(--card);border:1px solid var(--border);aspect-ratio:16/9;cursor:pointer;}
   .fv-media img.fv-poster,.fv-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:var(--card);}
   .fv-media video{opacity:0;transition:opacity .25s;}
   .fv-media.live video{opacity:1;}
@@ -1763,7 +1763,7 @@ const EXERCISES = [
   // ── HAND BALANCE DRILLS (London School of Hand Balance) ──────
   {id:'hs-long-lunge-stretch',name:'Long Lunge to Straight Leg',tags:['skill','warmup','calisthenics'],sets:'2\u00d75-8 each side',target:'Hip Flexors, Hamstrings, Adductors',intensity:'Easy',level:'Beginner',cue:'Long lunge, back knee off the floor \u2014 shift the hips back and straighten the front leg, then return',video:'https://www.youtube.com/results?search_query=lunge+to+hamstring+stretch+handstand+warm+up',desc:'Dynamic lunge to straight-leg stretch. Opens the hip flexors and hamstrings that set the entry position for every kick-up.'},
   {id:'hs-swing-kick-l',name:'Swing and Kick \u2014 L Position',tags:['skill','warmup','calisthenics','push'],sets:'3\u00d75-8',target:'Wrists, Shoulder Girdle, Core, Hip Flexors',intensity:'Easy-Moderate',level:'Beginner',cue:'Swing the arms up, step into the lunge, kick the lead leg to vertical and stop in the L \u2014 trail leg stays low',video:'https://www.youtube.com/results?search_query=handstand+kick+up+L+position+drill',desc:'Kick-up stopped in the L shape \u2014 one leg vertical, one leg horizontal. Teaches a controlled entry and the feel of stacking over the hands before committing to a full handstand.'},
-  {id:'hs-swing-kick-straight',name:'Swing and Kick \u2014 Straight',tags:['skill','warmup','calisthenics','push'],sets:'3\u00d75-8',target:'Wrists, Shoulder Girdle, Core, Balance',intensity:'Moderate',level:'Beginner',cue:'Same swing and lunge, but bring both legs together to the straight line \u2014 push the floor away, ribs down',video:'https://www.youtube.com/results?search_query=handstand+kick+up+drill+straight+line',desc:'Full kick-up to the straight handstand shape. The L drill with both legs joined at the top. Practise until the entry needs no thought.'},
+  {id:'hs-swing-kick-straight',name:'Swing and Kick \u2014 Straight',videoSrc:'hs-swing-kick-straight.mp4',videoRatio:'9/16',tags:['skill','warmup','calisthenics','push'],sets:'3\u00d75-8',target:'Wrists, Shoulder Girdle, Core, Balance',intensity:'Moderate',level:'Beginner',cue:'Same swing and lunge, but bring both legs together to the straight line \u2014 push the floor away, ribs down',video:'https://www.youtube.com/results?search_query=handstand+kick+up+drill+straight+line',desc:'Full kick-up to the straight handstand shape. The L drill with both legs joined at the top. Practise until the entry needs no thought.'},
   {id:'hs-forehead-wall',name:'Forehead Facing the Wall',tags:['skill','calisthenics','push'],sets:'3\u00d720-40s',target:'Wrists, Shoulder Girdle, Core',intensity:'Moderate',level:'Beginner',cue:'Chest to wall, hands close in, forehead towards the wall \u2014 open the shoulders and stack the hips over the hands',video:'https://www.youtube.com/results?search_query=chest+to+wall+handstand+alignment+drill',desc:'Chest-to-wall hold with the head towards the wall. Forces shoulder opening and a stacked line rather than the banana shape a back-to-wall handstand allows.'},
   {id:'hs-chin-chest',name:'Chin on Your Chest',tags:['skill','calisthenics','push'],sets:'3\u00d720-40s',target:'Wrists, Shoulder Girdle, Core, Neck',intensity:'Moderate',level:'Beginner',cue:'Tuck the chin to the chest and hold the line \u2014 balance with the fingers, not by looking around',video:'https://www.youtube.com/results?search_query=handstand+head+position+chin+tucked+neutral',desc:'Head position drill with the chin tucked. Removes the visual reference so balance comes from the fingers and the whole line, not from craning the neck.'},
   {id:'hs-one-bent-one-straight',name:'One Bent One Straight (Wall)',tags:['skill','calisthenics','push'],sets:'3\u00d720-30s each',target:'Wrists, Shoulder Girdle, Core, Hip Flexors',intensity:'Moderate',level:'Beginner',cue:'On the wall, one leg straight to the ceiling, the other bent with the foot to the knee \u2014 hips stay square',video:'https://www.youtube.com/results?search_query=handstand+wall+shape+one+leg+bent+drill',desc:'Wall handstand with asymmetric legs. Trains shape awareness and square hips while the wall still carries some of the balance.'},
@@ -3846,7 +3846,7 @@ function toggleDBItem(id) {
 // So a clip can be added one exercise at a time with no migration, and a
 // dead/blocked file silently reverts to the link rather than showing a
 // broken box mid-session.
-const VIDEO_BASE = '';   // e.g. 'https://media.forgetraining.app/' once R2 is live
+const VIDEO_BASE = 'https://pub-4b597bc22db14a1facdba2bef7a59a21.r2.dev/';
 
 function fvUrl(path){
   if(!path) return '';
@@ -3861,7 +3861,7 @@ function fvPlayerHTML(ex, opts){
   if(!fvHas(ex)) return '';
   const src    = fvUrl(ex.videoSrc);
   const poster = fvUrl(ex.poster || '');
-  const ratio  = opts.ratio || '16/9';
+  const ratio  = ex.videoRatio || opts.ratio || '16/9';
   const uid    = 'fv-' + ex.id + (opts.suffix || '');
   return `<div class="fv-media" id="${uid}" style="aspect-ratio:${ratio}"
       role="button" tabindex="0" aria-label="Play ${ex.name} demonstration"
