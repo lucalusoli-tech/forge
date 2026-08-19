@@ -3224,7 +3224,7 @@ function renderLogExercises(exercises) {
 
   // Populate each superset container
   groupsToRender.forEach(g => renderSupersetGroup(g));
-  try{ fvScan(); }catch(e){}
+  try{ fvScan(c); }catch(e){}
 }
 
 // Extracted: build the HTML for one exercise card (without populating the set-stack)
@@ -3802,13 +3802,14 @@ function renderDB(search='') {
       // uncategorised remainder
       const ungrouped = filtered.filter(ex => !catData.subs.includes((EX_META[ex.id]||{}).subcat));
       ungrouped.forEach(ex => c.innerHTML += renderExItem(ex));
+      try{ fvScan(c); }catch(e){}
       return;
     }
   }
 
   // Default flat render
   filtered.forEach(ex => c.innerHTML += renderExItem(ex));
-  try{ fvScan(); }catch(e){}
+  try{ fvScan(c); }catch(e){}
 }
 
 function renderExItem(ex, progressionNum) {
@@ -3870,17 +3871,30 @@ const VIDEO_BASE = 'https://pub-4b597bc22db14a1facdba2bef7a59a21.r2.dev/';
 // the YouTube button is what you see — exactly as before.
 //
 // One probe per exercise, remembered in localStorage so it never repeats.
+// One probe per exercise. Positives persist in localStorage; negatives are kept
+// in memory only, so a flaky connection can't permanently hide a clip you have
+// actually uploaded.
 const FV_CACHE_KEY = 'fw_clip_probe_v1';
-let fvProbed = {};
-try { fvProbed = JSON.parse(localStorage.getItem(FV_CACHE_KEY) || '{}'); } catch(e) { fvProbed = {}; }
+let fvProbed = {};                 // id -> {ok:true, ratio}   (persisted)
+const fvMissing = new Set();       // ids with no clip THIS SESSION (not persisted)
+try {
+  const raw = JSON.parse(localStorage.getItem(FV_CACHE_KEY) || '{}');
+  // Drop any legacy {ok:false} entries written by the old build
+  Object.keys(raw).forEach(k => { if (raw[k] && raw[k].ok) fvProbed[k] = raw[k]; });
+} catch(e) { fvProbed = {}; }
 
 function fvRemember(id, val){
-  fvProbed[id] = val;
-  try { localStorage.setItem(FV_CACHE_KEY, JSON.stringify(fvProbed)); } catch(e) {}
+  if (val && val.ok) {
+    fvProbed[id] = val;
+    try { localStorage.setItem(FV_CACHE_KEY, JSON.stringify(fvProbed)); } catch(e) {}
+  } else {
+    fvMissing.add(id);
+  }
 }
 // Call after uploading a new clip if you want the app to look again immediately
 function fvForgetProbes(){
   fvProbed = {};
+  fvMissing.clear();
   try { localStorage.removeItem(FV_CACHE_KEY); } catch(e) {}
 }
 
@@ -3888,22 +3902,26 @@ function fvUrl(path){
   if(!path) return '';
   return /^https?:\/\//i.test(path) ? path : VIDEO_BASE + path;
 }
-function fvHas(ex){ return !!(ex && fvProbed[ex.id] && fvProbed[ex.id].ok); }
+function fvHas(ex){ return !!(ex && fvProbed[ex.id]); }
 
-// Inline player markup. Poster only — the video element carries no src until
-// tapped, so a library of 285 exercises costs 285 small images, not 285 videos.
+// Inline player markup. No src until tapped, and no probe until scrolled into
+// view — the library can hold hundreds of exercises without the page paying for
+// them at boot.
 function fvPlayerHTML(ex, opts){
   opts = opts || {};
   if(!ex) return '';
+  if(fvMissing.has(ex.id)) return '';           // already probed, nothing there
   const known = fvProbed[ex.id];
-  if(known && !known.ok) return '';            // probed before, no clip there
   const src   = fvUrl(ex.id + '.mp4');
   const ratio = (known && known.ratio) || '9/16';
   const uid   = 'fv-' + ex.id + (opts.suffix || '');
-  // Hidden until the probe confirms the file exists, so unshot exercises never
-  // flash an empty player
-  const hide  = known && known.ok ? '' : 'display:none;';
-  return `<div class="fv-media" id="${uid}" style="aspect-ratio:${ratio};${hide}"
+  // Unconfirmed players must stay in the layout (a display:none element never
+  // fires an IntersectionObserver), so they sit at 1px and fully transparent
+  // until a probe either reveals or removes them.
+  const pending = known
+    ? `aspect-ratio:${ratio};`
+    : `height:1px;opacity:0;pointer-events:none;overflow:hidden;`;
+  return `<div class="fv-media" id="${uid}" style="${pending}"
       data-ex="${ex.id}" data-src="${src}"
       role="button" tabindex="0" aria-label="Play ${ex.name} demonstration"
       onclick="fvToggle('${uid}','${src}')"
@@ -3917,48 +3935,102 @@ function fvPlayerHTML(ex, opts){
   </div>`;
 }
 
+// ─── PROBE QUEUE ───────────────────────────────────────────────
+// Hard cap on concurrent probes. iOS destroys the page renderer if too many
+// media elements are alive at once, and an unthrottled scan of the full library
+// is exactly that. Three at a time is invisible to the user and safe on every
+// device. A per-probe timeout stops one dead request stalling the queue.
+const FV_MAX_PARALLEL = 3;
+const FV_PROBE_TIMEOUT_MS = 8000;
+let fvActive = 0;
+const fvQueue = [];
+
+function fvPump(){
+  while (fvActive < FV_MAX_PARALLEL && fvQueue.length) {
+    const box = fvQueue.shift();
+    if (!box || !box.isConnected || box._probing) continue;
+    fvRunProbe(box);
+  }
+}
+
 // Ask the browser for just the metadata header of the clip. Arrives → the file
-// exists and we learn its true dimensions. Errors → no clip, stay hidden.
-function fvProbe(box){
+// exists and we learn its true dimensions. Errors → no clip, remove the player.
+function fvRunProbe(box){
   const id = box.getAttribute('data-ex'), src = box.getAttribute('data-src');
-  if(!id || box._probing) return;
-  const known = fvProbed[id];
-  if(known){ if(known.ok) fvReveal(box, known.ratio); return; }
+  if(!id) return;
   box._probing = true;
+  fvActive++;
 
   const t = document.createElement('video');
   t.preload = 'metadata'; t.muted = true; t.playsInline = true;
-  // Guard: tearing the probe element down fires its own error event, which would
-  // otherwise overwrite a good result with a false negative.
+
   let settled = false;
-  t.addEventListener('loadedmetadata', () => {
-    if(settled) return; settled = true;
-    const r = (t.videoWidth && t.videoHeight) ? t.videoWidth + '/' + t.videoHeight : '9/16';
-    fvRemember(id, { ok:true, ratio:r });
-    fvReveal(box, r);
+  const finish = (ok, ratio) => {
+    if (settled) return; settled = true;
+    clearTimeout(timer);
+    fvRemember(id, ok ? { ok:true, ratio } : { ok:false });
+    if (ok) fvReveal(box, ratio); else fvHideBox(box);
     box._probing = false;
     t.removeAttribute('src');
+    try { t.load(); } catch(e) {}     // release the decoder immediately
+    fvActive--;
+    fvPump();
+  };
+
+  const timer = setTimeout(() => finish(false), FV_PROBE_TIMEOUT_MS);
+
+  t.addEventListener('loadedmetadata', () => {
+    const r = (t.videoWidth && t.videoHeight) ? t.videoWidth + '/' + t.videoHeight : '9/16';
+    finish(true, r);
   });
-  t.addEventListener('error', () => {
-    if(settled) return; settled = true;
-    fvRemember(id, { ok:false });
-    box._probing = false;
-  });
+  t.addEventListener('error', () => finish(false));
+
   t.src = src;
 }
 
 function fvReveal(box, ratio){
-  box.style.aspectRatio = ratio;
-  box.style.display = '';
+  box.style.aspectRatio    = ratio;
+  box.style.height         = '';
+  box.style.opacity        = '';
+  box.style.pointerEvents  = '';
+  box.style.overflow       = '';
+  box.style.display        = '';
   // A confirmed clip demotes the YouTube link to a secondary option
   const card = box.closest('.ex-detail, .sheet-body, .log-ex-body');
   const link = card && card.querySelector('.video-btn');
   if(link){ link.style.opacity = '.5'; link.style.fontSize = '9px'; link.style.padding = '9px'; }
 }
 
-// Probe any player that has just been rendered into the page
+function fvHideBox(box){
+  box.style.display = 'none';
+}
+
+// ─── LAZY DETECTION ────────────────────────────────────────────
+// Players are probed when they scroll near the viewport, never in bulk.
+const fvObserver = ('IntersectionObserver' in window)
+  ? new IntersectionObserver((entries, obs) => {
+      entries.forEach(en => {
+        if (!en.isIntersecting) return;
+        obs.unobserve(en.target);
+        fvQueue.push(en.target);
+      });
+      fvPump();
+    }, { rootMargin: '200px 0px' })
+  : null;
+
+// Register any players just rendered into the page. Cheap — no network, no
+// media elements. Kept as fvScan() so existing call sites are unchanged.
 function fvScan(root){
-  (root || document).querySelectorAll('.fv-media[data-ex]').forEach(fvProbe);
+  const boxes = (root || document).querySelectorAll('.fv-media[data-ex]');
+  boxes.forEach(box => {
+    if (box._fvSeen) return;
+    box._fvSeen = true;
+    const id = box.getAttribute('data-ex');
+    if (fvProbed[id]) { fvReveal(box, fvProbed[id].ratio); return; }
+    if (fvMissing.has(id)) { fvHideBox(box); return; }
+    if (fvObserver) fvObserver.observe(box);
+    else { fvQueue.push(box); fvPump(); }   // no IO support: queue, still capped
+  });
 }
 
 function fvToggle(uid, src){
@@ -7362,7 +7434,6 @@ async function afterAuth(supaUser, isNew) {
   // Backup session to IndexedDB (survives iOS Safari localStorage eviction)
   const { data: { session: freshSession } } = await supa.auth.getSession();
   if (freshSession) {
-    try { localStorage.setItem('fw_idb_backup','1'); } catch(e) {}
     await idbSet('supabase_session', {
       access_token: freshSession.access_token,
       refresh_token: freshSession.refresh_token
@@ -7497,16 +7568,7 @@ async function handleSignOut() {
   }
 
   // ── Tier 3: IndexedDB restore (Safari wiped localStorage entirely)
-  //
-  // Only worth attempting if there is actually something to restore. On iOS,
-  // indexedDB.open() can block the whole main thread when another context (the
-  // installed PWA alongside Safari) holds the database — and a blocked main
-  // thread means no timeout can fire and boot never finishes. So we record
-  // whether a backup exists in localStorage, and only touch IndexedDB when that
-  // marker says there is one.
-  if (!session && localStorage.getItem('fw_idb_backup') !== '1') {
-    console.log(`[FORGE AUTH] 4/5 skipped IndexedDB restore (no backup marker)`);
-  } else if (!session) {
+  if (!session) {
     console.log(`[FORGE AUTH] 4/5 attempting IndexedDB restore ${elapsed()}`);
     const idbSession = await idbGet('supabase_session');
     if (idbSession?.refresh_token) {
@@ -7575,7 +7637,6 @@ supa.auth.onAuthStateChange(async (event, session) => {
   } else if (event === 'TOKEN_REFRESHED' && session?.user) {
     console.log('[FORGE AUTH]     token refreshed, updating IDB backup');
     // Update IndexedDB backup with the new tokens — critical for long-term persistence
-    try { localStorage.setItem('fw_idb_backup','1'); } catch(e) {}
     await idbSet('supabase_session', {
       access_token: session.access_token,
       refresh_token: session.refresh_token
