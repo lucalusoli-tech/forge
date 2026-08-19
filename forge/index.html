@@ -16,6 +16,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -52,7 +53,7 @@
   .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 8px 0; transition: color 0.2s; }
   .nav-btn.active { color: var(--accent); }
   .nav-icon { font-size: 18px; line-height: 1; }
-  .nav-label { font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase; }
+  .nav-label { font-size: 7.5px; letter-spacing: .8px; text-transform: uppercase; }
 
   .page { display: none; background: #080808; }
   .page.active { display: block; }
@@ -376,6 +377,22 @@
   .info-line { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 11px; }
   .info-line-label { color: var(--text-muted); }
   .info-line-val { color: var(--text); text-align: right; max-width: 60%; }
+  /* ═══ SELF-HOSTED VIDEO PLAYER ═══ */
+  .fv-media{position:relative;margin-top:12px;max-height:52vh;margin-left:auto;margin-right:auto;border-radius:9px;overflow:hidden;background:var(--card);border:1px solid var(--border);aspect-ratio:16/9;cursor:pointer;}
+  .fv-media img.fv-poster,.fv-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:var(--card);}
+  .fv-media video{opacity:0;transition:opacity .25s;}
+  .fv-media.live video{opacity:1;}
+  .fv-media.live .fv-scrim,.fv-media.live .fv-play,.fv-media.live .fv-badge{opacity:0;pointer-events:none;}
+  .fv-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,8,8,.12),rgba(8,8,8,.55));transition:opacity .25s;}
+  .fv-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:48px;height:48px;border-radius:50%;border:1px solid var(--accent-dim);background:rgba(8,8,8,.55);display:grid;place-items:center;transition:opacity .25s;}
+  .fv-play svg{width:13px;height:15px;fill:var(--accent);margin-left:3px;}
+  .fv-badge{position:absolute;left:9px;bottom:8px;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--text);background:rgba(8,8,8,.6);padding:3px 6px;border-radius:3px;transition:opacity .25s;}
+  .fv-speed{position:absolute;right:9px;bottom:8px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--text-muted);background:rgba(8,8,8,.65);border:1px solid var(--border);border-radius:4px;padding:4px 8px;opacity:0;pointer-events:none;transition:opacity .25s;cursor:pointer;}
+  .fv-media.live .fv-speed{opacity:1;pointer-events:auto;}
+  .fv-media.live .fv-speed.on{color:var(--accent);border-color:var(--accent-dim);}
+  .fv-fail{position:absolute;inset:0;display:none;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);text-align:center;padding:12px;}
+  .fv-media.failed .fv-fail{display:flex;}
+  .fv-media.failed .fv-play,.fv-media.failed .fv-badge,.fv-media.failed .fv-scrim{opacity:0;}
   .video-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background: transparent; border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; text-decoration: none; margin-top: 12px; }
 
   /* ── PROGRESS ── */
@@ -1532,6 +1549,7 @@
     <button class="nav-btn" id="nav-progress" onclick="navigate('progress')"><span class="nav-icon">◌</span><span class="nav-label">Progress</span></button>
     <button class="nav-btn" id="nav-builder" onclick="navigate('builder')"><span class="nav-icon">✦</span><span class="nav-label">Build</span></button>
     <button class="nav-btn" id="nav-coaching" onclick="navigate('coaching')"><span class="nav-icon">人</span><span class="nav-label">Programmes</span></button>
+    <button class="nav-btn" id="nav-board" onclick="navigate('board')"><span class="nav-icon">✎</span><span class="nav-label">Notes</span></button>
   </nav>
 </div>
 
@@ -1585,6 +1603,7 @@
       <div class="info-line"><span class="info-line-label">Target</span><span class="info-line-val" id="sheet-target"></span></div>
       <div class="info-line"><span class="info-line-label">Intensity</span><span class="info-line-val" id="sheet-intensity"></span></div>
       <div class="info-line"><span class="info-line-label">Cue</span><span class="info-line-val" id="sheet-cue"></span></div>
+      <div id="sheet-player"></div>
       <a href="#" id="sheet-video" class="video-btn" target="_blank"><svg viewBox="0 0 8 10" width="8" height="10" fill="currentColor" style="flex-shrink:0" aria-hidden="true"><path d="M1 1 L7 5 L1 9 Z"/></svg> Watch Reference</a>
     </div>
   </div>
@@ -1672,6 +1691,12 @@ const EXERCISES = [
   {id:'hyperextension',name:'Hyperextension',tags:['core'],sets:'3×12-15',target:'Erectors, Glutes, Hamstrings',intensity:'Bodyweight',level:'Beginner',cue:'Hinge at the hips, extend to a straight line — don\'t overarch',video:'https://www.youtube.com/results?search_query=hyperextension+back+extension+form',desc:'Posterior-chain extension on a roman chair. Strengthens the lower back, glutes and hamstrings.'},
   {id:'reverse-hyperextension',name:'Reverse Hyperextension',tags:['core'],sets:'3×12-15',target:'Glutes, Hamstrings, Erectors',intensity:'Bodyweight',level:'Beginner',cue:'Torso fixed, raise the legs by squeezing the glutes, control the lowering',video:'https://www.youtube.com/results?search_query=reverse+hyperextension+form',desc:'Legs lever against a fixed torso. Glute and hamstring drive with minimal spinal load.'},
   {id:'side-hyperextension',name:'Side Hyperextension',tags:['core'],sets:'3×12-15',target:'Obliques, Lower Back',intensity:'Bodyweight',level:'Beginner',cue:'Lateral hinge, raise the torso sideways — no twisting',video:'https://www.youtube.com/results?search_query=side+hyperextension+oblique+form',desc:'Lateral-flexion variation on the roman chair. Targets the obliques and quadratus lumborum.'},
+  // ── ONE ARM HANDSTAND UNLOADING LADDER ──────────────────────
+  {id:'oahs-5f',name:'OAHS \u2014 5 Fingers',tags:['skill','push','calisthenics'],sets:'5\u00d75-15s each side',target:'Wrists, Shoulder Girdle, Core, Proprioception',intensity:'Max skill',level:'Elite',cue:'Shift the hips over one hand until the other carries almost nothing \u2014 all five fingers stay down',video:'https://www.youtube.com/results?search_query=one+arm+handstand+finger+unloading+progression',desc:'First stage of unloading. The weight moves onto one arm while the assisting hand keeps all five fingers on the floor for feedback. Trains the lateral shift without giving up the safety net.'},
+  {id:'oahs-3f',name:'OAHS \u2014 3 Fingers',tags:['skill','push','calisthenics'],sets:'5\u00d75-15s each side',target:'Wrists, Shoulder Girdle, Core, Proprioception',intensity:'Max skill',level:'Elite',cue:'Lift the little and ring finger \u2014 three fingers of the assisting hand remain, weight already on the working arm',video:'https://www.youtube.com/results?search_query=one+arm+handstand+finger+unloading+progression',desc:'Two fingers come off. Less feedback, so the working shoulder and the fingers of the loaded hand take over more of the correction.'},
+  {id:'oahs-2f',name:'OAHS \u2014 2 Fingers',tags:['skill','push','calisthenics'],sets:'5\u00d75-12s each side',target:'Wrists, Shoulder Girdle, Core, Proprioception',intensity:'Max skill',level:'Elite',cue:'Index and middle finger only \u2014 the assisting hand is a reference now, not support',video:'https://www.youtube.com/results?search_query=one+arm+handstand+finger+unloading+progression',desc:'The assisting hand stops carrying load and becomes purely a balance reference. Almost the full one arm hold, with a line back to the floor.'},
+  {id:'oahs-1f',name:'OAHS \u2014 1 Finger',tags:['skill','push','calisthenics'],sets:'5\u00d75-12s each side',target:'Wrists, Shoulder Girdle, Core, Proprioception',intensity:'Max skill',level:'Elite',cue:'One fingertip touching \u2014 hold the line and resist the urge to press back down',video:'https://www.youtube.com/results?search_query=one+arm+handstand+one+finger+progression',desc:'A single fingertip on the floor. Structurally this is already a one arm handstand \u2014 what remains is the confidence to remove the last point of contact.'},
+  {id:'oahs-tap',name:'OAHS \u2014 Tap',tags:['skill','push','calisthenics'],sets:'5\u00d73-8 taps each side',target:'Wrists, Shoulder Girdle, Core, Proprioception',intensity:'Max skill',level:'Elite',cue:'Take the hand fully off, tap the shoulder or the floor, return \u2014 short and controlled, not a snatch',video:'https://www.youtube.com/results?search_query=one+arm+handstand+tap+drill',desc:'Brief full releases of the assisting hand. Builds the seconds of unsupported balance that add up to a held one arm handstand.'},
   {id:'oah',name:'One Arm Handstand',tags:['skill','push','calisthenics'],sets:'Practice',target:'Full Body, Wrists, Proprioception',intensity:'Max skill',level:'Elite',cue:'Shift weight gradually, finger pressure control',video:'https://www.youtube.com/results?search_query=one+arm+handstand+tutorial',desc:'The summit. Reserve for peak conditions.'},
 
   // ── BWF HORIZONTAL PULL — BACK ────────────────────────────────
@@ -2005,6 +2030,7 @@ const EXERCISES = [
   {id:'mach-cable-overhead-tri',name:'Cable Overhead Tricep',tags:['machine','push'],sets:'3×10-15',target:'Triceps Long Head',intensity:'Light-Moderate',level:'Beginner',cue:'Face away from cable, rope overhead, press to extension',video:'https://www.youtube.com/results?search_query=cable+overhead+tricep+extension',desc:'Long head tricep stretch with constant cable tension. Excellent mass builder.'},
 ];
 
+
 // ─── CATEGORY / SUBCATEGORY TAXONOMY ──────────────────────────
 const EX_CATS = {
   all:         { label:'All',          subs:[] },
@@ -2029,7 +2055,7 @@ const SKILL_GROUPS = {
   'front-lever':['bwf-l-hang','bwf-tuck-front-lever','bwf-adv-tuck-front-lever','bwf-one-leg-fl','bwf-straddle-fl','front-lever','bwf-tuck-fl-row','bwf-adv-tuck-fl-row','adv-pl-rows'],
   'back-lever':  ['bwf-german-hang','bwf-tuck-skin-cat','bwf-adv-tuck-skin-cat','bwf-pike-skin-cat','bwf-tuck-back-lever','bwf-adv-tuck-back-lever','bwf-one-leg-back-lever','bwf-straddle-back-lever','bwf-back-lever'],
   'planche':     ['pppu','bwf-straight-arm-frog','bwf-tuck-planche','bwf-tuck-planche-pu','bwf-adv-tuck-pl','bwf-adv-tuck-pl-pu','bwf-str-planche','bwf-full-planche','bwf-rto-pp-pu'],
-  'handstand':   ['hs-long-lunge-stretch','bwf-wall-plank','bwf-wall-headstand','hs-swing-kick-l','hs-swing-kick-straight','bwf-wall-handstand','hs-forehead-wall','hs-chin-chest','hs-one-bent-one-straight','hs-half-tuck','bwf-tuck-handstand','hs-straddle','bwf-handstand','oah','bwf-wall-hes-pu-neg','bwf-wall-hes-pu','bwf-headstand-pu','bwf-hs-pu','bwf-ring-hs','bwf-ring-strap-hs-pu','bwf-ring-wide-hs-pu'],
+  'handstand':   ['hs-long-lunge-stretch','bwf-wall-plank','bwf-wall-headstand','hs-swing-kick-l','hs-swing-kick-straight','bwf-wall-handstand','hs-forehead-wall','hs-chin-chest','hs-one-bent-one-straight','hs-half-tuck','bwf-tuck-handstand','hs-straddle','bwf-handstand','oahs-5f','oahs-3f','oahs-2f','oahs-1f','oahs-tap','oah','bwf-wall-hes-pu-neg','bwf-wall-hes-pu','bwf-headstand-pu','bwf-hs-pu','bwf-ring-hs','bwf-ring-strap-hs-pu','bwf-ring-wide-hs-pu'],
   'l-sit':       ['bwf-foot-sup-l-sit','bwf-tuck-l-sit','bwf-one-leg-l-sit','bwf-one-leg-bent-l-sit','bwf-l-sit','l-sit','bwf-straddle-l-sit','bwf-v-sit','bwf-manna','bwf-tuck-l-sit-dip','bwf-l-sit-dip','bwf-ring-l-sit-dip','bwf-l-sit-pu','bwf-ring-l-sit-pu','bwf-l-sit-mu'],
   'muscle-up':   ['bwf-scapular-pull','bwf-arch-hang','bwf-pull-up-neg','bwf-pull-up','chin-ups','bwf-c2b-pull-up','bwf-mu-neg','bwf-kipping-mu','bwf-pullover','muscle-up','bwf-wide-mu','bwf-strict-bar-mu'],
 };
@@ -2040,7 +2066,7 @@ const EX_META = {};
 // Ring exercises
 const RING_IDS = ['bwf-ring-l-sit-pu','bwf-ring-wide-pu','bwf-ring-wide-lpu','bwf-ring-dip','bwf-rto-dip','bwf-ring-l-sit-dip','bwf-ring-wide-dip','bwf-rto-45-dip','bwf-rto-75-dip','bwf-ring-hs','bwf-ring-strap-hs-pu','bwf-ring-wide-hs-pu','bwf-ring-sup-hold','bwf-rto-sup-hold','bwf-ring-push-up','bwf-ring-wide-pu','bwf-ring-archer-pu','bwf-rto-push-up','bwf-rto-archer-pu','bwf-rto-pp-pu','bwf-ring-str-oa-pu','bwf-ring-l-sit-dip'];
 // Floor/ground exercises
-const FLOOR_IDS = ['hollow-body','bwf-reverse-plank','bwf-shoulder-bridge','bwf-table-bridge','bwf-angled-bridge','bwf-head-bridge','bwf-bridge-wheel','bwf-decline-bridge','bwf-one-leg-bridge','bwf-decline-ol-bridge','pppu','bwf-pp-push-up','bwf-straight-arm-frog','bwf-tuck-planche','bwf-tuck-planche-pu','bwf-adv-tuck-pl','bwf-adv-tuck-pl-pu','bwf-str-planche','bwf-incline-pu','bwf-push-up','bwf-diamond-pu','bwf-pike-push-up','bwf-decline-pike-pu','bwf-archer-push-up','bwf-incline-oa-pu','bwf-straddle-oa-pu','bwf-one-arm-push-up','bwf-foot-sup-l-sit','bwf-one-leg-l-sit','bwf-tuck-l-sit','bwf-one-leg-bent-l-sit','bwf-l-sit','l-sit','bwf-straddle-l-sit','bwf-v-sit','bwf-manna','bwf-wall-plank','bwf-wall-headstand','bwf-wall-handstand','bwf-tuck-handstand','bwf-handstand','oah','bwf-deadbugs','bwf-gmb-wrist-prep','hs-long-lunge-stretch','hs-swing-kick-l','hs-swing-kick-straight','hs-forehead-wall','hs-chin-chest','hs-one-bent-one-straight','hs-half-tuck','hs-straddle'];
+const FLOOR_IDS = ['hollow-body','bwf-reverse-plank','bwf-shoulder-bridge','bwf-table-bridge','bwf-angled-bridge','bwf-head-bridge','bwf-bridge-wheel','bwf-decline-bridge','bwf-one-leg-bridge','bwf-decline-ol-bridge','pppu','bwf-pp-push-up','bwf-straight-arm-frog','bwf-tuck-planche','bwf-tuck-planche-pu','bwf-adv-tuck-pl','bwf-adv-tuck-pl-pu','bwf-str-planche','bwf-incline-pu','bwf-push-up','bwf-diamond-pu','bwf-pike-push-up','bwf-decline-pike-pu','bwf-archer-push-up','bwf-incline-oa-pu','bwf-straddle-oa-pu','bwf-one-arm-push-up','bwf-foot-sup-l-sit','bwf-one-leg-l-sit','bwf-tuck-l-sit','bwf-one-leg-bent-l-sit','bwf-l-sit','l-sit','bwf-straddle-l-sit','bwf-v-sit','bwf-manna','bwf-wall-plank','bwf-wall-headstand','bwf-wall-handstand','bwf-tuck-handstand','bwf-handstand','oah','bwf-deadbugs','bwf-gmb-wrist-prep','hs-long-lunge-stretch','hs-swing-kick-l','hs-swing-kick-straight','hs-forehead-wall','hs-chin-chest','hs-one-bent-one-straight','hs-half-tuck','hs-straddle','oahs-5f','oahs-3f','oahs-2f','oahs-1f','oahs-tap'];
 
 EXERCISES.forEach(ex => {
   const t = ex.tags;
@@ -2342,7 +2368,7 @@ function navigate(page, push=true) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
   document.getElementById('scroll-area').scrollTop = 0;
-  const navIds = ['home','db','progress','builder','coaching'];
+  const navIds = ['home','db','progress','builder','coaching','board'];
   document.querySelectorAll('.nav-btn').forEach((b,i) => b.classList.toggle('active', navIds[i]===page));
   // Quick-board button rides along on the pages where notes actually happen
   try {
@@ -3198,6 +3224,7 @@ function renderLogExercises(exercises) {
 
   // Populate each superset container
   groupsToRender.forEach(g => renderSupersetGroup(g));
+  try{ fvScan(c); }catch(e){}
 }
 
 // Extracted: build the HTML for one exercise card (without populating the set-stack)
@@ -3238,6 +3265,7 @@ function _logExerciseCardHTML(ex) {
       ${lastWeekHint}
       ${sparkSvg ? `<div class="spark-row"><div class="spark-label">Load trend</div>${sparkSvg}</div>` : ''}
       <div class="log-ex-body">
+        ${fvPlayerHTML(exData, {suffix:'-log'})}
         <div class="set-stack" id="set-stack-${wk}"></div>
       </div>
       <div class="set-note-row">
@@ -3774,12 +3802,14 @@ function renderDB(search='') {
       // uncategorised remainder
       const ungrouped = filtered.filter(ex => !catData.subs.includes((EX_META[ex.id]||{}).subcat));
       ungrouped.forEach(ex => c.innerHTML += renderExItem(ex));
+      try{ fvScan(c); }catch(e){}
       return;
     }
   }
 
   // Default flat render
   filtered.forEach(ex => c.innerHTML += renderExItem(ex));
+  try{ fvScan(c); }catch(e){}
 }
 
 function renderExItem(ex, progressionNum) {
@@ -3795,6 +3825,7 @@ function renderExItem(ex, progressionNum) {
       <div class="info-line"><span class="info-line-label">Target</span><span class="info-line-val">${ex.target}</span></div>
       <div class="info-line"><span class="info-line-label">Intensity</span><span class="info-line-val">${ex.intensity}</span></div>
       <div class="info-line"><span class="info-line-label">Cue</span><span class="info-line-val">${ex.cue}</span></div>
+      ${fvPlayerHTML(ex, {suffix:'-db'})}
       <a href="${ex.video}" class="video-btn" target="_blank"><svg viewBox="0 0 8 10" width="8" height="10" fill="currentColor" style="flex-shrink:0" aria-hidden="true"><path d="M1 1 L7 5 L1 9 Z"/></svg> Watch Reference</a>
       <div style="height:12px"></div>
     </div>
@@ -3819,6 +3850,254 @@ function toggleDBItem(id) {
   }
 }
 
+
+// ─── SELF-HOSTED VIDEO PLAYER ──────────────────────────────────
+// Two-tier by design:
+//   ex.videoSrc present  → inline poster + <video>, never leaves the PWA
+//   ex.videoSrc absent   → the existing "Watch Reference" YouTube link
+// So a clip can be added one exercise at a time with no migration, and a
+// dead/blocked file silently reverts to the link rather than showing a
+// broken box mid-session.
+const VIDEO_BASE = 'https://pub-4b597bc22db14a1facdba2bef7a59a21.r2.dev/';
+
+// ─── CLIP DETECTION ────────────────────────────────────────────
+// Fully automatic: nothing to edit when a clip goes up. Upload <id>.mp4 to the
+// bucket and the app finds it on its own.
+//
+// How: when an exercise is opened, the player quietly asks the browser to load
+// just the metadata header of <id>.mp4. If it arrives, the clip exists and we
+// also learn its real width/height, so vertical and landscape both lay out
+// correctly with no ratio to configure. If it 404s, the player stays hidden and
+// the YouTube button is what you see — exactly as before.
+//
+// One probe per exercise, remembered in localStorage so it never repeats.
+// One probe per exercise. Positives persist in localStorage; negatives are kept
+// in memory only, so a flaky connection can't permanently hide a clip you have
+// actually uploaded.
+// Set to false to disable the self-hosted video system entirely. No players
+// render, no probes run, no media elements are created — the app falls back to
+// the YouTube "Watch Reference" links exactly as it did before video existed.
+// Useful as a one-line bisect if boot ever misbehaves.
+const FV_ENABLED = true;
+
+const FV_CACHE_KEY = 'fw_clip_probe_v1';
+let fvProbed = {};                 // id -> {ok:true, ratio}   (persisted)
+const fvMissing = new Set();       // ids with no clip THIS SESSION (not persisted)
+try {
+  const raw = JSON.parse(localStorage.getItem(FV_CACHE_KEY) || '{}');
+  // Drop any legacy {ok:false} entries written by the old build
+  Object.keys(raw).forEach(k => { if (raw[k] && raw[k].ok) fvProbed[k] = raw[k]; });
+} catch(e) { fvProbed = {}; }
+
+function fvRemember(id, val){
+  if (val && val.ok) {
+    fvProbed[id] = val;
+    try { localStorage.setItem(FV_CACHE_KEY, JSON.stringify(fvProbed)); } catch(e) {}
+  } else {
+    fvMissing.add(id);
+  }
+}
+// Call after uploading a new clip if you want the app to look again immediately
+function fvForgetProbes(){
+  fvProbed = {};
+  fvMissing.clear();
+  try { localStorage.removeItem(FV_CACHE_KEY); } catch(e) {}
+}
+
+function fvUrl(path){
+  if(!path) return '';
+  return /^https?:\/\//i.test(path) ? path : VIDEO_BASE + path;
+}
+function fvHas(ex){ return !!(ex && fvProbed[ex.id]); }
+
+// Inline player markup. No src until tapped, and no probe until scrolled into
+// view — the library can hold hundreds of exercises without the page paying for
+// them at boot.
+function fvPlayerHTML(ex, opts){
+  opts = opts || {};
+  if(!FV_ENABLED) return '';
+  if(!ex) return '';
+  if(fvMissing.has(ex.id)) return '';           // already probed, nothing there
+  const known = fvProbed[ex.id];
+  const src   = fvUrl(ex.id + '.mp4');
+  const ratio = (known && known.ratio) || '9/16';
+  const uid   = 'fv-' + ex.id + (opts.suffix || '');
+  // Unconfirmed players must stay in the layout (a display:none element never
+  // fires an IntersectionObserver), so they sit at 1px and fully transparent
+  // until a probe either reveals or removes them.
+  const pending = known
+    ? `aspect-ratio:${ratio};`
+    : `height:1px;opacity:0;pointer-events:none;overflow:hidden;`;
+  return `<div class="fv-media" id="${uid}" style="${pending}"
+      data-ex="${ex.id}" data-src="${src}"
+      role="button" tabindex="0" aria-label="Play ${ex.name} demonstration"
+      onclick="fvToggle('${uid}','${src}')"
+      onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();fvToggle('${uid}','${src}')}">
+    <div class="fv-scrim"></div>
+    <div class="fv-play"><svg viewBox="0 0 8 10"><path d="M1 1 L7 5 L1 9 Z"/></svg></div>
+    <div class="fv-badge">Luca \u00b7 FORGE</div>
+    <button class="fv-speed" onclick="event.stopPropagation();fvSpeed('${uid}')">1\u00d7</button>
+    <div class="fv-fail">Demo unavailable \u2014 tap Watch Reference below</div>
+  </div>`;
+}
+
+// ─── PROBE QUEUE ───────────────────────────────────────────────
+// Hard cap on concurrent probes. iOS destroys the page renderer if too many
+// media elements are alive at once, and an unthrottled scan of the full library
+// is exactly that. Three at a time is invisible to the user and safe on every
+// device. A per-probe timeout stops one dead request stalling the queue.
+const FV_MAX_PARALLEL = 3;
+const FV_PROBE_TIMEOUT_MS = 8000;
+let fvActive = 0;
+const fvQueue = [];
+
+function fvPump(){
+  while (fvActive < FV_MAX_PARALLEL && fvQueue.length) {
+    const box = fvQueue.shift();
+    if (!box || !box.isConnected || box._probing) continue;
+    fvRunProbe(box);
+  }
+}
+
+// Ask the browser for just the metadata header of the clip. Arrives → the file
+// exists and we learn its true dimensions. Errors → no clip, remove the player.
+function fvRunProbe(box){
+  const id = box.getAttribute('data-ex'), src = box.getAttribute('data-src');
+  if(!id) return;
+  box._probing = true;
+  fvActive++;
+
+  const t = document.createElement('video');
+  t.preload = 'metadata'; t.muted = true; t.playsInline = true;
+
+  let settled = false;
+  const finish = (ok, ratio) => {
+    if (settled) return; settled = true;
+    clearTimeout(timer);
+    fvRemember(id, ok ? { ok:true, ratio } : { ok:false });
+    if (ok) fvReveal(box, ratio); else fvHideBox(box);
+    box._probing = false;
+    t.removeAttribute('src');
+    try { t.load(); } catch(e) {}     // release the decoder immediately
+    fvActive--;
+    fvPump();
+  };
+
+  const timer = setTimeout(() => finish(false), FV_PROBE_TIMEOUT_MS);
+
+  t.addEventListener('loadedmetadata', () => {
+    const r = (t.videoWidth && t.videoHeight) ? t.videoWidth + '/' + t.videoHeight : '9/16';
+    finish(true, r);
+  });
+  t.addEventListener('error', () => finish(false));
+
+  t.src = src;
+}
+
+// The <video> element is created only when a clip is confirmed or tapped.
+// Rendering one per exercise up front instantiates a media player object per
+// element, which is what takes the iOS renderer down on a large library.
+function fvEnsureVideo(box){
+  let vid = box.querySelector('video');
+  if (vid) return vid;
+  vid = document.createElement('video');
+  vid.playsInline = true; vid.muted = true; vid.loop = true;
+  vid.preload = 'none';
+  vid.setAttribute('playsinline','');
+  vid.setAttribute('disablepictureinpicture','');
+  box.insertBefore(vid, box.firstChild);
+  return vid;
+}
+
+function fvReveal(box, ratio){
+  box.style.aspectRatio    = ratio;
+  box.style.height         = '';
+  box.style.opacity        = '';
+  box.style.pointerEvents  = '';
+  box.style.overflow       = '';
+  box.style.display        = '';
+  // A confirmed clip demotes the YouTube link to a secondary option
+  const card = box.closest('.ex-detail, .sheet-body, .log-ex-body');
+  const link = card && card.querySelector('.video-btn');
+  if(link){ link.style.opacity = '.5'; link.style.fontSize = '9px'; link.style.padding = '9px'; }
+}
+
+function fvHideBox(box){
+  box.style.display = 'none';
+}
+
+// ─── LAZY DETECTION ────────────────────────────────────────────
+// Players are probed when they scroll near the viewport, never in bulk.
+const fvObserver = ('IntersectionObserver' in window)
+  ? new IntersectionObserver((entries, obs) => {
+      entries.forEach(en => {
+        if (!en.isIntersecting) return;
+        obs.unobserve(en.target);
+        fvQueue.push(en.target);
+      });
+      fvPump();
+    }, { rootMargin: '200px 0px' })
+  : null;
+
+// Register any players just rendered into the page. Cheap — no network, no
+// media elements. Kept as fvScan() so existing call sites are unchanged.
+function fvScan(root){
+  if(!FV_ENABLED) return;
+  const boxes = (root || document).querySelectorAll('.fv-media[data-ex]');
+  boxes.forEach(box => {
+    if (box._fvSeen) return;
+    box._fvSeen = true;
+    const id = box.getAttribute('data-ex');
+    if (fvProbed[id]) { fvReveal(box, fvProbed[id].ratio); return; }
+    if (fvMissing.has(id)) { fvHideBox(box); return; }
+    if (fvObserver) fvObserver.observe(box);
+    else { fvQueue.push(box); fvPump(); }   // no IO support: queue, still capped
+  });
+}
+
+function fvToggle(uid, src){
+  const box = document.getElementById(uid); if(!box) return;
+  const vid = fvEnsureVideo(box);
+
+  if(box.classList.contains('live')){          // second tap stops and resets
+    vid.pause(); box.classList.remove('live'); return;
+  }
+  // Only one clip plays at a time, so scrolling the log doesn't stack audio-less
+  // decoders and chew battery.
+  document.querySelectorAll('.fv-media.live').forEach(o => {
+    if(o.id !== uid){ const v=o.querySelector('video'); if(v) v.pause(); o.classList.remove('live'); }
+  });
+
+  if(!vid.getAttribute('src')){
+    vid.setAttribute('src', src);
+    vid.addEventListener('error', () => {
+      // Network gone, file missing, or the CDN is blocked — fall back visibly
+      box.classList.add('failed'); box.classList.remove('live');
+    }, { once:true });
+  }
+  box.classList.add('live');
+  const p = vid.play();
+  if(p && p.catch) p.catch(() => { box.classList.add('failed'); box.classList.remove('live'); });
+}
+
+// Half speed for entries and skill work; the two states are enough on a phone.
+function fvSpeed(uid){
+  const box=document.getElementById(uid); if(!box) return;
+  const vid=box.querySelector('video'), btn=box.querySelector('.fv-speed');
+  if(!vid||!btn) return;  const half = vid.playbackRate !== 0.5;
+  vid.playbackRate = half ? 0.5 : 1;
+  btn.textContent = half ? '0.5\u00d7' : '1\u00d7';
+  btn.classList.toggle('on', half);
+}
+
+// Pause everything when the tab is backgrounded or the log is left
+function fvPauseAll(){
+  document.querySelectorAll('.fv-media.live').forEach(o => {
+    const v=o.querySelector('video'); if(v) v.pause(); o.classList.remove('live');
+  });
+}
+document.addEventListener('visibilitychange', () => { if(document.hidden) fvPauseAll(); });
+
 // ─── SHEET ─────────────────────────────────────────────────────
 function openSheet(id){
   const ex=EXERCISES.find(e=>e.id===id); if(!ex) return;
@@ -3828,11 +4107,17 @@ function openSheet(id){
   document.getElementById('sheet-intensity').textContent=ex.intensity;
   document.getElementById('sheet-cue').textContent=ex.cue;
   document.getElementById('sheet-video').href=ex.video;
+  // Inline clip when we have one; the YouTube link stays as the fallback
+  const sp=document.getElementById('sheet-player');
+  sp.innerHTML = fvPlayerHTML(ex, {suffix:'-sheet'});
+  const sv=document.getElementById('sheet-video');
+  sv.style.opacity=''; sv.style.fontSize=''; sv.style.padding='';
+  fvScan(sp);
   document.getElementById('sheet-tags').innerHTML=ex.tags.map(t=>`<span class="tag ${t}">${t}</span>`).join('');
   document.getElementById('sheet-overlay').classList.add('open');
 }
 function closeSheet(e){if(e.target===document.getElementById('sheet-overlay'))closeSheetDirect();}
-function closeSheetDirect(){document.getElementById('sheet-overlay').classList.remove('open');}
+function closeSheetDirect(){fvPauseAll();document.getElementById('sheet-overlay').classList.remove('open');}
 
 // ─── PROGRESS ──────────────────────────────────────────────────
 
@@ -4540,7 +4825,11 @@ function bdSave(){
   try{ if(typeof syncBlocksToCloud==='function') syncBlocksToCloud(); }catch(e){ console.warn('board sync', e); }
   document.getElementById('bd-editor').classList.remove('open');
   bdRenderList();
-  if(typeof showToast==='function') showToast('Board saved');
+  // Saving used to leave you wherever you were, with no sign of where the note
+  // went. Land on the Notes list so the save is visible.
+  const onBoard = !!document.querySelector('#page-board.active');
+  if(typeof navigate==='function' && !onBoard) navigate('board');
+  if(typeof showToast==='function') showToast('Saved to Notes \u2713');
 }
 
 function renderProgress(){
@@ -6831,39 +7120,61 @@ const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
 
 // ─── IndexedDB session backup (survives iOS Safari storage eviction) ───
 const IDB_NAME = 'forge_auth'; const IDB_STORE = 'session';
+// Boot must never be able to hang here. IndexedDB is an optional fallback for
+// restoring a session after Safari evicts localStorage — if it doesn't answer
+// quickly, we carry on without it.
+const IDB_TIMEOUT_MS = 2500;
+function idbWithTimeout(promise, label) {
+  return Promise.race([
+    promise,
+    new Promise(resolve => setTimeout(() => {
+      console.warn('[FORGE] IDB ' + label + ' timed out — continuing without it');
+      resolve(null);
+    }, IDB_TIMEOUT_MS))
+  ]);
+}
 function idbOpen() {
   return new Promise((resolve, reject) => {
-    const req = indexedDB.open(IDB_NAME, 1);
+    let req;
+    try { req = indexedDB.open(IDB_NAME, 1); }
+    catch(e) { reject(e); return; }          // Safari private mode throws outright
     req.onupgradeneeded = () => req.result.createObjectStore(IDB_STORE);
     req.onsuccess = () => resolve(req.result);
-    req.onerror = () => reject(req.error);
+    req.onerror   = () => reject(req.error);
+    // Fires when another tab or the installed PWA holds a connection. Without
+    // this handler no event ever arrives and the promise never settles.
+    req.onblocked = () => reject(new Error('IndexedDB open blocked by another tab'));
   });
 }
 async function idbSet(key, val) {
   try {
-    const db = await idbOpen();
+    const db = await idbWithTimeout(idbOpen(), 'open');
+    if (!db) return;
     const tx = db.transaction(IDB_STORE, 'readwrite');
     tx.objectStore(IDB_STORE).put(val, key);
-    await new Promise((r, j) => { tx.oncomplete = r; tx.onerror = j; });
+    await idbWithTimeout(new Promise((r, j) => { tx.oncomplete = r; tx.onerror = j; }), 'set');
     db.close();
   } catch(e) { console.warn('[FORGE] IDB set failed:', e); }
 }
 async function idbGet(key) {
   try {
-    const db = await idbOpen();
+    const db = await idbWithTimeout(idbOpen(), 'open');
+    if (!db) return null;
     const tx = db.transaction(IDB_STORE, 'readonly');
     const req = tx.objectStore(IDB_STORE).get(key);
-    const val = await new Promise((r, j) => { req.onsuccess = () => r(req.result); req.onerror = j; });
+    const val = await idbWithTimeout(
+      new Promise((r, j) => { req.onsuccess = () => r(req.result); req.onerror = j; }), 'get');
     db.close();
     return val || null;
   } catch(e) { console.warn('[FORGE] IDB get failed:', e); return null; }
 }
 async function idbClear() {
   try {
-    const db = await idbOpen();
+    const db = await idbWithTimeout(idbOpen(), 'open');
+    if (!db) return;
     const tx = db.transaction(IDB_STORE, 'readwrite');
     tx.objectStore(IDB_STORE).clear();
-    await new Promise((r, j) => { tx.oncomplete = r; tx.onerror = j; });
+    await idbWithTimeout(new Promise((r, j) => { tx.oncomplete = r; tx.onerror = j; }), 'clear');
     db.close();
   } catch(e) { console.warn('[FORGE] IDB clear failed:', e); }
 }
