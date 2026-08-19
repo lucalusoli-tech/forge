@@ -16,6 +16,7 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -52,7 +53,7 @@
   .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 8px 0; transition: color 0.2s; }
   .nav-btn.active { color: var(--accent); }
   .nav-icon { font-size: 18px; line-height: 1; }
-  .nav-label { font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase; }
+  .nav-label { font-size: 7.5px; letter-spacing: .8px; text-transform: uppercase; }
 
   .page { display: none; background: #080808; }
   .page.active { display: block; }
@@ -1548,6 +1549,7 @@
     <button class="nav-btn" id="nav-progress" onclick="navigate('progress')"><span class="nav-icon">◌</span><span class="nav-label">Progress</span></button>
     <button class="nav-btn" id="nav-builder" onclick="navigate('builder')"><span class="nav-icon">✦</span><span class="nav-label">Build</span></button>
     <button class="nav-btn" id="nav-coaching" onclick="navigate('coaching')"><span class="nav-icon">人</span><span class="nav-label">Programmes</span></button>
+    <button class="nav-btn" id="nav-board" onclick="navigate('board')"><span class="nav-icon">✎</span><span class="nav-label">Notes</span></button>
   </nav>
 </div>
 
@@ -2028,6 +2030,7 @@ const EXERCISES = [
   {id:'mach-cable-overhead-tri',name:'Cable Overhead Tricep',tags:['machine','push'],sets:'3×10-15',target:'Triceps Long Head',intensity:'Light-Moderate',level:'Beginner',cue:'Face away from cable, rope overhead, press to extension',video:'https://www.youtube.com/results?search_query=cable+overhead+tricep+extension',desc:'Long head tricep stretch with constant cable tension. Excellent mass builder.'},
 ];
 
+
 // ─── CATEGORY / SUBCATEGORY TAXONOMY ──────────────────────────
 const EX_CATS = {
   all:         { label:'All',          subs:[] },
@@ -2365,7 +2368,7 @@ function navigate(page, push=true) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
   document.getElementById('scroll-area').scrollTop = 0;
-  const navIds = ['home','db','progress','builder','coaching'];
+  const navIds = ['home','db','progress','builder','coaching','board'];
   document.querySelectorAll('.nav-btn').forEach((b,i) => b.classList.toggle('active', navIds[i]===page));
   // Quick-board button rides along on the pages where notes actually happen
   try {
@@ -4729,7 +4732,11 @@ function bdSave(){
   try{ if(typeof syncBlocksToCloud==='function') syncBlocksToCloud(); }catch(e){ console.warn('board sync', e); }
   document.getElementById('bd-editor').classList.remove('open');
   bdRenderList();
-  if(typeof showToast==='function') showToast('Board saved');
+  // Saving used to leave you wherever you were, with no sign of where the note
+  // went. Land on the Notes list so the save is visible.
+  const onBoard = !!document.querySelector('#page-board.active');
+  if(typeof navigate==='function' && !onBoard) navigate('board');
+  if(typeof showToast==='function') showToast('Saved to Notes \u2713');
 }
 
 function renderProgress(){
