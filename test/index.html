@@ -3874,6 +3874,12 @@ const VIDEO_BASE = 'https://pub-4b597bc22db14a1facdba2bef7a59a21.r2.dev/';
 // One probe per exercise. Positives persist in localStorage; negatives are kept
 // in memory only, so a flaky connection can't permanently hide a clip you have
 // actually uploaded.
+// Set to false to disable the self-hosted video system entirely. No players
+// render, no probes run, no media elements are created — the app falls back to
+// the YouTube "Watch Reference" links exactly as it did before video existed.
+// Useful as a one-line bisect if boot ever misbehaves.
+const FV_ENABLED = true;
+
 const FV_CACHE_KEY = 'fw_clip_probe_v1';
 let fvProbed = {};                 // id -> {ok:true, ratio}   (persisted)
 const fvMissing = new Set();       // ids with no clip THIS SESSION (not persisted)
@@ -3909,6 +3915,7 @@ function fvHas(ex){ return !!(ex && fvProbed[ex.id]); }
 // them at boot.
 function fvPlayerHTML(ex, opts){
   opts = opts || {};
+  if(!FV_ENABLED) return '';
   if(!ex) return '';
   if(fvMissing.has(ex.id)) return '';           // already probed, nothing there
   const known = fvProbed[ex.id];
@@ -3926,7 +3933,6 @@ function fvPlayerHTML(ex, opts){
       role="button" tabindex="0" aria-label="Play ${ex.name} demonstration"
       onclick="fvToggle('${uid}','${src}')"
       onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();fvToggle('${uid}','${src}')}">
-    <video playsinline muted loop preload="none" disablepictureinpicture></video>
     <div class="fv-scrim"></div>
     <div class="fv-play"><svg viewBox="0 0 8 10"><path d="M1 1 L7 5 L1 9 Z"/></svg></div>
     <div class="fv-badge">Luca \u00b7 FORGE</div>
@@ -3988,6 +3994,21 @@ function fvRunProbe(box){
   t.src = src;
 }
 
+// The <video> element is created only when a clip is confirmed or tapped.
+// Rendering one per exercise up front instantiates a media player object per
+// element, which is what takes the iOS renderer down on a large library.
+function fvEnsureVideo(box){
+  let vid = box.querySelector('video');
+  if (vid) return vid;
+  vid = document.createElement('video');
+  vid.playsInline = true; vid.muted = true; vid.loop = true;
+  vid.preload = 'none';
+  vid.setAttribute('playsinline','');
+  vid.setAttribute('disablepictureinpicture','');
+  box.insertBefore(vid, box.firstChild);
+  return vid;
+}
+
 function fvReveal(box, ratio){
   box.style.aspectRatio    = ratio;
   box.style.height         = '';
@@ -4021,6 +4042,7 @@ const fvObserver = ('IntersectionObserver' in window)
 // Register any players just rendered into the page. Cheap — no network, no
 // media elements. Kept as fvScan() so existing call sites are unchanged.
 function fvScan(root){
+  if(!FV_ENABLED) return;
   const boxes = (root || document).querySelectorAll('.fv-media[data-ex]');
   boxes.forEach(box => {
     if (box._fvSeen) return;
@@ -4035,7 +4057,7 @@ function fvScan(root){
 
 function fvToggle(uid, src){
   const box = document.getElementById(uid); if(!box) return;
-  const vid = box.querySelector('video'); if(!vid) return;
+  const vid = fvEnsureVideo(box);
 
   if(box.classList.contains('live')){          // second tap stops and resets
     vid.pause(); box.classList.remove('live'); return;
@@ -4062,8 +4084,7 @@ function fvToggle(uid, src){
 function fvSpeed(uid){
   const box=document.getElementById(uid); if(!box) return;
   const vid=box.querySelector('video'), btn=box.querySelector('.fv-speed');
-  if(!vid||!btn) return;
-  const half = vid.playbackRate !== 0.5;
+  if(!vid||!btn) return;  const half = vid.playbackRate !== 0.5;
   vid.playbackRate = half ? 0.5 : 1;
   btn.textContent = half ? '0.5\u00d7' : '1\u00d7';
   btn.classList.toggle('on', half);
