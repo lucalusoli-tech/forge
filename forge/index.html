@@ -3221,6 +3221,7 @@ function renderLogExercises(exercises) {
 
   // Populate each superset container
   groupsToRender.forEach(g => renderSupersetGroup(g));
+  try{ fvScan(); }catch(e){}
 }
 
 // Extracted: build the HTML for one exercise card (without populating the set-stack)
@@ -3261,7 +3262,7 @@ function _logExerciseCardHTML(ex) {
       ${lastWeekHint}
       ${sparkSvg ? `<div class="spark-row"><div class="spark-label">Load trend</div>${sparkSvg}</div>` : ''}
       <div class="log-ex-body">
-        ${fvPlayerHTML(exData, {suffix:'-log', ratio:'16/9'})}
+        ${fvPlayerHTML(exData, {suffix:'-log'})}
         <div class="set-stack" id="set-stack-${wk}"></div>
       </div>
       <div class="set-note-row">
@@ -3804,6 +3805,7 @@ function renderDB(search='') {
 
   // Default flat render
   filtered.forEach(ex => c.innerHTML += renderExItem(ex));
+  try{ fvScan(); }catch(e){}
 }
 
 function renderExItem(ex, progressionNum) {
@@ -3819,8 +3821,8 @@ function renderExItem(ex, progressionNum) {
       <div class="info-line"><span class="info-line-label">Target</span><span class="info-line-val">${ex.target}</span></div>
       <div class="info-line"><span class="info-line-label">Intensity</span><span class="info-line-val">${ex.intensity}</span></div>
       <div class="info-line"><span class="info-line-label">Cue</span><span class="info-line-val">${ex.cue}</span></div>
-      ${fvPlayerHTML(ex, {suffix:'-db', ratio:'16/9'})}
-      <a href="${ex.video}" class="video-btn" target="_blank" style="${fvHas(ex)?'opacity:.5;font-size:9px;padding:9px':''}"><svg viewBox="0 0 8 10" width="8" height="10" fill="currentColor" style="flex-shrink:0" aria-hidden="true"><path d="M1 1 L7 5 L1 9 Z"/></svg> Watch Reference</a>
+      ${fvPlayerHTML(ex, {suffix:'-db'})}
+      <a href="${ex.video}" class="video-btn" target="_blank"><svg viewBox="0 0 8 10" width="8" height="10" fill="currentColor" style="flex-shrink:0" aria-hidden="true"><path d="M1 1 L7 5 L1 9 Z"/></svg> Watch Reference</a>
       <div style="height:12px"></div>
     </div>
   </div>`;
@@ -3854,46 +3856,55 @@ function toggleDBItem(id) {
 // broken box mid-session.
 const VIDEO_BASE = 'https://pub-4b597bc22db14a1facdba2bef7a59a21.r2.dev/';
 
-// ─── CLIP REGISTRY ─────────────────────────────────────────────
-// The ONLY place to edit when a new clip goes up. Upload <id>.mp4 to the R2
-// bucket, then add one line here. Value is the aspect ratio of that clip:
-//   '9/16'  vertical (phone)      '16/9' landscape      '1/1' square
-// Add ':poster' after the ratio if you also uploaded <id>.jpg.
-// Anything not listed here keeps the YouTube fallback, untouched.
-const VIDEO_CLIPS = {
-  'hs-swing-kick-straight': '9/16',
-  'hs-chin-chest':          '9/16',
-};
+// ─── CLIP DETECTION ────────────────────────────────────────────
+// Fully automatic: nothing to edit when a clip goes up. Upload <id>.mp4 to the
+// bucket and the app finds it on its own.
+//
+// How: when an exercise is opened, the player quietly asks the browser to load
+// just the metadata header of <id>.mp4. If it arrives, the clip exists and we
+// also learn its real width/height, so vertical and landscape both lay out
+// correctly with no ratio to configure. If it 404s, the player stays hidden and
+// the YouTube button is what you see — exactly as before.
+//
+// One probe per exercise, remembered in localStorage so it never repeats.
+const FV_CACHE_KEY = 'fw_clip_probe_v1';
+let fvProbed = {};
+try { fvProbed = JSON.parse(localStorage.getItem(FV_CACHE_KEY) || '{}'); } catch(e) { fvProbed = {}; }
 
-function fvClip(ex){
-  if(!ex) return null;
-  const raw = VIDEO_CLIPS[ex.id];
-  if(!raw) return null;
-  const parts = String(raw).split(':');
-  return { ratio: parts[0] || '9/16', poster: parts.indexOf('poster') > -1 };
+function fvRemember(id, val){
+  fvProbed[id] = val;
+  try { localStorage.setItem(FV_CACHE_KEY, JSON.stringify(fvProbed)); } catch(e) {}
+}
+// Call after uploading a new clip if you want the app to look again immediately
+function fvForgetProbes(){
+  fvProbed = {};
+  try { localStorage.removeItem(FV_CACHE_KEY); } catch(e) {}
 }
 
 function fvUrl(path){
   if(!path) return '';
   return /^https?:\/\//i.test(path) ? path : VIDEO_BASE + path;
 }
-function fvHas(ex){ return !!fvClip(ex); }
+function fvHas(ex){ return !!(ex && fvProbed[ex.id] && fvProbed[ex.id].ok); }
 
 // Inline player markup. Poster only — the video element carries no src until
 // tapped, so a library of 285 exercises costs 285 small images, not 285 videos.
 function fvPlayerHTML(ex, opts){
   opts = opts || {};
-  const clip = fvClip(ex);
-  if(!clip) return '';
-  const src    = fvUrl(ex.id + '.mp4');
-  const poster = clip.poster ? fvUrl(ex.id + '.jpg') : '';
-  const ratio  = clip.ratio;
-  const uid    = 'fv-' + ex.id + (opts.suffix || '');
-  return `<div class="fv-media" id="${uid}" style="aspect-ratio:${ratio}"
+  if(!ex) return '';
+  const known = fvProbed[ex.id];
+  if(known && !known.ok) return '';            // probed before, no clip there
+  const src   = fvUrl(ex.id + '.mp4');
+  const ratio = (known && known.ratio) || '9/16';
+  const uid   = 'fv-' + ex.id + (opts.suffix || '');
+  // Hidden until the probe confirms the file exists, so unshot exercises never
+  // flash an empty player
+  const hide  = known && known.ok ? '' : 'display:none;';
+  return `<div class="fv-media" id="${uid}" style="aspect-ratio:${ratio};${hide}"
+      data-ex="${ex.id}" data-src="${src}"
       role="button" tabindex="0" aria-label="Play ${ex.name} demonstration"
       onclick="fvToggle('${uid}','${src}')"
       onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();fvToggle('${uid}','${src}')}">
-    ${poster ? `<img class="fv-poster" src="${poster}" alt="" loading="lazy" decoding="async">` : ''}
     <video playsinline muted loop preload="none" disablepictureinpicture></video>
     <div class="fv-scrim"></div>
     <div class="fv-play"><svg viewBox="0 0 8 10"><path d="M1 1 L7 5 L1 9 Z"/></svg></div>
@@ -3901,6 +3912,50 @@ function fvPlayerHTML(ex, opts){
     <button class="fv-speed" onclick="event.stopPropagation();fvSpeed('${uid}')">1\u00d7</button>
     <div class="fv-fail">Demo unavailable \u2014 tap Watch Reference below</div>
   </div>`;
+}
+
+// Ask the browser for just the metadata header of the clip. Arrives → the file
+// exists and we learn its true dimensions. Errors → no clip, stay hidden.
+function fvProbe(box){
+  const id = box.getAttribute('data-ex'), src = box.getAttribute('data-src');
+  if(!id || box._probing) return;
+  const known = fvProbed[id];
+  if(known){ if(known.ok) fvReveal(box, known.ratio); return; }
+  box._probing = true;
+
+  const t = document.createElement('video');
+  t.preload = 'metadata'; t.muted = true; t.playsInline = true;
+  // Guard: tearing the probe element down fires its own error event, which would
+  // otherwise overwrite a good result with a false negative.
+  let settled = false;
+  t.addEventListener('loadedmetadata', () => {
+    if(settled) return; settled = true;
+    const r = (t.videoWidth && t.videoHeight) ? t.videoWidth + '/' + t.videoHeight : '9/16';
+    fvRemember(id, { ok:true, ratio:r });
+    fvReveal(box, r);
+    box._probing = false;
+    t.removeAttribute('src');
+  });
+  t.addEventListener('error', () => {
+    if(settled) return; settled = true;
+    fvRemember(id, { ok:false });
+    box._probing = false;
+  });
+  t.src = src;
+}
+
+function fvReveal(box, ratio){
+  box.style.aspectRatio = ratio;
+  box.style.display = '';
+  // A confirmed clip demotes the YouTube link to a secondary option
+  const card = box.closest('.ex-detail, .sheet-body, .log-ex-body');
+  const link = card && card.querySelector('.video-btn');
+  if(link){ link.style.opacity = '.5'; link.style.fontSize = '9px'; link.style.padding = '9px'; }
+}
+
+// Probe any player that has just been rendered into the page
+function fvScan(root){
+  (root || document).querySelectorAll('.fv-media[data-ex]').forEach(fvProbe);
 }
 
 function fvToggle(uid, src){
@@ -3958,10 +4013,10 @@ function openSheet(id){
   document.getElementById('sheet-video').href=ex.video;
   // Inline clip when we have one; the YouTube link stays as the fallback
   const sp=document.getElementById('sheet-player');
-  sp.innerHTML = fvPlayerHTML(ex, {suffix:'-sheet', ratio:'16/9'});
+  sp.innerHTML = fvPlayerHTML(ex, {suffix:'-sheet'});
   const sv=document.getElementById('sheet-video');
-  sv.style.opacity = fvHas(ex) ? '.5' : '';
-  sv.style.fontSize = fvHas(ex) ? '9px' : '';
+  sv.style.opacity=''; sv.style.fontSize=''; sv.style.padding='';
+  fvScan(sp);
   document.getElementById('sheet-tags').innerHTML=ex.tags.map(t=>`<span class="tag ${t}">${t}</span>`).join('');
   document.getElementById('sheet-overlay').classList.add('open');
 }
