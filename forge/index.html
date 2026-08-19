@@ -16,7 +16,6 @@
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preload" as="script" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -53,7 +52,7 @@
   .nav-btn { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px; background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 8px 0; transition: color 0.2s; }
   .nav-btn.active { color: var(--accent); }
   .nav-icon { font-size: 18px; line-height: 1; }
-  .nav-label { font-size: 7.5px; letter-spacing: .8px; text-transform: uppercase; }
+  .nav-label { font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase; }
 
   .page { display: none; background: #080808; }
   .page.active { display: block; }
@@ -1549,7 +1548,6 @@
     <button class="nav-btn" id="nav-progress" onclick="navigate('progress')"><span class="nav-icon">◌</span><span class="nav-label">Progress</span></button>
     <button class="nav-btn" id="nav-builder" onclick="navigate('builder')"><span class="nav-icon">✦</span><span class="nav-label">Build</span></button>
     <button class="nav-btn" id="nav-coaching" onclick="navigate('coaching')"><span class="nav-icon">人</span><span class="nav-label">Programmes</span></button>
-    <button class="nav-btn" id="nav-board" onclick="navigate('board')"><span class="nav-icon">✎</span><span class="nav-label">Notes</span></button>
   </nav>
 </div>
 
@@ -2030,7 +2028,6 @@ const EXERCISES = [
   {id:'mach-cable-overhead-tri',name:'Cable Overhead Tricep',tags:['machine','push'],sets:'3×10-15',target:'Triceps Long Head',intensity:'Light-Moderate',level:'Beginner',cue:'Face away from cable, rope overhead, press to extension',video:'https://www.youtube.com/results?search_query=cable+overhead+tricep+extension',desc:'Long head tricep stretch with constant cable tension. Excellent mass builder.'},
 ];
 
-
 // ─── CATEGORY / SUBCATEGORY TAXONOMY ──────────────────────────
 const EX_CATS = {
   all:         { label:'All',          subs:[] },
@@ -2368,7 +2365,7 @@ function navigate(page, push=true) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
   document.getElementById('scroll-area').scrollTop = 0;
-  const navIds = ['home','db','progress','builder','coaching','board'];
+  const navIds = ['home','db','progress','builder','coaching'];
   document.querySelectorAll('.nav-btn').forEach((b,i) => b.classList.toggle('active', navIds[i]===page));
   // Quick-board button rides along on the pages where notes actually happen
   try {
@@ -4732,11 +4729,7 @@ function bdSave(){
   try{ if(typeof syncBlocksToCloud==='function') syncBlocksToCloud(); }catch(e){ console.warn('board sync', e); }
   document.getElementById('bd-editor').classList.remove('open');
   bdRenderList();
-  // Saving used to leave you wherever you were, with no sign of where the note
-  // went. Land on the Notes list so the save is visible.
-  const onBoard = !!document.querySelector('#page-board.active');
-  if(typeof navigate==='function' && !onBoard) navigate('board');
-  if(typeof showToast==='function') showToast('Saved to Notes \u2713');
+  if(typeof showToast==='function') showToast('Board saved');
 }
 
 function renderProgress(){
@@ -7027,61 +7020,39 @@ const supa = supabase.createClient(SUPA_URL, SUPA_KEY);
 
 // ─── IndexedDB session backup (survives iOS Safari storage eviction) ───
 const IDB_NAME = 'forge_auth'; const IDB_STORE = 'session';
-// Boot must never be able to hang here. IndexedDB is an optional fallback for
-// restoring a session after Safari evicts localStorage — if it doesn't answer
-// quickly, we carry on without it.
-const IDB_TIMEOUT_MS = 2500;
-function idbWithTimeout(promise, label) {
-  return Promise.race([
-    promise,
-    new Promise(resolve => setTimeout(() => {
-      console.warn('[FORGE] IDB ' + label + ' timed out — continuing without it');
-      resolve(null);
-    }, IDB_TIMEOUT_MS))
-  ]);
-}
 function idbOpen() {
   return new Promise((resolve, reject) => {
-    let req;
-    try { req = indexedDB.open(IDB_NAME, 1); }
-    catch(e) { reject(e); return; }          // Safari private mode throws outright
+    const req = indexedDB.open(IDB_NAME, 1);
     req.onupgradeneeded = () => req.result.createObjectStore(IDB_STORE);
     req.onsuccess = () => resolve(req.result);
-    req.onerror   = () => reject(req.error);
-    // Fires when another tab or the installed PWA holds a connection. Without
-    // this handler no event ever arrives and the promise never settles.
-    req.onblocked = () => reject(new Error('IndexedDB open blocked by another tab'));
+    req.onerror = () => reject(req.error);
   });
 }
 async function idbSet(key, val) {
   try {
-    const db = await idbWithTimeout(idbOpen(), 'open');
-    if (!db) return;
+    const db = await idbOpen();
     const tx = db.transaction(IDB_STORE, 'readwrite');
     tx.objectStore(IDB_STORE).put(val, key);
-    await idbWithTimeout(new Promise((r, j) => { tx.oncomplete = r; tx.onerror = j; }), 'set');
+    await new Promise((r, j) => { tx.oncomplete = r; tx.onerror = j; });
     db.close();
   } catch(e) { console.warn('[FORGE] IDB set failed:', e); }
 }
 async function idbGet(key) {
   try {
-    const db = await idbWithTimeout(idbOpen(), 'open');
-    if (!db) return null;
+    const db = await idbOpen();
     const tx = db.transaction(IDB_STORE, 'readonly');
     const req = tx.objectStore(IDB_STORE).get(key);
-    const val = await idbWithTimeout(
-      new Promise((r, j) => { req.onsuccess = () => r(req.result); req.onerror = j; }), 'get');
+    const val = await new Promise((r, j) => { req.onsuccess = () => r(req.result); req.onerror = j; });
     db.close();
     return val || null;
   } catch(e) { console.warn('[FORGE] IDB get failed:', e); return null; }
 }
 async function idbClear() {
   try {
-    const db = await idbWithTimeout(idbOpen(), 'open');
-    if (!db) return;
+    const db = await idbOpen();
     const tx = db.transaction(IDB_STORE, 'readwrite');
     tx.objectStore(IDB_STORE).clear();
-    await idbWithTimeout(new Promise((r, j) => { tx.oncomplete = r; tx.onerror = j; }), 'clear');
+    await new Promise((r, j) => { tx.oncomplete = r; tx.onerror = j; });
     db.close();
   } catch(e) { console.warn('[FORGE] IDB clear failed:', e); }
 }
@@ -7362,7 +7333,6 @@ async function afterAuth(supaUser, isNew) {
   // Backup session to IndexedDB (survives iOS Safari localStorage eviction)
   const { data: { session: freshSession } } = await supa.auth.getSession();
   if (freshSession) {
-    try { localStorage.setItem('fw_idb_backup','1'); } catch(e) {}
     await idbSet('supabase_session', {
       access_token: freshSession.access_token,
       refresh_token: freshSession.refresh_token
@@ -7497,16 +7467,7 @@ async function handleSignOut() {
   }
 
   // ── Tier 3: IndexedDB restore (Safari wiped localStorage entirely)
-  //
-  // Only worth attempting if there is actually something to restore. On iOS,
-  // indexedDB.open() can block the whole main thread when another context (the
-  // installed PWA alongside Safari) holds the database — and a blocked main
-  // thread means no timeout can fire and boot never finishes. So we record
-  // whether a backup exists in localStorage, and only touch IndexedDB when that
-  // marker says there is one.
-  if (!session && localStorage.getItem('fw_idb_backup') !== '1') {
-    console.log(`[FORGE AUTH] 4/5 skipped IndexedDB restore (no backup marker)`);
-  } else if (!session) {
+  if (!session) {
     console.log(`[FORGE AUTH] 4/5 attempting IndexedDB restore ${elapsed()}`);
     const idbSession = await idbGet('supabase_session');
     if (idbSession?.refresh_token) {
@@ -7575,7 +7536,6 @@ supa.auth.onAuthStateChange(async (event, session) => {
   } else if (event === 'TOKEN_REFRESHED' && session?.user) {
     console.log('[FORGE AUTH]     token refreshed, updating IDB backup');
     // Update IndexedDB backup with the new tokens — critical for long-term persistence
-    try { localStorage.setItem('fw_idb_backup','1'); } catch(e) {}
     await idbSet('supabase_session', {
       access_token: session.access_token,
       refresh_token: session.refresh_token
