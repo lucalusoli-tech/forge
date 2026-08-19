@@ -376,6 +376,22 @@
   .info-line { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 11px; }
   .info-line-label { color: var(--text-muted); }
   .info-line-val { color: var(--text); text-align: right; max-width: 60%; }
+  /* ═══ SELF-HOSTED VIDEO PLAYER ═══ */
+  .fv-media{position:relative;margin-top:12px;max-height:52vh;margin-left:auto;margin-right:auto;border-radius:9px;overflow:hidden;background:var(--card);border:1px solid var(--border);aspect-ratio:16/9;cursor:pointer;}
+  .fv-media img.fv-poster,.fv-media video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:var(--card);}
+  .fv-media video{opacity:0;transition:opacity .25s;}
+  .fv-media.live video{opacity:1;}
+  .fv-media.live .fv-scrim,.fv-media.live .fv-play,.fv-media.live .fv-badge{opacity:0;pointer-events:none;}
+  .fv-scrim{position:absolute;inset:0;background:linear-gradient(180deg,rgba(8,8,8,.12),rgba(8,8,8,.55));transition:opacity .25s;}
+  .fv-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:48px;height:48px;border-radius:50%;border:1px solid var(--accent-dim);background:rgba(8,8,8,.55);display:grid;place-items:center;transition:opacity .25s;}
+  .fv-play svg{width:13px;height:15px;fill:var(--accent);margin-left:3px;}
+  .fv-badge{position:absolute;left:9px;bottom:8px;font-family:'DM Mono',monospace;font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--text);background:rgba(8,8,8,.6);padding:3px 6px;border-radius:3px;transition:opacity .25s;}
+  .fv-speed{position:absolute;right:9px;bottom:8px;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.1em;color:var(--text-muted);background:rgba(8,8,8,.65);border:1px solid var(--border);border-radius:4px;padding:4px 8px;opacity:0;pointer-events:none;transition:opacity .25s;cursor:pointer;}
+  .fv-media.live .fv-speed{opacity:1;pointer-events:auto;}
+  .fv-media.live .fv-speed.on{color:var(--accent);border-color:var(--accent-dim);}
+  .fv-fail{position:absolute;inset:0;display:none;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);text-align:center;padding:12px;}
+  .fv-media.failed .fv-fail{display:flex;}
+  .fv-media.failed .fv-play,.fv-media.failed .fv-badge,.fv-media.failed .fv-scrim{opacity:0;}
   .video-btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; padding: 12px; background: transparent; border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; text-decoration: none; margin-top: 12px; }
 
   /* ── PROGRESS ── */
@@ -1585,6 +1601,7 @@
       <div class="info-line"><span class="info-line-label">Target</span><span class="info-line-val" id="sheet-target"></span></div>
       <div class="info-line"><span class="info-line-label">Intensity</span><span class="info-line-val" id="sheet-intensity"></span></div>
       <div class="info-line"><span class="info-line-label">Cue</span><span class="info-line-val" id="sheet-cue"></span></div>
+      <div id="sheet-player"></div>
       <a href="#" id="sheet-video" class="video-btn" target="_blank"><svg viewBox="0 0 8 10" width="8" height="10" fill="currentColor" style="flex-shrink:0" aria-hidden="true"><path d="M1 1 L7 5 L1 9 Z"/></svg> Watch Reference</a>
     </div>
   </div>
@@ -1672,6 +1689,12 @@ const EXERCISES = [
   {id:'hyperextension',name:'Hyperextension',tags:['core'],sets:'3×12-15',target:'Erectors, Glutes, Hamstrings',intensity:'Bodyweight',level:'Beginner',cue:'Hinge at the hips, extend to a straight line — don\'t overarch',video:'https://www.youtube.com/results?search_query=hyperextension+back+extension+form',desc:'Posterior-chain extension on a roman chair. Strengthens the lower back, glutes and hamstrings.'},
   {id:'reverse-hyperextension',name:'Reverse Hyperextension',tags:['core'],sets:'3×12-15',target:'Glutes, Hamstrings, Erectors',intensity:'Bodyweight',level:'Beginner',cue:'Torso fixed, raise the legs by squeezing the glutes, control the lowering',video:'https://www.youtube.com/results?search_query=reverse+hyperextension+form',desc:'Legs lever against a fixed torso. Glute and hamstring drive with minimal spinal load.'},
   {id:'side-hyperextension',name:'Side Hyperextension',tags:['core'],sets:'3×12-15',target:'Obliques, Lower Back',intensity:'Bodyweight',level:'Beginner',cue:'Lateral hinge, raise the torso sideways — no twisting',video:'https://www.youtube.com/results?search_query=side+hyperextension+oblique+form',desc:'Lateral-flexion variation on the roman chair. Targets the obliques and quadratus lumborum.'},
+  // ── ONE ARM HANDSTAND UNLOADING LADDER ──────────────────────
+  {id:'oahs-5f',name:'OAHS \u2014 5 Fingers',tags:['skill','push','calisthenics'],sets:'5\u00d75-15s each side',target:'Wrists, Shoulder Girdle, Core, Proprioception',intensity:'Max skill',level:'Elite',cue:'Shift the hips over one hand until the other carries almost nothing \u2014 all five fingers stay down',video:'https://www.youtube.com/results?search_query=one+arm+handstand+finger+unloading+progression',desc:'First stage of unloading. The weight moves onto one arm while the assisting hand keeps all five fingers on the floor for feedback. Trains the lateral shift without giving up the safety net.'},
+  {id:'oahs-3f',name:'OAHS \u2014 3 Fingers',tags:['skill','push','calisthenics'],sets:'5\u00d75-15s each side',target:'Wrists, Shoulder Girdle, Core, Proprioception',intensity:'Max skill',level:'Elite',cue:'Lift the little and ring finger \u2014 three fingers of the assisting hand remain, weight already on the working arm',video:'https://www.youtube.com/results?search_query=one+arm+handstand+finger+unloading+progression',desc:'Two fingers come off. Less feedback, so the working shoulder and the fingers of the loaded hand take over more of the correction.'},
+  {id:'oahs-2f',name:'OAHS \u2014 2 Fingers',tags:['skill','push','calisthenics'],sets:'5\u00d75-12s each side',target:'Wrists, Shoulder Girdle, Core, Proprioception',intensity:'Max skill',level:'Elite',cue:'Index and middle finger only \u2014 the assisting hand is a reference now, not support',video:'https://www.youtube.com/results?search_query=one+arm+handstand+finger+unloading+progression',desc:'The assisting hand stops carrying load and becomes purely a balance reference. Almost the full one arm hold, with a line back to the floor.'},
+  {id:'oahs-1f',name:'OAHS \u2014 1 Finger',tags:['skill','push','calisthenics'],sets:'5\u00d75-12s each side',target:'Wrists, Shoulder Girdle, Core, Proprioception',intensity:'Max skill',level:'Elite',cue:'One fingertip touching \u2014 hold the line and resist the urge to press back down',video:'https://www.youtube.com/results?search_query=one+arm+handstand+one+finger+progression',desc:'A single fingertip on the floor. Structurally this is already a one arm handstand \u2014 what remains is the confidence to remove the last point of contact.'},
+  {id:'oahs-tap',name:'OAHS \u2014 Tap',tags:['skill','push','calisthenics'],sets:'5\u00d73-8 taps each side',target:'Wrists, Shoulder Girdle, Core, Proprioception',intensity:'Max skill',level:'Elite',cue:'Take the hand fully off, tap the shoulder or the floor, return \u2014 short and controlled, not a snatch',video:'https://www.youtube.com/results?search_query=one+arm+handstand+tap+drill',desc:'Brief full releases of the assisting hand. Builds the seconds of unsupported balance that add up to a held one arm handstand.'},
   {id:'oah',name:'One Arm Handstand',tags:['skill','push','calisthenics'],sets:'Practice',target:'Full Body, Wrists, Proprioception',intensity:'Max skill',level:'Elite',cue:'Shift weight gradually, finger pressure control',video:'https://www.youtube.com/results?search_query=one+arm+handstand+tutorial',desc:'The summit. Reserve for peak conditions.'},
 
   // ── BWF HORIZONTAL PULL — BACK ────────────────────────────────
@@ -2029,7 +2052,7 @@ const SKILL_GROUPS = {
   'front-lever':['bwf-l-hang','bwf-tuck-front-lever','bwf-adv-tuck-front-lever','bwf-one-leg-fl','bwf-straddle-fl','front-lever','bwf-tuck-fl-row','bwf-adv-tuck-fl-row','adv-pl-rows'],
   'back-lever':  ['bwf-german-hang','bwf-tuck-skin-cat','bwf-adv-tuck-skin-cat','bwf-pike-skin-cat','bwf-tuck-back-lever','bwf-adv-tuck-back-lever','bwf-one-leg-back-lever','bwf-straddle-back-lever','bwf-back-lever'],
   'planche':     ['pppu','bwf-straight-arm-frog','bwf-tuck-planche','bwf-tuck-planche-pu','bwf-adv-tuck-pl','bwf-adv-tuck-pl-pu','bwf-str-planche','bwf-full-planche','bwf-rto-pp-pu'],
-  'handstand':   ['hs-long-lunge-stretch','bwf-wall-plank','bwf-wall-headstand','hs-swing-kick-l','hs-swing-kick-straight','bwf-wall-handstand','hs-forehead-wall','hs-chin-chest','hs-one-bent-one-straight','hs-half-tuck','bwf-tuck-handstand','hs-straddle','bwf-handstand','oah','bwf-wall-hes-pu-neg','bwf-wall-hes-pu','bwf-headstand-pu','bwf-hs-pu','bwf-ring-hs','bwf-ring-strap-hs-pu','bwf-ring-wide-hs-pu'],
+  'handstand':   ['hs-long-lunge-stretch','bwf-wall-plank','bwf-wall-headstand','hs-swing-kick-l','hs-swing-kick-straight','bwf-wall-handstand','hs-forehead-wall','hs-chin-chest','hs-one-bent-one-straight','hs-half-tuck','bwf-tuck-handstand','hs-straddle','bwf-handstand','oahs-5f','oahs-3f','oahs-2f','oahs-1f','oahs-tap','oah','bwf-wall-hes-pu-neg','bwf-wall-hes-pu','bwf-headstand-pu','bwf-hs-pu','bwf-ring-hs','bwf-ring-strap-hs-pu','bwf-ring-wide-hs-pu'],
   'l-sit':       ['bwf-foot-sup-l-sit','bwf-tuck-l-sit','bwf-one-leg-l-sit','bwf-one-leg-bent-l-sit','bwf-l-sit','l-sit','bwf-straddle-l-sit','bwf-v-sit','bwf-manna','bwf-tuck-l-sit-dip','bwf-l-sit-dip','bwf-ring-l-sit-dip','bwf-l-sit-pu','bwf-ring-l-sit-pu','bwf-l-sit-mu'],
   'muscle-up':   ['bwf-scapular-pull','bwf-arch-hang','bwf-pull-up-neg','bwf-pull-up','chin-ups','bwf-c2b-pull-up','bwf-mu-neg','bwf-kipping-mu','bwf-pullover','muscle-up','bwf-wide-mu','bwf-strict-bar-mu'],
 };
@@ -2040,7 +2063,7 @@ const EX_META = {};
 // Ring exercises
 const RING_IDS = ['bwf-ring-l-sit-pu','bwf-ring-wide-pu','bwf-ring-wide-lpu','bwf-ring-dip','bwf-rto-dip','bwf-ring-l-sit-dip','bwf-ring-wide-dip','bwf-rto-45-dip','bwf-rto-75-dip','bwf-ring-hs','bwf-ring-strap-hs-pu','bwf-ring-wide-hs-pu','bwf-ring-sup-hold','bwf-rto-sup-hold','bwf-ring-push-up','bwf-ring-wide-pu','bwf-ring-archer-pu','bwf-rto-push-up','bwf-rto-archer-pu','bwf-rto-pp-pu','bwf-ring-str-oa-pu','bwf-ring-l-sit-dip'];
 // Floor/ground exercises
-const FLOOR_IDS = ['hollow-body','bwf-reverse-plank','bwf-shoulder-bridge','bwf-table-bridge','bwf-angled-bridge','bwf-head-bridge','bwf-bridge-wheel','bwf-decline-bridge','bwf-one-leg-bridge','bwf-decline-ol-bridge','pppu','bwf-pp-push-up','bwf-straight-arm-frog','bwf-tuck-planche','bwf-tuck-planche-pu','bwf-adv-tuck-pl','bwf-adv-tuck-pl-pu','bwf-str-planche','bwf-incline-pu','bwf-push-up','bwf-diamond-pu','bwf-pike-push-up','bwf-decline-pike-pu','bwf-archer-push-up','bwf-incline-oa-pu','bwf-straddle-oa-pu','bwf-one-arm-push-up','bwf-foot-sup-l-sit','bwf-one-leg-l-sit','bwf-tuck-l-sit','bwf-one-leg-bent-l-sit','bwf-l-sit','l-sit','bwf-straddle-l-sit','bwf-v-sit','bwf-manna','bwf-wall-plank','bwf-wall-headstand','bwf-wall-handstand','bwf-tuck-handstand','bwf-handstand','oah','bwf-deadbugs','bwf-gmb-wrist-prep','hs-long-lunge-stretch','hs-swing-kick-l','hs-swing-kick-straight','hs-forehead-wall','hs-chin-chest','hs-one-bent-one-straight','hs-half-tuck','hs-straddle'];
+const FLOOR_IDS = ['hollow-body','bwf-reverse-plank','bwf-shoulder-bridge','bwf-table-bridge','bwf-angled-bridge','bwf-head-bridge','bwf-bridge-wheel','bwf-decline-bridge','bwf-one-leg-bridge','bwf-decline-ol-bridge','pppu','bwf-pp-push-up','bwf-straight-arm-frog','bwf-tuck-planche','bwf-tuck-planche-pu','bwf-adv-tuck-pl','bwf-adv-tuck-pl-pu','bwf-str-planche','bwf-incline-pu','bwf-push-up','bwf-diamond-pu','bwf-pike-push-up','bwf-decline-pike-pu','bwf-archer-push-up','bwf-incline-oa-pu','bwf-straddle-oa-pu','bwf-one-arm-push-up','bwf-foot-sup-l-sit','bwf-one-leg-l-sit','bwf-tuck-l-sit','bwf-one-leg-bent-l-sit','bwf-l-sit','l-sit','bwf-straddle-l-sit','bwf-v-sit','bwf-manna','bwf-wall-plank','bwf-wall-headstand','bwf-wall-handstand','bwf-tuck-handstand','bwf-handstand','oah','bwf-deadbugs','bwf-gmb-wrist-prep','hs-long-lunge-stretch','hs-swing-kick-l','hs-swing-kick-straight','hs-forehead-wall','hs-chin-chest','hs-one-bent-one-straight','hs-half-tuck','hs-straddle','oahs-5f','oahs-3f','oahs-2f','oahs-1f','oahs-tap'];
 
 EXERCISES.forEach(ex => {
   const t = ex.tags;
@@ -3238,6 +3261,7 @@ function _logExerciseCardHTML(ex) {
       ${lastWeekHint}
       ${sparkSvg ? `<div class="spark-row"><div class="spark-label">Load trend</div>${sparkSvg}</div>` : ''}
       <div class="log-ex-body">
+        ${fvPlayerHTML(exData, {suffix:'-log', ratio:'16/9'})}
         <div class="set-stack" id="set-stack-${wk}"></div>
       </div>
       <div class="set-note-row">
@@ -3795,7 +3819,8 @@ function renderExItem(ex, progressionNum) {
       <div class="info-line"><span class="info-line-label">Target</span><span class="info-line-val">${ex.target}</span></div>
       <div class="info-line"><span class="info-line-label">Intensity</span><span class="info-line-val">${ex.intensity}</span></div>
       <div class="info-line"><span class="info-line-label">Cue</span><span class="info-line-val">${ex.cue}</span></div>
-      <a href="${ex.video}" class="video-btn" target="_blank"><svg viewBox="0 0 8 10" width="8" height="10" fill="currentColor" style="flex-shrink:0" aria-hidden="true"><path d="M1 1 L7 5 L1 9 Z"/></svg> Watch Reference</a>
+      ${fvPlayerHTML(ex, {suffix:'-db', ratio:'16/9'})}
+      <a href="${ex.video}" class="video-btn" target="_blank" style="${fvHas(ex)?'opacity:.5;font-size:9px;padding:9px':''}"><svg viewBox="0 0 8 10" width="8" height="10" fill="currentColor" style="flex-shrink:0" aria-hidden="true"><path d="M1 1 L7 5 L1 9 Z"/></svg> Watch Reference</a>
       <div style="height:12px"></div>
     </div>
   </div>`;
@@ -3819,6 +3844,109 @@ function toggleDBItem(id) {
   }
 }
 
+
+// ─── SELF-HOSTED VIDEO PLAYER ──────────────────────────────────
+// Two-tier by design:
+//   ex.videoSrc present  → inline poster + <video>, never leaves the PWA
+//   ex.videoSrc absent   → the existing "Watch Reference" YouTube link
+// So a clip can be added one exercise at a time with no migration, and a
+// dead/blocked file silently reverts to the link rather than showing a
+// broken box mid-session.
+const VIDEO_BASE = 'https://pub-4b597bc22db14a1facdba2bef7a59a21.r2.dev/';
+
+// ─── CLIP REGISTRY ─────────────────────────────────────────────
+// The ONLY place to edit when a new clip goes up. Upload <id>.mp4 to the R2
+// bucket, then add one line here. Value is the aspect ratio of that clip:
+//   '9/16'  vertical (phone)      '16/9' landscape      '1/1' square
+// Add ':poster' after the ratio if you also uploaded <id>.jpg.
+// Anything not listed here keeps the YouTube fallback, untouched.
+const VIDEO_CLIPS = {
+  'hs-swing-kick-straight': '9/16',
+  'hs-chin-chest':          '9/16',
+};
+
+function fvClip(ex){
+  if(!ex) return null;
+  const raw = VIDEO_CLIPS[ex.id];
+  if(!raw) return null;
+  const parts = String(raw).split(':');
+  return { ratio: parts[0] || '9/16', poster: parts.indexOf('poster') > -1 };
+}
+
+function fvUrl(path){
+  if(!path) return '';
+  return /^https?:\/\//i.test(path) ? path : VIDEO_BASE + path;
+}
+function fvHas(ex){ return !!fvClip(ex); }
+
+// Inline player markup. Poster only — the video element carries no src until
+// tapped, so a library of 285 exercises costs 285 small images, not 285 videos.
+function fvPlayerHTML(ex, opts){
+  opts = opts || {};
+  const clip = fvClip(ex);
+  if(!clip) return '';
+  const src    = fvUrl(ex.id + '.mp4');
+  const poster = clip.poster ? fvUrl(ex.id + '.jpg') : '';
+  const ratio  = clip.ratio;
+  const uid    = 'fv-' + ex.id + (opts.suffix || '');
+  return `<div class="fv-media" id="${uid}" style="aspect-ratio:${ratio}"
+      role="button" tabindex="0" aria-label="Play ${ex.name} demonstration"
+      onclick="fvToggle('${uid}','${src}')"
+      onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();fvToggle('${uid}','${src}')}">
+    ${poster ? `<img class="fv-poster" src="${poster}" alt="" loading="lazy" decoding="async">` : ''}
+    <video playsinline muted loop preload="none" disablepictureinpicture></video>
+    <div class="fv-scrim"></div>
+    <div class="fv-play"><svg viewBox="0 0 8 10"><path d="M1 1 L7 5 L1 9 Z"/></svg></div>
+    <div class="fv-badge">Luca \u00b7 FORGE</div>
+    <button class="fv-speed" onclick="event.stopPropagation();fvSpeed('${uid}')">1\u00d7</button>
+    <div class="fv-fail">Demo unavailable \u2014 tap Watch Reference below</div>
+  </div>`;
+}
+
+function fvToggle(uid, src){
+  const box = document.getElementById(uid); if(!box) return;
+  const vid = box.querySelector('video'); if(!vid) return;
+
+  if(box.classList.contains('live')){          // second tap stops and resets
+    vid.pause(); box.classList.remove('live'); return;
+  }
+  // Only one clip plays at a time, so scrolling the log doesn't stack audio-less
+  // decoders and chew battery.
+  document.querySelectorAll('.fv-media.live').forEach(o => {
+    if(o.id !== uid){ const v=o.querySelector('video'); if(v) v.pause(); o.classList.remove('live'); }
+  });
+
+  if(!vid.getAttribute('src')){
+    vid.setAttribute('src', src);
+    vid.addEventListener('error', () => {
+      // Network gone, file missing, or the CDN is blocked — fall back visibly
+      box.classList.add('failed'); box.classList.remove('live');
+    }, { once:true });
+  }
+  box.classList.add('live');
+  const p = vid.play();
+  if(p && p.catch) p.catch(() => { box.classList.add('failed'); box.classList.remove('live'); });
+}
+
+// Half speed for entries and skill work; the two states are enough on a phone.
+function fvSpeed(uid){
+  const box=document.getElementById(uid); if(!box) return;
+  const vid=box.querySelector('video'), btn=box.querySelector('.fv-speed');
+  if(!vid||!btn) return;
+  const half = vid.playbackRate !== 0.5;
+  vid.playbackRate = half ? 0.5 : 1;
+  btn.textContent = half ? '0.5\u00d7' : '1\u00d7';
+  btn.classList.toggle('on', half);
+}
+
+// Pause everything when the tab is backgrounded or the log is left
+function fvPauseAll(){
+  document.querySelectorAll('.fv-media.live').forEach(o => {
+    const v=o.querySelector('video'); if(v) v.pause(); o.classList.remove('live');
+  });
+}
+document.addEventListener('visibilitychange', () => { if(document.hidden) fvPauseAll(); });
+
 // ─── SHEET ─────────────────────────────────────────────────────
 function openSheet(id){
   const ex=EXERCISES.find(e=>e.id===id); if(!ex) return;
@@ -3828,11 +3956,17 @@ function openSheet(id){
   document.getElementById('sheet-intensity').textContent=ex.intensity;
   document.getElementById('sheet-cue').textContent=ex.cue;
   document.getElementById('sheet-video').href=ex.video;
+  // Inline clip when we have one; the YouTube link stays as the fallback
+  const sp=document.getElementById('sheet-player');
+  sp.innerHTML = fvPlayerHTML(ex, {suffix:'-sheet', ratio:'16/9'});
+  const sv=document.getElementById('sheet-video');
+  sv.style.opacity = fvHas(ex) ? '.5' : '';
+  sv.style.fontSize = fvHas(ex) ? '9px' : '';
   document.getElementById('sheet-tags').innerHTML=ex.tags.map(t=>`<span class="tag ${t}">${t}</span>`).join('');
   document.getElementById('sheet-overlay').classList.add('open');
 }
 function closeSheet(e){if(e.target===document.getElementById('sheet-overlay'))closeSheetDirect();}
-function closeSheetDirect(){document.getElementById('sheet-overlay').classList.remove('open');}
+function closeSheetDirect(){fvPauseAll();document.getElementById('sheet-overlay').classList.remove('open');}
 
 // ─── PROGRESS ──────────────────────────────────────────────────
 
