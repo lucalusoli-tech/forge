@@ -7362,6 +7362,7 @@ async function afterAuth(supaUser, isNew) {
   // Backup session to IndexedDB (survives iOS Safari localStorage eviction)
   const { data: { session: freshSession } } = await supa.auth.getSession();
   if (freshSession) {
+    try { localStorage.setItem('fw_idb_backup','1'); } catch(e) {}
     await idbSet('supabase_session', {
       access_token: freshSession.access_token,
       refresh_token: freshSession.refresh_token
@@ -7496,7 +7497,16 @@ async function handleSignOut() {
   }
 
   // ── Tier 3: IndexedDB restore (Safari wiped localStorage entirely)
-  if (!session) {
+  //
+  // Only worth attempting if there is actually something to restore. On iOS,
+  // indexedDB.open() can block the whole main thread when another context (the
+  // installed PWA alongside Safari) holds the database — and a blocked main
+  // thread means no timeout can fire and boot never finishes. So we record
+  // whether a backup exists in localStorage, and only touch IndexedDB when that
+  // marker says there is one.
+  if (!session && localStorage.getItem('fw_idb_backup') !== '1') {
+    console.log(`[FORGE AUTH] 4/5 skipped IndexedDB restore (no backup marker)`);
+  } else if (!session) {
     console.log(`[FORGE AUTH] 4/5 attempting IndexedDB restore ${elapsed()}`);
     const idbSession = await idbGet('supabase_session');
     if (idbSession?.refresh_token) {
@@ -7565,6 +7575,7 @@ supa.auth.onAuthStateChange(async (event, session) => {
   } else if (event === 'TOKEN_REFRESHED' && session?.user) {
     console.log('[FORGE AUTH]     token refreshed, updating IDB backup');
     // Update IndexedDB backup with the new tokens — critical for long-term persistence
+    try { localStorage.setItem('fw_idb_backup','1'); } catch(e) {}
     await idbSet('supabase_session', {
       access_token: session.access_token,
       refresh_token: session.refresh_token
