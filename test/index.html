@@ -146,6 +146,18 @@
   .archive-btn { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; padding: 5px 12px; cursor: pointer; }
   .archive-btn:active { border-color: var(--accent-dim); color: var(--accent); }
 
+  /* ─── PHASE STRIP (cycle progress) ─────────────────────────── */
+  .phase-bar { padding: 12px 20px 13px; border-bottom: 1px solid var(--border); background: var(--deep); }
+  .phase-bar-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 9px; }
+  .phase-name { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; color: var(--accent); text-transform: uppercase; }
+  .phase-week { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px; color: var(--text-dim); text-transform: uppercase; white-space: nowrap; }
+  .phase-week b { color: var(--accent); font-weight: 400; }
+  .phase-strip { display: flex; gap: 3px; height: 3px; }
+  .phase-seg { display: block; background: var(--border-light); transition: background 0.3s ease, box-shadow 0.3s ease; }
+  .phase-seg.done { background: var(--accent-dim); }
+  .phase-seg.now { background: var(--accent); box-shadow: 0 0 8px rgba(201,169,110,0.45); }
+  @media (prefers-reduced-motion: reduce) { .phase-seg { transition: none; } }
+
   .duration-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 20px; border-bottom: 1px solid var(--border); background: var(--black); }
   .duration-label { font-size: 8px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; }
   .duration-chips { display: flex; gap: 5px; }
@@ -1261,6 +1273,13 @@
           <span class="archive-bar-label" id="current-block-label">Current Block</span>
           <button class="archive-btn" onclick="openArchiveConfirm()">Archive Block →</button>
         </div>
+        <div class="phase-bar" id="phase-bar" style="display:none">
+          <div class="phase-bar-top">
+            <span class="phase-name" id="phase-name">—</span>
+            <span class="phase-week" id="phase-week">wk <b>1</b>/1</span>
+          </div>
+          <div class="phase-strip" id="phase-strip"></div>
+        </div>
         <div id="home-fixed-sections"></div>
         <div id="home-day-cards"></div>
       </div>
@@ -2206,6 +2225,88 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function saveCurrentBlock() { localStorage.setItem('fw_block', JSON.stringify(currentBlock)); scheduleSync(); }
 
+// ─── CYCLE / PHASE TRACKING ────────────────────────────────────
+// A "cycle" groups several blocks (one per phase) under a shared id. Each block carries:
+//   cycle: { id:'cyc_xxx', name:'Muscle-Up Build', phase:'strength', order:3 }
+// Blocks with no cycle field are standalone and render nothing — this is purely additive.
+// Completed phases are read from archivedBlocks (activateBlock archives with a full spread,
+// so the cycle field survives). No new storage, no migration.
+const PHASE_LABELS = { prep:'PREP', hypertrophy:'HYPERTROPHY', strength:'STRENGTH', power:'POWER' };
+
+function cycleSiblings(cycleId){
+  if(!cycleId) return [];
+  return customWorkouts.filter(w => w.cycle && w.cycle.id === cycleId);
+}
+function cycleArchived(cycleId){
+  if(!cycleId) return [];
+  return archivedBlocks.filter(b => b.cycle && b.cycle.id === cycleId);
+}
+
+function renderPhaseStrip(){
+  const bar = document.getElementById('phase-bar');
+  if(!bar) return;
+  const cyc = currentBlock.cycle;
+  if(!cyc || !cyc.id){ bar.style.display = 'none'; return; }
+
+  // The phase list comes from the saved sibling blocks. If the live block has no saved
+  // source (activated then deleted), fold it in so the strip still shows the current phase.
+  const phases = cycleSiblings(cyc.id).map(w => ({
+    order: w.cycle.order || 1,
+    phase: w.cycle.phase || '',
+    weeks: w.weeks || 4
+  }));
+  if(!phases.some(p => p.order === (cyc.order || 1))){
+    phases.push({ order: cyc.order || 1, phase: cyc.phase || '', weeks: currentBlock.weeks || 4 });
+  }
+  phases.sort((a,b) => a.order - b.order);
+
+  // A one-phase cycle isn't a cycle — nothing worth drawing.
+  if(phases.length < 2){ bar.style.display = 'none'; return; }
+
+  const archived  = cycleArchived(cyc.id);
+  const doneOrders = new Set(archived.map(b => (b.cycle && b.cycle.order) || 0));
+  const curOrder   = cyc.order || 1;
+
+  // Cycle week = weeks already banked in archived phases + the live block's week.
+  const elapsed    = archived.reduce((a,b) => a + (b.weeks || 0), 0);
+  const cycleWeek  = elapsed + currentWeek;
+  const plannedTot = phases.reduce((a,p) => a + p.weeks, 0);
+  // A repeated phase adds an extra archived block that isn't in the saved list, so the
+  // planned total can undershoot. Take whichever is larger — never show "wk 8/6".
+  const cycleTotal = Math.max(plannedTot, elapsed + (currentBlock.weeks || 4));
+
+  document.getElementById('phase-strip').innerHTML = phases.map(p => {
+    const cls = p.order === curOrder ? 'now' : (doneOrders.has(p.order) ? 'done' : '');
+    return `<i class="phase-seg ${cls}" style="flex:${p.weeks}"></i>`;
+  }).join('');
+
+  const label = PHASE_LABELS[cyc.phase] || (cyc.phase || '').toUpperCase() || 'PHASE';
+  document.getElementById('phase-name').textContent = label;
+  document.getElementById('phase-week').innerHTML = 'wk <b>' + cycleWeek + '</b>/' + cycleTotal;
+  bar.style.display = 'block';
+}
+
+// Dev helper — no builder UI for cycles yet, so tag blocks from the console to see the strip.
+// Example:  forgeTagCycle('cw_1712...', 'cyc_mu2', 'strength', 3, 'Muscle-Up Build')
+function forgeTagCycle(blockId, cycleId, phase, order, cycleName){
+  const wk = customWorkouts.find(w => w.id === blockId);
+  if(!wk){ console.warn('No saved block with id', blockId); return; }
+  wk.cycle = { id: cycleId, name: cycleName || cycleId, phase: phase, order: order };
+  localStorage.setItem('fw_customs', JSON.stringify(customWorkouts));
+  if(currentBlock.sourceId === blockId){
+    currentBlock.cycle = wk.cycle;
+    localStorage.setItem('fw_block', JSON.stringify(currentBlock));
+  }
+  syncBlocksToCloud();
+  renderPhaseStrip();
+  console.log('Tagged:', wk.name, wk.cycle);
+}
+function forgeCycleDebug(){
+  console.table(customWorkouts.map(w => ({ id:w.id, name:w.name, weeks:w.weeks,
+    cycle:w.cycle&&w.cycle.id, phase:w.cycle&&w.cycle.phase, order:w.cycle&&w.cycle.order })));
+  console.log('live block cycle:', currentBlock.cycle, '| currentWeek:', currentWeek);
+}
+
 function updateStats() {
   const total = currentBlock.weeks || 4;
   document.getElementById('current-week').textContent = currentWeek;
@@ -2214,6 +2315,7 @@ function updateStats() {
   const m = currentBlock.methods || [];
   document.getElementById('home-sub').textContent = m.length ? m.join(' · ') : 'Current Block';
   document.getElementById('current-block-label').textContent = currentBlock.name || 'Current Block';
+  renderPhaseStrip();
 
   // Count logged sessions from sessionLog
   const days = currentBlock.days || [];
@@ -5400,6 +5502,8 @@ function saveBlockOnly() {
   if(!name){showToast('Add a block name');return;}
   if(!builderDays.length){showToast('Add at least 1 day');return;}
   const editingId = window._editingBlockId;
+  // Editing must not wipe the block's cycle tag — the builder has no UI for it yet.
+  const prevCycle = editingId ? ((customWorkouts.find(w=>w.id===editingId)||{}).cycle || null) : null;
   const block={
     id: editingId || 'cw_'+Date.now(),
     name:name.toUpperCase(),
@@ -5408,6 +5512,7 @@ function saveBlockOnly() {
     warmup: [...builderWarmup],
     skill:  [...builderSkill],
     days:getBuiltDays(),
+    cycle: prevCycle,
   };
   if(editingId) {
     const idx = customWorkouts.findIndex(w=>w.id===editingId);
@@ -5433,7 +5538,8 @@ function saveBlockOnly() {
       ...currentBlock,
       sourceId: editingId,
       name: block.name, methods: block.methods, weeks: block.weeks,
-      warmup: block.warmup, skill: block.skill, days: block.days
+      warmup: block.warmup, skill: block.skill, days: block.days,
+      cycle: block.cycle
     };
     localStorage.setItem('fw_block', JSON.stringify(currentBlock));
     saveCurrentBlock();
@@ -5475,7 +5581,8 @@ async function activateBlock(newBlock){
     warmup: newBlock.warmup || [],
     skill: newBlock.skill || [],
     days: newBlock.days || [],
-    sourceId: newBlock.id || newBlock.sourceId || null // links the live block to its saved source (for in-place edits)
+    sourceId: newBlock.id || newBlock.sourceId || null, // links the live block to its saved source (for in-place edits)
+    cycle: newBlock.cycle || null // phase-tracking group — MUST be listed here or it's dropped on activation
   };
   currentWeek = 1;
   sessionLog = {};
