@@ -156,7 +156,24 @@
   .phase-seg { display: block; background: var(--border-light); transition: background 0.3s ease, box-shadow 0.3s ease; }
   .phase-seg.done { background: var(--accent-dim); }
   .phase-seg.now { background: var(--accent); box-shadow: 0 0 8px rgba(201,169,110,0.45); }
+  .phase-seg.unbuilt { background: transparent; box-shadow: inset 0 0 0 1px var(--border); }
   @media (prefers-reduced-motion: reduce) { .phase-seg { transition: none; } }
+
+  /* ─── CYCLE PLANNER ────────────────────────────────────────── */
+  .cycle-card { border: 1px solid var(--border); background: var(--deep); padding: 14px; margin-bottom: 12px; }
+  .cycle-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+  .cycle-card-name { font-family: 'DM Mono', monospace; font-size: 14px; letter-spacing: 1.5px; color: var(--text); }
+  .cycle-card-meta { font-size: 9px; letter-spacing: 1.5px; color: var(--text-dim); text-transform: uppercase; margin-top: 4px; }
+  .cycle-slot-row { display: flex; align-items: baseline; gap: 10px; padding: 6px 0; border-top: 1px solid var(--border); }
+  .cycle-slot-phase { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px; color: var(--accent); text-transform: uppercase; width: 108px; flex: none; }
+  .cycle-slot-block { flex: 1; font-size: 11px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cycle-slot-block.empty { color: var(--text-dim); font-style: italic; }
+  .cycle-slot-weeks { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-dim); }
+  .cycle-draft-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .cycle-draft-select { flex: 1; background: var(--black); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 10px; padding: 7px 8px; }
+  .cycle-draft-weeks { width: 52px; background: var(--black); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 10px; padding: 7px 8px; text-align: center; }
+  .cycle-draft-wk { font-size: 9px; letter-spacing: 1px; color: var(--text-dim); text-transform: uppercase; }
+  .cycle-draft-x { background: transparent; border: 1px solid var(--border); color: var(--text-dim); font-size: 13px; line-height: 1; padding: 5px 9px; cursor: pointer; }
 
   .duration-bar { display: flex; align-items: center; justify-content: space-between; padding: 8px 20px; border-bottom: 1px solid var(--border); background: var(--black); }
   .duration-label { font-size: 8px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; }
@@ -1269,8 +1286,7 @@
         <div class="stat-cell"><div class="stat-label">Last</div><div class="stat-value" style="font-size:14px;margin-top:4px" id="dash-last">—</div></div>
       </div>
       <div id="home-block-section">
-        <div class="archive-bar">
-          <span class="archive-bar-label" id="current-block-label">Current Block</span>
+        <div class="archive-bar" style="justify-content:flex-end">
           <button class="archive-btn" onclick="openArchiveConfirm()">Archive Block →</button>
         </div>
         <div class="phase-bar" id="phase-bar" style="display:none">
@@ -1419,6 +1435,13 @@
           </div>
         </div>
 
+        <!-- Cycle attachment -->
+        <div class="field-section">
+          <div class="field-label">Part of a Cycle</div>
+          <div class="picker-chips" id="builder-cycle-chips"></div>
+          <div class="picker-chips" id="builder-slot-chips" style="margin-top:8px;display:none"></div>
+        </div>
+
         <!-- Warm-up (fixed, same every week) -->
         <div class="builder-fixed">
           <div class="builder-fixed-header">
@@ -1497,6 +1520,15 @@
           <div class="coaching-eyebrow">Your Training</div>
           <div class="coaching-title">PROGRAMMES</div>
           <div class="coaching-desc">Every block you've built or been assigned. Set one as current to start training.</div>
+        </div>
+
+        <!-- CYCLE PLANNER -->
+        <div class="saved-blocks-section">
+          <div class="field-label" style="display:flex;justify-content:space-between;align-items:center">
+            <span>Cycles</span>
+            <button class="picker-chip" onclick="newCycleDraft()">+ New cycle</button>
+          </div>
+          <div id="cycle-planner-list" style="margin-top:12px"></div>
         </div>
 
         <!-- SAVED BLOCKS (moved here from the Builder tab) -->
@@ -2187,6 +2219,11 @@ let currentBlock = JSON.parse(localStorage.getItem('fw_block')||'null') || { nam
 if(!currentBlock.warmup) currentBlock.warmup = [];
 if(!currentBlock.skill)  currentBlock.skill  = [];
 let customWorkouts = JSON.parse(localStorage.getItem('fw_customs')||'[]');
+// Cycle plans — the SHAPE of a training cycle, independent of the blocks that fill it.
+// { id, name, slots:[{ phase, weeks, blockId|null }] }
+// A slot with blockId:null is planned but not yet built. This is what lets the strip show
+// all four phases from day one instead of only the ones that already exist.
+let trainingCycles = JSON.parse(localStorage.getItem('fw_cycles')||'[]');
 let archivedBlocks = JSON.parse(localStorage.getItem('fw_archive')||'[]');
 let boards = JSON.parse(localStorage.getItem('fw_boards')||'[]');
 let sessionLog = JSON.parse(localStorage.getItem('fw_log')||'{}');
@@ -2226,91 +2263,208 @@ document.addEventListener('DOMContentLoaded', () => {
 function saveCurrentBlock() { localStorage.setItem('fw_block', JSON.stringify(currentBlock)); scheduleSync(); }
 
 // ─── CYCLE / PHASE TRACKING ────────────────────────────────────
-// A "cycle" groups several blocks (one per phase) under a shared id. Each block carries:
-//   cycle: { id:'cyc_xxx', name:'Muscle-Up Build', phase:'strength', order:3 }
-// Blocks with no cycle field are standalone and render nothing — this is purely additive.
-// Completed phases are read from archivedBlocks (activateBlock archives with a full spread,
-// so the cycle field survives). No new storage, no migration.
+// A cycle PLAN lives in trainingCycles and holds the shape of the whole cycle:
+//   { id, name, slots:[{ phase, weeks, blockId|null }] }
+// Blocks point back at a slot via  block.cycle = { id, order }  (order is 1-indexed).
+// The plan is the source of truth for the strip, so all phases render from day one —
+// including ones you haven't built yet. A slot with blockId:null is planned, not built.
 const PHASE_LABELS = { prep:'PREP', hypertrophy:'HYPERTROPHY', strength:'STRENGTH', power:'POWER' };
+const PHASE_SEQUENCE = ['prep','hypertrophy','strength','power'];
 
-function cycleSiblings(cycleId){
-  if(!cycleId) return [];
-  return customWorkouts.filter(w => w.cycle && w.cycle.id === cycleId);
+function saveCycles(){
+  localStorage.setItem('fw_cycles', JSON.stringify(trainingCycles));
+  syncBlocksToCloud();
 }
-function cycleArchived(cycleId){
-  if(!cycleId) return [];
-  return archivedBlocks.filter(b => b.cycle && b.cycle.id === cycleId);
-}
+function getCycle(id){ return trainingCycles.find(c => c.id === id) || null; }
 
 function renderPhaseStrip(){
   const bar = document.getElementById('phase-bar');
   if(!bar) return;
-  const cyc = currentBlock.cycle;
-  if(!cyc || !cyc.id){ bar.style.display = 'none'; return; }
+  const ref = currentBlock.cycle;
+  const cyc = ref && ref.id ? getCycle(ref.id) : null;
+  if(!cyc || !Array.isArray(cyc.slots) || cyc.slots.length < 2){ bar.style.display = 'none'; return; }
 
-  // The phase list comes from the saved sibling blocks. If the live block has no saved
-  // source (activated then deleted), fold it in so the strip still shows the current phase.
-  const phases = cycleSiblings(cyc.id).map(w => ({
-    order: w.cycle.order || 1,
-    phase: w.cycle.phase || '',
-    weeks: w.weeks || 4
-  }));
-  if(!phases.some(p => p.order === (cyc.order || 1))){
-    phases.push({ order: cyc.order || 1, phase: cyc.phase || '', weeks: currentBlock.weeks || 4 });
-  }
-  phases.sort((a,b) => a.order - b.order);
+  const order = Math.min(Math.max(ref.order || 1, 1), cyc.slots.length);
+  const curIdx = order - 1;
 
-  // A one-phase cycle isn't a cycle — nothing worth drawing.
-  if(phases.length < 2){ bar.style.display = 'none'; return; }
-
-  const archived  = cycleArchived(cyc.id);
-  const doneOrders = new Set(archived.map(b => (b.cycle && b.cycle.order) || 0));
-  const curOrder   = cyc.order || 1;
-
-  // Cycle week = weeks already banked in archived phases + the live block's week.
-  const elapsed    = archived.reduce((a,b) => a + (b.weeks || 0), 0);
-  const cycleWeek  = elapsed + currentWeek;
-  const plannedTot = phases.reduce((a,p) => a + p.weeks, 0);
-  // A repeated phase adds an extra archived block that isn't in the saved list, so the
-  // planned total can undershoot. Take whichever is larger — never show "wk 8/6".
-  const cycleTotal = Math.max(plannedTot, elapsed + (currentBlock.weeks || 4));
-
-  document.getElementById('phase-strip').innerHTML = phases.map(p => {
-    const cls = p.order === curOrder ? 'now' : (doneOrders.has(p.order) ? 'done' : '');
-    return `<i class="phase-seg ${cls}" style="flex:${p.weeks}"></i>`;
+  document.getElementById('phase-strip').innerHTML = cyc.slots.map((s,i) => {
+    const cls = i === curIdx ? 'now' : (i < curIdx ? 'done' : '');
+    // A planned-but-unbuilt future phase reads slightly fainter than a built one.
+    const unbuilt = (i > curIdx && !s.blockId) ? ' unbuilt' : '';
+    return `<i class="phase-seg ${cls}${unbuilt}" style="flex:${s.weeks || 4}"></i>`;
   }).join('');
 
-  const label = PHASE_LABELS[cyc.phase] || (cyc.phase || '').toUpperCase() || 'PHASE';
-  document.getElementById('phase-name').textContent = label;
-  document.getElementById('phase-week').innerHTML = 'cycle wk <b>' + cycleWeek + '</b>/' + cycleTotal;
+  const elapsed = cyc.slots.slice(0, curIdx).reduce((a,s) => a + (s.weeks || 0), 0);
+  const total   = cyc.slots.reduce((a,s) => a + (s.weeks || 0), 0);
+  const cycleWeek = Math.min(elapsed + currentWeek, total);
+  const phase = cyc.slots[curIdx].phase || '';
+
+  document.getElementById('phase-name').textContent = PHASE_LABELS[phase] || phase.toUpperCase() || 'PHASE';
+  document.getElementById('phase-week').innerHTML = 'cycle wk <b>' + cycleWeek + '</b>/' + total;
   bar.style.display = 'block';
 }
 
-// Dev helper — no builder UI for cycles yet, so tag blocks from the console to see the strip.
-// Example:  forgeTagCycle('cw_1712...', 'cyc_mu2', 'strength', 3, 'Muscle-Up Build')
-function forgeTagCycle(blockId, cycleId, phase, order, cycleName){
-  const wk = customWorkouts.find(w => w.id === blockId);
-  if(!wk){ console.warn('No saved block with id', blockId); return; }
-  wk.cycle = { id: cycleId, name: cycleName || cycleId, phase: phase, order: order };
-  localStorage.setItem('fw_customs', JSON.stringify(customWorkouts));
-  // Blocks activated before sourceId existed have none — fall back to a name match and
-  // heal sourceId while we're here (same pattern saveBlockOnly uses for in-place edits).
-  const isLive = currentBlock.sourceId === blockId ||
-                 (!currentBlock.sourceId && currentBlock.name === wk.name);
-  if(isLive){
-    currentBlock.sourceId = blockId;
-    currentBlock.cycle = wk.cycle;
+// ─── CYCLE PLANNER (Programmes tab) ────────────────────────────
+let cycleDraft = null; // { name, slots:[{phase,weeks}] } while the New Cycle form is open
+
+function renderCyclePlanner(){
+  const host = document.getElementById('cycle-planner-list');
+  if(!host) return;
+
+  if(!trainingCycles.length && !cycleDraft){
+    host.innerHTML = `<div class="empty-state">No cycles planned yet</div>`;
+    return;
+  }
+
+  host.innerHTML = trainingCycles.map(c => {
+    const total = c.slots.reduce((a,s)=>a+(s.weeks||0),0);
+    const built = c.slots.filter(s=>s.blockId).length;
+    const segs = c.slots.map(s =>
+      `<i class="phase-seg ${s.blockId?'done':'unbuilt'}" style="flex:${s.weeks||4}"></i>`).join('');
+    const rows = c.slots.map((s,i) => {
+      const wk = s.blockId ? customWorkouts.find(w=>w.id===s.blockId) : null;
+      const name = wk ? wk.name : 'not built yet';
+      return `<div class="cycle-slot-row">
+        <span class="cycle-slot-phase">${i+1}. ${(PHASE_LABELS[s.phase]||s.phase)}</span>
+        <span class="cycle-slot-block ${wk?'':'empty'}">${name}</span>
+        <span class="cycle-slot-weeks">${s.weeks}w</span>
+      </div>`;
+    }).join('');
+    return `<div class="cycle-card">
+      <div class="cycle-card-head">
+        <div>
+          <div class="cycle-card-name">${c.name}</div>
+          <div class="cycle-card-meta">${c.slots.length} phases · ${total} weeks · ${built}/${c.slots.length} built</div>
+        </div>
+        <button class="saved-wk-del" onclick="deleteCycle('${c.id}')">Delete</button>
+      </div>
+      <div class="phase-strip" style="margin:10px 0 12px">${segs}</div>
+      ${rows}
+    </div>`;
+  }).join('');
+
+  if(cycleDraft) host.insertAdjacentHTML('beforeend', renderCycleDraftForm());
+}
+
+function renderCycleDraftForm(){
+  const rows = cycleDraft.slots.map((s,i) => `
+    <div class="cycle-draft-row">
+      <select class="cycle-draft-select" onchange="updateDraftSlot(${i},'phase',this.value)">
+        ${PHASE_SEQUENCE.map(p=>`<option value="${p}" ${p===s.phase?'selected':''}>${PHASE_LABELS[p]}</option>`).join('')}
+      </select>
+      <input class="cycle-draft-weeks" type="number" min="1" max="16" value="${s.weeks}"
+             onchange="updateDraftSlot(${i},'weeks',this.value)">
+      <span class="cycle-draft-wk">weeks</span>
+      <button class="cycle-draft-x" onclick="removeDraftSlot(${i})">×</button>
+    </div>`).join('');
+  return `<div class="cycle-card" style="border-color:var(--accent-dim)">
+    <div class="field-label" style="margin-bottom:8px">New Cycle</div>
+    <input class="name-field" type="text" id="cycle-draft-name" placeholder="CYCLE NAME" maxlength="40"
+           value="${cycleDraft.name||''}" oninput="cycleDraft.name=this.value">
+    <div style="margin-top:12px">${rows}</div>
+    <button class="picker-chip" style="margin-top:8px" onclick="addDraftSlot()">+ Add phase</button>
+    <div style="display:flex;gap:8px;margin-top:14px">
+      <button class="start-btn" style="flex:1;margin:0" onclick="saveCycleDraft()">SAVE CYCLE</button>
+      <button class="saved-wk-del" onclick="cycleDraft=null;renderCyclePlanner()">Cancel</button>
+    </div>
+  </div>`;
+}
+
+function newCycleDraft(){
+  cycleDraft = { name:'', slots: PHASE_SEQUENCE.map(p => ({ phase:p, weeks: p==='power'?4:6 })) };
+  renderCyclePlanner();
+}
+function updateDraftSlot(i, key, val){
+  if(!cycleDraft || !cycleDraft.slots[i]) return;
+  cycleDraft.slots[i][key] = key==='weeks' ? Math.max(1, Math.min(16, parseInt(val)||4)) : val;
+}
+function addDraftSlot(){
+  if(!cycleDraft) return;
+  cycleDraft.slots.push({ phase:'strength', weeks:6 });
+  renderCyclePlanner();
+}
+function removeDraftSlot(i){
+  if(!cycleDraft || cycleDraft.slots.length <= 2){ showToast('A cycle needs at least 2 phases'); return; }
+  cycleDraft.slots.splice(i,1);
+  renderCyclePlanner();
+}
+function saveCycleDraft(){
+  if(!cycleDraft) return;
+  const name = (cycleDraft.name||'').trim();
+  if(!name){ showToast('Name the cycle'); return; }
+  trainingCycles.push({
+    id: 'cyc_'+Date.now(),
+    name: name.toUpperCase(),
+    slots: cycleDraft.slots.map(s => ({ phase:s.phase, weeks:s.weeks, blockId:null }))
+  });
+  cycleDraft = null;
+  saveCycles();
+  renderCyclePlanner();
+  renderBuilderCyclePicker();
+  showToast('Cycle saved ✓');
+}
+function deleteCycle(id){
+  const c = getCycle(id); if(!c) return;
+  // Detach any blocks pointing at this cycle so they don't hold a dead reference.
+  customWorkouts.forEach(w => { if(w.cycle && w.cycle.id === id) w.cycle = null; });
+  if(currentBlock.cycle && currentBlock.cycle.id === id){
+    currentBlock.cycle = null;
     localStorage.setItem('fw_block', JSON.stringify(currentBlock));
   }
-  syncBlocksToCloud();
-  renderPhaseStrip();
-  console.log('Tagged:', wk.name, wk.cycle);
+  trainingCycles = trainingCycles.filter(x => x.id !== id);
+  localStorage.setItem('fw_customs', JSON.stringify(customWorkouts));
+  saveCycles();
+  renderCyclePlanner();
+  renderBuilderCyclePicker();
+  updateStats();
+  showToast('Cycle deleted');
 }
-function forgeCycleDebug(){
-  console.table(customWorkouts.map(w => ({ id:w.id, name:w.name, weeks:w.weeks,
-    cycle:w.cycle&&w.cycle.id, phase:w.cycle&&w.cycle.phase, order:w.cycle&&w.cycle.order })));
-  console.log('live block cycle:', currentBlock.cycle, '| currentWeek:', currentWeek);
+
+// ─── BUILDER: attach a block to a cycle slot ───────────────────
+let builderCycle = null; // { id, order } or null
+
+function renderBuilderCyclePicker(){
+  const host = document.getElementById('builder-cycle-chips');
+  if(!host) return;
+  const chips = [`<button class="picker-chip ${!builderCycle?'selected':''}" onclick="setBuilderCycle(null)">No cycle</button>`]
+    .concat(trainingCycles.map(c =>
+      `<button class="picker-chip ${builderCycle&&builderCycle.id===c.id?'selected':''}" onclick="setBuilderCycle('${c.id}')">${c.name}</button>`));
+  host.innerHTML = chips.join('');
+
+  const slotHost = document.getElementById('builder-slot-chips');
+  if(!slotHost) return;
+  const cyc = builderCycle ? getCycle(builderCycle.id) : null;
+  if(!cyc){ slotHost.innerHTML = ''; slotHost.style.display='none'; return; }
+  slotHost.style.display = 'flex';
+  slotHost.innerHTML = cyc.slots.map((s,i) => {
+    const taken = s.blockId && s.blockId !== window._editingBlockId;
+    const label = (PHASE_LABELS[s.phase]||s.phase) + ' · ' + s.weeks + 'w' + (taken ? ' ·filled' : '');
+    return `<button class="picker-chip ${builderCycle.order===i+1?'selected':''}"
+      style="${taken?'opacity:.45':''}" onclick="setBuilderSlot(${i+1})">${label}</button>`;
+  }).join('');
 }
+function setBuilderCycle(id){
+  builderCycle = id ? { id: id, order: 1 } : null;
+  // Adopt the slot's planned length so the block and the plan agree.
+  const cyc = id ? getCycle(id) : null;
+  if(cyc && cyc.slots[0]) setBuilderWeeksSilent(cyc.slots[0].weeks);
+  renderBuilderCyclePicker();
+}
+function setBuilderSlot(order){
+  if(!builderCycle) return;
+  builderCycle.order = order;
+  const cyc = getCycle(builderCycle.id);
+  if(cyc && cyc.slots[order-1]) setBuilderWeeksSilent(cyc.slots[order-1].weeks);
+  renderBuilderCyclePicker();
+}
+// Sets builderWeeks and reflects it in the duration chips without a toast.
+function setBuilderWeeksSilent(w){
+  builderWeeks = w;
+  document.querySelectorAll('#builder-duration-chips .picker-chip').forEach(b=>{
+    b.classList.toggle('selected', parseInt(b.textContent)===w);
+  });
+}
+
 
 function updateStats() {
   const total = currentBlock.weeks || 4;
@@ -2319,7 +2473,8 @@ function updateStats() {
   document.getElementById('dash-week').textContent = 'W' + currentWeek + '/' + total;
   const m = currentBlock.methods || [];
   document.getElementById('home-sub').textContent = m.length ? m.join(' · ') : 'Current Block';
-  document.getElementById('current-block-label').textContent = currentBlock.name || 'Current Block';
+  const blockLabel = document.getElementById('current-block-label'); // removed from Home — name is already the hero title
+  if(blockLabel) blockLabel.textContent = currentBlock.name || 'Current Block';
   renderPhaseStrip();
 
   // Count logged sessions from sessionLog
@@ -5507,7 +5662,8 @@ function saveBlockOnly() {
   if(!name){showToast('Add a block name');return;}
   if(!builderDays.length){showToast('Add at least 1 day');return;}
   const editingId = window._editingBlockId;
-  // Editing must not wipe the block's cycle tag — the builder has no UI for it yet.
+  // The builder's cycle picker is the source of truth; fall back to whatever the block
+  // already had so an edit made with the picker untouched doesn't silently detach it.
   const prevCycle = editingId ? ((customWorkouts.find(w=>w.id===editingId)||{}).cycle || null) : null;
   const block={
     id: editingId || 'cw_'+Date.now(),
@@ -5517,8 +5673,16 @@ function saveBlockOnly() {
     warmup: [...builderWarmup],
     skill:  [...builderSkill],
     days:getBuiltDays(),
-    cycle: prevCycle,
+    cycle: builderCycle ? { id: builderCycle.id, order: builderCycle.order } : prevCycle,
   };
+  // Bind the block into its slot, and clear it out of any slot it used to occupy.
+  trainingCycles.forEach(c => c.slots.forEach(s => { if(s.blockId === block.id) s.blockId = null; }));
+  if(block.cycle){
+    const cyc = getCycle(block.cycle.id);
+    const slot = cyc && cyc.slots[block.cycle.order - 1];
+    if(slot) slot.blockId = block.id; else block.cycle = null; // slot vanished — detach rather than dangle
+  }
+  localStorage.setItem('fw_cycles', JSON.stringify(trainingCycles));
   if(editingId) {
     const idx = customWorkouts.findIndex(w=>w.id===editingId);
     if(idx > -1) customWorkouts[idx] = block;
@@ -5605,7 +5769,7 @@ async function saveAndStart() {
   if(!name){showToast('Add a block name');return;}
   if(!builderDays.length){showToast('Add at least 1 day');return;}
   const days=getBuiltDays();
-  await activateBlock({name:name.toUpperCase(),methods:[...builderMethods],weeks:builderWeeks,warmup:[...builderWarmup],skill:[...builderSkill],days});
+  await activateBlock({name:name.toUpperCase(),methods:[...builderMethods],weeks:builderWeeks,warmup:[...builderWarmup],skill:[...builderSkill],days,cycle:builderCycle?{id:builderCycle.id,order:builderCycle.order}:null});
   saveBlockOnly();
   updateStats();
   renderHomeDays();
@@ -5616,7 +5780,7 @@ async function saveAndStart() {
 function resetBuilder(){
   document.getElementById('custom-name').value='';
   builderDays=[]; builderMethods=[]; builderWeeks=4; openDayIndex=null;
-  builderWarmup=[]; builderSkill=[];
+  builderWarmup=[]; builderSkill=[]; builderCycle=null;
   document.querySelectorAll('#method-chips .picker-chip').forEach(b=>b.classList.remove('selected'));
   document.getElementById('method-preview').textContent='';
   document.querySelectorAll('#builder-duration-chips .picker-chip').forEach(b=>b.classList.remove('selected'));
@@ -5628,6 +5792,8 @@ function resetBuilder(){
 }
 
 function renderBuilderSaved(){
+  renderCyclePlanner();
+  renderBuilderCyclePicker();
   const c=document.getElementById('builder-saved-list');
   // Only hide programme blocks — show personal AND assigned blocks
   const visible = customWorkouts.filter(wk => !wk.id?.startsWith('prog_'));
@@ -5697,6 +5863,8 @@ function editSavedBlock(id){
   builderSkill  = [...(wk.skill||[])];
   // Store editing id so save replaces rather than duplicates
   window._editingBlockId = id;
+  builderCycle = wk.cycle && getCycle(wk.cycle.id) ? { id: wk.cycle.id, order: wk.cycle.order || 1 } : null;
+  renderBuilderCyclePicker();
   renderBuilderDays();
   renderFixedExList('warmup');
   renderFixedExList('skill');
@@ -7310,14 +7478,14 @@ async function syncBlocksToCloud() {
     if(existing?.id) {
       await supa.from('blocks').update({
         name: currentBlock.name || 'My Block',
-        data: { currentBlock, customWorkouts, archivedBlocks, currentWeek, boards, trainedDates },
+        data: { currentBlock, customWorkouts, archivedBlocks, trainingCycles, currentWeek, boards, trainedDates },
         updated_at: new Date().toISOString()
       }).eq('id', existing.id);
     } else {
       await supa.from('blocks').insert({
         user_id: currentUser.id,
         name: currentBlock.name || 'My Block',
-        data: { currentBlock, customWorkouts, archivedBlocks, currentWeek, boards, trainedDates },
+        data: { currentBlock, customWorkouts, archivedBlocks, trainingCycles, currentWeek, boards, trainedDates },
         is_current: true,
         updated_at: new Date().toISOString()
       });
@@ -7380,6 +7548,9 @@ async function loadFromCloud() {
           archivedBlocks = d.archivedBlocks;
           localStorage.setItem('fw_archive', JSON.stringify(archivedBlocks));
         }
+      }
+      if(Array.isArray(d.trainingCycles) && d.trainingCycles.length >= trainingCycles.length) {
+        trainingCycles = d.trainingCycles; localStorage.setItem('fw_cycles', JSON.stringify(trainingCycles));
       }
       if(d.currentWeek) { currentWeek = d.currentWeek; localStorage.setItem('fw_week', currentWeek); }
       if(Array.isArray(d.boards) && d.boards.length >= boards.length) {
