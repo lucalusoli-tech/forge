@@ -1276,7 +1276,7 @@
         <div class="phase-bar" id="phase-bar" style="display:none">
           <div class="phase-bar-top">
             <span class="phase-name" id="phase-name">—</span>
-            <span class="phase-week" id="phase-week">wk <b>1</b>/1</span>
+            <span class="phase-week" id="phase-week">cycle wk <b>1</b>/1</span>
           </div>
           <div class="phase-strip" id="phase-strip"></div>
         </div>
@@ -2282,7 +2282,7 @@ function renderPhaseStrip(){
 
   const label = PHASE_LABELS[cyc.phase] || (cyc.phase || '').toUpperCase() || 'PHASE';
   document.getElementById('phase-name').textContent = label;
-  document.getElementById('phase-week').innerHTML = 'wk <b>' + cycleWeek + '</b>/' + cycleTotal;
+  document.getElementById('phase-week').innerHTML = 'cycle wk <b>' + cycleWeek + '</b>/' + cycleTotal;
   bar.style.display = 'block';
 }
 
@@ -2293,7 +2293,12 @@ function forgeTagCycle(blockId, cycleId, phase, order, cycleName){
   if(!wk){ console.warn('No saved block with id', blockId); return; }
   wk.cycle = { id: cycleId, name: cycleName || cycleId, phase: phase, order: order };
   localStorage.setItem('fw_customs', JSON.stringify(customWorkouts));
-  if(currentBlock.sourceId === blockId){
+  // Blocks activated before sourceId existed have none — fall back to a name match and
+  // heal sourceId while we're here (same pattern saveBlockOnly uses for in-place edits).
+  const isLive = currentBlock.sourceId === blockId ||
+                 (!currentBlock.sourceId && currentBlock.name === wk.name);
+  if(isLive){
+    currentBlock.sourceId = blockId;
     currentBlock.cycle = wk.cycle;
     localStorage.setItem('fw_block', JSON.stringify(currentBlock));
   }
