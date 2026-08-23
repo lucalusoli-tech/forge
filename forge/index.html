@@ -141,10 +141,6 @@
 
   .section-label { padding: 16px 20px 10px; font-size: 9px; letter-spacing: 3px; color: var(--text-muted); text-transform: uppercase; border-bottom: 1px solid var(--border); }
 
-  .archive-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; border-bottom: 1px solid var(--border); background: var(--deep); }
-  .archive-bar-label { font-size: 9px; letter-spacing: 2px; color: var(--text-muted); text-transform: uppercase; }
-  .archive-btn { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; padding: 5px 12px; cursor: pointer; }
-  .archive-btn:active { border-color: var(--accent-dim); color: var(--accent); }
 
   /* ─── PHASE STRIP (cycle progress) ─────────────────────────── */
   .phase-bar { padding: 12px 20px 13px; border-bottom: 1px solid var(--border); background: var(--deep); }
@@ -169,6 +165,9 @@
   .cycle-slot-block { flex: 1; font-size: 11px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .cycle-slot-block.empty { color: var(--text-dim); font-style: italic; }
   .cycle-slot-weeks { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-dim); }
+  .cycle-slot-set { background: transparent; border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 8.5px; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 9px; cursor: pointer; flex: none; }
+  .cycle-slot-set:active { background: var(--accent-glow); }
+  .cycle-slot-live { font-family: 'DM Mono', monospace; font-size: 8.5px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); border: 1px solid transparent; padding: 4px 9px; flex: none; }
   .cycle-draft-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
   .cycle-draft-select { flex: 1; background: var(--black); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 10px; padding: 7px 8px; }
   .cycle-draft-weeks { width: 52px; background: var(--black); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 10px; padding: 7px 8px; text-align: center; }
@@ -1286,9 +1285,6 @@
         <div class="stat-cell"><div class="stat-label">Last</div><div class="stat-value" style="font-size:14px;margin-top:4px" id="dash-last">—</div></div>
       </div>
       <div id="home-block-section">
-        <div class="archive-bar" style="justify-content:flex-end">
-          <button class="archive-btn" onclick="openArchiveConfirm()">Archive Block →</button>
-        </div>
         <div class="phase-bar" id="phase-bar" style="display:none">
           <div class="phase-bar-top">
             <span class="phase-name" id="phase-name">—</span>
@@ -2324,10 +2320,18 @@ function renderCyclePlanner(){
     const rows = c.slots.map((s,i) => {
       const wk = s.blockId ? customWorkouts.find(w=>w.id===s.blockId) : null;
       const name = wk ? wk.name : 'not built yet';
+      // A slot can only be started once a block has been built into it. The live block
+      // shows as CURRENT rather than offering to re-activate itself.
+      const isLive = wk && currentBlock.cycle && currentBlock.cycle.id === c.id
+                        && (currentBlock.cycle.order || 1) === i+1;
+      const action = isLive
+        ? `<span class="cycle-slot-live">Current</span>`
+        : (wk ? `<button class="cycle-slot-set" onclick="setAsCurrentBlock('${wk.id}')">Set as Current →</button>` : '');
       return `<div class="cycle-slot-row">
         <span class="cycle-slot-phase">${i+1}. ${(PHASE_LABELS[s.phase]||s.phase)}</span>
         <span class="cycle-slot-block ${wk?'':'empty'}">${name}</span>
         <span class="cycle-slot-weeks">${s.weeks}w</span>
+        ${action}
       </div>`;
     }).join('');
     return `<div class="cycle-card">
@@ -3169,7 +3173,6 @@ function renderHomeDays() {
   const emptyState = document.getElementById('home-empty-state');
   const statsRow = document.getElementById('home-stats-row');
   const heroTitle = document.getElementById('home-title');
-  const archiveBar = document.querySelector('.archive-bar');
   c.innerHTML = '';
 
   const hasActiveBlock = currentBlock.days?.length > 0;
@@ -3183,7 +3186,6 @@ function renderHomeDays() {
   blockSection.style.display = hasAnything ? 'block' : 'none';
   emptyState.style.display = hasAnything ? 'none' : 'block';
   statsRow.style.display = (hasActiveBlock || hasFixed) ? 'grid' : 'none';
-  if (archiveBar) archiveBar.style.display = hasActiveBlock ? 'flex' : 'none';
 
   if (!hasAnything) {
     heroTitle.innerHTML = 'BUILD<br>YOUR BLOCK';
@@ -5882,6 +5884,7 @@ async function setAsCurrentBlock(id){
   updateStats(); renderHomeDays();
   if(typeof renderHomeFixedSections === 'function') renderHomeFixedSections();
   renderBuilderSaved();
+  if(typeof renderCyclePlanner === 'function') renderCyclePlanner();
   showToast('Block set ✓');
   setTimeout(()=>navigate('home'),350);
 }
