@@ -1778,6 +1778,9 @@ const EXERCISES = [
   {id:'bwf-ring-l-sit-pu',name:'Ring L-Sit Pull-Up',tags:['skill','calisthenics','pull'],sets:'3×5',target:'Lats, Hip Flexors, Core',intensity:'Hard',level:'Intermediate',cue:'Hold L throughout the pull, rings for free movement',video:'https://www.youtube.com/results?search_query=ring+l-sit+pull+up',desc:'L-sit held throughout pull-up on rings. Combines compression and vertical pull.'},
   {id:'bwf-l-sit-pu',name:'L-Sit Pull-Up',tags:['skill','calisthenics','pull'],sets:'3×5',target:'Lats, Core, Hip Flexors',intensity:'Hard',level:'Intermediate',cue:'L position locked, pull as normal',video:'https://www.youtube.com/results?search_query=l-sit+pull+up',desc:'Pull-up with legs held at parallel. Brutal core compression requirement.'},
   {id:'bwf-c2b-pull-up',name:'C2B Pull-Up',tags:['calisthenics','pull'],sets:'3×5',target:'Lats, Upper Traps, Biceps',intensity:'Hard',level:'Beginner',cue:'Pull until chest contacts bar, elbows drive back',video:'https://www.youtube.com/results?search_query=chest+to+bar+pull+up',desc:'Chest-to-bar pull-up. Greater range of motion than standard pull-up.'},
+  {id:'bwf-false-grip-hang',name:'False Grip Hang',tags:['skill','calisthenics','pull'],sets:'3×20-30s',target:'Forearms, Wrists, Lats',intensity:'Moderate',level:'Beginner',cue:'Wrist over the bar, heel of hand on top, hang without losing the grip',video:'https://www.youtube.com/results?search_query=false+grip+hang+tutorial',desc:'Builds the wrist and forearm tolerance the muscle-up transition demands. Uncomfortable before it is strong — build the hang time first.'},
+  {id:'bwf-bar-swing',name:'Bar Swing',tags:['skill','calisthenics','pull'],sets:'3×5-8',target:'Lats, Shoulders, Core',intensity:'Easy',level:'Beginner',cue:'Arch and hollow from the shoulders, keep arms straight, no leg kick',video:'https://www.youtube.com/results?search_query=bar+swing+kip+tutorial',desc:'Controlled swing on the bar. Teaches where the power comes from before it gets used in a kipping muscle-up.'},
+  {id:'bwf-low-bar-transition',name:'Low Bar Transition',tags:['skill','calisthenics','pull'],sets:'4×3-5',target:'Lats, Triceps, Chest',intensity:'Moderate',level:'Beginner',cue:'Feet on the floor, false grip, rotate the elbows over the bar slowly',video:'https://www.youtube.com/results?search_query=low+bar+muscle+up+transition',desc:'Transition drill on a low bar with the feet assisting. Isolates the hardest part of the muscle-up at a load you can actually control.'},
   {id:'bwf-mu-neg',name:'MU Negative',tags:['skill','calisthenics','pull'],sets:'3×3-5',target:'Lats, Triceps, Core',intensity:'Hard',level:'Intermediate',cue:'Start at top of muscle-up, lower slowly through transition',video:'https://www.youtube.com/results?search_query=muscle+up+negative',desc:'Eccentric muscle-up. Builds the transition strength needed for the full movement.'},
   {id:'bwf-kipping-mu',name:'Kipping MU',tags:['skill','calisthenics','pull'],sets:'3×5',target:'Full Upper Body, Core',intensity:'Hard',level:'Intermediate',cue:'Generate hip drive, time the kip to transition',video:'https://www.youtube.com/results?search_query=kipping+muscle+up',desc:'Kipping muscle-up. Uses momentum to assist transition. High power output.'},
   {id:'bwf-pullover',name:'Pullover',tags:['calisthenics','pull'],sets:'3×5-8',target:'Lats, Triceps, Core',intensity:'Hard',level:'Intermediate',cue:'Pull hips over bar, press down to finish on top',video:'https://www.youtube.com/results?search_query=bar+pullover+tutorial',desc:'Pull hips up and over the bar. Combines a pull with a press. Great muscle-up precursor.'},
@@ -2104,7 +2107,7 @@ const SKILL_GROUPS = {
   'planche':     ['pppu','bwf-straight-arm-frog','bwf-tuck-planche','bwf-tuck-planche-pu','bwf-adv-tuck-pl','bwf-adv-tuck-pl-pu','bwf-str-planche','bwf-full-planche','bwf-rto-pp-pu'],
   'handstand':   ['hs-long-lunge-stretch','bwf-wall-plank','bwf-wall-headstand','hs-swing-kick-l','hs-swing-kick-straight','bwf-wall-handstand','hs-forehead-wall','hs-chin-chest','hs-one-bent-one-straight','hs-half-tuck','bwf-tuck-handstand','hs-straddle','bwf-handstand','oahs-5f','oahs-3f','oahs-2f','oahs-1f','oahs-tap','oah','bwf-wall-hes-pu-neg','bwf-wall-hes-pu','bwf-headstand-pu','bwf-hs-pu','bwf-ring-hs','bwf-ring-strap-hs-pu','bwf-ring-wide-hs-pu'],
   'l-sit':       ['bwf-foot-sup-l-sit','bwf-tuck-l-sit','bwf-one-leg-l-sit','bwf-one-leg-bent-l-sit','bwf-l-sit','l-sit','bwf-straddle-l-sit','bwf-v-sit','bwf-manna','bwf-tuck-l-sit-dip','bwf-l-sit-dip','bwf-ring-l-sit-dip','bwf-l-sit-pu','bwf-ring-l-sit-pu','bwf-l-sit-mu'],
-  'muscle-up':   ['bwf-scapular-pull','bwf-arch-hang','bwf-pull-up-neg','bwf-pull-up','chin-ups','bwf-c2b-pull-up','bwf-mu-neg','bwf-kipping-mu','bwf-pullover','muscle-up','bwf-wide-mu','bwf-strict-bar-mu'],
+  'muscle-up':   ['bwf-scapular-pull','bwf-arch-hang','bwf-false-grip-hang','bwf-pull-up-neg','bwf-pull-up','chin-ups','bwf-c2b-pull-up','bwf-low-bar-transition','bwf-mu-neg','bwf-bar-swing','bwf-kipping-mu','bwf-pullover','muscle-up','bwf-wide-mu','bwf-strict-bar-mu'],
 };
 
 // Build EX_META: map each exercise id → { cat, subcat }
@@ -3529,7 +3532,8 @@ function _logExerciseCardHTML(ex) {
       ${lastWeekHint}
       ${sparkSvg ? `<div class="spark-row"><div class="spark-label">Load trend</div>${sparkSvg}</div>` : ''}
       <div class="log-ex-body">
-        ${fvPlayerHTML(exData, {suffix:'-log'})}
+        <!-- Inline demo removed from the log card — the video is still one tap away via the
+             header (openSheet) and in the Library detail. Keeps the log focused on logging. -->
         <div class="set-stack" id="set-stack-${wk}"></div>
       </div>
       <div class="set-note-row">
@@ -5249,6 +5253,10 @@ function removeFixedEx(section, i) {
   renderFixedPicker(section);
 }
 
+// Warm-up and skill work start EXPANDED — they're the part of the session that actually
+// gets skipped when hidden. State is held here so a re-render doesn't reopen something
+// the user deliberately folded away.
+const fixedSectionOpen = { warmup: true, skill: true };
 function renderHomeFixedSections() {
   const c = document.getElementById('home-fixed-sections');
   if(!c) return;
@@ -5268,7 +5276,7 @@ function renderHomeFixedSections() {
   }
 
   if(warmup.length) {
-    html += `<div class="fixed-section" id="fixed-warmup">
+    html += `<div class="fixed-section${fixedSectionOpen.warmup?' open':''}" id="fixed-warmup">
       <div class="fixed-section-header" onclick="toggleFixedSection('warmup')">
         <div><div class="fixed-section-label">Fixed · Every Session</div><div class="fixed-section-title">WARM-UP</div></div>
         <div style="display:flex;align-items:center;gap:8px">
@@ -5280,7 +5288,7 @@ function renderHomeFixedSections() {
     </div>`;
   }
   if(skill.length) {
-    html += `<div class="fixed-section" id="fixed-skill">
+    html += `<div class="fixed-section${fixedSectionOpen.skill?' open':''}" id="fixed-skill">
       <div class="fixed-section-header" onclick="toggleFixedSection('skill')">
         <div><div class="fixed-section-label">Fixed · Every Session</div><div class="fixed-section-title">SKILL WORK</div></div>
         <div style="display:flex;align-items:center;gap:8px">
@@ -5295,7 +5303,10 @@ function renderHomeFixedSections() {
 }
 
 function toggleFixedSection(type) {
-  document.getElementById('fixed-'+type)?.classList.toggle('open');
+  const el = document.getElementById('fixed-'+type);
+  if(!el) return;
+  el.classList.toggle('open');
+  fixedSectionOpen[type] = el.classList.contains('open');
 }
 
 function autoSaveFixed(wk, setNum, field, val) {
