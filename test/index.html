@@ -160,11 +160,12 @@
   .cycle-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
   .cycle-card-name { font-family: 'DM Mono', monospace; font-size: 14px; letter-spacing: 1.5px; color: var(--text); }
   .cycle-card-meta { font-size: 9px; letter-spacing: 1.5px; color: var(--text-dim); text-transform: uppercase; margin-top: 4px; }
-  .cycle-slot-row { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; padding: 9px 0; border-top: 1px solid var(--border); }
+  .cycle-slot-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 0; border-top: 1px solid var(--border); }
+  .cycle-slot-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
+  .cycle-slot-actions { display: flex; align-items: center; gap: 8px; flex: none; }
   .cycle-client-select { margin-top: 8px; max-width: 100%; background: var(--black); border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 9.5px; letter-spacing: 1px; padding: 5px 7px; }
-  .cycle-slot-phase { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px; color: var(--accent); text-transform: uppercase; width: 108px; flex: none; }
-  @media (max-width: 560px) { .cycle-slot-phase { width: auto; } .cycle-slot-block { flex: 1 0 100%; order: 9; } }
-  .cycle-slot-block { flex: 1; font-size: 11px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cycle-slot-phase { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px; color: var(--accent); text-transform: uppercase; }
+  .cycle-slot-block { font-size: 11px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .cycle-slot-block.empty { color: var(--text-dim); font-style: italic; }
   .cycle-slot-weeks { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-dim); }
   .cycle-slot-set { background: transparent; border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 8.5px; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 9px; cursor: pointer; flex: none; }
@@ -2409,15 +2410,21 @@ function cycleCardHTML(c){
                       && (currentBlock.cycle.order || 1) === i+1;
     const action = isLive
       ? `<span class="cycle-slot-live">Current</span>`
-      : (wk ? `<button class="cycle-slot-set" onclick="setAsCurrentBlock('${wk.id}')">Set as Current →</button>` : '');
+      : (wk ? `<button class="cycle-slot-set" onclick="setAsCurrentBlock('${wk.id}')">Set →</button>` : '');
     const push = (currentUser?.tier === 'admin' && wk)
       ? `<button class="cycle-slot-push" onclick="openPushUpdate('${wk.id}')">Push</button>` : '';
+    // Two fixed columns — label+name on the left, controls on the right. Previously these
+    // were five siblings in one wrapping flex row, which broke differently on every row.
     return `<div class="cycle-slot-row">
-      <span class="cycle-slot-phase">${i+1}. ${(PHASE_LABELS[s.phase]||s.phase)}</span>
-      <span class="cycle-slot-block ${wk?'':'empty'}">${name}</span>
-      <span class="cycle-slot-weeks">${s.weeks}w</span>
-      ${push}
-      ${action}
+      <div class="cycle-slot-info">
+        <span class="cycle-slot-phase">${i+1}. ${(PHASE_LABELS[s.phase]||s.phase)}</span>
+        <span class="cycle-slot-block ${wk?'':'empty'}">${name}</span>
+      </div>
+      <div class="cycle-slot-actions">
+        <span class="cycle-slot-weeks">${s.weeks}w</span>
+        ${push}
+        ${action}
+      </div>
     </div>`;
   }).join('');
   return `<div class="cycle-card">
@@ -2669,6 +2676,29 @@ function setBuilderWeeks(n, btn) {
   btn.classList.add('selected');
 }
 
+// If the finished block sits in a cycle and the NEXT phase already has a block built into
+// it, that's the intended next step — offer it instead of "build something new". Returns
+// null when there's no cycle, no next slot, or the next slot is still empty.
+function nextPhaseInCycle(){
+  const ref = currentBlock.cycle;
+  if(!ref || !ref.id) return null;
+  const cyc = getCycle(ref.id);
+  if(!cyc) return null;
+  const nextSlot = cyc.slots[(ref.order || 1)]; // slots are 0-indexed, order is 1-indexed
+  if(!nextSlot || !nextSlot.blockId) return null;
+  const block = customWorkouts.find(w => w.id === nextSlot.blockId);
+  if(!block) return null;
+  return { cycle: cyc, block: block, phase: nextSlot.phase, order: (ref.order || 1) + 1 };
+}
+
+// Advance to the next phase. activateBlock archives the finished one, so the strip picks
+// up the completed phase automatically.
+async function advanceToNextPhase(){
+  const next = nextPhaseInCycle();
+  if(!next){ showToast('No next phase built'); return; }
+  await setAsCurrentBlock(next.block.id);
+}
+
 function openBlockEndPrompt() {
   const total = currentBlock.weeks || 4;
   const tier = currentUser?.tier || '';
@@ -2680,6 +2710,22 @@ function openBlockEndPrompt() {
   const desc = document.getElementById('blockend-desc');
   const actions = document.getElementById('blockend-actions');
   actions.innerHTML = '';
+
+  const next = nextPhaseInCycle();
+
+  if (next) {
+    // Block is part of a planned cycle and the next phase is already built — that plan IS
+    // the decision. Don't offer to generate something unrelated over the top of it.
+    document.getElementById('blockend-title').textContent = 'PHASE COMPLETE';
+    desc.textContent = (PHASE_LABELS[next.phase] ? (PHASE_LABELS[next.phase].charAt(0) + PHASE_LABELS[next.phase].slice(1).toLowerCase()) : 'The next phase')
+      + ' is next in ' + next.cycle.name + '.';
+    actions.innerHTML = `
+      <button class="confirm-yes" onclick="closeBlockEndPrompt();advanceToNextPhase()">Start ${next.block.name} →</button>
+      <button class="confirm-yes" style="background:transparent;border-color:var(--border);color:var(--text-muted);margin-top:4px" onclick="closeBlockEndPrompt();repeatBlock()">Repeat This Phase</button>
+    `;
+    document.getElementById('blockend-overlay').classList.add('open');
+    return;
+  }
 
   if (isForgePlus) {
     // FORGE+ tier — AI + coached programme
@@ -8556,4 +8602,3 @@ async function executePushUpdate() {
 </script>
 </body>
 </html>
-
