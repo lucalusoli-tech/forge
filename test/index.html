@@ -160,8 +160,10 @@
   .cycle-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
   .cycle-card-name { font-family: 'DM Mono', monospace; font-size: 14px; letter-spacing: 1.5px; color: var(--text); }
   .cycle-card-meta { font-size: 9px; letter-spacing: 1.5px; color: var(--text-dim); text-transform: uppercase; margin-top: 4px; }
-  .cycle-slot-row { display: flex; align-items: baseline; gap: 10px; padding: 6px 0; border-top: 1px solid var(--border); }
+  .cycle-slot-row { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 10px; padding: 9px 0; border-top: 1px solid var(--border); }
+  .cycle-client-select { margin-top: 8px; max-width: 100%; background: var(--black); border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 9.5px; letter-spacing: 1px; padding: 5px 7px; }
   .cycle-slot-phase { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px; color: var(--accent); text-transform: uppercase; width: 108px; flex: none; }
+  @media (max-width: 560px) { .cycle-slot-phase { width: auto; } .cycle-slot-block { flex: 1 0 100%; order: 9; } }
   .cycle-slot-block { flex: 1; font-size: 11px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .cycle-slot-block.empty { color: var(--text-dim); font-style: italic; }
   .cycle-slot-weeks { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-dim); }
@@ -2420,9 +2422,16 @@ function cycleCardHTML(c){
   }).join('');
   return `<div class="cycle-card">
     <div class="cycle-card-head">
-      <div>
+      <div style="min-width:0">
         <div class="cycle-card-name">${c.name}</div>
         <div class="cycle-card-meta">${c.slots.length} phases · ${total} weeks · ${built}/${c.slots.length} built</div>
+        ${currentUser?.tier === 'admin' ? `
+        <select class="cycle-client-select" onchange="assignCycleClient('${c.id}', this.value)">
+          <option value="" ${!c.client?'selected':''}>Unassigned / personal</option>
+          ${coachClients.map(cl=>`<option value="${cl.email}" ${c.client&&c.client.email===cl.email?'selected':''}>${cl.name}</option>`).join('')}
+          ${c.client && !coachClients.some(cl=>cl.email===c.client.email)
+            ? `<option value="${c.client.email}" selected>${c.client.name} (removed)</option>` : ''}
+        </select>` : ''}
       </div>
       <button class="saved-wk-del" onclick="deleteCycle('${c.id}')">Delete</button>
     </div>
@@ -2502,6 +2511,17 @@ function saveCycleDraft(){
   renderBuilderCyclePicker();
   showToast('Cycle saved ✓');
 }
+// Retag an existing cycle. Needed because the client picker only appears at creation time,
+// so every cycle built before this feature landed sits in the Unassigned folder.
+function assignCycleClient(cycleId, email){
+  const c = getCycle(cycleId); if(!c) return;
+  const cl = coachClients.find(x => x.email === email);
+  c.client = cl ? { email: cl.email, name: cl.name } : null;
+  saveCycles();
+  renderCyclePlanner();
+  showToast(cl ? ('Moved to ' + cl.name) : 'Unassigned');
+}
+
 function deleteCycle(id){
   const c = getCycle(id); if(!c) return;
   // Detach any blocks pointing at this cycle so they don't hold a dead reference.
