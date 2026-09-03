@@ -160,13 +160,52 @@
   .cycle-card-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
   .cycle-card-name { font-family: 'DM Mono', monospace; font-size: 14px; letter-spacing: 1.5px; color: var(--text); }
   .cycle-card-meta { font-size: 9px; letter-spacing: 1.5px; color: var(--text-dim); text-transform: uppercase; margin-top: 4px; }
-  .cycle-slot-row { display: flex; align-items: baseline; gap: 10px; padding: 6px 0; border-top: 1px solid var(--border); }
-  .cycle-slot-phase { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px; color: var(--accent); text-transform: uppercase; width: 108px; flex: none; }
-  .cycle-slot-block { flex: 1; font-size: 11px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cycle-slot-row { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 0; border-top: 1px solid var(--border); }
+  .cycle-slot-info { display: flex; flex-direction: column; gap: 3px; min-width: 0; flex: 1; }
+  .cycle-slot-actions { display: flex; align-items: stretch; gap: 6px; flex: none; }
+  .cycle-slot-actions button { min-width: 62px; text-align: center; }
+  /* ─── MACRO TARGETS ────────────────────────────────────────── */
+  .mc-wrap { border: 1px solid var(--border); background: var(--deep); margin-bottom: 12px; }
+  .mc-kcal { padding: 14px 16px 12px; border-bottom: 1px solid var(--border); }
+  .mc-klab { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; }
+  .mc-knum { font-family: 'DM Mono', monospace; font-size: 30px; color: var(--text); margin-top: 4px; letter-spacing: -1px; }
+  .mc-knum small { font-size: 11px; color: var(--text-dim); letter-spacing: 1px; margin-left: 6px; }
+  .mc-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--border); }
+  .mc-cell { padding: 13px 12px; }
+  .mc-val { font-family: 'DM Mono', monospace; font-size: 20px; letter-spacing: -0.5px; }
+  .mc-val small { font-size: 10px; margin-left: 2px; opacity: 0.65; }
+  .mc-lab { font-family: 'DM Mono', monospace; font-size: 8.5px; letter-spacing: 2px; text-transform: uppercase; margin-top: 4px; opacity: 0.75; }
+  .mc-p { background: rgba(122,174,238,0.14); } .mc-p .mc-val, .mc-p .mc-lab { color: #7aaeee; }
+  .mc-c { background: rgba(201,169,110,0.14); } .mc-c .mc-val, .mc-c .mc-lab { color: var(--accent); }
+  .mc-f { background: rgba(160,124,214,0.14); } .mc-f .mc-val, .mc-f .mc-lab { color: #a07cd6; }
+  .macro-inputs { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .macro-inputs label { display: flex; flex-direction: column; gap: 4px; }
+  .macro-inputs span { font-family: 'DM Mono', monospace; font-size: 8.5px; letter-spacing: 1.5px; color: var(--text-dim); text-transform: uppercase; }
+  .macro-inputs input { background: var(--black); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; padding: 9px 10px; width: 100%; }
+  .macro-inputs input:focus { outline: none; border-color: var(--accent-dim); }
+
+  /* ─── QUALITY RADAR ────────────────────────────────────────── */
+  .at-radarwrap { display: flex; justify-content: center; padding: 6px 0 2px; }
+  .at-radar { width: 100%; max-width: 260px; height: auto; overflow: visible; }
+  .at-radarnote { font-size: 9px; letter-spacing: 0.5px; color: var(--text-dim); text-align: center; padding: 2px 8px 4px; }
+
+  .cycle-client-select { margin-top: 8px; max-width: 100%; background: var(--black); border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 9.5px; letter-spacing: 1px; padding: 5px 7px; }
+  .cycle-slot-phase { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px; color: var(--accent); text-transform: uppercase; }
+  .cycle-slot-block { font-size: 11px; color: var(--text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .cycle-slot-block.empty { color: var(--text-dim); font-style: italic; }
-  .cycle-slot-weeks { font-family: 'DM Mono', monospace; font-size: 10px; color: var(--text-dim); }
+  .cycle-slot-weeks { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text-dim); letter-spacing: 0.5px; }
   .cycle-slot-set { background: transparent; border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 8.5px; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 9px; cursor: pointer; flex: none; }
   .cycle-slot-set:active { background: var(--accent-glow); }
+  .client-folder { border: 1px solid var(--border); margin-bottom: 12px; }
+  .client-folder-head { display: flex; align-items: center; gap: 10px; width: 100%; padding: 12px 14px; background: var(--deep); border: none; cursor: pointer; text-align: left; }
+  .client-folder-chev { color: var(--accent); font-size: 13px; transition: transform 0.2s ease; flex: none; }
+  .client-folder.open .client-folder-chev { transform: rotate(90deg); }
+  .client-folder-name { flex: 1; font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 1.5px; color: var(--text); text-transform: uppercase; }
+  .client-folder-meta { font-size: 9px; letter-spacing: 1.5px; color: var(--text-dim); text-transform: uppercase; }
+  .client-folder-body { display: none; padding: 12px; border-top: 1px solid var(--border); }
+  .client-folder.open .client-folder-body { display: block; }
+  .client-folder-body .cycle-card:last-child { margin-bottom: 0; }
+  .cycle-slot-push { background: transparent; border: 1px solid #456; color: #7ae; font-family: 'DM Mono', monospace; font-size: 8.5px; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 9px; cursor: pointer; flex: none; }
   .cycle-slot-live { font-family: 'DM Mono', monospace; font-size: 8.5px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); border: 1px solid transparent; padding: 4px 9px; flex: none; }
   .cycle-draft-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
   .cycle-draft-select { flex: 1; background: var(--black); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 10px; padding: 7px 8px; }
@@ -1438,6 +1477,17 @@
           <div class="picker-chips" id="builder-slot-chips" style="margin-top:8px;display:none"></div>
         </div>
 
+        <!-- Macro targets (coach-set, optional) -->
+        <div class="field-section">
+          <div class="field-label">Macro Targets <span style="color:var(--text-dim);letter-spacing:1px">· optional</span></div>
+          <div class="macro-inputs">
+            <label><span>Calories</span><input type="number" id="mt-kcal" min="0" max="9999" placeholder="—" oninput="setBuilderMacro('kcal',this.value)"></label>
+            <label><span>Protein g</span><input type="number" id="mt-protein" min="0" max="999" placeholder="—" oninput="setBuilderMacro('protein',this.value)"></label>
+            <label><span>Carbs g</span><input type="number" id="mt-carbs" min="0" max="999" placeholder="—" oninput="setBuilderMacro('carbs',this.value)"></label>
+            <label><span>Fat g</span><input type="number" id="mt-fat" min="0" max="999" placeholder="—" oninput="setBuilderMacro('fat',this.value)"></label>
+          </div>
+        </div>
+
         <!-- Warm-up (fixed, same every week) -->
         <div class="builder-fixed">
           <div class="builder-fixed-header">
@@ -2261,6 +2311,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function saveCurrentBlock() { localStorage.setItem('fw_block', JSON.stringify(currentBlock)); scheduleSync(); }
 
+// ─── CLIENT ROSTER ─────────────────────────────────────────────
+// Admin-only. Cached in localStorage so the Programmes tab can group offline; refreshed
+// from Supabase whenever the tab is opened. Cycles store { email, name } — the email is
+// the stable key, the name is a snapshot so a folder still has a label if the client
+// record is later deleted.
+let coachClients = JSON.parse(localStorage.getItem('fw_clients')||'[]');
+
+async function loadCoachClients(){
+  if(currentUser?.tier !== 'admin' || !currentUser?.id) return coachClients;
+  try{
+    const { data, error } = await supa
+      .from('coach_clients').select('name, email').eq('coach_id', currentUser.id);
+    if(error || !Array.isArray(data)) return coachClients;
+    coachClients = data;
+    localStorage.setItem('fw_clients', JSON.stringify(coachClients));
+  }catch(e){ /* offline — keep the cached roster */ }
+  return coachClients;
+}
+// fallbackName is the snapshot stored on the cycle — used when the client record has been
+// deleted from Supabase, so the folder keeps a readable label instead of a bare email.
+function clientLabel(email, fallbackName){
+  if(!email) return 'Unassigned';
+  const c = coachClients.find(x => x.email === email);
+  return c ? c.name : (fallbackName || email);
+}
+
 // ─── CYCLE / PHASE TRACKING ────────────────────────────────────
 // A cycle PLAN lives in trainingCycles and holds the shape of the whole cycle:
 //   { id, name, slots:[{ phase, weeks, blockId|null }] }
@@ -2310,47 +2386,101 @@ function renderCyclePlanner(){
   const host = document.getElementById('cycle-planner-list');
   if(!host) return;
 
+  const isAdmin = currentUser?.tier === 'admin';
   if(!trainingCycles.length && !cycleDraft){
     host.innerHTML = `<div class="empty-state">No cycles planned yet</div>`;
     return;
   }
 
-  host.innerHTML = trainingCycles.map(c => {
-    const total = c.slots.reduce((a,s)=>a+(s.weeks||0),0);
-    const built = c.slots.filter(s=>s.blockId).length;
-    const segs = c.slots.map(s =>
-      `<i class="phase-seg ${s.blockId?'done':'unbuilt'}" style="flex:${s.weeks||4}"></i>`).join('');
-    const rows = c.slots.map((s,i) => {
-      const wk = s.blockId ? customWorkouts.find(w=>w.id===s.blockId) : null;
-      const name = wk ? wk.name : 'not built yet';
-      // A slot can only be started once a block has been built into it. The live block
-      // shows as CURRENT rather than offering to re-activate itself.
-      const isLive = wk && currentBlock.cycle && currentBlock.cycle.id === c.id
-                        && (currentBlock.cycle.order || 1) === i+1;
-      const action = isLive
-        ? `<span class="cycle-slot-live">Current</span>`
-        : (wk ? `<button class="cycle-slot-set" onclick="setAsCurrentBlock('${wk.id}')">Set as Current →</button>` : '');
-      return `<div class="cycle-slot-row">
-        <span class="cycle-slot-phase">${i+1}. ${(PHASE_LABELS[s.phase]||s.phase)}</span>
-        <span class="cycle-slot-block ${wk?'':'empty'}">${name}</span>
-        <span class="cycle-slot-weeks">${s.weeks}w</span>
-        ${action}
-      </div>`;
-    }).join('');
-    return `<div class="cycle-card">
-      <div class="cycle-card-head">
-        <div>
-          <div class="cycle-card-name">${c.name}</div>
-          <div class="cycle-card-meta">${c.slots.length} phases · ${total} weeks · ${built}/${c.slots.length} built</div>
-        </div>
-        <button class="saved-wk-del" onclick="deleteCycle('${c.id}')">Delete</button>
-      </div>
-      <div class="phase-strip" style="margin:10px 0 12px">${segs}</div>
-      ${rows}
+  // Non-admins have one client's worth of work — folders would be noise. Flat list.
+  if(!isAdmin){
+    host.innerHTML = trainingCycles.map(cycleCardHTML).join('');
+    if(cycleDraft) host.insertAdjacentHTML('beforeend', renderCycleDraftForm());
+    return;
+  }
+
+  // Group by client email. Untagged cycles fall into one folder at the end.
+  const groups = new Map();
+  trainingCycles.forEach(c => {
+    const key = c.client?.email || '';
+    if(!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(c);
+  });
+  const nameFor = k => k ? clientLabel(k, (groups.get(k)[0].client||{}).name) : 'Unassigned';
+  const keys = [...groups.keys()].filter(k=>k).sort((a,b)=>nameFor(a).localeCompare(nameFor(b)));
+  if(groups.has('')) keys.push('');
+
+  host.innerHTML = keys.map(key => {
+    const list = groups.get(key);
+    const open = clientFolderOpen[key] !== false; // folders start open
+    const weeks = list.reduce((a,c)=>a+c.slots.reduce((x,s)=>x+(s.weeks||0),0),0);
+    return `<div class="client-folder ${open?'open':''}">
+      <button class="client-folder-head" onclick="toggleClientFolder('${key}')">
+        <span class="client-folder-chev">›</span>
+        <span class="client-folder-name">${nameFor(key) || 'Unassigned'}</span>
+        <span class="client-folder-meta">${list.length} cycle${list.length>1?'s':''} · ${weeks}w</span>
+      </button>
+      <div class="client-folder-body">${list.map(cycleCardHTML).join('')}</div>
     </div>`;
   }).join('');
 
   if(cycleDraft) host.insertAdjacentHTML('beforeend', renderCycleDraftForm());
+}
+
+const clientFolderOpen = {};
+function toggleClientFolder(key){
+  clientFolderOpen[key] = clientFolderOpen[key] === false;
+  renderCyclePlanner();
+}
+
+function cycleCardHTML(c){
+  const total = c.slots.reduce((a,s)=>a+(s.weeks||0),0);
+  const built = c.slots.filter(s=>s.blockId).length;
+  const segs = c.slots.map(s =>
+    `<i class="phase-seg ${s.blockId?'done':'unbuilt'}" style="flex:${s.weeks||4}"></i>`).join('');
+  const rows = c.slots.map((s,i) => {
+    const wk = s.blockId ? customWorkouts.find(w=>w.id===s.blockId) : null;
+    const name = wk ? wk.name : 'not built yet';
+    // A slot can only be started once a block has been built into it. The live block
+    // shows as CURRENT rather than offering to re-activate itself.
+    const isLive = wk && currentBlock.cycle && currentBlock.cycle.id === c.id
+                      && (currentBlock.cycle.order || 1) === i+1;
+    const action = isLive
+      ? `<span class="cycle-slot-live">Current</span>`
+      : (wk ? `<button class="cycle-slot-set" onclick="setAsCurrentBlock('${wk.id}')">Set →</button>` : '');
+    const push = (currentUser?.tier === 'admin' && wk)
+      ? `<button class="cycle-slot-push" onclick="openPushUpdate('${wk.id}')">Push</button>` : '';
+    // Two fixed columns — label+name on the left, controls on the right. Previously these
+    // were five siblings in one wrapping flex row, which broke differently on every row.
+    return `<div class="cycle-slot-row">
+      <div class="cycle-slot-info">
+        <span class="cycle-slot-phase">${i+1}. ${(PHASE_LABELS[s.phase]||s.phase)} <span class="cycle-slot-weeks">${s.weeks}w</span></span>
+        <span class="cycle-slot-block ${wk?'':'empty'}">${name}</span>
+      </div>
+      <div class="cycle-slot-actions">
+        ${push}
+        ${action}
+      </div>
+    </div>`;
+  }).join('');
+  return `<div class="cycle-card">
+    <div class="cycle-card-head">
+      <div style="min-width:0">
+        <div class="cycle-card-name">${c.name}</div>
+        <div class="cycle-card-meta">${c.slots.length} phases · ${total} weeks · ${built}/${c.slots.length} built</div>
+        ${currentUser?.tier === 'admin' ? `
+        <select class="cycle-client-select" onchange="assignCycleClient('${c.id}', this.value)">
+          <option value="" ${!c.client?'selected':''}>Unassigned / personal</option>
+          ${coachClients.map(cl=>`<option value="${cl.email}" ${c.client&&c.client.email===cl.email?'selected':''}>${cl.name}</option>`).join('')}
+          ${c.client && !coachClients.some(cl=>cl.email===c.client.email)
+            ? `<option value="${c.client.email}" selected>${c.client.name} (removed)</option>` : ''}
+        </select>` : ''}
+      </div>
+      <button class="saved-wk-del" onclick="deleteCycle('${c.id}')">Delete</button>
+    </div>
+    <div class="phase-strip" style="margin:10px 0 12px">${segs}</div>
+    ${rows}
+  </div>`;
 }
 
 function renderCycleDraftForm(){
@@ -2368,6 +2498,12 @@ function renderCycleDraftForm(){
     <div class="field-label" style="margin-bottom:8px">New Cycle</div>
     <input class="name-field" type="text" id="cycle-draft-name" placeholder="CYCLE NAME" maxlength="40"
            value="${cycleDraft.name||''}" oninput="cycleDraft.name=this.value">
+    ${currentUser?.tier === 'admin' ? `
+    <div class="field-label" style="margin:12px 0 6px">Client</div>
+    <select class="cycle-draft-select" style="width:100%" onchange="setDraftClient(this.value)">
+      <option value="">Unassigned / personal</option>
+      ${coachClients.map(cl=>`<option value="${cl.email}" ${cycleDraft.client&&cycleDraft.client.email===cl.email?'selected':''}>${cl.name}</option>`).join('')}
+    </select>` : ''}
     <div style="margin-top:12px">${rows}</div>
     <button class="picker-chip" style="margin-top:8px" onclick="addDraftSlot()">+ Add phase</button>
     <div style="display:flex;gap:8px;margin-top:14px">
@@ -2378,8 +2514,15 @@ function renderCycleDraftForm(){
 }
 
 function newCycleDraft(){
-  cycleDraft = { name:'', slots: PHASE_SEQUENCE.map(p => ({ phase:p, weeks: p==='power'?4:6 })) };
+  cycleDraft = { name:'', client:null, slots: PHASE_SEQUENCE.map(p => ({ phase:p, weeks: p==='power'?4:6 })) };
+  loadCoachClients().then(renderCyclePlanner); // refresh the roster, then draw the picker
   renderCyclePlanner();
+}
+function setDraftClient(email){
+  if(!cycleDraft) return;
+  const cl = coachClients.find(x => x.email === email);
+  // Snapshot the name so the folder keeps a label even if the client record disappears.
+  cycleDraft.client = cl ? { email: cl.email, name: cl.name } : null;
 }
 function updateDraftSlot(i, key, val){
   if(!cycleDraft || !cycleDraft.slots[i]) return;
@@ -2402,6 +2545,7 @@ function saveCycleDraft(){
   trainingCycles.push({
     id: 'cyc_'+Date.now(),
     name: name.toUpperCase(),
+    client: cycleDraft.client || null,
     slots: cycleDraft.slots.map(s => ({ phase:s.phase, weeks:s.weeks, blockId:null }))
   });
   cycleDraft = null;
@@ -2410,6 +2554,17 @@ function saveCycleDraft(){
   renderBuilderCyclePicker();
   showToast('Cycle saved ✓');
 }
+// Retag an existing cycle. Needed because the client picker only appears at creation time,
+// so every cycle built before this feature landed sits in the Unassigned folder.
+function assignCycleClient(cycleId, email){
+  const c = getCycle(cycleId); if(!c) return;
+  const cl = coachClients.find(x => x.email === email);
+  c.client = cl ? { email: cl.email, name: cl.name } : null;
+  saveCycles();
+  renderCyclePlanner();
+  showToast(cl ? ('Moved to ' + cl.name) : 'Unassigned');
+}
+
 function deleteCycle(id){
   const c = getCycle(id); if(!c) return;
   // Detach any blocks pointing at this cycle so they don't hold a dead reference.
@@ -2428,6 +2583,22 @@ function deleteCycle(id){
 }
 
 // ─── BUILDER: attach a block to a cycle slot ───────────────────
+// Coach-set macro targets. Stays null until a number is entered — an empty object would
+// render an empty card on the client's Progress tab.
+let builderMacros = null;
+function setBuilderMacro(key, val){
+  const n = parseInt(val);
+  if(!builderMacros) builderMacros = {};
+  if(isNaN(n) || n <= 0) delete builderMacros[key]; else builderMacros[key] = n;
+  if(!Object.keys(builderMacros).length) builderMacros = null;
+}
+function fillMacroInputs(m){
+  ['kcal','protein','carbs','fat'].forEach(function(k){
+    var el = document.getElementById('mt-'+k);
+    if(el) el.value = (m && m[k]) ? m[k] : '';
+  });
+}
+
 let builderCycle = null; // { id, order } or null
 
 function renderBuilderCyclePicker(){
@@ -2557,6 +2728,29 @@ function setBuilderWeeks(n, btn) {
   btn.classList.add('selected');
 }
 
+// If the finished block sits in a cycle and the NEXT phase already has a block built into
+// it, that's the intended next step — offer it instead of "build something new". Returns
+// null when there's no cycle, no next slot, or the next slot is still empty.
+function nextPhaseInCycle(){
+  const ref = currentBlock.cycle;
+  if(!ref || !ref.id) return null;
+  const cyc = getCycle(ref.id);
+  if(!cyc) return null;
+  const nextSlot = cyc.slots[(ref.order || 1)]; // slots are 0-indexed, order is 1-indexed
+  if(!nextSlot || !nextSlot.blockId) return null;
+  const block = customWorkouts.find(w => w.id === nextSlot.blockId);
+  if(!block) return null;
+  return { cycle: cyc, block: block, phase: nextSlot.phase, order: (ref.order || 1) + 1 };
+}
+
+// Advance to the next phase. activateBlock archives the finished one, so the strip picks
+// up the completed phase automatically.
+async function advanceToNextPhase(){
+  const next = nextPhaseInCycle();
+  if(!next){ showToast('No next phase built'); return; }
+  await setAsCurrentBlock(next.block.id);
+}
+
 function openBlockEndPrompt() {
   const total = currentBlock.weeks || 4;
   const tier = currentUser?.tier || '';
@@ -2568,6 +2762,22 @@ function openBlockEndPrompt() {
   const desc = document.getElementById('blockend-desc');
   const actions = document.getElementById('blockend-actions');
   actions.innerHTML = '';
+
+  const next = nextPhaseInCycle();
+
+  if (next) {
+    // Block is part of a planned cycle and the next phase is already built — that plan IS
+    // the decision. Don't offer to generate something unrelated over the top of it.
+    document.getElementById('blockend-title').textContent = 'PHASE COMPLETE';
+    desc.textContent = (PHASE_LABELS[next.phase] ? (PHASE_LABELS[next.phase].charAt(0) + PHASE_LABELS[next.phase].slice(1).toLowerCase()) : 'The next phase')
+      + ' is next in ' + next.cycle.name + '.';
+    actions.innerHTML = `
+      <button class="confirm-yes" onclick="closeBlockEndPrompt();advanceToNextPhase()">Start ${next.block.name} →</button>
+      <button class="confirm-yes" style="background:transparent;border-color:var(--border);color:var(--text-muted);margin-top:4px" onclick="closeBlockEndPrompt();repeatBlock()">Repeat This Phase</button>
+    `;
+    document.getElementById('blockend-overlay').classList.add('open');
+    return;
+  }
 
   if (isForgePlus) {
     // FORGE+ tier — AI + coached programme
@@ -2652,6 +2862,8 @@ function navigate(page, push=true) {
   if (page==='progress') { renderProgress(); try{ renderStatsOverview(); }catch(err){ console.warn('overview', err); } }
   if (page==='coaching') {
     loadProgrammes();
+    // Refresh the client roster so new clients show up as folders without a reload.
+    if(currentUser?.tier === 'admin') loadCoachClients().then(()=>renderCyclePlanner());
   }
   if (page==='ai') {
     const aiChat = document.getElementById('ai-chat');
@@ -4555,6 +4767,25 @@ function computeStats(block,week,log){
 
 var ST_STATS=null;
 function stRingOff(pct){return 283-(283*Math.min(100,pct)/100);}
+// Coach-set macro targets shown at the top of Progress. Purely a reference card — nothing
+// is logged against these. Renders nothing when the block carries no targets.
+function macroCardHTML(m){
+  if(!m || !(m.kcal || m.protein || m.carbs || m.fat)) return '';
+  var cell = function(cls, val, unit, label){
+    if(!val) return '';
+    return '<div class="mc-cell '+cls+'"><div class="mc-val">'+val+'<small>'+unit+'</small></div>'
+         + '<div class="mc-lab">'+label+'</div></div>';
+  };
+  var head = m.kcal
+    ? '<div class="mc-kcal"><div class="mc-klab">Daily target</div><div class="mc-knum">'
+      + m.kcal.toLocaleString() + '<small>kcal</small></div></div>' : '';
+  return '<div class="mc-wrap">' + head + '<div class="mc-grid">'
+    + cell('mc-p', m.protein, 'g', 'Protein')
+    + cell('mc-c', m.carbs,   'g', 'Carbs')
+    + cell('mc-f', m.fat,     'g', 'Fat')
+    + '</div></div>';
+}
+
 function renderStatsOverview(){
   var host=document.getElementById('st-overview');if(!host)return;
   if(!currentBlock||!currentBlock.days||!currentBlock.days.length){host.innerHTML='<div style="font-size:10px;letter-spacing:2px;color:var(--text-dim);text-align:center;padding:40px 20px;text-transform:uppercase">No active block</div>';return;}
@@ -4565,9 +4796,17 @@ function renderStatsOverview(){
   CAT_ORDER.forEach(function(c){var v=s.setsByCategory[c];if(!catTotal)return;var frac=v/catTotal,len=C*frac;arcs+='<circle cx="52" cy="52" r="42" fill="none" stroke="'+CAT_COLOR[c]+'" stroke-width="11" stroke-dasharray="'+len+' '+(C-len)+'" stroke-dashoffset="'+(-off)+'"/>';off+=len;legend+='<div class="st-leg"><span class="st-legdot" style="background:'+CAT_COLOR[c]+'"></span><span class="st-legname">'+CAT_LABEL[c]+'</span><span class="st-legpct">'+Math.round(frac*100)+'%</span></div>';});
   var lvlTotal=LEVELS.reduce(function(a,l){return a+s.setsByLevel[l];},0);
   var lvlColor={Beginner:'var(--text-muted)',Intermediate:'var(--text)',Advanced:'var(--accent)',Elite:'var(--red)'};
-  var html='<div class="st-hero">'
+  var html=macroCardHTML(currentBlock.macros)
+    +'<div class="st-hero">'
     +'<div class="st-card"><div class="st-label">Streak</div><div class="st-num">'+s.streak+'<span class="st-unit">d</span></div><div class="st-meta">'+(s.streak>=2?'keep it going':(s.streak===1?'day one':'no active streak'))+'</div></div>'
     +'<div class="st-card"><div class="st-label">Workouts</div><div class="st-num">'+s.sessionsLogged+'</div><div class="st-meta">completed this block</div></div></div>'
+    +'<div class="st-sec"><div class="st-sechead"><h3>Muscle Map</h3><span class="ln"></span><span class="tg">this week</span></div>'
+    +'<div class="st-panel"><div class="st-ptop"><span class="st-pcap">Muscle Map</span><span class="st-pval">sets this week</span></div>'
+    +'<div class="st-figtoggle"><button id="st-bfront" class="on" onclick="showFig(\'front\')">Front</button><button id="st-bback" onclick="showFig(\'back\')">Back</button></div>'
+    +'<div class="st-stage"><svg class="st-fig on" id="st-front" viewBox="0 0 228 440">'+FIG_FRONT+'</svg><svg class="st-fig" id="st-back" viewBox="0 0 228 440">'+FIG_BACK+'</svg></div>'
+    +'<div class="st-readout"><div><div class="st-roname" id="st-roname">Tap a muscle</div><div class="st-rosub" id="st-rosub">to see this week\'s sets</div></div><div class="st-badge st-b0" id="st-robadge">\u2014</div></div>'
+    +'<div class="st-scale"><div class="st-scalebar"><span style="background:#1c1c1c"></span><span style="background:rgba(201,169,110,.28)"></span><span style="background:rgba(201,169,110,.68)"></span><span style="background:var(--accent)"></span><span style="background:var(--red)"></span></div><div class="st-scalelab"><span>0</span><span>building</span><span>10\u201320</span><span>20+</span></div></div></div>'
+    +'</div>'
     +'<div class="st-sec"><div class="st-sechead"><h3>Weekly Activity</h3><span class="ln"></span><span class="tg">week '+s.week+'</span></div>'
     +'<div class="st-rings">'
     +'<div class="st-ringcard"><div class="st-ringwrap"><svg width="104" height="104" viewBox="0 0 104 104"><circle class="st-ringbg" cx="52" cy="52" r="45"/><circle class="st-ringfg" cx="52" cy="52" r="45" style="stroke-dashoffset:'+stRingOff(100*s.weekSessions/Math.max(1,s.plannedDays))+'"/></svg><div class="st-ringc">'+s.weekSessions+'<small>/'+s.plannedDays+'</small></div></div><div class="st-ringcap">Sessions</div><div class="st-ringgoal">of planned</div></div>'
@@ -4576,11 +4815,6 @@ function renderStatsOverview(){
     +s.setsByDay.map(function(d){return '<div class="st-barcol"><span class="st-barn">'+(d.sets||'')+'</span><div class="st-bar '+(d.sets?'':'muted')+'" style="height:'+(d.sets?Math.round(100*d.sets/maxDay):6)+'%"></div><span class="st-barday">'+d.name.slice(0,6)+'</span></div>';}).join('')
     +'</div></div>'
     +'<div class="st-panel"><div class="st-ptop"><span class="st-pcap">Category Split</span><span class="st-pval">'+catTotal+' sets</span></div><div class="st-split"><div class="st-donutwrap"><svg width="104" height="104" viewBox="0 0 104 104"><circle cx="52" cy="52" r="42" fill="none" stroke="var(--card)" stroke-width="11"/>'+arcs+'</svg><div class="st-donutc"><div class="n">'+catTotal+'</div><div class="l">sets</div></div></div><div class="st-legend">'+(legend||'<div class="st-leg"><span class="st-legname" style="color:var(--text-muted)">Nothing logged yet</span></div>')+'</div></div></div>'
-    +'<div class="st-panel"><div class="st-ptop"><span class="st-pcap">Muscle Map</span><span class="st-pval">sets this week</span></div>'
-    +'<div class="st-figtoggle"><button id="st-bfront" class="on" onclick="showFig(\'front\')">Front</button><button id="st-bback" onclick="showFig(\'back\')">Back</button></div>'
-    +'<div class="st-stage"><svg class="st-fig on" id="st-front" viewBox="0 0 228 440">'+FIG_FRONT+'</svg><svg class="st-fig" id="st-back" viewBox="0 0 228 440">'+FIG_BACK+'</svg></div>'
-    +'<div class="st-readout"><div><div class="st-roname" id="st-roname">Tap a muscle</div><div class="st-rosub" id="st-rosub">to see this week\'s sets</div></div><div class="st-badge st-b0" id="st-robadge">\u2014</div></div>'
-    +'<div class="st-scale"><div class="st-scalebar"><span style="background:#1c1c1c"></span><span style="background:rgba(201,169,110,.28)"></span><span style="background:rgba(201,169,110,.68)"></span><span style="background:var(--accent)"></span><span style="background:var(--red)"></span></div><div class="st-scalelab"><span>0</span><span>building</span><span>10\u201320</span><span>20+</span></div></div></div>'
     +'<div class="st-panel"><div class="st-ptop"><span class="st-pcap">Level Breakdown</span><span class="st-pval">'+lvlTotal+' sets</span></div><div class="st-levels">'
     +LEVELS.map(function(l){var v=s.setsByLevel[l];var pct=lvlTotal?Math.round(100*v/lvlTotal):0;return '<div><div class="st-lvltop"><span>'+l+'</span><span class="st-lvln">'+v+' sets \u00b7 '+pct+'%</span></div><div class="st-lvltrack"><div class="st-lvlfill" style="width:'+pct+'%;background:'+lvlColor[l]+'"></div></div></div>';}).join('')
     +'</div></div></div>'
@@ -4627,6 +4861,10 @@ function computeAllTime(){
   var out={
     sets:0,reps:0,volume:0,weightedSets:0,sessions:0,blocks:0,
     byRegion:{},byCategory:{},byLevel:{},perBlock:[],prs:{},
+    // Training quality, read off the reps actually logged rather than what was prescribed.
+    // strength = sets at 1-5 reps, hypertrophy = 6-15, skill = sets on skill-tagged work.
+    // Skill overlaps the other two by design — a 5-rep muscle-up set is both.
+    byQuality:{strength:0,hypertrophy:0,skill:0},
     exerciseCount:0,daysTrained:0,bestStreak:0,weekday:[0,0,0,0,0,0,0]
   };
   REGIONS.forEach(function(r){out.byRegion[r]=0;});
@@ -4651,7 +4889,11 @@ function computeAllTime(){
             var hasR=!isNaN(rr)&&rr>0, hasW=!isNaN(ww)&&ww>0;
             if(!hasR && !hasW) continue;
             n++;
-            if(hasR){ reps+=rr; if(rr>bestR) bestR=rr; }
+            if(hasR){
+              reps+=rr; if(rr>bestR) bestR=rr;
+              if(rr<=5) out.byQuality.strength++;
+              else if(rr<=15) out.byQuality.hypertrophy++;
+            }
             if(hasW){ wsets++; if(ww>bestW) bestW=ww; if(hasR) vol+=ww*rr; }
           }
           if(n<=0) return;
@@ -4659,6 +4901,7 @@ function computeAllTime(){
           out.sets+=n; out.reps+=reps; out.volume+=vol; out.weightedSets+=wsets;
           bl.sets+=n;
           seenEx[ref.id]=true;
+          if((ex.tags||[]).indexOf('skill')>-1) out.byQuality.skill+=n;
           regionsForTarget(ex.target).forEach(function(r){out.byRegion[r]+=n;});
           var cat=primaryCategory(ex); if(cat) out.byCategory[cat]+=n;
           if(LEVELS.indexOf(ex.level)>-1){ out.byLevel[ex.level]+=n; bl.byLevel[ex.level]+=n; }
@@ -4696,6 +4939,55 @@ function computeAllTime(){
 
 function atFmt(n){ return Math.round(n).toLocaleString('en-GB'); }
 
+// ─── QUALITY RADAR ─────────────────────────────────────────────
+// Three axes on an equilateral triangle. Values are normalised against the largest axis,
+// so the shape shows BALANCE between qualities, not absolute volume — the numbers beside
+// each axis carry the raw set counts.
+function atQualityRadar(q){
+  var axes=[{k:'strength',label:'Strength',sub:'1-5 reps'},
+            {k:'hypertrophy',label:'Hypertrophy',sub:'6-15 reps'},
+            {k:'skill',label:'Skill',sub:'skill work'}];
+  var max=Math.max(q.strength,q.hypertrophy,q.skill);
+  if(!max) return '';
+  var cx=110,cy=104,R=68;
+  // start at 12 o'clock, then clockwise
+  var pt=function(i,r){ var a=-Math.PI/2 + i*2*Math.PI/3; return [cx+r*Math.cos(a), cy+r*Math.sin(a)]; };
+
+  var grid='';
+  [0.33,0.66,1].forEach(function(f){
+    var p=[0,1,2].map(function(i){return pt(i,R*f).map(function(n){return n.toFixed(1);}).join(',');}).join(' ');
+    grid+='<polygon points="'+p+'" fill="none" stroke="var(--border)" stroke-width="1"/>';
+  });
+  var spokes=[0,1,2].map(function(i){var e=pt(i,R);
+    return '<line x1="'+cx+'" y1="'+cy+'" x2="'+e[0].toFixed(1)+'" y2="'+e[1].toFixed(1)+'" stroke="var(--border)" stroke-width="1"/>';}).join('');
+
+  var poly=axes.map(function(ax,i){
+    var v=q[ax.k]/max;
+    return pt(i, R*Math.max(v,0.02)).map(function(n){return n.toFixed(1);}).join(',');
+  }).join(' ');
+  var dots=axes.map(function(ax,i){
+    var c=pt(i, R*Math.max(q[ax.k]/max,0.02));
+    return '<circle cx="'+c[0].toFixed(1)+'" cy="'+c[1].toFixed(1)+'" r="3" fill="var(--accent)"/>';
+  }).join('');
+
+  var labels=axes.map(function(ax,i){
+    var c=pt(i, R+22), anchor = i===0?'middle':(i===1?'start':'end');
+    return '<text x="'+c[0].toFixed(1)+'" y="'+(c[1]+(i===0?-2:4)).toFixed(1)+'" text-anchor="'+anchor+'" '
+      +'font-family="DM Mono, monospace" font-size="8.5" letter-spacing="1" fill="var(--text-muted)">'+ax.label.toUpperCase()+'</text>'
+      +'<text x="'+c[0].toFixed(1)+'" y="'+(c[1]+(i===0?9:15)).toFixed(1)+'" text-anchor="'+anchor+'" '
+      +'font-family="DM Mono, monospace" font-size="9" fill="var(--accent)">'+q[ax.k]+'</text>';
+  }).join('');
+
+  return '<div class="at-panel"><div class="at-ptop"><span class="at-pcap">Training qualities</span>'
+    +'<span class="at-pval">sets by quality</span></div>'
+    +'<div class="at-radarwrap"><svg viewBox="0 0 220 208" class="at-radar">'
+    +grid+spokes
+    +'<polygon points="'+poly+'" fill="rgba(201,169,110,0.18)" stroke="var(--accent)" stroke-width="1.5"/>'
+    +dots+labels+'</svg></div>'
+    +'<div class="at-radarnote">Skill sets are also counted in strength or hypertrophy by rep range.</div>'
+    +'</div>';
+}
+
 function renderAllTime(){
   var host=document.getElementById('st-alltime'); if(!host) return;
   var a=computeAllTime();
@@ -4726,26 +5018,6 @@ function renderAllTime(){
     +'<div class="at-cell"><div class="at-elab">Exercises</div><div class="v">'+a.exerciseCount+'</div></div>'
     +'</div>';
 
-  // ── DIFFICULTY LADDER ── the improvement signal when nothing is weighted
-  var lvlColor={Beginner:'var(--text-dim)',Intermediate:'var(--text-muted)',Advanced:'var(--accent)',Elite:'var(--red)'};
-  if(a.perBlock.length){
-    var rows=a.perBlock.map(function(bl){
-      var tot=LEVELS.reduce(function(s,l){return s+bl.byLevel[l];},0);
-      var segs=LEVELS.map(function(l){
-        var pct=tot?100*bl.byLevel[l]/tot:0;
-        return pct>0?'<span style="width:'+pct.toFixed(1)+'%;background:'+lvlColor[l]+'"></span>':'';
-      }).join('');
-      var hard=tot?Math.round(100*(bl.byLevel.Advanced+bl.byLevel.Elite)/tot):0;
-      return '<div class="at-srow"><div class="t"><b>'+String(bl.label).replace(/</g,'&lt;').slice(0,26)+'</b>'
-        +'<span>'+hard+'% advanced+</span></div><div class="at-track">'+segs+'</div></div>';
-    }).join('');
-    html+='<div class="at-panel"><div class="at-ptop"><span class="at-pcap">Difficulty ladder</span>'
-      +'<span class="at-pval">oldest \u2192 newest</span></div>'
-      +'<div class="at-stack">'+rows+'</div><div class="at-key">'
-      +LEVELS.map(function(l){return '<div><i style="background:'+lvlColor[l]+'"></i>'+l+'</div>';}).join('')
-      +'</div></div>';
-  }
-
   // ── CONSISTENCY ──
   var dset={}; (trainedDates||[]).forEach(function(d){dset[d]=1;});
   var cells='',today=new Date(new Date().toISOString().slice(0,10)+'T00:00:00');
@@ -4761,15 +5033,6 @@ function renderAllTime(){
     +'<div class="at-heatwrap"><div class="at-heat">'+cells+'</div></div>'
     +'<div class="at-hlab"><i style="background:#1c1c1c"></i>Rest<i style="background:var(--accent)"></i>Trained</div></div>';
 
-  // ── WEEKDAY RHYTHM ──
-  var maxW=Math.max.apply(null,a.weekday)||1;
-  html+='<div class="at-panel"><div class="at-ptop"><span class="at-pcap">Training rhythm</span>'
-    +'<span class="at-pval">days per weekday</span></div><div class="at-bars">'
-    +a.weekday.map(function(v){
-        return '<div class="at-bcol'+(v===maxW&&v>0?' pk':'')+'"><span style="height:'+(v?Math.round(100*v/maxW):3)+'%"></span></div>';
-      }).join('')
-    +'</div><div class="at-bx"><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div><div>S</div></div></div>';
-
   // ── LIFETIME MUSCLE MAP ── same figure as Overview, lifetime sets
   html+='<div class="at-panel"><div class="at-ptop"><span class="at-pcap">Muscle map</span>'
     +'<span class="at-pval">all-time sets</span></div>'
@@ -4780,6 +5043,18 @@ function renderAllTime(){
     +'<div class="st-readout"><div><div class="st-roname" id="at-roname">Tap a muscle</div>'
     +'<div class="st-rosub" id="at-rosub">to see all-time sets</div></div>'
     +'<div class="st-badge st-b0" id="at-robadge">\u2014</div></div></div>';
+
+  // ── QUALITY RADAR ──
+  html+=atQualityRadar(a.byQuality);
+
+  // ── WEEKDAY RHYTHM ──
+  var maxW=Math.max.apply(null,a.weekday)||1;
+  html+='<div class="at-panel"><div class="at-ptop"><span class="at-pcap">Training rhythm</span>'
+    +'<span class="at-pval">days per weekday</span></div><div class="at-bars">'
+    +a.weekday.map(function(v){
+        return '<div class="at-bcol'+(v===maxW&&v>0?' pk':'')+'"><span style="height:'+(v?Math.round(100*v/maxW):3)+'%"></span></div>';
+      }).join('')
+    +'</div><div class="at-bx"><div>M</div><div>T</div><div>W</div><div>T</div><div>F</div><div>S</div><div>S</div></div></div>';
 
   // ── CATEGORY SPLIT ──
   var catTotal=CAT_ORDER.reduce(function(s,c){return s+a.byCategory[c];},0);
@@ -5687,6 +5962,7 @@ function saveBlockOnly() {
     skill:  [...builderSkill],
     days:getBuiltDays(),
     cycle: builderCycle ? { id: builderCycle.id, order: builderCycle.order } : prevCycle,
+    macros: builderMacros ? {...builderMacros} : null,
   };
   // Bind the block into its slot, and clear it out of any slot it used to occupy.
   trainingCycles.forEach(c => c.slots.forEach(s => { if(s.blockId === block.id) s.blockId = null; }));
@@ -5721,7 +5997,7 @@ function saveBlockOnly() {
       sourceId: editingId,
       name: block.name, methods: block.methods, weeks: block.weeks,
       warmup: block.warmup, skill: block.skill, days: block.days,
-      cycle: block.cycle
+      cycle: block.cycle, macros: block.macros
     };
     localStorage.setItem('fw_block', JSON.stringify(currentBlock));
     saveCurrentBlock();
@@ -5764,7 +6040,8 @@ async function activateBlock(newBlock){
     skill: newBlock.skill || [],
     days: newBlock.days || [],
     sourceId: newBlock.id || newBlock.sourceId || null, // links the live block to its saved source (for in-place edits)
-    cycle: newBlock.cycle || null // phase-tracking group — MUST be listed here or it's dropped on activation
+    cycle: newBlock.cycle || null, // phase-tracking group — MUST be listed here or it's dropped on activation
+    macros: newBlock.macros || null // coach-set macro targets — same whitelist rule applies
   };
   currentWeek = 1;
   sessionLog = {};
@@ -5782,7 +6059,7 @@ async function saveAndStart() {
   if(!name){showToast('Add a block name');return;}
   if(!builderDays.length){showToast('Add at least 1 day');return;}
   const days=getBuiltDays();
-  await activateBlock({name:name.toUpperCase(),methods:[...builderMethods],weeks:builderWeeks,warmup:[...builderWarmup],skill:[...builderSkill],days,cycle:builderCycle?{id:builderCycle.id,order:builderCycle.order}:null});
+  await activateBlock({name:name.toUpperCase(),methods:[...builderMethods],weeks:builderWeeks,warmup:[...builderWarmup],skill:[...builderSkill],days,cycle:builderCycle?{id:builderCycle.id,order:builderCycle.order}:null,macros:builderMacros?{...builderMacros}:null});
   saveBlockOnly();
   updateStats();
   renderHomeDays();
@@ -5793,7 +6070,7 @@ async function saveAndStart() {
 function resetBuilder(){
   document.getElementById('custom-name').value='';
   builderDays=[]; builderMethods=[]; builderWeeks=4; openDayIndex=null;
-  builderWarmup=[]; builderSkill=[]; builderCycle=null;
+  builderWarmup=[]; builderSkill=[]; builderCycle=null; builderMacros=null; fillMacroInputs(null);
   document.querySelectorAll('#method-chips .picker-chip').forEach(b=>b.classList.remove('selected'));
   document.getElementById('method-preview').textContent='';
   document.querySelectorAll('#builder-duration-chips .picker-chip').forEach(b=>b.classList.remove('selected'));
@@ -5877,6 +6154,8 @@ function editSavedBlock(id){
   // Store editing id so save replaces rather than duplicates
   window._editingBlockId = id;
   builderCycle = wk.cycle && getCycle(wk.cycle.id) ? { id: wk.cycle.id, order: wk.cycle.order || 1 } : null;
+  builderMacros = wk.macros ? {...wk.macros} : null;
+  fillMacroInputs(builderMacros);
   renderBuilderCyclePicker();
   renderBuilderDays();
   renderFixedExList('warmup');
@@ -8341,6 +8620,10 @@ async function openPushUpdate(blockId) {
   
   const block = customWorkouts.find(w => w.id === blockId);
   if(!block) { showToast('Block not found'); return; }
+
+  // If the block sits in a client-tagged cycle, pre-select that client.
+  const ownerCycle = block.cycle ? trainingCycles.find(c => c.id === block.cycle.id) : null;
+  const preselect = ownerCycle?.client?.email || '';
   
   // Get clients who have been assigned blocks
   const { data: clients } = await supa
@@ -8372,7 +8655,7 @@ async function openPushUpdate(blockId) {
         <div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:8px">SELECT CLIENT</div>
         <select id="push-client-select" style="width:100%;padding:12px;background:var(--deep);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:12px;margin-bottom:16px">
           <option value="">Choose a client...</option>
-          ${clients.map(c => `<option value="${c.email}">${c.name} (${c.email})</option>`).join('')}
+          ${clients.map(c => `<option value="${c.email}" ${c.email===preselect?'selected':''}>${c.name} (${c.email})</option>`).join('')}
         </select>
         
         <div style="display:flex;gap:12px">
