@@ -2892,14 +2892,12 @@ function switchBuildTab(tab) {
 }
 
 // ─── CHANGELOG ─────────────────────────────────────────────────
-const FORGE_VERSION = '2.1.1';
+const FORGE_VERSION = '2.2.0';
 const FORGE_CHANGELOG = [
-  'AI-built programmes now name each day by focus, like "Day 1 — Strength", so your week reads at a glance',
-  'Day cards show a ✓ LOGGED badge once you\'ve trained them this week — no more guessing what\'s done',
-  'New blocks start clean — last block\'s numbers no longer carry across',
-  'Smoother week switching — the pill and week tabs stay in sync and remember where you left off',
-  'Returning to your AI coach now lets you progress your next block or start fresh — no surprise restarts',
-  'Building manually? Exercises now sort by difficulty, Beginner through Elite'
+  'Cycles — plan a full training cycle in phases (prep, hypertrophy, strength, power) and see where you are in it. A strip under your block name shows the phases you\'ve finished, the one you\'re in, and what\'s still ahead',
+  'Finish a phase and the next one is waiting — one tap moves you on, no rebuilding',
+  'Macro targets on the Progress tab — calories, protein, carbs and fat for the phase you\'re training. Each phase carries its own',
+  'New radar chart in All Time showing how your work splits across strength, hypertrophy and skill'
 ];
 
 function checkChangelog() {
@@ -8539,6 +8537,19 @@ async function acceptAssignedBlock(assignmentId) {
     if(!newBlock.warmup) newBlock.warmup = [];
     if(!newBlock.skill)  newBlock.skill  = [];
 
+    // Merge the coach's cycle plan so the phase strip has something to draw from, and point
+    // this phase's slot at the local block id. Phases pushed later fill in their own slots,
+    // so the plan builds up as the cycle is delivered.
+    const plan = row.block_data?.cyclePlan;
+    if(plan && plan.id){
+      let mine = trainingCycles.find(c => c.id === plan.id);
+      if(!mine){ mine = { id: plan.id, name: plan.name, client: null, slots: plan.slots }; trainingCycles.push(mine); }
+      else { mine.name = plan.name; }
+      const ord = newBlock.cycle && newBlock.cycle.order;
+      if(ord && mine.slots[ord-1]) mine.slots[ord-1].blockId = newId;
+      localStorage.setItem('fw_cycles', JSON.stringify(trainingCycles));
+    }
+
     // Decide: UPDATE the current programme in place (KEEP logs) or start a NEW one (fresh start).
     // The coach's explicit choice (block_data.mode) wins. If it's an older push with no mode set,
     // fall back to a name match with the current block so a same-name update never wipes progress.
@@ -8572,8 +8583,16 @@ async function acceptAssignedBlock(assignmentId) {
         warmup: newBlock.warmup || [],
         skill: newBlock.skill || [],
         days: newBlock.days || [],
-        sourceId: savedId
+        sourceId: savedId,
+        cycle: newBlock.cycle || null,   // phase strip needs this — dropped here in earlier builds
+        macros: newBlock.macros || null  // coach-set macro targets
       };
+      // The slot points at savedId in this branch, not newId.
+      if(newBlock.cycle && newBlock.cycle.id){
+        const mc = trainingCycles.find(c => c.id === newBlock.cycle.id);
+        const o  = newBlock.cycle.order;
+        if(mc && o && mc.slots[o-1]){ mc.slots[o-1].blockId = savedId; localStorage.setItem('fw_cycles', JSON.stringify(trainingCycles)); }
+      }
       currentWeek = Math.min(currentWeek || 1, currentBlock.weeks);
       localStorage.setItem('fw_block', JSON.stringify(currentBlock));
       localStorage.setItem('fw_week', currentWeek);
@@ -8696,13 +8715,23 @@ async function executePushUpdate() {
 
   const mode = document.getElementById('push-mode')?.value || 'update';
 
+  // Send the cycle PLAN too, not just the block. The phase strip renders from the plan, so
+  // without it the client sees the phase with no sense of the cycle it belongs to. Slots are
+  // sent with blockId stripped — those ids are local to the coach and mean nothing client-side.
+  const planCycle = block.cycle ? trainingCycles.find(c => c.id === block.cycle.id) : null;
+  const cyclePlan = planCycle ? {
+    id: planCycle.id,
+    name: planCycle.name,
+    slots: planCycle.slots.map(sl => ({ phase: sl.phase, weeks: sl.weeks, blockId: null }))
+  } : null;
+
   // mode 'update' → client keeps their logs (applied in place). mode 'new' → fresh start.
   const { error } = await supa.from('assigned_blocks').insert({
     coach_id: currentUser.id,
     coach_email: currentUser.email,
     client_email: clientEmail,
     block_name: block.name,
-    block_data: { currentBlock: block, mode },
+    block_data: { currentBlock: block, mode, cyclePlan },
     note: mode === 'update' ? 'Updated version of your programme — your progress is kept' : 'New programme',
     status: 'pending'
   });
