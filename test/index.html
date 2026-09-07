@@ -184,6 +184,55 @@
   .macro-inputs input { background: var(--black); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; padding: 9px 10px; width: 100%; }
   .macro-inputs input:focus { outline: none; border-color: var(--accent-dim); }
 
+  /* ─── NOTE THREAD ──────────────────────────────────────────── */
+  .nt-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9997; display: flex; align-items: flex-end; justify-content: center; }
+  .nt-card { background: var(--deep); border: 1px solid var(--border); width: 100%; max-width: 460px; max-height: 82vh; display: flex; flex-direction: column; padding-bottom: var(--safe-bottom); }
+  .nt-head { display: flex; align-items: flex-start; justify-content: space-between; padding: 16px 16px 12px; border-bottom: 1px solid var(--border); }
+  .nt-cap { font-family: 'DM Mono', monospace; font-size: 8.5px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; }
+  .nt-title { font-family: 'DM Mono', monospace; font-size: 14px; letter-spacing: 1px; color: var(--text); margin-top: 3px; }
+  .nt-close { background: none; border: none; color: var(--text-dim); font-size: 24px; line-height: 1; cursor: pointer; padding: 0 4px; }
+  .nt-list { overflow-y: auto; padding: 12px 16px; flex: 1; min-height: 120px; }
+  .nt-empty { font-size: 11px; color: var(--text-dim); text-align: center; padding: 28px 12px; line-height: 1.6; }
+  .nt-row { padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .nt-row:last-child { border-bottom: none; }
+  .nt-meta { display: flex; gap: 8px; align-items: baseline; margin-bottom: 4px; }
+  .nt-who { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); }
+  .nt-row.mine .nt-who { color: var(--accent); }
+  .nt-when { font-family: 'DM Mono', monospace; font-size: 8.5px; color: var(--text-dim); }
+  .nt-body { font-size: 12.5px; color: var(--text); line-height: 1.55; white-space: pre-wrap; }
+  .nt-compose { display: flex; gap: 8px; padding: 12px 16px; border-top: 1px solid var(--border); }
+  .nt-compose textarea { flex: 1; background: var(--black); border: 1px solid var(--border); color: var(--text); font-family: inherit; font-size: 13px; padding: 9px 10px; resize: none; }
+  .nt-compose textarea:focus { outline: none; border-color: var(--accent-dim); }
+  .nt-send { background: var(--accent); border: none; color: var(--black); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; padding: 0 16px; cursor: pointer; }
+  .nt-send:disabled { opacity: 0.5; }
+  .cycle-slot-note { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 8.5px; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 9px; cursor: pointer; flex: none; }
+
+  /* ─── BODYWEIGHT & STRENGTH INDEX ──────────────────────────── */
+  .bw-card { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 14px 16px; border: 1px solid var(--border); background: var(--deep); flex-wrap: wrap; }
+  .bw-now { display: flex; align-items: baseline; gap: 10px; }
+  .bw-num { font-family: 'DM Mono', monospace; font-size: 28px; color: var(--text); letter-spacing: -1px; }
+  .bw-num small { font-size: 11px; color: var(--text-dim); margin-left: 4px; letter-spacing: 1px; }
+  .bw-delta { font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 1px; }
+  .bw-delta.up { color: #c2703f; } .bw-delta.down { color: #7aaeee; }
+  .bw-entry { display: flex; gap: 6px; flex: 1; min-width: 168px; }
+  .bw-entry input { flex: 1; min-width: 0; background: var(--black); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 12px; padding: 9px 10px; }
+  .bw-entry input:focus { outline: none; border-color: var(--accent-dim); }
+  .bw-btn { background: var(--accent); border: none; color: var(--black); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; padding: 9px 16px; cursor: pointer; }
+  .bw-spark { border: 1px solid var(--border); border-top: none; background: var(--deep); padding: 10px 12px 6px; }
+  .bw-spark svg { width: 100%; height: 56px; display: block; }
+  .bw-sparklab { display: flex; justify-content: space-between; font-family: 'DM Mono', monospace; font-size: 8.5px; color: var(--text-dim); margin-top: 4px; }
+  .si-wrap { border: 1px solid var(--border); background: var(--deep); padding: 12px; }
+  .si-pick { width: 100%; background: var(--black); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 11px; padding: 9px 10px; margin-bottom: 12px; }
+  .si-chart svg { width: 100%; height: 110px; display: block; }
+  .si-empty { font-size: 11px; color: var(--text-dim); padding: 18px 4px; text-align: center; line-height: 1.5; }
+  .si-foot { display: flex; align-items: center; gap: 14px; margin-top: 10px; flex-wrap: wrap; }
+  .si-key { display: flex; align-items: center; gap: 5px; font-family: 'DM Mono', monospace; font-size: 8.5px; letter-spacing: 1px; color: var(--text-dim); text-transform: uppercase; }
+  .si-key i { width: 12px; height: 2px; display: block; }
+  .k-si { background: var(--accent); } .k-bw { background: var(--text-dim); }
+  .si-gain { margin-left: auto; font-family: 'DM Mono', monospace; font-size: 12px; }
+  .si-gain.up { color: var(--accent); } .si-gain.down { color: #c2703f; }
+  .si-range { display: flex; justify-content: space-between; font-family: 'DM Mono', monospace; font-size: 8.5px; color: var(--text-dim); margin-top: 6px; }
+
   /* ─── QUALITY RADAR ────────────────────────────────────────── */
   .at-radarwrap { display: flex; justify-content: center; padding: 6px 0 2px; }
   .at-radar { width: 100%; max-width: 260px; height: auto; overflow: visible; }
@@ -974,6 +1023,24 @@
 </style>
 </head>
 <body>
+
+<!-- ── BLOCK NOTE THREAD ── -->
+<div class="nt-overlay" id="notethread-overlay" style="display:none" onclick="if(event.target===this)closeNoteThread()">
+  <div class="nt-card">
+    <div class="nt-head">
+      <div>
+        <div class="nt-cap">Notes on</div>
+        <div class="nt-title" id="notethread-title">Block</div>
+      </div>
+      <button class="nt-close" onclick="closeNoteThread()">×</button>
+    </div>
+    <div class="nt-list" id="notethread-list"></div>
+    <div class="nt-compose">
+      <textarea id="notethread-input" rows="2" placeholder="Add a note…"></textarea>
+      <button class="nt-send" id="notethread-send" onclick="postNote()">Post</button>
+    </div>
+  </div>
+</div>
 
 <!-- ── CHANGELOG OVERLAY ── -->
 <div class="changelog-overlay" id="changelog-overlay" style="display:none" onclick="if(event.target===this)closeChangelog()">
@@ -2412,7 +2479,7 @@ function renderCyclePlanner(){
 
   host.innerHTML = keys.map(key => {
     const list = groups.get(key);
-    const open = clientFolderOpen[key] !== false; // folders start open
+    const open = clientFolderOpen[key] === true; // folders start closed — the point is a tidy list
     const weeks = list.reduce((a,c)=>a+c.slots.reduce((x,s)=>x+(s.weeks||0),0),0);
     return `<div class="client-folder ${open?'open':''}">
       <button class="client-folder-head" onclick="toggleClientFolder('${key}')">
@@ -2429,7 +2496,7 @@ function renderCyclePlanner(){
 
 const clientFolderOpen = {};
 function toggleClientFolder(key){
-  clientFolderOpen[key] = clientFolderOpen[key] === false;
+  clientFolderOpen[key] = !clientFolderOpen[key];
   renderCyclePlanner();
 }
 
@@ -2450,6 +2517,7 @@ function cycleCardHTML(c){
       : (wk ? `<button class="cycle-slot-set" onclick="setAsCurrentBlock('${wk.id}')">Set →</button>` : '');
     const push = (currentUser?.tier === 'admin' && wk)
       ? `<button class="cycle-slot-push" onclick="openPushUpdate('${wk.id}')">Push</button>` : '';
+    const notes = wk ? `<button class="cycle-slot-note" onclick='openNoteThread(${JSON.stringify({name:wk.name,cycle:{id:c.id,order:i+1}}).replace(/'/g,"&#39;")})'>Notes</button>` : '';
     // Two fixed columns — label+name on the left, controls on the right. Previously these
     // were five siblings in one wrapping flex row, which broke differently on every row.
     return `<div class="cycle-slot-row">
@@ -2458,6 +2526,7 @@ function cycleCardHTML(c){
         <span class="cycle-slot-block ${wk?'':'empty'}">${name}</span>
       </div>
       <div class="cycle-slot-actions">
+        ${notes}
         ${push}
         ${action}
       </div>
@@ -2556,6 +2625,23 @@ function saveCycleDraft(){
 }
 // Retag an existing cycle. Needed because the client picker only appears at creation time,
 // so every cycle built before this feature landed sits in the Unassigned folder.
+const blockFolderOpen = {};
+function toggleBlockFolder(key){
+  blockFolderOpen[key] = !blockFolderOpen[key];
+  renderBuilderSaved();
+}
+// Tag a standalone block with a client so it files into their folder. Blocks inside a cycle
+// take the cycle's client instead — this is for loose one-off blocks.
+function assignBlockClient(blockId, email){
+  const wk = customWorkouts.find(w => w.id === blockId); if(!wk) return;
+  const cl = coachClients.find(x => x.email === email);
+  wk.client = cl ? { email: cl.email, name: cl.name } : null;
+  localStorage.setItem('fw_customs', JSON.stringify(customWorkouts));
+  syncBlocksToCloud();
+  renderBuilderSaved();
+  showToast(cl ? ('Moved to ' + cl.name) : 'Unassigned');
+}
+
 function assignCycleClient(cycleId, email){
   const c = getCycle(cycleId); if(!c) return;
   const cl = coachClients.find(x => x.email === email);
@@ -2852,7 +2938,7 @@ function navigate(page, push=true) {
   // Quick-board button rides along on the pages where notes actually happen
   try {
     const fab = document.getElementById('bd-fab');
-    if (fab) fab.classList.toggle('show', page==='home' || page==='log' || page==='progress');
+    if (fab) fab.classList.toggle('show', page==='home' || page==='log'); // off Progress — it sat on top of the stats
   } catch(e) {}
   if (page==='board') { try { bdRenderList(); } catch(err){ console.warn('board', err); } }
   const isLog = page==='log';
@@ -4111,6 +4197,7 @@ function saveSession() {
     }
     const noteEl = document.getElementById(`${wk}_note`);
     if(noteEl) sessionLog[`${currentDayId}_${ex.id}_note`] = noteEl.value; // block-level note (persists across weeks)
+    entry._d = todayISO(); // date-stamp so the strength index can plot a real timeline
     sessionLog[wk]=entry;
   });
   sessionLog[`${currentDayId}_notes_v${currentWeek}`]=document.getElementById('session-notes').value;
@@ -4765,6 +4852,274 @@ function computeStats(block,week,log){
 
 var ST_STATS=null;
 function stRingOff(pct){return 283-(283*Math.min(100,pct)/100);}
+// ─── BLOCK NOTE THREAD ─────────────────────────────────────────
+// Not a chat. An asynchronous comment list pinned to a block, so a note about the strength
+// phase is still sitting on the strength phase three months later. No realtime, no unread
+// badges — it loads when opened. Requires the `block_notes` table (see README note).
+let noteThreadKey = null;   // the block identity the open thread belongs to
+let noteThreadRows = [];
+
+// A pushed block has a different local id on each device, so threads are keyed by the
+// CYCLE + phase where one exists, and fall back to the block name otherwise. That keeps
+// coach and client on the same thread without a shared block id.
+function threadKeyFor(block){
+  if(!block) return null;
+  if(block.cycle && block.cycle.id) return 'cyc:'+block.cycle.id+':'+(block.cycle.order||1);
+  return 'name:'+(block.name||'').trim().toUpperCase();
+}
+
+async function openNoteThread(block){
+  const key = threadKeyFor(block);
+  if(!key){ showToast('No block to attach notes to'); return; }
+  noteThreadKey = key;
+  noteThreadRows = [];
+  document.getElementById('notethread-overlay').style.display = 'flex';
+  document.getElementById('notethread-title').textContent = block.name || 'Notes';
+  document.getElementById('notethread-list').innerHTML = '<div class="nt-empty">Loading…</div>';
+  await loadNoteThread();
+}
+function closeNoteThread(){
+  document.getElementById('notethread-overlay').style.display = 'none';
+  noteThreadKey = null;
+}
+
+async function loadNoteThread(){
+  if(!noteThreadKey) return;
+  try{
+    const { data, error } = await supa
+      .from('block_notes').select('*')
+      .eq('thread_key', noteThreadKey)
+      .order('created_at', { ascending: true });
+    if(error) throw error;
+    noteThreadRows = data || [];
+  }catch(e){
+    document.getElementById('notethread-list').innerHTML =
+      '<div class="nt-empty">Notes unavailable offline. They\'ll load when you\'re back on.</div>';
+    return;
+  }
+  renderNoteThread();
+}
+
+function renderNoteThread(){
+  const list = document.getElementById('notethread-list');
+  if(!noteThreadRows.length){
+    list.innerHTML = '<div class="nt-empty">No notes yet. Anything worth remembering about this phase goes here.</div>';
+    return;
+  }
+  const me = currentUser?.email;
+  list.innerHTML = noteThreadRows.map(function(r){
+    const mine = r.author_email === me;
+    const when = new Date(r.created_at);
+    const stamp = when.toLocaleDateString(undefined,{day:'numeric',month:'short'})
+      + ' · ' + when.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
+    return '<div class="nt-row'+(mine?' mine':'')+'">'
+      + '<div class="nt-meta"><span class="nt-who">'+(mine?'You':(r.author_name||r.author_email||'Coach'))+'</span>'
+      + '<span class="nt-when">'+stamp+'</span></div>'
+      + '<div class="nt-body">'+String(r.body||'').replace(/[<>]/g,'')+'</div></div>';
+  }).join('');
+  list.scrollTop = list.scrollHeight;
+}
+
+async function postNote(){
+  const el = document.getElementById('notethread-input');
+  const body = (el && el.value || '').trim();
+  if(!body){ return; }
+  if(!noteThreadKey || !currentUser?.email){ showToast('Not signed in'); return; }
+  const btn = document.getElementById('notethread-send');
+  if(btn) btn.disabled = true;
+  try{
+    const { error } = await supa.from('block_notes').insert({
+      thread_key: noteThreadKey,
+      author_email: currentUser.email,
+      author_name: (currentUser.email||'').split('@')[0],
+      body: body
+    });
+    if(error) throw error;
+    el.value = '';
+    await loadNoteThread();
+  }catch(e){
+    console.error('note post', e);
+    showToast('Could not post note');
+  }
+  if(btn) btn.disabled = false;
+}
+
+// ─── BODYWEIGHT LOG ────────────────────────────────────────────
+// [{ d:'YYYY-MM-DD', kg:Number }], newest last, one entry per day (re-logging replaces).
+let bodyLog = JSON.parse(localStorage.getItem('fw_body')||'[]');
+
+function todayISO(){ return new Date().toISOString().slice(0,10); }
+
+function logBodyweight(){
+  const el = document.getElementById('bw-input');
+  const kg = parseFloat(el && el.value);
+  if(isNaN(kg) || kg <= 0 || kg > 400){ showToast('Enter a valid weight'); return; }
+  const d = todayISO();
+  const existing = bodyLog.find(e => e.d === d);
+  if(existing) existing.kg = kg; else bodyLog.push({ d: d, kg: kg });
+  bodyLog.sort(function(a,b){ return a.d < b.d ? -1 : 1; });
+  localStorage.setItem('fw_body', JSON.stringify(bodyLog));
+  syncBlocksToCloud();
+  if(el) el.value = '';
+  renderStatsOverview();
+  showToast('Weight logged ✓');
+}
+function latestBodyweight(onOrBefore){
+  if(!bodyLog.length) return null;
+  if(!onOrBefore) return bodyLog[bodyLog.length-1].kg;
+  var best = null;
+  for(var i=0;i<bodyLog.length;i++){ if(bodyLog[i].d <= onOrBefore) best = bodyLog[i].kg; }
+  return best !== null ? best : bodyLog[0].kg;
+}
+
+function bodyweightCardHTML(){
+  var latest = bodyLog.length ? bodyLog[bodyLog.length-1] : null;
+  var delta = '';
+  if(bodyLog.length > 1){
+    var cutoff = new Date(Date.now() - 30*864e5).toISOString().slice(0,10);
+    var ref = null;
+    for(var i=0;i<bodyLog.length;i++){ if(bodyLog[i].d <= cutoff) ref = bodyLog[i]; }
+    if(!ref) ref = bodyLog[0];
+    var dv = +(latest.kg - ref.kg).toFixed(1);
+    if(dv !== 0) delta = '<span class="bw-delta '+(dv>0?'up':'down')+'">'+(dv>0?'+':'')+dv+'kg</span>';
+  }
+  return '<div class="st-sec"><div class="st-sechead"><h3>Bodyweight</h3><span class="ln"></span>'
+    + '<span class="tg">'+(latest ? 'last 30 days' : 'not logged')+'</span></div>'
+    + '<div class="bw-card">'
+    + '<div class="bw-now"><div class="bw-num">'+(latest ? latest.kg : '—')+'<small>kg</small></div>'
+    + delta + '</div>'
+    + '<div class="bw-entry"><input type="number" id="bw-input" step="0.1" min="20" max="400" placeholder="today\'s weight" inputmode="decimal">'
+    + '<button class="bw-btn" onclick="logBodyweight()">Log</button></div>'
+    + '</div>' + bwSparkHTML() + '</div>';
+}
+function bwSparkHTML(){
+  if(bodyLog.length < 2) return '';
+  var pts = bodyLog.slice(-40);
+  var min = Math.min.apply(null, pts.map(function(p){return p.kg;}));
+  var max = Math.max.apply(null, pts.map(function(p){return p.kg;}));
+  var pad = (max-min) < 1 ? 1 : (max-min)*0.15;
+  min -= pad; max += pad;
+  var W = 300, H = 64;
+  var xy = pts.map(function(p,i){
+    var x = pts.length===1 ? W/2 : (i/(pts.length-1))*W;
+    var y = H - ((p.kg-min)/(max-min))*H;
+    return x.toFixed(1)+','+y.toFixed(1);
+  });
+  return '<div class="bw-spark"><svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">'
+    + '<polyline points="'+xy.join(' ')+'" fill="none" stroke="var(--accent)" stroke-width="1.5" vector-effect="non-scaling-stroke"/>'
+    + '</svg><div class="bw-sparklab"><span>'+pts[0].d.slice(5)+'</span><span>'+pts[pts.length-1].d.slice(5)+'</span></div></div>';
+}
+
+// ─── STRENGTH INDEX ────────────────────────────────────────────
+// Epley, with a bodyweight term only for unloaded calisthenics work:
+//   loaded (barbell/dumbbell/machine, or any set with a weight entered):  load × (1 + reps/30)
+//   bodyweight movement:                                  (bw + added) × (1 + reps/30)
+// A trend number, NOT a tested 1RM — Epley drifts high past ~10 reps, and the bodyweight
+// term assumes the whole body is moved, which overstates push-ups and understates nothing.
+function strengthIndex(ex, reps, addedKg, bwAtTime){
+  if(!reps || reps < 1) return null;
+  var r = Math.min(reps, 12); // beyond 12 Epley is unreliable — clamp rather than mislead
+  var tags = (ex && ex.tags) || [];
+  var isBW = tags.indexOf('calisthenics') > -1 || tags.indexOf('skill') > -1;
+  var load = isBW ? ((bwAtTime || 0) + (addedKg || 0)) : (addedKg || 0);
+  if(!load) return null;
+  return +(load * (1 + r/30)).toFixed(1);
+}
+
+// ─── STRENGTH INDEX CHART ──────────────────────────────────────
+// One exercise at a time — a pull-up index and a bench index on one chart would be
+// meaningless. Bodyweight is drawn faintly behind so you can see whether strength is
+// climbing faster than weight, which is the whole question in calisthenics.
+let siExercise = localStorage.getItem('fw_si_ex') || '';
+
+// Every logged set that carries a date. Historic entries predate date-stamping and are
+// skipped — the series starts from the first session logged after this update.
+function siSeriesFor(exId){
+  var ex = EXERCISES.find(function(e){ return e.id === exId; });
+  if(!ex) return [];
+  var byDate = {};
+  Object.keys(sessionLog).forEach(function(k){
+    if(k.indexOf('_'+exId+'_v') === -1) return;
+    var entry = sessionLog[k];
+    if(!entry || typeof entry !== 'object' || !entry._d) return;
+    var best = null;
+    for(var sN=1; sN<=12; sN++){
+      var r = parseInt(entry['s'+sN+'_r']);
+      var w = parseFloat(entry['s'+sN+'_w']);
+      if(isNaN(r) || r < 1) continue;
+      var idx = strengthIndex(ex, r, isNaN(w)?0:w, latestBodyweight(entry._d));
+      if(idx !== null && (best === null || idx > best)) best = idx;
+    }
+    if(best !== null && (!byDate[entry._d] || best > byDate[entry._d])) byDate[entry._d] = best;
+  });
+  return Object.keys(byDate).sort().map(function(d){ return { d:d, v:byDate[d] }; });
+}
+
+// Exercises with at least one dated, logged set — no point offering an empty chart.
+function siLoggedExercises(){
+  var ids = {};
+  Object.keys(sessionLog).forEach(function(k){
+    var m = k.match(/^.+?_(.+)_v\d+$/);
+    if(!m) return;
+    var e = sessionLog[k];
+    if(e && typeof e === 'object' && e._d) ids[m[1]] = true;
+  });
+  return Object.keys(ids)
+    .map(function(id){ return EXERCISES.find(function(e){ return e.id === id; }); })
+    .filter(Boolean)
+    .sort(function(a,b){ return a.name.localeCompare(b.name); });
+}
+
+function setSiExercise(id){
+  siExercise = id;
+  localStorage.setItem('fw_si_ex', id);
+  renderStatsOverview();
+}
+
+function strengthChartHTML(){
+  var opts = siLoggedExercises();
+  if(!opts.length) return '';
+  if(!siExercise || !opts.some(function(e){ return e.id === siExercise; })) siExercise = opts[0].id;
+
+  var picker = '<select class="si-pick" onchange="setSiExercise(this.value)">'
+    + opts.map(function(e){ return '<option value="'+e.id+'"'+(e.id===siExercise?' selected':'')+'>'+e.name+'</option>'; }).join('')
+    + '</select>';
+
+  var series = siSeriesFor(siExercise);
+  var body;
+  if(series.length < 2){
+    body = '<div class="si-empty">Log this exercise on two separate days to see a trend.</div>';
+  } else {
+    var W=300, H=110;
+    var vals = series.map(function(p){ return p.v; });
+    var bws  = series.map(function(p){ return latestBodyweight(p.d) || 0; });
+    var all  = vals.concat(bws.filter(function(x){ return x>0; }));
+    var min = Math.min.apply(null, all), max = Math.max.apply(null, all);
+    var pad = (max-min) < 2 ? 2 : (max-min)*0.15;
+    min -= pad; max += pad;
+    var X = function(i){ return series.length===1 ? W/2 : (i/(series.length-1))*W; };
+    var Y = function(v){ return H - ((v-min)/(max-min))*H; };
+
+    var bwLine = bws.every(function(b){ return b>0; })
+      ? '<polyline points="'+bws.map(function(b,i){ return X(i).toFixed(1)+','+Y(b).toFixed(1); }).join(' ')
+        + '" fill="none" stroke="var(--text-dim)" stroke-width="1" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>' : '';
+    var siLine = '<polyline points="'+vals.map(function(v,i){ return X(i).toFixed(1)+','+Y(v).toFixed(1); }).join(' ')
+        + '" fill="none" stroke="var(--accent)" stroke-width="1.75" vector-effect="non-scaling-stroke"/>';
+
+    var first = vals[0], last = vals[vals.length-1];
+    var gain = +(last-first).toFixed(1);
+    body = '<div class="si-chart"><svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">'+bwLine+siLine+'</svg></div>'
+      + '<div class="si-foot"><span class="si-key"><i class="k-si"></i>Strength index</span>'
+      + '<span class="si-key"><i class="k-bw"></i>Bodyweight</span>'
+      + '<span class="si-gain '+(gain>=0?'up':'down')+'">'+(gain>=0?'+':'')+gain+'kg</span></div>'
+      + '<div class="si-range"><span>'+series[0].d.slice(5)+'</span><span>'+last+'kg</span><span>'+series[series.length-1].d.slice(5)+'</span></div>';
+  }
+
+  return '<div class="st-sec"><div class="st-sechead"><h3>Strength Index</h3><span class="ln"></span>'
+    + '<span class="tg">trend, not a 1RM</span></div>'
+    + '<div class="si-wrap">'+picker+body+'</div></div>';
+}
+
 // Coach-set macro targets shown at the top of Progress. Purely a reference card — nothing
 // is logged against these. Renders nothing when the block carries no targets.
 function macroCardHTML(m){
@@ -4798,6 +5153,8 @@ function renderStatsOverview(){
     +'<div class="st-hero">'
     +'<div class="st-card"><div class="st-label">Streak</div><div class="st-num">'+s.streak+'<span class="st-unit">d</span></div><div class="st-meta">'+(s.streak>=2?'keep it going':(s.streak===1?'day one':'no active streak'))+'</div></div>'
     +'<div class="st-card"><div class="st-label">Workouts</div><div class="st-num">'+s.sessionsLogged+'</div><div class="st-meta">completed this block</div></div></div>'
+    +bodyweightCardHTML()
+    +strengthChartHTML()
     +'<div class="st-sec"><div class="st-sechead"><h3>Muscle Map</h3><span class="ln"></span><span class="tg">this week</span></div>'
     +'<div class="st-panel"><div class="st-ptop"><span class="st-pcap">Muscle Map</span><span class="st-pval">sets this week</span></div>'
     +'<div class="st-figtoggle"><button id="st-bfront" class="on" onclick="showFig(\'front\')">Front</button><button id="st-bback" onclick="showFig(\'back\')">Back</button></div>'
@@ -5030,17 +5387,6 @@ function renderAllTime(){
     +'<span class="at-pval">'+a.daysTrained+' days</span></div>'
     +'<div class="at-heatwrap"><div class="at-heat">'+cells+'</div></div>'
     +'<div class="at-hlab"><i style="background:#1c1c1c"></i>Rest<i style="background:var(--accent)"></i>Trained</div></div>';
-
-  // ── LIFETIME MUSCLE MAP ── same figure as Overview, lifetime sets
-  html+='<div class="at-panel"><div class="at-ptop"><span class="at-pcap">Muscle map</span>'
-    +'<span class="at-pval">all-time sets</span></div>'
-    +'<div class="st-figtoggle"><button id="at-bfront" class="on" onclick="atShowFig(\'front\')">Front</button>'
-    +'<button id="at-bback" onclick="atShowFig(\'back\')">Back</button></div>'
-    +'<div class="st-stage"><svg class="st-fig on" id="at-front" viewBox="0 0 228 440">'+FIG_FRONT+'</svg>'
-    +'<svg class="st-fig" id="at-back" viewBox="0 0 228 440">'+FIG_BACK+'</svg></div>'
-    +'<div class="st-readout"><div><div class="st-roname" id="at-roname">Tap a muscle</div>'
-    +'<div class="st-rosub" id="at-rosub">to see all-time sets</div></div>'
-    +'<div class="st-badge st-b0" id="at-robadge">\u2014</div></div></div>';
 
   // ── QUALITY RADAR ──
   html+=atQualityRadar(a.byQuality);
@@ -5961,6 +6307,7 @@ function saveBlockOnly() {
     days:getBuiltDays(),
     cycle: builderCycle ? { id: builderCycle.id, order: builderCycle.order } : prevCycle,
     macros: builderMacros ? {...builderMacros} : null,
+    client: editingId ? ((customWorkouts.find(w=>w.id===editingId)||{}).client || null) : null,
   };
   // Bind the block into its slot, and clear it out of any slot it used to occupy.
   trainingCycles.forEach(c => c.slots.forEach(s => { if(s.blockId === block.id) s.blockId = null; }));
@@ -6087,7 +6434,7 @@ function renderBuilderSaved(){
   const visible = customWorkouts.filter(wk => !wk.id?.startsWith('prog_'));
   if(!visible.length){c.innerHTML=`<div class="empty-state">No saved blocks yet</div>`;return;}
   const isAdmin = currentUser?.tier === 'admin';
-  c.innerHTML=visible.map((wk,wi)=>{
+  const cardFor = (wk)=>{
     const realIdx = customWorkouts.indexOf(wk);
     const isAssigned = wk.id?.startsWith('assigned_');
     const pushBtn = isAdmin ? `<button class="saved-wk-del" onclick="openPushUpdate('${wk.id}')" style="color:#7ae;border-color:#456">Push</button>` : '';
@@ -6098,6 +6445,11 @@ function renderBuilderSaved(){
           <div class="saved-wk-name">${wk.name} ${isAssigned ? '<span style="font-size:8px;color:var(--accent);letter-spacing:2px">◉ ASSIGNED</span>' : ''}</div>
           ${wk.methods?.length?`<div class="saved-wk-methods">${wk.methods.join(' · ')}</div>`:''}
           <div class="saved-wk-meta">${(wk.days||[]).length} days · ${wk.weeks||4} weeks</div>
+          ${isAdmin ? `
+          <select class="cycle-client-select" onchange="assignBlockClient('${wk.id}', this.value)">
+            <option value="" ${!wk.client?'selected':''}>Unassigned / personal</option>
+            ${coachClients.map(cl=>`<option value="${cl.email}" ${wk.client&&wk.client.email===cl.email?'selected':''}>${cl.name}</option>`).join('')}
+          </select>` : ''}
         </div>
         <div class="saved-wk-actions">
           ${pushBtn}
@@ -6109,6 +6461,33 @@ function renderBuilderSaved(){
         ${(wk.days||[]).map(d=>`<div class="saved-wk-day"><span>${d.name}</span><span class="saved-wk-day-count">${d.exercises?.length||0} ex</span></div>`).join('')}
         <button class="start-btn" style="margin:10px 0" onclick="setAsCurrentBlock('${wk.id}')">SET AS CURRENT →</button>
       </div>
+    </div>`;
+  };
+
+  // Non-admins have one person's blocks — a flat list is right for them.
+  if(!isAdmin){ c.innerHTML = visible.map(cardFor).join(''); return; }
+
+  // Same folder treatment as cycles, so Programmes is one tidy list either way.
+  const bGroups = new Map();
+  visible.forEach(function(wk){
+    const key = (wk.client && wk.client.email) || '';
+    if(!bGroups.has(key)) bGroups.set(key, []);
+    bGroups.get(key).push(wk);
+  });
+  const bName = k => k ? clientLabel(k, (bGroups.get(k)[0].client||{}).name) : 'Unassigned';
+  const bKeys = [...bGroups.keys()].filter(k=>k).sort((a,b)=>bName(a).localeCompare(bName(b)));
+  if(bGroups.has('')) bKeys.push('');
+
+  c.innerHTML = bKeys.map(function(key){
+    const list = bGroups.get(key);
+    const open = blockFolderOpen[key] === true;
+    return `<div class="client-folder ${open?'open':''}">
+      <button class="client-folder-head" onclick="toggleBlockFolder('${key}')">
+        <span class="client-folder-chev">›</span>
+        <span class="client-folder-name">${bName(key)}</span>
+        <span class="client-folder-meta">${list.length} block${list.length>1?'s':''}</span>
+      </button>
+      <div class="client-folder-body">${list.map(cardFor).join('')}</div>
     </div>`;
   }).join('');
 }
@@ -7769,14 +8148,14 @@ async function syncBlocksToCloud() {
     if(existing?.id) {
       await supa.from('blocks').update({
         name: currentBlock.name || 'My Block',
-        data: { currentBlock, customWorkouts, archivedBlocks, trainingCycles, currentWeek, boards, trainedDates },
+        data: { currentBlock, customWorkouts, archivedBlocks, trainingCycles, bodyLog, currentWeek, boards, trainedDates },
         updated_at: new Date().toISOString()
       }).eq('id', existing.id);
     } else {
       await supa.from('blocks').insert({
         user_id: currentUser.id,
         name: currentBlock.name || 'My Block',
-        data: { currentBlock, customWorkouts, archivedBlocks, trainingCycles, currentWeek, boards, trainedDates },
+        data: { currentBlock, customWorkouts, archivedBlocks, trainingCycles, bodyLog, currentWeek, boards, trainedDates },
         is_current: true,
         updated_at: new Date().toISOString()
       });
@@ -7842,6 +8221,9 @@ async function loadFromCloud() {
       }
       if(Array.isArray(d.trainingCycles) && d.trainingCycles.length >= trainingCycles.length) {
         trainingCycles = d.trainingCycles; localStorage.setItem('fw_cycles', JSON.stringify(trainingCycles));
+      }
+      if(Array.isArray(d.bodyLog) && d.bodyLog.length >= bodyLog.length) {
+        bodyLog = d.bodyLog; localStorage.setItem('fw_body', JSON.stringify(bodyLog));
       }
       if(d.currentWeek) { currentWeek = d.currentWeek; localStorage.setItem('fw_week', currentWeek); }
       if(Array.isArray(d.boards) && d.boards.length >= boards.length) {
