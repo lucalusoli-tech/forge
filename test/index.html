@@ -184,6 +184,15 @@
   .macro-inputs input { background: var(--black); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; padding: 9px 10px; width: 100%; }
   .macro-inputs input:focus { outline: none; border-color: var(--accent-dim); }
 
+  /* ─── THREAD INDEX ─────────────────────────────────────────── */
+  .th-item { border: 1px solid var(--border); background: var(--deep); padding: 13px 14px; margin-bottom: 10px; cursor: pointer; }
+  .th-item:active { border-color: var(--accent-dim); }
+  .th-top { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .th-title { font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 1px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .th-when { font-family: 'DM Mono', monospace; font-size: 8.5px; color: var(--text-dim); flex: none; }
+  .th-sub { font-family: 'DM Mono', monospace; font-size: 8.5px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); margin-top: 4px; }
+  .th-prev { font-size: 11.5px; color: var(--text-muted); margin-top: 6px; line-height: 1.5; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
   /* ─── NOTE THREAD ──────────────────────────────────────────── */
   .nt-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9997; display: flex; align-items: flex-end; justify-content: center; }
   .nt-card { background: var(--deep); border: 1px solid var(--border); width: 100%; max-width: 460px; max-height: 82vh; display: flex; flex-direction: column; padding-bottom: var(--safe-bottom); }
@@ -851,44 +860,10 @@
 
   /* ── STATS OVERVIEW ───────────────────────────────── */
   /* ═══ BOARD ═══ */
-  .bd-fab{position:fixed;right:16px;bottom:calc(var(--nav-h) + var(--safe-bottom) + 16px);width:50px;height:50px;border-radius:50%;background:var(--accent);color:#080808;border:none;display:none;align-items:center;justify-content:center;z-index:40;box-shadow:0 6px 20px rgba(0,0,0,.55);cursor:pointer;}
-  .bd-fab.show{display:flex;}
-  .bd-fab svg{width:20px;height:20px;}
   .bd-list{padding:0 20px 30px;}
   .bd-new{width:100%;background:var(--accent);color:#080808;border:none;border-radius:11px;padding:14px;font-family:inherit;font-size:11px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;margin-bottom:16px;}
-  .bd-item{display:flex;align-items:center;gap:12px;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:12px;margin-bottom:10px;cursor:pointer;}
-  .bd-thumb{width:58px;height:44px;border-radius:6px;background:var(--card);flex-shrink:0;object-fit:cover;border:1px solid var(--border);}
-  .bd-meta{flex:1;min-width:0;}
-  .bd-name{font-size:13px;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .bd-date{font-size:10px;color:var(--text-dim);letter-spacing:.1em;text-transform:uppercase;margin-top:3px;}
-  .bd-del{background:none;border:none;color:var(--text-dim);font-size:16px;padding:6px 4px;cursor:pointer;}
   .bd-empty{text-align:center;padding:50px 20px;color:var(--text-dim);font-size:10px;letter-spacing:2px;text-transform:uppercase;}
   /* editor overlay */
-  .bd-editor{position:fixed;inset:0;background:var(--black);z-index:9000;display:none;flex-direction:column;}
-  .bd-editor.open{display:flex;}
-  .bd-top{display:flex;align-items:center;gap:10px;padding:calc(env(safe-area-inset-top, 0px) + 10px) 14px 10px;border-bottom:1px solid var(--border);flex-shrink:0;}
-  .bd-title{flex:1;background:none;border:none;color:var(--text);font-family:inherit;font-size:14px;min-width:0;outline:none;}
-  .bd-top button{background:none;border:1px solid var(--border);color:var(--text-muted);border-radius:7px;padding:8px 11px;font-family:inherit;font-size:10px;letter-spacing:.12em;text-transform:uppercase;cursor:pointer;}
-  .bd-top button.pri{background:var(--accent);color:#080808;border-color:var(--accent);font-weight:700;}
-  .bd-stage{flex:1;position:relative;min-height:0;background:radial-gradient(circle at 1px 1px,rgba(201,169,110,.13) 1px,transparent 0) 0 0/26px 26px,#0d0d0d;}
-  #bd-canvas{display:block;width:100%;height:100%;touch-action:none;}
-  .bd-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;font-size:10px;letter-spacing:.2em;color:rgba(232,226,217,.2);text-transform:uppercase;transition:opacity .4s;}
-  .bd-hint.gone{opacity:0;}
-  .bd-dock{display:flex;align-items:center;gap:6px;padding:9px 12px calc(var(--safe-bottom) + 9px);border-top:1px solid var(--border);overflow-x:auto;flex-shrink:0;}
-  .bd-dock::-webkit-scrollbar{display:none;}
-  .bd-dock button{flex:0 0 auto;background:none;border:1px solid var(--border);border-radius:7px;color:var(--text-muted);font-family:inherit;font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:0 10px;height:38px;cursor:pointer;transition:.15s;}
-  .bd-dock button.on{background:var(--accent);color:#080808;border-color:var(--accent);}
-  .bd-dock button:disabled{opacity:.3;}
-  .bd-ink,.bd-nib{width:38px;padding:0;display:grid;place-items:center;}
-  .bd-ink i{width:13px;height:13px;border-radius:50%;display:block;transition:transform .15s;}
-  .bd-ink.on{background:none;border-color:var(--accent);}
-  .bd-ink.on i{transform:scale(1.35);}
-  .bd-nib i{background:var(--text);border-radius:50%;display:block;opacity:.5;}
-  .bd-nib.on{border-color:var(--accent);}
-  .bd-nib.on i{opacity:1;}
-  .bd-sep{width:1px;height:20px;background:var(--border);flex:0 0 auto;margin:0 2px;}
-  .bd-tele{font-size:9px;letter-spacing:.1em;color:var(--text-dim);text-transform:uppercase;white-space:nowrap;flex:0 0 auto;padding-left:4px;}
-  .bd-tele b{color:var(--accent);font-weight:500;}
 
   /* ═══ ALL-TIME STATS ═══ */
   #st-alltime{padding:0 20px;}
@@ -1484,13 +1459,13 @@
       <div id="progress-container" style="padding-bottom:20px;display:none"></div>
     </div>
 
-    <!-- BOARD -->
+    <!-- NOTES — coach/client threads, one per block or cycle phase -->
     <div class="page" id="page-board">
       <div class="progress-header">
-        <div class="progress-title">BOARD</div>
-        <div class="progress-sub">NOTES &amp; SKETCHES</div>
+        <div class="progress-title">NOTES</div>
+        <div class="progress-sub">CONVERSATIONS ON YOUR TRAINING</div>
       </div>
-      <div class="bd-list" id="bd-list"></div>
+      <div class="bd-list" id="thread-index"></div>
     </div>
 
     <!-- BUILD + ARCHIVE -->
@@ -1715,42 +1690,6 @@
     <button class="nav-btn" id="nav-coaching" onclick="navigate('coaching')"><span class="nav-icon">人</span><span class="nav-label">Programmes</span></button>
     <button class="nav-btn" id="nav-board" onclick="navigate('board')"><span class="nav-icon">✎</span><span class="nav-label">Notes</span></button>
   </nav>
-</div>
-
-<!-- QUICK BOARD -->
-<button class="bd-fab" id="bd-fab" onclick="bdQuick()" aria-label="Open board">
-  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19l7-7 3 3-7 7-3-3z"/><path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"/><path d="M2 2l7.586 7.586"/><circle cx="11" cy="11" r="2"/></svg>
-</button>
-
-<!-- BOARD EDITOR -->
-<div class="bd-editor" id="bd-editor">
-  <div class="bd-top">
-    <button onclick="bdClose()">Close</button>
-    <input class="bd-title" id="bd-title" placeholder="Untitled board" maxlength="60">
-    <button onclick="bdExport()">PNG</button>
-    <button class="pri" onclick="bdSave()">Save</button>
-  </div>
-  <div class="bd-stage" id="bd-stage">
-    <canvas id="bd-canvas"></canvas>
-    <div class="bd-hint" id="bd-hint">Draw to begin</div>
-  </div>
-  <div class="bd-dock">
-    <button class="bd-ink on" data-color="#e8e2d9"><i style="background:#e8e2d9"></i></button>
-    <button class="bd-ink" data-color="#c9a96e"><i style="background:#c9a96e"></i></button>
-    <button class="bd-ink" data-color="#c94040"><i style="background:#c94040"></i></button>
-    <div class="bd-sep"></div>
-    <button class="bd-nib" data-size="1.6"><i style="width:5px;height:5px"></i></button>
-    <button class="bd-nib on" data-size="3"><i style="width:9px;height:9px"></i></button>
-    <button class="bd-nib" data-size="6"><i style="width:13px;height:13px"></i></button>
-    <div class="bd-sep"></div>
-    <button id="bd-erase">Erase</button>
-    <button id="bd-penonly">Pen only</button>
-    <div class="bd-sep"></div>
-    <button id="bd-undo" disabled>Undo</button>
-    <button id="bd-redo" disabled>Redo</button>
-    <button id="bd-clear">Clear</button>
-    <div class="bd-tele" id="bd-tele">—</div>
-  </div>
 </div>
 
 <!-- EX SHEET -->
@@ -2341,7 +2280,6 @@ let customWorkouts = JSON.parse(localStorage.getItem('fw_customs')||'[]');
 // all four phases from day one instead of only the ones that already exist.
 let trainingCycles = JSON.parse(localStorage.getItem('fw_cycles')||'[]');
 let archivedBlocks = JSON.parse(localStorage.getItem('fw_archive')||'[]');
-let boards = JSON.parse(localStorage.getItem('fw_boards')||'[]');
 let sessionLog = JSON.parse(localStorage.getItem('fw_log')||'{}');
 let currentWeek = parseInt(localStorage.getItem('fw_week')||'1');
 // Map of programme-week-number -> first-session-date (YYYY-MM-DD).
@@ -2935,12 +2873,7 @@ function navigate(page, push=true) {
   document.getElementById('scroll-area').scrollTop = 0;
   const navIds = ['home','db','progress','builder','coaching','board'];
   document.querySelectorAll('.nav-btn').forEach((b,i) => b.classList.toggle('active', navIds[i]===page));
-  // Quick-board button rides along on the pages where notes actually happen
-  try {
-    const fab = document.getElementById('bd-fab');
-    if (fab) fab.classList.toggle('show', page==='home' || page==='log'); // off Progress — it sat on top of the stats
-  } catch(e) {}
-  if (page==='board') { try { bdRenderList(); } catch(err){ console.warn('board', err); } }
+  if (page==='board') { try { renderThreadIndex(); } catch(err){ console.warn('threads', err); } }
   const isLog = page==='log';
   document.getElementById('back-btn').classList.toggle('visible', isLog);
   document.getElementById('topbar-logo').style.display = isLog ? 'none' : 'block';
@@ -4868,10 +4801,22 @@ function threadKeyFor(block){
   return 'name:'+(block.name||'').trim().toUpperCase();
 }
 
+let noteThreadPeers = { coach:null, client:null };
+
+// Resolve the two participants for a thread. Coach-side we read the client off the cycle
+// or the block tag; client-side both were stamped onto the block when it was pushed.
+function threadPeersFor(block){
+  if(block && block.coachEmail) return { coach: block.coachEmail, client: block.clientEmail || null };
+  const cyc = block && block.cycle && block.cycle.id ? getCycle(block.cycle.id) : null;
+  const client = (cyc && cyc.client && cyc.client.email) || (block && block.client && block.client.email) || null;
+  return { coach: currentUser?.email || null, client: client };
+}
+
 async function openNoteThread(block){
   const key = threadKeyFor(block);
   if(!key){ showToast('No block to attach notes to'); return; }
   noteThreadKey = key;
+  noteThreadPeers = threadPeersFor(block);
   noteThreadRows = [];
   document.getElementById('notethread-overlay').style.display = 'flex';
   document.getElementById('notethread-title').textContent = block.name || 'Notes';
@@ -4932,16 +4877,101 @@ async function postNote(){
       thread_key: noteThreadKey,
       author_email: currentUser.email,
       author_name: (currentUser.email||'').split('@')[0],
+      coach_email: noteThreadPeers.coach,
+      client_email: noteThreadPeers.client,
       body: body
     });
     if(error) throw error;
     el.value = '';
     await loadNoteThread();
+    if(document.getElementById('page-board')?.classList.contains('active')) renderThreadIndex();
   }catch(e){
     console.error('note post', e);
     showToast('Could not post note');
   }
   if(btn) btn.disabled = false;
+}
+
+// ─── THREAD INDEX (Notes tab) ──────────────────────────────────
+// Every thread you're a participant in, newest activity first. RLS scopes the query to
+// threads where you're the coach or the client, so this can safely select broadly.
+let threadIndexRows = [];
+
+// Turn a thread key back into something readable. 'cyc:<id>:<order>' resolves against the
+// local cycle plan; 'name:<NAME>' is a loose block and carries its own label.
+function describeThreadKey(key){
+  if(!key) return { title:'Notes', sub:'' };
+  if(key.indexOf('cyc:') === 0){
+    const parts = key.split(':');
+    const cyc = getCycle(parts[1]);
+    const order = parseInt(parts[2]) || 1;
+    if(cyc){
+      const slot = cyc.slots[order-1];
+      const phase = slot ? (PHASE_LABELS[slot.phase] || slot.phase) : ('Phase ' + order);
+      return { title: cyc.name, sub: order + '. ' + phase };
+    }
+    return { title: 'Cycle phase ' + order, sub: 'plan not on this device' };
+  }
+  if(key.indexOf('name:') === 0) return { title: key.slice(5), sub: 'block' };
+  return { title: key, sub: '' };
+}
+
+async function renderThreadIndex(){
+  const host = document.getElementById('thread-index');
+  if(!host) return;
+  host.innerHTML = '<div class="bd-empty">Loading…</div>';
+  try{
+    const { data, error } = await supa
+      .from('block_notes').select('*')
+      .order('created_at', { ascending: false })
+      .limit(400);
+    if(error) throw error;
+    threadIndexRows = data || [];
+  }catch(e){
+    host.innerHTML = '<div class="bd-empty">Notes unavailable offline.<br>They\'ll load when you\'re back on.</div>';
+    return;
+  }
+
+  // Collapse to one entry per thread — the most recent note wins.
+  const seen = new Map();
+  threadIndexRows.forEach(function(r){
+    if(!seen.has(r.thread_key)) seen.set(r.thread_key, { last: r, count: 0 });
+    seen.get(r.thread_key).count++;
+  });
+
+  if(!seen.size){
+    host.innerHTML = '<div class="bd-empty">No notes yet.<br>Open a phase in Programmes and start a thread.</div>';
+    return;
+  }
+
+  const me = currentUser?.email;
+  host.innerHTML = [...seen.entries()].map(function(pair){
+    const key = pair[0], info = pair[1], r = info.last;
+    const d = describeThreadKey(key);
+    // Who the thread is WITH — the participant that isn't you.
+    const other = (r.coach_email === me ? r.client_email : r.coach_email) || '';
+    const who = other ? other.split('@')[0] : 'you';
+    const when = new Date(r.created_at).toLocaleDateString(undefined,{day:'numeric',month:'short'});
+    const preview = String(r.body||'').replace(/[<>]/g,'').slice(0,80);
+    return '<div class="th-item" onclick="openThreadByKey(\'' + key + '\')">'
+      + '<div class="th-top"><span class="th-title">' + d.title + '</span>'
+      + '<span class="th-when">' + when + '</span></div>'
+      + '<div class="th-sub">' + (d.sub ? d.sub + ' · ' : '') + 'with ' + who + ' · ' + info.count + ' note' + (info.count>1?'s':'') + '</div>'
+      + '<div class="th-prev">' + preview + '</div></div>';
+  }).join('');
+}
+
+// Open straight from the index — the key is already known, so no block object is needed.
+async function openThreadByKey(key){
+  const row = threadIndexRows.find(function(r){ return r.thread_key === key; });
+  const d = describeThreadKey(key);
+  noteThreadKey = key;
+  noteThreadPeers = row ? { coach: row.coach_email, client: row.client_email } : { coach: currentUser?.email, client: null };
+  noteThreadRows = [];
+  document.getElementById('notethread-overlay').style.display = 'flex';
+  document.getElementById('notethread-title').textContent = d.title + (d.sub ? ' · ' + d.sub : '');
+  document.getElementById('notethread-list').innerHTML = '<div class="nt-empty">Loading…</div>';
+  await loadNoteThread();
 }
 
 // ─── BODYWEIGHT LOG ────────────────────────────────────────────
@@ -5483,241 +5513,6 @@ var BD = {
   strokes:[], redo:[], cur:null, id:null, dirty:false,
   color:'#e8e2d9', size:3, erase:false, penOnly:true, penSeen:false
 };
-
-function bdSaveLocal(){ localStorage.setItem('fw_boards', JSON.stringify(boards)); }
-
-function bdRenderList(){
-  var host=document.getElementById('bd-list'); if(!host) return;
-  if(!boards.length){
-    host.innerHTML='<button class="bd-new" onclick="bdQuick()">New board</button>'
-      +'<div class="bd-empty">No boards yet.<br>Sketch a cue, a set, a shape.</div>';
-    return;
-  }
-  host.innerHTML='<button class="bd-new" onclick="bdQuick()">New board</button>'
-    + boards.map(function(b){
-        return '<div class="bd-item" onclick="bdOpen(\''+b.id+'\')">'
-          + (b.thumb ? '<img class="bd-thumb" src="'+b.thumb+'" alt="">' : '<div class="bd-thumb"></div>')
-          + '<div class="bd-meta"><div class="bd-name">'+(b.title||'Untitled board').replace(/</g,'&lt;')+'</div>'
-          + '<div class="bd-date">'+b.updatedAt+' · '+(b.strokes?b.strokes.length:0)+' strokes</div></div>'
-          + '<button class="bd-del" onclick="event.stopPropagation();bdDelete(\''+b.id+'\')" aria-label="Delete board">\u2715</button></div>';
-      }).join('');
-}
-
-function bdDelete(id){
-  var b=boards.find(function(x){return x.id===id;});
-  if(!b) return;
-  if(!confirm('Delete "'+(b.title||'Untitled board')+'"? This cannot be undone.')) return;
-  boards=boards.filter(function(x){return x.id!==id;});
-  bdSaveLocal(); bdRenderList();
-  try{ if(typeof syncBlocksToCloud==='function') syncBlocksToCloud(); }catch(e){ console.warn('board sync', e); }
-}
-
-function bdQuick(){ bdOpenEditor(null); }
-function bdOpen(id){ bdOpenEditor(boards.find(function(b){return b.id===id;})||null); }
-
-function bdOpenEditor(board){
-  var ed=document.getElementById('bd-editor');
-  BD.id      = board ? board.id : null;
-  BD.strokes = board && board.strokes ? JSON.parse(JSON.stringify(board.strokes)) : [];
-  BD.redo    = []; BD.cur=null; BD.dirty=false;
-  document.getElementById('bd-title').value = board ? (board.title||'') : '';
-  document.getElementById('bd-hint').classList.toggle('gone', BD.strokes.length>0);
-  ed.classList.add('open');
-  BD.cv    = document.getElementById('bd-canvas');
-  BD.ctx   = BD.cv.getContext('2d');
-  BD.stage = document.getElementById('bd-stage');
-  requestAnimationFrame(function(){ bdSize(); bdSyncBtns(); });
-}
-
-function bdClose(){
-  if(BD.dirty && !confirm('Close without saving? Your changes will be lost.')) return;
-  document.getElementById('bd-editor').classList.remove('open');
-  BD.cur=null;
-}
-
-function bdSize(){
-  if(!BD.stage) return;
-  BD.rect=BD.stage.getBoundingClientRect();
-  BD.W=BD.rect.width; BD.H=BD.rect.height;
-  BD.dpr=Math.min(window.devicePixelRatio||1,3);
-  BD.cv.width=Math.round(BD.W*BD.dpr); BD.cv.height=Math.round(BD.H*BD.dpr);
-  BD.ctx.setTransform(BD.dpr,0,0,BD.dpr,0,0);
-  bdRedraw();
-}
-
-function bdWidth(s,p){
-  var base=s.z*(s.e?7:1);
-  if(!s.p) return base;                       // finger / mouse: constant width
-  return Math.max(0.4, base*(0.30+1.45*p));   // pen: pressure drives the nib
-}
-function bdSeg(s,ax,ay,ap,bx,by,bp){
-  var c=BD.ctx;
-  c.globalCompositeOperation = s.e ? 'destination-out' : 'source-over';
-  c.strokeStyle=s.c; c.lineCap='round'; c.lineJoin='round';
-  c.lineWidth=bdWidth(s,(ap+bp)/2);
-  c.beginPath(); c.moveTo(ax,ay); c.lineTo(bx,by); c.stroke();
-}
-function bdPaint(s){
-  var p=s.pts,i,W=BD.W;
-  if(p.length===3){ bdSeg(s,p[0]*W,p[1]*W,p[2],p[0]*W+0.01,p[1]*W,p[2]); return; }
-  for(i=0;i+5<p.length;i+=3) bdSeg(s,p[i]*W,p[i+1]*W,p[i+2],p[i+3]*W,p[i+4]*W,p[i+5]);
-}
-function bdRedraw(){
-  if(!BD.ctx) return;
-  BD.ctx.setTransform(BD.dpr,0,0,BD.dpr,0,0);
-  BD.ctx.clearRect(0,0,BD.W,BD.H);
-  for(var i=0;i<BD.strokes.length;i++) bdPaint(BD.strokes[i]);
-  BD.ctx.globalCompositeOperation='source-over';
-}
-
-function bdPressure(e){
-  if(e.pointerType!=='pen') return 0.5;
-  return (e.pressure>0 && e.pressure<=1) ? e.pressure : 0.5;
-}
-function bdPush(e,connect){
-  var x=e.clientX-BD.rect.left, y=e.clientY-BD.rect.top, p=bdPressure(e), n=BD.cur.pts.length, W=BD.W;
-  if(connect && n>=3) bdSeg(BD.cur, BD.cur.pts[n-3]*W, BD.cur.pts[n-2]*W, BD.cur.pts[n-1], x, y, p);
-  // 4dp keeps sub-pixel accuracy while roughly halving stored size
-  BD.cur.pts.push(+(x/W).toFixed(4), +(y/W).toFixed(4), +p.toFixed(2));
-}
-
-(function bdBind(){
-  var cv=document.getElementById('bd-canvas'); if(!cv) return;
-
-  cv.addEventListener('pointerdown', function(e){
-    if(e.pointerType==='pen') BD.penSeen=true;
-    // Palm rejection: once a pen has touched this board, fingers stop drawing
-    if(BD.penOnly && BD.penSeen && e.pointerType!=='pen') return;
-    if(e.button>0) return;
-    BD.rect=BD.stage.getBoundingClientRect();
-    cv.setPointerCapture(e.pointerId);
-    BD.cur={c:BD.color,z:BD.size,e:BD.erase,p:e.pointerType==='pen',pts:[]};
-    bdPush(e,false);
-    document.getElementById('bd-hint').classList.add('gone');
-    bdTele(e); e.preventDefault();
-  },{passive:false});
-
-  cv.addEventListener('pointermove', function(e){
-    if(!BD.cur) return;
-    // Coalesced events recover the stylus's full sample rate between frames
-    var evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
-    for(var i=0;i<evs.length;i++) bdPush(evs[i],true);
-    bdTele(e); e.preventDefault();
-  },{passive:false});
-
-  function end(){
-    if(!BD.cur) return;
-    if(BD.cur.pts.length>=3){ BD.strokes.push(BD.cur); BD.redo.length=0; BD.dirty=true; }
-    BD.cur=null;
-    if(BD.ctx) BD.ctx.globalCompositeOperation='source-over';
-    bdSyncBtns();
-  }
-  cv.addEventListener('pointerup',end);
-  cv.addEventListener('pointercancel',end);
-  cv.addEventListener('pointerleave',end);
-
-  function grp(sel,fn){
-    var els=document.querySelectorAll(sel);
-    Array.prototype.forEach.call(els,function(el){
-      el.addEventListener('click',function(){
-        Array.prototype.forEach.call(els,function(o){o.classList.remove('on');});
-        el.classList.add('on'); fn(el);
-      });
-    });
-  }
-  grp('.bd-ink',function(el){
-    BD.color=el.getAttribute('data-color'); BD.erase=false;
-    document.getElementById('bd-erase').classList.remove('on');
-  });
-  grp('.bd-nib',function(el){ BD.size=parseFloat(el.getAttribute('data-size')); });
-
-  document.getElementById('bd-erase').addEventListener('click',function(){
-    BD.erase=!BD.erase; this.classList.toggle('on',BD.erase);
-  });
-  document.getElementById('bd-penonly').addEventListener('click',function(){
-    BD.penOnly=!BD.penOnly; this.classList.toggle('on',BD.penOnly);
-    this.textContent=BD.penOnly?'Pen only':'Any input';
-  });
-  document.getElementById('bd-penonly').classList.add('on');
-  document.getElementById('bd-undo').addEventListener('click',function(){
-    if(!BD.strokes.length) return;
-    BD.redo.push(BD.strokes.pop()); BD.dirty=true; bdRedraw(); bdSyncBtns();
-  });
-  document.getElementById('bd-redo').addEventListener('click',function(){
-    if(!BD.redo.length) return;
-    BD.strokes.push(BD.redo.pop()); BD.dirty=true; bdRedraw(); bdSyncBtns();
-  });
-  document.getElementById('bd-clear').addEventListener('click',function(){
-    if(BD.strokes.length && !confirm('Clear the board?')) return;
-    BD.strokes=[]; BD.redo=[]; BD.dirty=true; bdRedraw(); bdSyncBtns();
-    document.getElementById('bd-hint').classList.remove('gone');
-  });
-
-  var t;
-  window.addEventListener('resize',function(){
-    if(!document.getElementById('bd-editor').classList.contains('open')) return;
-    clearTimeout(t); t=setTimeout(bdSize,140);
-  });
-})();
-
-function bdTele(e){
-  var el=document.getElementById('bd-tele'); if(!el) return;
-  el.innerHTML=e.pointerType+' · <b>'+bdPressure(e).toFixed(2)+'</b>';
-}
-function bdSyncBtns(){
-  var u=document.getElementById('bd-undo'), r=document.getElementById('bd-redo');
-  if(u) u.disabled=!BD.strokes.length;
-  if(r) r.disabled=!BD.redo.length;
-}
-
-// Flatten background + dot grid + ink into one bitmap
-function bdFlatten(scale){
-  var s=scale||1;
-  var out=document.createElement('canvas');
-  out.width=Math.round(BD.W*s); out.height=Math.round(BD.H*s);
-  var o=out.getContext('2d');
-  o.setTransform(s,0,0,s,0,0);
-  o.fillStyle='#0d0d0d'; o.fillRect(0,0,BD.W,BD.H);
-  o.fillStyle='rgba(201,169,110,.13)';
-  for(var y=0;y<BD.H;y+=26) for(var x=0;x<BD.W;x+=26) o.fillRect(x,y,1,1);
-  o.setTransform(1,0,0,1,0,0);
-  o.drawImage(BD.cv,0,0,out.width,out.height);
-  return out;
-}
-
-function bdExport(){
-  try{
-    var url=bdFlatten(BD.dpr).toDataURL('image/png');
-    var a=document.createElement('a');
-    a.href=url; a.download='forge-board-'+Date.now()+'.png';
-    document.body.appendChild(a); a.click(); a.remove();
-  }catch(e){ alert('Export failed on this device. Screenshot works as a fallback.'); }
-}
-
-function bdSave(){
-  var title=document.getElementById('bd-title').value.trim();
-  var thumb='';
-  try{ thumb=bdFlatten(116/Math.max(1,BD.W)).toDataURL('image/jpeg',0.5); }catch(e){}
-  var now=new Date().toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-  var existing=BD.id ? boards.find(function(b){return b.id===BD.id;}) : null;
-  if(existing){
-    existing.title=title; existing.strokes=BD.strokes; existing.updatedAt=now; existing.thumb=thumb;
-    boards=[existing].concat(boards.filter(function(b){return b.id!==existing.id;}));
-  } else {
-    BD.id='bd'+Date.now()+Math.random().toString(36).slice(2,6);
-    boards.unshift({id:BD.id,title:title,strokes:BD.strokes,updatedAt:now,thumb:thumb});
-  }
-  if(boards.length>60) boards=boards.slice(0,60);
-  bdSaveLocal(); BD.dirty=false;
-  try{ if(typeof syncBlocksToCloud==='function') syncBlocksToCloud(); }catch(e){ console.warn('board sync', e); }
-  document.getElementById('bd-editor').classList.remove('open');
-  bdRenderList();
-  // Saving used to leave you wherever you were, with no sign of where the note
-  // went. Land on the Notes list so the save is visible.
-  const onBoard = !!document.querySelector('#page-board.active');
-  if(typeof navigate==='function' && !onBoard) navigate('board');
-  if(typeof showToast==='function') showToast('Saved to Notes \u2713');
-}
 
 function renderProgress(){
   const c=document.getElementById('progress-container'); c.innerHTML='';
@@ -6386,7 +6181,9 @@ async function activateBlock(newBlock){
     days: newBlock.days || [],
     sourceId: newBlock.id || newBlock.sourceId || null, // links the live block to its saved source (for in-place edits)
     cycle: newBlock.cycle || null, // phase-tracking group — MUST be listed here or it's dropped on activation
-    macros: newBlock.macros || null // coach-set macro targets — same whitelist rule applies
+    macros: newBlock.macros || null, // coach-set macro targets — same whitelist rule applies
+    coachEmail: newBlock.coachEmail || null, // note-thread participants — same rule again
+    clientEmail: newBlock.clientEmail || null
   };
   currentWeek = 1;
   sessionLog = {};
@@ -8148,14 +7945,14 @@ async function syncBlocksToCloud() {
     if(existing?.id) {
       await supa.from('blocks').update({
         name: currentBlock.name || 'My Block',
-        data: { currentBlock, customWorkouts, archivedBlocks, trainingCycles, bodyLog, currentWeek, boards, trainedDates },
+        data: { currentBlock, customWorkouts, archivedBlocks, trainingCycles, bodyLog, currentWeek, trainedDates },
         updated_at: new Date().toISOString()
       }).eq('id', existing.id);
     } else {
       await supa.from('blocks').insert({
         user_id: currentUser.id,
         name: currentBlock.name || 'My Block',
-        data: { currentBlock, customWorkouts, archivedBlocks, trainingCycles, bodyLog, currentWeek, boards, trainedDates },
+        data: { currentBlock, customWorkouts, archivedBlocks, trainingCycles, bodyLog, currentWeek, trainedDates },
         is_current: true,
         updated_at: new Date().toISOString()
       });
@@ -8226,9 +8023,6 @@ async function loadFromCloud() {
         bodyLog = d.bodyLog; localStorage.setItem('fw_body', JSON.stringify(bodyLog));
       }
       if(d.currentWeek) { currentWeek = d.currentWeek; localStorage.setItem('fw_week', currentWeek); }
-      if(Array.isArray(d.boards) && d.boards.length >= boards.length) {
-        boards = d.boards; localStorage.setItem('fw_boards', JSON.stringify(boards));
-      }
       if(Array.isArray(d.trainedDates)) {
         // Union local + cloud so a device that was offline never loses training days
         const merged = Array.from(new Set([...(trainedDates||[]), ...d.trainedDates])).sort();
@@ -8363,7 +8157,7 @@ async function afterAuth(supaUser, isNew) {
      'fw_premium','fw_trial_start','fw_boards','fw_trained_dates'].forEach(k => localStorage.removeItem(k));
     // Reset in-memory state
     currentBlock = { name:'', methods:[], weeks:4, warmup:[], skill:[], days:[] };
-    customWorkouts = []; archivedBlocks = []; sessionLog = {}; currentWeek = 1; boards = [];
+    customWorkouts = []; archivedBlocks = []; sessionLog = {}; currentWeek = 1;
   }
   const user = {
     id: supaUser.id,
@@ -8967,7 +8761,9 @@ async function acceptAssignedBlock(assignmentId) {
         days: newBlock.days || [],
         sourceId: savedId,
         cycle: newBlock.cycle || null,   // phase strip needs this — dropped here in earlier builds
-        macros: newBlock.macros || null  // coach-set macro targets
+        macros: newBlock.macros || null, // coach-set macro targets
+        coachEmail: newBlock.coachEmail || null,   // note-thread participants
+        clientEmail: newBlock.clientEmail || null
       };
       // The slot points at savedId in this branch, not newId.
       if(newBlock.cycle && newBlock.cycle.id){
@@ -9113,7 +8909,7 @@ async function executePushUpdate() {
     coach_email: currentUser.email,
     client_email: clientEmail,
     block_name: block.name,
-    block_data: { currentBlock: block, mode, cyclePlan },
+    block_data: { currentBlock: { ...block, coachEmail: currentUser.email, clientEmail: clientEmail }, mode, cyclePlan },
     note: mode === 'update' ? 'Updated version of your programme — your progress is kept' : 'New programme',
     status: 'pending'
   });
@@ -9132,4 +8928,3 @@ async function executePushUpdate() {
 </script>
 </body>
 </html>
-
