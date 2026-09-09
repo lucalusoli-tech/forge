@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Handstand Workshop — FORGE</title>
+<title>Handstand Class — FORGE</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
@@ -137,70 +137,32 @@
   .hl-green { color: var(--green); font-weight: 500; }
   .hl-blue { color: #6b9bc3; font-weight: 500; }
 
-  /* Early CTA */
-  .early-cta {
+  /* Schedule banner */
+  .schedule-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 22px;
+    background: var(--accent-dim);
+    border: 1px solid rgba(201, 169, 110, 0.2);
+    border-radius: 10px;
     margin-bottom: 48px;
     animation: fadeDown 0.8s 0.38s ease both;
   }
-
-  /* Shared button style */
-  .cta-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 16px 48px;
-    background: var(--accent);
-    color: var(--bg-deep);
-    font-family: 'Inter', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    text-decoration: none;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.3s ease;
+  .schedule-icon {
+    font-size: 20px;
+    flex-shrink: 0;
   }
-  .cta-btn:hover {
-    background: #d4b87a;
-    transform: translateY(-1px);
-    box-shadow: 0 8px 32px rgba(201, 169, 110, 0.25);
+  .schedule-text {
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text-primary);
+    line-height: 1.5;
   }
-  .cta-btn svg {
-    width: 14px; height: 14px;
-    transition: transform 0.3s ease;
-  }
-  .cta-btn:hover svg { transform: translateX(3px); }
-
-  .cta-btn-outline {
-    display: inline-flex;
-    align-items: center;
-    gap: 10px;
-    padding: 14px 36px;
-    background: transparent;
+  .schedule-text strong {
     color: var(--accent);
-    font-family: 'Inter', sans-serif;
-    font-size: 13px;
-    font-weight: 600;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    text-decoration: none;
-    border: 1px solid rgba(201, 169, 110, 0.4);
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.3s ease;
+    font-weight: 500;
   }
-  .cta-btn-outline:hover {
-    background: rgba(201, 169, 110, 0.08);
-    border-color: var(--accent);
-    transform: translateY(-1px);
-  }
-  .cta-btn-outline svg {
-    width: 14px; height: 14px;
-    transition: transform 0.3s ease;
-  }
-  .cta-btn-outline:hover svg { transform: translateX(3px); }
 
   /* Info grid */
   .info-grid {
@@ -234,6 +196,11 @@
     color: var(--text-primary);
   }
   .info-value.accent { color: var(--accent); }
+  .info-sub {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 4px;
+  }
   .info-address {
     font-size: 14px;
     color: var(--text-mid);
@@ -304,12 +271,8 @@
     font-weight: 500;
   }
 
-  .levels {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-  }
-  .level-tag {
+  /* Level badge */
+  .level-single {
     display: inline-flex;
     align-items: center;
     gap: 10px;
@@ -322,12 +285,12 @@
     width: 8px; height: 8px;
     border-radius: 50%;
     flex-shrink: 0;
+    background: linear-gradient(135deg, var(--green), #6b9bc3);
   }
-  .level-dot.green { background: var(--green); }
-  .level-dot.blue { background: #6b9bc3; }
   .level-name { font-size: 14px; font-weight: 500; color: var(--text-primary); }
   .level-desc { font-size: 13px; color: var(--text-muted); margin-left: 4px; }
 
+  /* Coach */
   .coach {
     display: flex;
     align-items: center;
@@ -348,24 +311,136 @@
   .coach-name { font-size: 15px; font-weight: 500; color: var(--text-primary); margin-bottom: 2px; }
   .coach-cred { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
 
-  .cta-block {
-    text-align: center;
-    padding: 56px 24px;
+  /* Pricing cards */
+  .pricing {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
     animation: fadeDown 0.8s 0.6s ease both;
   }
-  .cta-price {
-    font-size: 48px;
+  .price-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(201, 169, 110, 0.1);
+    border-radius: 12px;
+    padding: 32px 24px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    transition: border-color 0.3s;
+  }
+  .price-card:hover {
+    border-color: rgba(201, 169, 110, 0.25);
+  }
+  .price-card.recommended {
+    border-color: rgba(201, 169, 110, 0.35);
+    position: relative;
+  }
+  .price-card.recommended::before {
+    content: 'BEST VALUE';
+    position: absolute;
+    top: -10px;
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.15em;
+    color: var(--bg-deep);
+    background: var(--accent);
+    padding: 3px 12px;
+    border-radius: 100px;
+  }
+  .price-card-name {
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+  }
+  .price-card-amount {
+    font-size: 36px;
     font-weight: 300;
     letter-spacing: -0.03em;
     color: var(--accent);
     margin-bottom: 4px;
   }
-  .cta-price-note {
-    font-size: 13px;
+  .price-card-per {
+    font-size: 12px;
     color: var(--text-muted);
-    margin-bottom: 32px;
+    margin-bottom: 24px;
   }
+  .price-card-detail {
+    font-size: 13px;
+    color: var(--text-mid);
+    line-height: 1.6;
+    margin-bottom: 24px;
+    flex-grow: 1;
+  }
+
+  /* Buttons */
+  .cta-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 28px;
+    background: var(--accent);
+    color: var(--bg-deep);
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+  }
+  .cta-btn:hover {
+    background: #d4b87a;
+    transform: translateY(-1px);
+    box-shadow: 0 8px 32px rgba(201, 169, 110, 0.25);
+  }
+  .cta-btn svg {
+    width: 13px; height: 13px;
+    transition: transform 0.3s ease;
+  }
+  .cta-btn:hover svg { transform: translateX(3px); }
+
+  .cta-btn-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 28px;
+    background: transparent;
+    color: var(--accent);
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-decoration: none;
+    border: 1px solid rgba(201, 169, 110, 0.4);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+  }
+  .cta-btn-outline:hover {
+    background: rgba(201, 169, 110, 0.08);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+  }
+  .cta-btn-outline svg {
+    width: 13px; height: 13px;
+    transition: transform 0.3s ease;
+  }
+  .cta-btn-outline:hover svg { transform: translateX(3px); }
+
   .spots {
+    text-align: center;
     margin-top: 20px;
     font-size: 12px;
     font-weight: 500;
@@ -374,11 +449,12 @@
     color: var(--red);
   }
 
+  /* Footer */
   .footer {
     text-align: center;
     padding-top: 40px;
     border-top: 1px solid rgba(201, 169, 110, 0.08);
-    margin-top: 20px;
+    margin-top: 48px;
   }
   .footer-logo {
     font-size: 11px; font-weight: 600; letter-spacing: 0.25em;
@@ -394,11 +470,12 @@
     to { opacity: 1; transform: translateY(0); }
   }
 
-  @media (max-width: 480px) {
+  @media (max-width: 520px) {
     .page { padding: 40px 18px 60px; }
     .info-grid { grid-template-columns: 1fr; }
-    .cta-price { font-size: 40px; }
-    .cta-btn, .cta-btn-outline { padding: 14px 32px; font-size: 12px; }
+    .pricing { grid-template-columns: 1fr; }
+    .price-card-amount { font-size: 32px; }
+    .cta-btn, .cta-btn-outline { padding: 14px 20px; font-size: 11px; }
   }
 </style>
 </head>
@@ -406,45 +483,48 @@
 
 <div class="page">
 
-  <div class="badge">Workshop</div>
+  <div class="badge">Biweekly Class</div>
 
   <div class="hero-label">FORGE × Handstand Training</div>
-  <h1 class="hero-title">Handstand<br><em>Workshop</em></h1>
+  <h1 class="hero-title">Handstand<br><em>Class</em></h1>
 
   <!-- Hero Image -->
   <div class="hero-image">
     <img src="hero3.png" alt="Handstand at The Ministry gym">
   </div>
 
-  <!-- Intro copy -->
-  <p class="intro">Keen to see what everything looks like upside down and get a little stronger in the process? Learn it all at this Handstand Workshop and gain a niche little skill you can whack on your CV.</p>
-  <p class="intro-detail">A deep dive into the Handstand — 3 hours of full technique and drills, based on your level. After this you will definitely learn how to develop a training for yourself and a deep understanding of bio-mechanics.<br><br>Tailored for <span class="hl-green">beginners</span> and <span class="hl-blue">intermediate</span> level.</p>
+  <!-- Intro -->
+  <p class="intro">Keen to see what everything looks like upside down and get a little stronger in the process? Join this biweekly Handstand Class and build a real skill — one session at a time.</p>
+  <p class="intro-detail">A focused 1-hour session of technique and drills, based on your level. You'll develop a solid understanding of handstand bio-mechanics and learn how to structure your own practice between sessions.<br><br>From <span class="hl-green">foundation</span> to <span class="hl-blue">intermediate</span> level.</p>
 
-  <!-- Early CTA -->
-  <div class="early-cta">
-    <a href="https://monzo.com/pay/r/lucacalisthenics_BDXa9YPW0fjlu0" target="_blank" class="cta-btn-outline">
-      Reserve Your Spot — £39
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-    </a>
+  <!-- Schedule banner -->
+  <div class="schedule-banner">
+    <div class="schedule-icon">📅</div>
+    <div class="schedule-text">
+      <strong>Every other Tuesday at 7:00 PM</strong><br>
+      Next sessions: 16th September &amp; 30th September
+    </div>
   </div>
 
   <!-- Info Grid -->
   <div class="info-grid">
     <div class="info-cell">
-      <div class="info-label">Date</div>
-      <div class="info-value">26th of July</div>
+      <div class="info-label">Schedule</div>
+      <div class="info-value">Biweekly</div>
+      <div class="info-sub">Every other week</div>
     </div>
     <div class="info-cell">
       <div class="info-label">Time</div>
-      <div class="info-value">12:00 – 3:00 PM</div>
+      <div class="info-value">7:00 PM</div>
+      <div class="info-sub">1 hour</div>
     </div>
     <div class="info-cell">
-      <div class="info-label">Duration</div>
-      <div class="info-value">3 Hours</div>
+      <div class="info-label">Next Dates</div>
+      <div class="info-value accent">16 &amp; 30 Sep</div>
     </div>
     <div class="info-cell">
-      <div class="info-label">Price</div>
-      <div class="info-value accent">£39</div>
+      <div class="info-label">Level</div>
+      <div class="info-value">Foundation → Intermediate</div>
     </div>
     <div class="info-cell full">
       <div class="info-label">Location</div>
@@ -455,6 +535,7 @@
 
   <div class="divider"></div>
 
+  <!-- What You'll Cover -->
   <div class="section">
     <div class="section-title">What You'll Cover</div>
     <ul class="content-list">
@@ -464,30 +545,23 @@
       <li>Kick-up technique and entry methods</li>
       <li>Balance corrections — finger pressure, weight shifting, and micro-adjustments</li>
       <li>Freestanding handstand holds and building volume over time</li>
-      <li>How to structure your own handstand practice going forward</li>
+      <li>How to structure your own handstand practice between sessions</li>
     </ul>
   </div>
 
+  <!-- Who It's For -->
   <div class="section">
     <div class="section-title">Who It's For</div>
-    <div class="levels">
-      <div class="level-tag">
-        <div class="level-dot green"></div>
-        <div>
-          <span class="level-name">Beginners</span>
-          <span class="level-desc">— No handstand experience needed. We start from scratch.</span>
-        </div>
-      </div>
-      <div class="level-tag">
-        <div class="level-dot blue"></div>
-        <div>
-          <span class="level-name">Intermediate</span>
-          <span class="level-desc">— Can hold a wall handstand and want to work toward freestanding.</span>
-        </div>
+    <div class="level-single">
+      <div class="level-dot"></div>
+      <div>
+        <span class="level-name">Foundation → Intermediate</span>
+        <span class="level-desc">— From zero handstand experience through to working on freestanding holds.</span>
       </div>
     </div>
   </div>
 
+  <!-- Coach -->
   <div class="section">
     <div class="section-title">Your Coach</div>
     <div class="coach">
@@ -499,6 +573,7 @@
     </div>
   </div>
 
+  <!-- What to Bring -->
   <div class="section">
     <div class="section-title">What to Bring</div>
     <p class="body-text">Comfortable training clothes, a <strong>water bottle</strong>, and a good attitude. No equipment needed — everything else is provided.</p>
@@ -506,17 +581,40 @@
 
   <div class="divider"></div>
 
-  <!-- Bottom CTA -->
-  <div class="cta-block">
-    <div class="cta-price">£39</div>
-    <div class="cta-price-note">per person</div>
-    <a href="https://monzo.com/pay/r/lucacalisthenics_BDXa9YPW0fjlu0" target="_blank" class="cta-btn">
-      Reserve Your Spot
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
-    </a>
-    <div class="spots">Limited spots available</div>
+  <!-- Pricing -->
+  <div class="section">
+    <div class="section-title">Pricing</div>
+    <div class="pricing">
+
+      <!-- Pay as you go -->
+      <div class="price-card">
+        <div class="price-card-name">Pay As You Go</div>
+        <div class="price-card-amount">£15</div>
+        <div class="price-card-per">per session</div>
+        <div class="price-card-detail">Drop in whenever suits you. No commitment, just show up.</div>
+        <a href="https://monzo.com/pay/r/lucacalisthenics_YYvVQjeOWRSJ1G" target="_blank" class="cta-btn-outline">
+          Book Single
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+      </div>
+
+      <!-- 4 Sessions -->
+      <div class="price-card recommended">
+        <div class="price-card-name">4 Sessions</div>
+        <div class="price-card-amount">£49</div>
+        <div class="price-card-per">4 classes</div>
+        <div class="price-card-detail">Commit to the progress. That's just over £12 a session.</div>
+        <a href="https://monzo.com/pay/r/lucacalisthenics_xqIVtU488fLT9K" target="_blank" class="cta-btn">
+          Book 4 Sessions
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </a>
+      </div>
+
+    </div>
+    <div class="spots">Limited spots per session</div>
   </div>
 
+  <!-- Footer -->
   <div class="footer">
     <div class="footer-logo">FORGE</div>
     <div class="footer-note">Questions? DM <a href="https://instagram.com/Luca_Calisthenics" target="_blank">@Luca_Calisthenics</a> on Instagram</div>
