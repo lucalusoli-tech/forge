@@ -184,6 +184,12 @@
   .macro-inputs input { background: var(--black); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; padding: 9px 10px; width: 100%; }
   .macro-inputs input:focus { outline: none; border-color: var(--accent-dim); }
 
+  .nav-icon { position: relative; display: inline-block; }
+  .nav-dot { position: absolute; top: -2px; right: -6px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); display: none; }
+  .nav-dot.on { display: block; }
+  .th-item.unread { border-color: var(--accent-dim); }
+  .th-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-right: 7px; vertical-align: middle; }
+
   /* ─── THREAD INDEX ─────────────────────────────────────────── */
   .th-item { border: 1px solid var(--border); background: var(--deep); padding: 13px 14px; margin-bottom: 10px; cursor: pointer; }
   .th-item:active { border-color: var(--accent-dim); }
@@ -1688,7 +1694,7 @@
     <button class="nav-btn" id="nav-progress" onclick="navigate('progress')"><span class="nav-icon">◌</span><span class="nav-label">Progress</span></button>
     <button class="nav-btn" id="nav-builder" onclick="navigate('builder')"><span class="nav-icon">✦</span><span class="nav-label">Build</span></button>
     <button class="nav-btn" id="nav-coaching" onclick="navigate('coaching')"><span class="nav-icon">人</span><span class="nav-label">Programmes</span></button>
-    <button class="nav-btn" id="nav-board" onclick="navigate('board')"><span class="nav-icon">✎</span><span class="nav-label">Notes</span></button>
+    <button class="nav-btn" id="nav-board" onclick="navigate('board')"><span class="nav-icon">✎<i class="nav-dot" id="notes-dot"></i></span><span class="nav-label">Notes</span></button>
   </nav>
 </div>
 
@@ -2874,6 +2880,7 @@ function navigate(page, push=true) {
   const navIds = ['home','db','progress','builder','coaching','board'];
   document.querySelectorAll('.nav-btn').forEach((b,i) => b.classList.toggle('active', navIds[i]===page));
   if (page==='board') { try { renderThreadIndex(); } catch(err){ console.warn('threads', err); } }
+  try { refreshNotesBadge(); } catch(e) {}
   const isLog = page==='log';
   document.getElementById('back-btn').classList.toggle('visible', isLog);
   document.getElementById('topbar-logo').style.display = isLog ? 'none' : 'block';
@@ -4822,6 +4829,7 @@ async function openNoteThread(block){
   document.getElementById('notethread-title').textContent = block.name || 'Notes';
   document.getElementById('notethread-list').innerHTML = '<div class="nt-empty">Loading…</div>';
   await loadNoteThread();
+  markThreadSeen(key);
 }
 function closeNoteThread(){
   document.getElementById('notethread-overlay').style.display = 'none';
@@ -4892,6 +4900,45 @@ async function postNote(){
   if(btn) btn.disabled = false;
 }
 
+// ─── UNREAD NOTES BADGE ────────────────────────────────────────
+// A dot on the Notes tab when someone else has posted since you last looked. Not a push
+// notification — it only refreshes while the app is open. Per-thread state so opening one
+// thread doesn't silence the others.
+let notesSeen = JSON.parse(localStorage.getItem('fw_notes_seen')||'{}');
+
+function markThreadSeen(key){
+  if(!key) return;
+  notesSeen[key] = new Date().toISOString();
+  localStorage.setItem('fw_notes_seen', JSON.stringify(notesSeen));
+  refreshNotesBadge();
+}
+
+// Threads with a note from someone else, newer than the last time you opened that thread.
+function unreadThreadKeys(rows){
+  const me = currentUser?.email;
+  const newest = {};
+  (rows||[]).forEach(function(r){
+    if(r.author_email === me) return;               // your own notes are never unread
+    if(!newest[r.thread_key] || r.created_at > newest[r.thread_key]) newest[r.thread_key] = r.created_at;
+  });
+  return Object.keys(newest).filter(function(k){
+    const seen = notesSeen[k];
+    return !seen || newest[k] > seen;
+  });
+}
+
+async function refreshNotesBadge(){
+  const dot = document.getElementById('notes-dot');
+  if(!dot) return;
+  try{
+    const { data, error } = await supa
+      .from('block_notes').select('thread_key, author_email, created_at')
+      .order('created_at', { ascending: false }).limit(200);
+    if(error) throw error;
+    dot.classList.toggle('on', unreadThreadKeys(data).length > 0);
+  }catch(e){ /* offline — leave the badge as it is */ }
+}
+
 // ─── THREAD INDEX (Notes tab) ──────────────────────────────────
 // Every thread you're a participant in, newest activity first. RLS scopes the query to
 // threads where you're the coach or the client, so this can safely select broadly.
@@ -4945,6 +4992,7 @@ async function renderThreadIndex(){
   }
 
   const me = currentUser?.email;
+  const unread_ = unreadThreadKeys(threadIndexRows);
   host.innerHTML = [...seen.entries()].map(function(pair){
     const key = pair[0], info = pair[1], r = info.last;
     const d = describeThreadKey(key);
@@ -4953,8 +5001,9 @@ async function renderThreadIndex(){
     const who = other ? other.split('@')[0] : 'you';
     const when = new Date(r.created_at).toLocaleDateString(undefined,{day:'numeric',month:'short'});
     const preview = String(r.body||'').replace(/[<>]/g,'').slice(0,80);
-    return '<div class="th-item" onclick="openThreadByKey(\'' + key + '\')">'
-      + '<div class="th-top"><span class="th-title">' + d.title + '</span>'
+    const unread = unread_.indexOf(key) > -1;
+    return '<div class="th-item' + (unread?' unread':'') + '" onclick="openThreadByKey(\'' + key + '\')">'
+      + '<div class="th-top"><span class="th-title">' + (unread?'<i class="th-dot"></i>':'') + d.title + '</span>'
       + '<span class="th-when">' + when + '</span></div>'
       + '<div class="th-sub">' + (d.sub ? d.sub + ' · ' : '') + 'with ' + who + ' · ' + info.count + ' note' + (info.count>1?'s':'') + '</div>'
       + '<div class="th-prev">' + preview + '</div></div>';
@@ -5023,7 +5072,9 @@ function bodyweightCardHTML(){
     + '</div>' + bwSparkHTML() + '</div>';
 }
 function bwSparkHTML(){
-  if(bodyLog.length < 2) return '';
+  // One entry is a number, not a trend — say so rather than rendering nothing, or it
+  // reads as a broken chart.
+  if(bodyLog.length < 2) return '<div class="si-empty">Log again on another day to see a trend line.</div>';
   var pts = bodyLog.slice(-40);
   var min = Math.min.apply(null, pts.map(function(p){return p.kg;}));
   var max = Math.max.apply(null, pts.map(function(p){return p.kg;}));
@@ -5108,7 +5159,11 @@ function setSiExercise(id){
 
 function strengthChartHTML(){
   var opts = siLoggedExercises();
-  if(!opts.length) return '';
+  // Sets logged before date-stamping shipped carry no _d, so a user with plenty of history
+  // can still land here. Explain it instead of hiding the whole section.
+  if(!opts.length) return '<div class="st-sec"><div class="st-sechead"><h3>Strength Index</h3><span class="ln"></span>'
+    + '<span class="tg">no data yet</span></div>'
+    + '<div class="si-empty">Log a workout to start the index. Sets recorded before this update aren\'t dated, so the chart starts fresh.</div></div>';
   if(!siExercise || !opts.some(function(e){ return e.id === siExercise; })) siExercise = opts[0].id;
 
   var picker = '<select class="si-pick" onchange="setSiExercise(this.value)">'
