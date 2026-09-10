@@ -184,6 +184,9 @@
   .macro-inputs input { background: var(--black); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; padding: 9px 10px; width: 100%; }
   .macro-inputs input:focus { outline: none; border-color: var(--accent-dim); }
 
+  .acct-plan { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); text-align: center; margin: 10px 0 14px; }
+  .acct-billing { width: 100%; padding: 13px; margin-bottom: 10px; background: none; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: border-color 0.15s, color 0.15s; }
+  .acct-billing:active { border-color: var(--accent-dim); color: var(--accent); }
   .nav-icon { position: relative; display: inline-block; }
   .nav-dot { position: absolute; top: -2px; right: -6px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); display: none; }
   .nav-dot.on { display: block; }
@@ -1326,7 +1329,9 @@
     <div class="signout-card">
       <div class="signout-name" id="signout-sheet-name"></div>
       <div class="signout-email" id="signout-sheet-email"></div>
+      <div class="acct-plan" id="signout-plan"></div>
       <button class="upgrade-cta" id="signout-upgrade-btn" onclick="closeSignOutSheet();openUpgrade()" style="width:100%;margin-bottom:10px;display:none">UPGRADE ✦</button>
+      <button class="acct-billing" id="signout-billing-btn" onclick="openBillingPortal()" style="display:none">Manage subscription</button>
       <button class="signout-btn" onclick="handleSignOut()">Sign Out</button>
       <div style="display:flex;justify-content:center;gap:16px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
         <a href="https://forgetraining.app/terms" target="_blank" style="font-size:9px;letter-spacing:1px;color:var(--text-dim);text-transform:uppercase;text-decoration:none">Terms</a>
@@ -8553,8 +8558,32 @@ function updateUserBar() {
   }
 }
 
+// Stripe customer portal. Dashboard > Settings > Billing > Customer portal gives a
+// shareable login link — paste it here. Empty string hides the billing button entirely,
+// so shipping before it's configured is safe.
+const STRIPE_PORTAL_URL = '';
+
+// Tiers that pay Stripe. 'pt' clients are billed by Luca directly and 'admin' is Luca,
+// so neither gets a billing button.
+const BILLED_TIERS = ['premium','coached'];
+
+const TIER_LABEL = { premium:'FORGE · £9.99/mo', coached:'FORGE+ · coached', pt:'1-on-1 coaching', admin:'Admin', free:'Free' };
+
+function openBillingPortal(){
+  if(!STRIPE_PORTAL_URL){
+    alert('Billing portal is not set up yet.');
+    return;
+  }
+  window.open(STRIPE_PORTAL_URL, '_blank');
+}
+
 function openSignOutSheet() {
   if(!currentUser) return;
+  const planEl = document.getElementById('signout-plan');
+  if(planEl) planEl.textContent = TIER_LABEL[currentUser.tier] || '';
+  const billBtn = document.getElementById('signout-billing-btn');
+  if(billBtn) billBtn.style.display =
+    (STRIPE_PORTAL_URL && BILLED_TIERS.indexOf(currentUser.tier) > -1) ? 'block' : 'none';
   document.getElementById('signout-sheet-name').textContent = currentUser.name.toUpperCase();
   document.getElementById('signout-sheet-email').textContent = currentUser.email;
   const upgradeBtn = document.getElementById('signout-upgrade-btn');
