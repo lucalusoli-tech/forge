@@ -5240,9 +5240,6 @@ function renderStatsOverview(){
   var lvlTotal=LEVELS.reduce(function(a,l){return a+s.setsByLevel[l];},0);
   var lvlColor={Beginner:'var(--text-muted)',Intermediate:'var(--text)',Advanced:'var(--accent)',Elite:'var(--red)'};
   var html=macroCardHTML(currentBlock.macros)
-    +'<div class="st-hero">'
-    +'<div class="st-card"><div class="st-label">Streak</div><div class="st-num">'+s.streak+'<span class="st-unit">d</span></div><div class="st-meta">'+(s.streak>=2?'keep it going':(s.streak===1?'day one':'no active streak'))+'</div></div>'
-    +'<div class="st-card"><div class="st-label">Workouts</div><div class="st-num">'+s.sessionsLogged+'</div><div class="st-meta">completed this block</div></div></div>'
     +bodyweightCardHTML()
     +strengthChartHTML()
     +'<div class="st-sec"><div class="st-sechead"><h3>Muscle Map</h3><span class="ln"></span><span class="tg">this week</span></div>'
@@ -5267,7 +5264,7 @@ function renderStatsOverview(){
     +'<div class="st-perfcard"><div class="st-perflabel">Frequency</div><div class="st-perfval">'+s.frequency+'<small>/wk</small></div><div class="st-perfsub">sessions per week</div></div>'
     +'<div class="st-perfcard"><div class="st-perflabel">Completion</div><div class="st-perfval">'+s.completion+'<small>%</small></div><div class="st-perfsub">of planned</div></div>'
     +'<div class="st-perfcard"><div class="st-perflabel">Total Sets</div><div class="st-perfval">'+s.lifetimeSets.toLocaleString()+'</div><div class="st-perfsub">this block</div></div>'
-    +'<div class="st-perfcard"><div class="st-perflabel">Avg / Session</div><div class="st-perfval">'+s.avgSets+'</div><div class="st-perfsub">sets</div></div></div></div>';
+    +'</div></div>';
   host.innerHTML=html;
   REGIONS.forEach(function(r){var sets=s.setsByRegion[r]||0;var nodes=host.querySelectorAll('.st-m[data-region="'+r+'"]');for(var i=0;i<nodes.length;i++){nodes[i].setAttribute('class','st-m '+band(sets));nodes[i].setAttribute('data-sets',sets);}});
 }
@@ -9003,6 +9000,21 @@ async function executePushUpdate() {
     showToast('Failed to push update');
     closePushModal();
     return;
+  }
+
+  // Pushing to a client IS the assignment — file it into their folder so the coach never has
+  // to set the same thing twice. Only fills a blank; an existing assignment is left alone in
+  // case it was deliberately different.
+  const cl = (coachClients||[]).find(c => c.client_email === clientEmail);
+  const stamp = { email: clientEmail, name: cl?.client_name || clientEmail.split('@')[0] };
+  let touched = false;
+  if(!block.client) { block.client = stamp; touched = true; }
+  if(planCycle && !planCycle.client) { planCycle.client = stamp; touched = true; }
+  if(touched){
+    saveCustoms();
+    try { localStorage.setItem('fw_cycles', JSON.stringify(trainingCycles)); } catch(e) {}
+    queueCloudSync();
+    try { renderCyclePlanner(); } catch(e) {}
   }
 
   showToast((mode === 'update' ? 'Update' : 'New programme') + ' sent to ' + clientEmail.split('@')[0] + ' ✦');
