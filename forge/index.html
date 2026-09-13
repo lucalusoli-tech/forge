@@ -187,6 +187,8 @@
   .acct-plan { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); text-align: center; margin: 10px 0 14px; }
   .acct-billing { width: 100%; padding: 13px; margin-bottom: 10px; background: none; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: border-color 0.15s, color 0.15s; }
   .acct-billing:active { border-color: var(--accent-dim); color: var(--accent); }
+  .bw-ytick { fill: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 7px; text-anchor: end; }
+  .bw-xtick { fill: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 7px; }
   .nav-icon { position: relative; display: inline-block; }
   .nav-dot { position: absolute; top: -2px; right: -6px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); display: none; }
   .nav-dot.on { display: block; }
@@ -860,7 +862,7 @@
   .onboard-freq-opt:active, .onboard-freq-opt.selected { border-color: var(--accent-dim); color: var(--accent); background: var(--accent-glow); }
   .onboard-cta { background: var(--accent-glow); border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; padding: 16px 32px; cursor: pointer; margin-top: 8px; }
   .onboard-cta:active { background: rgba(201,169,110,0.2); }
-  .onboard-footer { padding: 0 24px 32px; display: flex; justify-content: center; }
+  .onboard-footer { padding: 0 24px 32px; display: flex; align-items: center; justify-content: space-between; }
   .onboard-back { background: none; border: none; color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; cursor: pointer; padding: 12px; text-transform: uppercase; }
   .onboard-back:active { color: var(--accent); }
   .onboard-loading-bar { width: 120px; height: 2px; background: var(--border); margin-top: 32px; overflow: hidden; border-radius: 1px; }
@@ -1169,6 +1171,7 @@
   </div>
   <div class="onboard-footer">
     <button class="onboard-back" id="onboard-back-btn" onclick="onboardBack()" style="visibility:hidden">← BACK</button>
+    <button class="onboard-back" id="onboard-skip-btn" onclick="skipOnboarding()">Skip</button>
   </div>
 </div>
 
@@ -3128,6 +3131,19 @@ function updateOnboardStep() {
   // Back button visibility
   const backBtn = document.getElementById('onboard-back-btn');
   backBtn.style.visibility = (onboardStep > 0 && onboardStep < 5) ? 'visible' : 'hidden';
+  // Hide skip on the final building screen — there's nothing left to skip by then.
+  const skipBtn = document.getElementById('onboard-skip-btn');
+  if(skipBtn) skipBtn.style.visibility = (onboardStep < 5) ? 'visible' : 'hidden';
+}
+
+// Leave without a block. Marks onboarding done so it doesn't reappear on every load, but
+// GET STARTED on the empty home still reopens it whenever they want it.
+function skipOnboarding() {
+  localStorage.setItem('fw_onboarded', '1');
+  document.getElementById('onboard-overlay').style.display = 'none';
+  renderHomeDays();
+  renderBuilderDays();
+  try { updateStats(); } catch(e) {}
 }
 
 function onboardNext() {
@@ -5081,19 +5097,42 @@ function bwSparkHTML(){
   // reads as a broken chart.
   if(bodyLog.length < 2) return '<div class="si-empty">Log again on another day to see a trend line.</div>';
   var pts = bodyLog.slice(-40);
-  var min = Math.min.apply(null, pts.map(function(p){return p.kg;}));
-  var max = Math.max.apply(null, pts.map(function(p){return p.kg;}));
-  var pad = (max-min) < 1 ? 1 : (max-min)*0.15;
-  min -= pad; max += pad;
-  var W = 300, H = 64;
-  var xy = pts.map(function(p,i){
-    var x = pts.length===1 ? W/2 : (i/(pts.length-1))*W;
-    var y = H - ((p.kg-min)/(max-min))*H;
-    return x.toFixed(1)+','+y.toFixed(1);
-  });
-  return '<div class="bw-spark"><svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">'
-    + '<polyline points="'+xy.join(' ')+'" fill="none" stroke="var(--accent)" stroke-width="1.5" vector-effect="non-scaling-stroke"/>'
-    + '</svg><div class="bw-sparklab"><span>'+pts[0].d.slice(5)+'</span><span>'+pts[pts.length-1].d.slice(5)+'</span></div></div>';
+  var lo = Math.min.apply(null, pts.map(function(p){return p.kg;}));
+  var hi = Math.max.apply(null, pts.map(function(p){return p.kg;}));
+
+  // A 0.2kg day-to-day wobble autoscaled to full height reads like a cliff. Force a minimum
+  // 2kg window so small changes look small — which is the honest picture — then round the
+  // bounds to clean 0.5kg marks so the gridline labels are readable numbers.
+  var span = Math.max(hi - lo, 2);
+  var mid = (hi + lo) / 2;
+  var min = Math.floor((mid - span*0.75) * 2) / 2;
+  var max = Math.ceil((mid + span*0.75) * 2) / 2;
+
+  var W = 300, H = 130, L = 34, R = 6, T = 8, B = 18;   // L leaves room for axis labels
+  var pw = W - L - R, ph = H - T - B;
+  var X = function(i){ return L + (pts.length===1 ? pw/2 : (i/(pts.length-1))*pw); };
+  var Y = function(kg){ return T + ph - ((kg-min)/(max-min))*ph; };
+
+  // Three gridlines: bottom, middle, top.
+  var ticks = [min, (min+max)/2, max];
+  var grid = ticks.map(function(t){
+    var y = Y(t).toFixed(1);
+    return '<line x1="'+L+'" y1="'+y+'" x2="'+(W-R)+'" y2="'+y+'" stroke="var(--border)" stroke-width="0.5"/>'
+         + '<text x="'+(L-5)+'" y="'+(+y+2.5).toFixed(1)+'" class="bw-ytick">'+t.toFixed(1)+'</text>';
+  }).join('');
+
+  var line = pts.map(function(p,i){ return X(i).toFixed(1)+','+Y(p.kg).toFixed(1); }).join(' ');
+  var dots = pts.map(function(p,i){
+    return '<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(p.kg).toFixed(1)+'" r="2.5" fill="var(--accent)"/>';
+  }).join('');
+
+  return '<div class="bw-spark"><svg viewBox="0 0 '+W+' '+H+'">'
+    + grid
+    + '<polyline points="'+line+'" fill="none" stroke="var(--accent)" stroke-width="1.5"/>'
+    + dots
+    + '<text x="'+L+'" y="'+(H-5)+'" class="bw-xtick">'+pts[0].d.slice(5)+'</text>'
+    + '<text x="'+(W-R)+'" y="'+(H-5)+'" class="bw-xtick" text-anchor="end">'+pts[pts.length-1].d.slice(5)+'</text>'
+    + '</svg></div>';
 }
 
 // ─── STRENGTH INDEX ────────────────────────────────────────────
