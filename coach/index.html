@@ -190,8 +190,9 @@
   .signout-link:hover { color: var(--text-muted); }
 
   /* ── TABS ── */
-  .dash-tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--deep); }
-  .dash-tab { flex: 1; padding: 14px; background: transparent; border: none; color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
+  .dash-tabs { display: flex; border-bottom: 1px solid var(--border); background: var(--deep); overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .dash-tabs::-webkit-scrollbar { display: none; }
+  .dash-tab { flex: 1 0 auto; white-space: nowrap; padding: 14px 16px; background: transparent; border: none; color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; border-bottom: 2px solid transparent; transition: all 0.15s; }
   .dash-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
   .dash-panel { display: none; }
   .dash-panel.active { display: block; }
@@ -222,6 +223,14 @@
   .pl-flags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
   .pl-flag { background: transparent; border: 1px solid var(--border); color: var(--text-dim); font-family: 'DM Mono', monospace; font-size: 9px; padding: 6px 8px; cursor: pointer; }
   .pl-flag.on { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+  .pl-step { border-left: 2px solid var(--border); padding-left: 10px; margin-bottom: 14px; }
+  .pl-step.done { border-left-color: var(--accent); }
+  .pl-steplab { font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 6px; }
+  .pl-check { display: flex; align-items: center; gap: 8px; background: transparent; border: 1px solid var(--border); color: var(--text-dim); font-family: 'DM Mono', monospace; font-size: 11px; padding: 9px 10px; cursor: pointer; width: 100%; text-align: left; margin-bottom: 8px; }
+  .pl-check.on { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+  .pl-box { width: 13px; height: 13px; border: 1px solid currentColor; display: inline-flex; align-items: center; justify-content: center; font-size: 9px; flex: 0 0 auto; }
+  .pl-outcome { display: flex; gap: 6px; margin-bottom: 10px; }
+  .pl-outcome .pl-check { margin-bottom: 0; justify-content: center; }
   .pl-acts { display: flex; gap: 8px; }
   .pl-acts button { flex: 1; background: transparent; border: 1px solid var(--border); color: var(--text-dim); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; padding: 9px; cursor: pointer; }
   .pl-convert { border-color: var(--green) !important; color: var(--green) !important; }
@@ -1247,15 +1256,6 @@ function showToast(msg) {
 let leads = [];
 let leadFilter = 'active';
 
-const LEAD_FLAGS = [
-  { k:'f_reply',    label:'Step 1 reply' },
-  { k:'f_step3',    label:'Step 3 pass' },
-  { k:'f_step4',    label:'Step 4 pass' },
-  { k:'f_pitched',  label:'Price pitched' },
-  { k:'f_ghost',    label:'Ghosted' },
-  { k:'f_objected', label:'Objection' },
-  { k:'f_sale',     label:'Sale' }
-];
 
 // Stage follows the flags — no separate bookkeeping to forget.
 function stageFromFlags(l) {
@@ -1446,9 +1446,15 @@ function renderPipeline() {
       `<label class="pl-f"><span>${label}</span><input type="${type||'text'}" value="${esc(l[field])}" placeholder="${ph}"
         onchange="leadSet('${l.id}','${field}',this.value)"></label>`;
 
-    const flags = LEAD_FLAGS.map(x =>
-      `<button class="pl-flag${l[x.k] ? ' on' : ''}" onclick="leadFlag('${l.id}','${x.k}')">${l[x.k] ? '✓ ' : ''}${x.label}</button>`
-    ).join('');
+    // One checkbox, styled as a row rather than a chip, so the steps read as a sequence.
+    const check = (field, label) =>
+      `<button class="pl-check${l[field] ? ' on' : ''}" onclick="leadFlag('${l.id}','${field}')">
+        <span class="pl-box">${l[field] ? '✓' : ''}</span>${label}</button>`;
+
+    // Mirrors the sheet's column order: each step's checkbox sits with its own insight
+    // fields, so the card is worked top to bottom like the script itself.
+    const step = (n, title, done, inner) =>
+      `<div class="pl-step${done ? ' done' : ''}"><div class="pl-steplab">${n} · ${title}</div>${inner}</div>`;
 
     const canConvert = l.f_sale && !l.converted_at;
 
@@ -1460,16 +1466,41 @@ function renderPipeline() {
       </div>
       <div class="pl-body">
         <div class="pl-row2">${f('Name','name','')}${f('Email','email','optional','email')}</div>
-        <div class="pl-row2">${f('First contact','first_dm','','date')}${f('Cash','cash_collected','0','number')}</div>
-        ${f('Current situation','insight_current','Inconsistent / none')}
-        ${f('Goal','insight_goal','Lose 3kg')}
-        ${f('Past success / failure','insight_past','Lost weight with keto')}
-        ${f('Gap insight','insight_gap','Weekends')}
-        <div class="pl-flags">${flags}</div>
-        <label class="pl-f"><span>Objection</span><textarea placeholder="Wants to start after his holiday"
-          onchange="leadSet('${l.id}','objection',this.value)">${esc(l.objection)}</textarea></label>
+        <div class="pl-row2">
+          <label class="pl-f"><span>Platform</span><select onchange="leadSet('${l.id}','platform',this.value)">
+            ${['','Instagram','Text Message','WhatsApp','Twitter','Email','In person','Referral']
+              .map(p => `<option value="${p}"${l.platform === p ? ' selected' : ''}>${p || '—'}</option>`).join('')}
+          </select></label>
+          ${f('First contact','first_dm','','date')}
+        </div>
+
+        ${step('STEP 1','Opener', l.f_reply, check('f_reply','Replied'))}
+
+        ${step('STEP 2','Insight', l.insight_current || l.insight_goal || l.insight_past,
+            f('Current situation','insight_current','Inconsistent / none')
+          + f('Goal','insight_goal','Lose 3kg')
+          + f('Past success / failure','insight_past','Lost weight with keto'))}
+
+        ${step('STEP 3','Gap', l.f_step3,
+            check('f_step3','Passed step 3')
+          + f('Gap insight','insight_gap','Weekends'))}
+
+        ${step('STEP 4','Bridge', l.f_step4, check('f_step4','Passed step 4'))}
+
+        ${step('STEP 5','Pitch', l.f_pitched,
+            check('f_pitched','Price pitched')
+          + `<div class="pl-outcome">
+              <button class="pl-check${l.f_sale ? ' on' : ''}" onclick="leadFlag('${l.id}','f_sale')">Sale</button>
+              <button class="pl-check${l.f_objected ? ' on' : ''}" onclick="leadFlag('${l.id}','f_objected')">Objection</button>
+              <button class="pl-check${l.f_ghost ? ' on' : ''}" onclick="leadFlag('${l.id}','f_ghost')">Ghosted</button>
+            </div>`
+          + f('Cash collected','cash_collected','0','number')
+          + `<label class="pl-f"><span>Objection</span><textarea placeholder="Wants to start after his holiday"
+              onchange="leadSet('${l.id}','objection',this.value)">${esc(l.objection)}</textarea></label>`)}
+
         <label class="pl-f"><span>Notes</span><textarea placeholder="Anything else worth remembering"
           onchange="leadSet('${l.id}','notes',this.value)">${esc(l.notes)}</textarea></label>
+
         <div class="pl-acts">
           ${canConvert ? `<button class="pl-convert" onclick="convertLead('${l.id}')">→ Client</button>` : ''}
           ${l.status !== 'won'  ? `<button onclick="leadStatus('${l.id}','won')">Won</button>` : ''}
@@ -1882,4 +1913,3 @@ checkSession();
 </script>
 </body>
 </html>
-
