@@ -199,6 +199,32 @@
   /* ── SESSION TRACKER ── */
   .tracker-controls { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
   .tracker-filter { display: flex; gap: 6px; }
+  /* ─── PIPELINE ─────────────────────────────────────────────── */
+  .pl-stats { border: 1px solid var(--border); background: var(--deep); display: grid; grid-template-columns: 1fr 1fr; }
+  .pl-stat { padding: 9px 12px; border-bottom: 1px solid var(--border); }
+  .pl-stat:nth-child(odd) { border-right: 1px solid var(--border); }
+  .pl-stat-l { font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); }
+  .pl-stat-v { font-family: 'DM Mono', monospace; font-size: 15px; color: var(--accent); margin-top: 2px; }
+  .pl-card { border: 1px solid var(--border); background: var(--deep); margin-bottom: 8px; }
+  .pl-head { padding: 12px; cursor: pointer; position: relative; }
+  .pl-name { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--text); padding-right: 84px; }
+  .pl-sub { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text-dim); margin-top: 3px; }
+  .pl-badge { position: absolute; top: 12px; right: 12px; font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 1.5px; border: 1px solid var(--border); color: var(--text-muted); padding: 3px 6px; }
+  .pl-badge.won { color: var(--green); border-color: var(--green); }
+  .pl-badge.lost { color: var(--red); border-color: var(--red); }
+  .pl-body { border-top: 1px solid var(--border); padding: 12px; }
+  .pl-f { display: block; margin-bottom: 10px; }
+  .pl-f span { display: block; font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px; }
+  .pl-f input, .pl-f select, .pl-f textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 11px; padding: 8px 9px; }
+  .pl-f textarea { resize: vertical; min-height: 52px; }
+  .pl-row2 { display: flex; gap: 8px; }
+  .pl-row2 .pl-f { flex: 1; }
+  .pl-flags { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px; }
+  .pl-flag { background: transparent; border: 1px solid var(--border); color: var(--text-dim); font-family: 'DM Mono', monospace; font-size: 9px; padding: 6px 8px; cursor: pointer; }
+  .pl-flag.on { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+  .pl-acts { display: flex; gap: 8px; }
+  .pl-acts button { flex: 1; background: transparent; border: 1px solid var(--border); color: var(--text-dim); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; text-transform: uppercase; padding: 9px; cursor: pointer; }
+  .pl-convert { border-color: var(--green) !important; color: var(--green) !important; }
   .filter-chip { background: transparent; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; padding: 5px 12px; cursor: pointer; transition: all 0.15s; }
   .filter-chip.active { background: var(--accent-glow); border-color: var(--accent); color: var(--accent); }
   .filter-chip.s4-chip.active { background: var(--s4-glow); border-color: var(--s4); color: var(--s4); }
@@ -410,9 +436,10 @@
   <!-- TABS -->
   <div class="dash-tabs">
     <button class="dash-tab active" onclick="switchTab('clients', this)">Clients</button>
-    <button class="dash-tab" onclick="switchTab('tracker', this)">Session Tracker</button>
+    <button class="dash-tab" onclick="switchTab('tracker', this)">Sessions</button>
     <button class="dash-tab" onclick="switchTab('assigned', this)">History</button>
     <button class="dash-tab" onclick="switchTab('finance', this)">Finance</button>
+    <button class="dash-tab" onclick="switchTab('pipeline', this)">Pipeline</button>
   </div>
 
   <!-- PANEL: CLIENTS (CRM) -->
@@ -609,6 +636,48 @@
     </div>
 
   </div><!-- /dpanel-finance -->
+
+  <!-- PANEL: PIPELINE (sales CRM) -->
+  <div class="dash-panel" id="dpanel-pipeline">
+
+    <div class="tracker-controls">
+      <div class="tracker-filter" id="pl-status-filter">
+        <button class="filter-chip active" onclick="setLeadFilter('active', this)">Active</button>
+        <button class="filter-chip" onclick="setLeadFilter('won', this)">Won</button>
+        <button class="filter-chip" onclick="setLeadFilter('lost', this)">Lost</button>
+        <button class="filter-chip" onclick="setLeadFilter('all', this)">All</button>
+      </div>
+      <button class="add-client-btn" onclick="toggleAddLeadForm()">+ Add Lead</button>
+    </div>
+
+    <div class="add-client-form" id="add-lead-form">
+      <div class="add-client-row">
+        <input class="add-client-input" type="text" id="lead-name" placeholder="Contact name" autocomplete="off">
+        <input class="add-client-input" type="email" id="lead-email" placeholder="Email (optional)" autocomplete="off">
+      </div>
+      <div class="add-client-row" style="margin-top:8px">
+        <select class="add-client-input" id="lead-platform">
+          <option value="">Platform…</option>
+          <option>Instagram</option><option>Text Message</option><option>WhatsApp</option>
+          <option>Twitter</option><option>Email</option><option>In person</option><option>Referral</option>
+        </select>
+        <input class="add-client-input" type="date" id="lead-date" style="max-width:150px">
+      </div>
+      <button class="add-client-submit" onclick="addLead()" style="margin-top:10px">ADD LEAD →</button>
+    </div>
+
+    <div style="padding:0 20px">
+      <input class="add-client-input" id="pl-search" placeholder="Search name…" oninput="renderPipeline()" style="width:100%">
+    </div>
+
+    <div id="pl-analytics" style="padding:14px 20px 0"></div>
+
+    <div id="pl-list" style="padding:12px 20px 20px">
+      <div class="tracker-empty">Loading…</div>
+    </div>
+
+  </div><!-- /dpanel-pipeline -->
+
 
 </div><!-- /main -->
 
@@ -1170,6 +1239,249 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2200);
 }
 
+
+// ── PIPELINE (sales CRM) ──────────────────────────────────────────────────
+// Rows live in sales_leads, owned by coach_id. The boolean flags mirror the Propane
+// sheet so the analytics match it; stage and status exist purely so a long list can be
+// filtered without inspecting every flag.
+let leads = [];
+let leadFilter = 'active';
+
+const LEAD_FLAGS = [
+  { k:'f_reply',    label:'Step 1 reply' },
+  { k:'f_step3',    label:'Step 3 pass' },
+  { k:'f_step4',    label:'Step 4 pass' },
+  { k:'f_pitched',  label:'Price pitched' },
+  { k:'f_ghost',    label:'Ghosted' },
+  { k:'f_objected', label:'Objection' },
+  { k:'f_sale',     label:'Sale' }
+];
+
+// Stage follows the flags — no separate bookkeeping to forget.
+function stageFromFlags(l) {
+  if(l.f_pitched) return 'pitched';
+  if(l.f_step4)   return 'step4';
+  if(l.f_step3)   return 'step3';
+  if(l.f_reply)   return 'replied';
+  return 'sent';
+}
+
+const STAGE_LABEL = { sent:'SENT', replied:'REPLIED', step3:'STEP 3', step4:'STEP 4', pitched:'PITCHED' };
+
+async function loadLeads() {
+  const { data, error } = await supa
+    .from('sales_leads').select('*')
+    .eq('coach_id', coachUser.id)
+    .order('first_dm', { ascending: false });
+  if(error) { console.warn('Leads load failed:', error); showToast('Could not load pipeline'); return; }
+  leads = data || [];
+  renderPipeline();
+}
+
+function setLeadFilter(val, btn) {
+  leadFilter = val;
+  document.querySelectorAll('#pl-status-filter .filter-chip').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderPipeline();
+}
+
+function toggleAddLeadForm() {
+  const f = document.getElementById('add-lead-form');
+  f.classList.toggle('open');
+  if(f.classList.contains('open')) {
+    document.getElementById('lead-date').value = new Date().toISOString().slice(0,10);
+    document.getElementById('lead-name').focus();
+  }
+}
+
+async function addLead() {
+  const name = document.getElementById('lead-name').value.trim();
+  if(!name) { showToast('Name required'); return; }
+  const row = {
+    coach_id: coachUser.id,
+    name: name,
+    email: document.getElementById('lead-email').value.trim() || null,
+    platform: document.getElementById('lead-platform').value || null,
+    first_dm: document.getElementById('lead-date').value || new Date().toISOString().slice(0,10)
+  };
+  const { data, error } = await supa.from('sales_leads').insert(row).select().single();
+  if(error) { console.warn(error); showToast('Failed to add lead'); return; }
+  leads.unshift(data);
+  ['lead-name','lead-email'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('add-lead-form').classList.remove('open');
+  renderPipeline();
+  showToast('Lead added');
+}
+
+// Every write goes straight to Supabase — there's no local copy to fall out of step.
+async function leadSet(id, field, value) {
+  const l = leads.find(x => x.id === id);
+  if(!l) return;
+  l[field] = value;
+  const patch = {}; patch[field] = value;
+  // A flag change can move the stage, so send both together.
+  if(field.indexOf('f_') === 0) { l.stage = stageFromFlags(l); patch.stage = l.stage; }
+  const { error } = await supa.from('sales_leads').update(patch).eq('id', id);
+  if(error) { console.warn(error); showToast('Save failed'); return; }
+  if(field.indexOf('f_') === 0) renderPipeline();
+  else renderPipelineStats();
+}
+
+function leadFlag(id, field) {
+  const l = leads.find(x => x.id === id);
+  if(!l) return;
+  leadSet(id, field, !l[field]);
+}
+
+function leadOpen(id) {
+  const l = leads.find(x => x.id === id);
+  if(!l) return;
+  l._open = !l._open;
+  renderPipeline();
+}
+
+async function leadStatus(id, status) {
+  await leadSet(id, 'status', status);
+  renderPipeline();
+}
+
+async function leadDelete(id) {
+  const l = leads.find(x => x.id === id);
+  if(!l) return;
+  if(!confirm('Delete ' + (l.name || 'this lead') + '? This cannot be undone.')) return;
+  const { error } = await supa.from('sales_leads').delete().eq('id', id);
+  if(error) { showToast('Failed to delete'); return; }
+  leads = leads.filter(x => x.id !== id);
+  renderPipeline();
+  showToast('Lead deleted');
+}
+
+// Won lead → real client. Keeps the lead row so the analytics still count the sale.
+async function convertLead(id) {
+  const l = leads.find(x => x.id === id);
+  if(!l) return;
+  let email = (l.email || '').trim();
+  if(!email) {
+    email = (prompt('Email address for ' + l.name + '?') || '').trim();
+    if(!email) return;
+  }
+  const { error } = await supa.from('coach_clients').insert({
+    coach_id: coachUser.id,
+    client_name: l.name,
+    client_email: email
+  });
+  if(error) {
+    console.warn(error);
+    showToast(error.code === '23505' ? 'Already a client' : 'Failed to convert');
+    return;
+  }
+  await supa.from('sales_leads')
+    .update({ email: email, status: 'won', converted_at: new Date().toISOString().slice(0,10) })
+    .eq('id', id);
+  l.email = email; l.status = 'won'; l.converted_at = new Date().toISOString().slice(0,10);
+  renderPipeline();
+  showToast(l.name + ' added as a client ✦');
+}
+
+// Analytics over the whole pipeline, not the filtered view — the filter is for finding
+// people, not for changing what the numbers mean.
+function pipelineStats() {
+  const n = f => leads.filter(l => l[f]).length;
+  const sent = leads.length;
+  const sales = n('f_sale'), pitched = n('f_pitched'), ghost = n('f_ghost');
+  const cash = leads.reduce((a,l) => a + (parseFloat(l.cash_collected) || 0), 0);
+  return {
+    sent: sent, replies: n('f_reply'), s3: n('f_step3'), s4: n('f_step4'),
+    pitched: pitched, ghost: ghost, objected: n('f_objected'), sales: sales,
+    cr: pitched ? Math.round(sales / pitched * 100) : 0,
+    adj: (pitched - ghost) > 0 ? Math.round(sales / (pitched - ghost) * 100) : 0,
+    cash: cash, perMsg: sent ? cash / sent : 0
+  };
+}
+
+function renderPipelineStats() {
+  const el = document.getElementById('pl-analytics');
+  if(!el) return;
+  const s = pipelineStats();
+  const cell = (l, v) => `<div class="pl-stat"><div class="pl-stat-l">${l}</div><div class="pl-stat-v">${v}</div></div>`;
+  el.innerHTML = '<div class="pl-stats">'
+    + cell('Sent', s.sent) + cell('Replies', s.replies)
+    + cell('Step 3', s.s3) + cell('Step 4', s.s4)
+    + cell('Pitched', s.pitched) + cell('Ghosted', s.ghost)
+    + cell('Objections', s.objected) + cell('Sales', s.sales)
+    + cell('Sales CR%', s.cr + '%') + cell('Adjusted CR%', s.adj + '%')
+    + cell('Cash', '£' + s.cash.toFixed(0)) + cell('Cash / msg', '£' + s.perMsg.toFixed(1))
+    + '</div>';
+}
+
+function renderPipeline() {
+  renderPipelineStats();
+  const host = document.getElementById('pl-list');
+  if(!host) return;
+
+  const q = (document.getElementById('pl-search')?.value || '').trim().toLowerCase();
+  let view = leads.filter(l => leadFilter === 'all' ? true : l.status === leadFilter);
+  if(q) view = view.filter(l => (l.name || '').toLowerCase().includes(q));
+
+  if(!view.length) {
+    host.innerHTML = `<div class="tracker-empty">${leads.length ? 'Nothing matches that filter' : 'No leads yet — add one above'}</div>`;
+    return;
+  }
+
+  const esc = v => String(v == null ? '' : v).replace(/"/g,'&quot;').replace(/[<>]/g,'');
+
+  host.innerHTML = view.map(l => {
+    const badge = l.status === 'won' ? 'won' : (l.status === 'lost' ? 'lost' : '');
+    const badgeTxt = l.status === 'won' ? 'WON' : (l.status === 'lost' ? 'LOST' : STAGE_LABEL[stageFromFlags(l)]);
+
+    if(!l._open) {
+      return `<div class="pl-card"><div class="pl-head" onclick="leadOpen('${l.id}')">
+        <div class="pl-name">${esc(l.name) || 'Unnamed'}</div>
+        <div class="pl-sub">${esc(l.platform) || '—'} · ${esc(l.first_dm) || ''}${l.converted_at ? ' · client' : ''}</div>
+        <span class="pl-badge ${badge}">${badgeTxt}</span>
+      </div></div>`;
+    }
+
+    const f = (label, field, ph, type) =>
+      `<label class="pl-f"><span>${label}</span><input type="${type||'text'}" value="${esc(l[field])}" placeholder="${ph}"
+        onchange="leadSet('${l.id}','${field}',this.value)"></label>`;
+
+    const flags = LEAD_FLAGS.map(x =>
+      `<button class="pl-flag${l[x.k] ? ' on' : ''}" onclick="leadFlag('${l.id}','${x.k}')">${l[x.k] ? '✓ ' : ''}${x.label}</button>`
+    ).join('');
+
+    const canConvert = l.f_sale && !l.converted_at;
+
+    return `<div class="pl-card">
+      <div class="pl-head" onclick="leadOpen('${l.id}')">
+        <div class="pl-name">${esc(l.name) || 'Unnamed'}</div>
+        <div class="pl-sub">${esc(l.platform) || '—'} · ${esc(l.first_dm) || ''}${l.converted_at ? ' · client' : ''}</div>
+        <span class="pl-badge ${badge}">${badgeTxt}</span>
+      </div>
+      <div class="pl-body">
+        <div class="pl-row2">${f('Name','name','')}${f('Email','email','optional','email')}</div>
+        <div class="pl-row2">${f('First contact','first_dm','','date')}${f('Cash','cash_collected','0','number')}</div>
+        ${f('Current situation','insight_current','Inconsistent / none')}
+        ${f('Goal','insight_goal','Lose 3kg')}
+        ${f('Past success / failure','insight_past','Lost weight with keto')}
+        ${f('Gap insight','insight_gap','Weekends')}
+        <div class="pl-flags">${flags}</div>
+        <label class="pl-f"><span>Objection</span><textarea placeholder="Wants to start after his holiday"
+          onchange="leadSet('${l.id}','objection',this.value)">${esc(l.objection)}</textarea></label>
+        <label class="pl-f"><span>Notes</span><textarea placeholder="Anything else worth remembering"
+          onchange="leadSet('${l.id}','notes',this.value)">${esc(l.notes)}</textarea></label>
+        <div class="pl-acts">
+          ${canConvert ? `<button class="pl-convert" onclick="convertLead('${l.id}')">→ Client</button>` : ''}
+          ${l.status !== 'won'  ? `<button onclick="leadStatus('${l.id}','won')">Won</button>` : ''}
+          ${l.status !== 'lost' ? `<button onclick="leadStatus('${l.id}','lost')">Lost</button>` : ''}
+          ${l.status !== 'active' ? `<button onclick="leadStatus('${l.id}','active')">Reopen</button>` : ''}
+          <button onclick="leadDelete('${l.id}')">Delete</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
 // ── TABS ──────────────────────────────────────────────────────────────────
 function switchTab(tab, btn) {
   document.querySelectorAll('.dash-tab').forEach(b => b.classList.remove('active'));
@@ -1180,6 +1492,7 @@ function switchTab(tab, btn) {
   if(tab === 'tracker') renderTracker();
   if(tab === 'assigned') loadAssigned();
   if(tab === 'finance') { loadFinanceEntries(); }
+  if(tab === 'pipeline') loadLeads();
 }
 
 // ── SESSION TRACKER ───────────────────────────────────────────────────────
