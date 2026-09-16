@@ -189,29 +189,6 @@
   .acct-billing:active { border-color: var(--accent-dim); color: var(--accent); }
   .bw-ytick { fill: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 8.5px; text-anchor: end; }
   .bw-xtick { fill: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 8.5px; }
-  /* ─── SALES PIPELINE ────────────────────────────────────────── */
-  .crm-analytics { border: 1px solid var(--border); background: var(--deep); }
-  .crm-arow { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; border-bottom: 1px solid var(--border); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.5px; color: var(--text-muted); }
-  .crm-arow:last-child { border-bottom: none; }
-  .crm-aval { color: var(--accent); font-size: 12px; }
-  .crm-card { border: 1px solid var(--border); background: var(--deep); margin-bottom: 8px; }
-  .crm-head { padding: 12px; cursor: pointer; position: relative; }
-  .crm-name { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--text); letter-spacing: 0.5px; padding-right: 76px; }
-  .crm-sub { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--text-dim); margin-top: 3px; letter-spacing: 0.5px; }
-  .crm-stage { position: absolute; top: 12px; right: 12px; font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 1.5px; color: var(--text-muted); border: 1px solid var(--border); padding: 3px 6px; }
-  .crm-stage.win { color: var(--accent); border-color: var(--accent-dim); }
-  .crm-namerow { padding: 0 12px 10px; }
-  .crm-namerow input { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; padding: 9px 10px; }
-  .crm-body { padding: 0 12px 12px; border-top: 1px solid var(--border); padding-top: 12px; }
-  .crm-frow { display: flex; gap: 8px; }
-  .crm-frow .crm-f { flex: 1; }
-  .crm-f { display: block; margin-bottom: 10px; }
-  .crm-f span { display: block; font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-dim); margin-bottom: 4px; }
-  .crm-f input, .crm-f select { width: 100%; background: var(--bg); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 11px; padding: 8px 9px; }
-  .crm-toggles { display: flex; flex-wrap: wrap; gap: 5px; margin: 4px 0 12px; }
-  .crm-tog { background: none; border: 1px solid var(--border); color: var(--text-dim); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.5px; padding: 6px 8px; cursor: pointer; }
-  .crm-tog.on { border-color: var(--accent-dim); color: var(--accent); }
-  .crm-del { width: 100%; background: none; border: 1px solid var(--border); color: var(--text-dim); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; padding: 9px; cursor: pointer; margin-top: 2px; }
   .nt-del { background: none; border: none; color: var(--text-dim); font-size: 15px; line-height: 1; padding: 0 0 0 8px; cursor: pointer; }
   .nt-del:active { color: var(--accent); }
   .nav-icon { position: relative; display: inline-block; }
@@ -1631,20 +1608,6 @@
           </div>
         </div>
 
-        <!-- SALES PIPELINE (admin only) -->
-        <div id="crm-section" style="display:none">
-          <div class="coaching-hero">
-            <div class="coaching-eyebrow">Sales</div>
-            <div class="coaching-title">PIPELINE</div>
-            <div class="coaching-desc">Every conversation, from first message to cash. Numbers below update as you tick.</div>
-          </div>
-          <div style="padding:0 20px 18px">
-            <div id="crm-analytics"></div>
-            <button class="coaching-submit" onclick="newLead()" style="width:100%;margin-top:14px">+ ADD LEAD</button>
-            <div id="crm-list" style="margin-top:14px"></div>
-          </div>
-        </div>
-
         <!-- TRAINING BLOCKS -->
         <div class="coaching-hero">
           <div class="coaching-eyebrow">Your Training</div>
@@ -2321,14 +2284,6 @@ let customWorkouts = JSON.parse(localStorage.getItem('fw_customs')||'[]');
 // A slot with blockId:null is planned but not yet built. This is what lets the strip show
 // all four phases from day one instead of only the ones that already exist.
 let trainingCycles = JSON.parse(localStorage.getItem('fw_cycles')||'[]');
-
-// Sales pipeline. Admin-only — never shown to clients, never pushed. One row per contact,
-// mirroring the Propane sheet's stages so the numbers stay comparable.
-let leads = JSON.parse(localStorage.getItem('fw_leads')||'[]');
-function saveLeads(){
-  localStorage.setItem('fw_leads', JSON.stringify(leads));
-  queueCloudSync();
-}
 let archivedBlocks = JSON.parse(localStorage.getItem('fw_archive')||'[]');
 let sessionLog = JSON.parse(localStorage.getItem('fw_log')||'{}');
 let currentWeek = parseInt(localStorage.getItem('fw_week')||'1');
@@ -4974,183 +4929,6 @@ async function postNote(){
     showToast('Could not post note');
   }
   if(btn) btn.disabled = false;
-}
-
-// ─── SALES PIPELINE (admin only) ───────────────────────────────
-// Mirrors the Propane sheet: one row per contact, stage flags, cash. Analytics are all
-// derived — nothing is stored twice, so a mis-tick fixes itself the moment you correct it.
-const LEAD_PLATFORMS = ['Instagram','Text Message','WhatsApp','Twitter','Email','In person','Referral'];
-
-const LEAD_STAGES = [
-  { k:'reply',    label:'Step 1 reply' },
-  { k:'s3pass',   label:'Step 3 pass' },
-  { k:'s4pass',   label:'Step 4 pass' },
-  { k:'pitched',  label:'Price pitched' },
-  { k:'ghost',    label:'Ghosted' },
-  { k:'objected', label:'Gave objection' },
-  { k:'sale',     label:'Sale' }
-];
-
-function newLead(){
-  leads.unshift({
-    id: 'ld_' + Date.now().toString(36) + Math.random().toString(36).slice(2,6),
-    date: todayISO(), name: '', platform: '', cash: 0, note: '', objection: '',
-    goal: '', current: '', gap: '',
-    reply:false, s3pass:false, s4pass:false, pitched:false, ghost:false, objected:false, sale:false,
-    open: true
-  });
-  saveLeads(); renderPipeline();
-}
-
-function leadSet(id, field, value){
-  const l = leads.find(function(x){ return x.id===id; });
-  if(!l) return;
-  l[field] = value;
-  saveLeads();
-  // Only the analytics panel needs redrawing — re-rendering the whole list would blur the
-  // field being typed into.
-  const a = document.getElementById('crm-analytics');
-  if(a) a.innerHTML = pipelineAnalyticsHTML();
-}
-
-function leadToggle(id, field){
-  const l = leads.find(function(x){ return x.id===id; });
-  if(!l) return;
-  l[field] = !l[field];
-  saveLeads(); renderPipeline();
-}
-
-function leadOpen(id){
-  const l = leads.find(function(x){ return x.id===id; });
-  if(!l) return;
-  l.open = !l.open;
-  saveLeads(); renderPipeline();
-}
-
-function leadDelete(id){
-  const l = leads.find(function(x){ return x.id===id; });
-  if(!l) return;
-  if(!confirm('Delete ' + (l.name || 'this lead') + '?')) return;
-  leads = leads.filter(function(x){ return x.id!==id; });
-  saveLeads(); renderPipeline();
-}
-
-// Every figure in the Propane analytics block, derived from the rows.
-function pipelineStats(){
-  const n = function(f){ return leads.filter(function(l){ return l[f]; }).length; };
-  const sent = leads.length;
-  const sales = n('sale');
-  const pitched = n('pitched');
-  const ghost = n('ghost');
-  const cash = leads.reduce(function(a,l){ return a + (parseFloat(l.cash)||0); }, 0);
-  return {
-    sent: sent,
-    replies: n('reply'),
-    s3: n('s3pass'),
-    s4: n('s4pass'),
-    pitched: pitched,
-    ghost: ghost,
-    objected: n('objected'),
-    sales: sales,
-    // Of the people who heard a price, how many bought.
-    cr: pitched ? Math.round((sales/pitched)*100) : 0,
-    // Same, with ghosts taken out — they never really said no.
-    adj: (pitched-ghost) > 0 ? Math.round((sales/(pitched-ghost))*100) : 0,
-    cash: cash,
-    perMsg: sent ? (cash/sent) : 0
-  };
-}
-
-function pipelineAnalyticsHTML(){
-  const s = pipelineStats();
-  const row = function(label, val){
-    return '<div class="crm-arow"><span>'+label+'</span><span class="crm-aval">'+val+'</span></div>';
-  };
-  return '<div class="crm-analytics">'
-    + row('# Sent', s.sent)
-    + row('Stage 1 replies', s.replies)
-    + row('Stage 3 passes', s.s3)
-    + row('Stage 4 passes', s.s4)
-    + row('# Price pitched', s.pitched)
-    + row('# Ghost', s.ghost)
-    + row('# Gave objection', s.objected)
-    + row('# Sales', s.sales)
-    + row('Sales CR%', s.cr + '%')
-    + row('Cash', '£' + s.cash.toFixed(0))
-    + row('Cash / message', '£' + s.perMsg.toFixed(1))
-    + row('Adjusted CR%', s.adj + '%')
-    + '</div>';
-}
-
-// The furthest stage reached, for the collapsed card.
-function leadStageLabel(l){
-  if(l.sale) return 'SALE';
-  if(l.ghost) return 'GHOSTED';
-  if(l.objected) return 'OBJECTION';
-  if(l.pitched) return 'PITCHED';
-  if(l.s4pass) return 'STEP 4';
-  if(l.s3pass) return 'STEP 3';
-  if(l.reply) return 'REPLIED';
-  return 'SENT';
-}
-
-function renderPipeline(){
-  const host = document.getElementById('crm-list');
-  if(!host) return;
-  const a = document.getElementById('crm-analytics');
-  if(a) a.innerHTML = pipelineAnalyticsHTML();
-
-  if(!leads.length){
-    host.innerHTML = '<div class="nt-empty">No leads yet. Add one as you reach out.</div>';
-    return;
-  }
-
-  const esc = function(v){ return String(v==null?'':v).replace(/"/g,'&quot;').replace(/[<>]/g,''); };
-
-  host.innerHTML = leads.map(function(l){
-    const toggles = LEAD_STAGES.map(function(st){
-      return '<button class="crm-tog'+(l[st.k]?' on':'')+'" onclick="leadToggle(\'' + l.id + '\',\'' + st.k + '\')">'
-        + (l[st.k]?'✓ ':'') + st.label + '</button>';
-    }).join('');
-
-    const field = function(label, f, ph){
-      return '<label class="crm-f"><span>'+label+'</span>'
-        + '<input type="text" value="'+esc(l[f])+'" placeholder="'+ph+'" '
-        + 'onchange="leadSet(\'' + l.id + '\',\'' + f + '\',this.value)"></label>';
-    };
-
-    const platOpts = ['<option value="">—</option>'].concat(LEAD_PLATFORMS.map(function(p){
-      return '<option value="'+p+'"'+(l.platform===p?' selected':'')+'>'+p+'</option>';
-    })).join('');
-
-    const body = !l.open ? '' :
-      '<div class="crm-body">'
-      + '<div class="crm-frow">'
-      +   '<label class="crm-f"><span>Date</span><input type="date" value="'+esc(l.date)+'" onchange="leadSet(\'' + l.id + '\',\'date\',this.value)"></label>'
-      +   '<label class="crm-f"><span>Platform</span><select onchange="leadSet(\'' + l.id + '\',\'platform\',this.value)">'+platOpts+'</select></label>'
-      + '</div>'
-      + field('Current situation', 'current', 'Inconsistent / none')
-      + field('Goal', 'goal', 'Lose 3kg')
-      + field('Past success / failure', 'note', 'Lost weight with keto')
-      + field('Gap insight', 'gap', 'Weekends')
-      + '<div class="crm-toggles">'+toggles+'</div>'
-      + '<div class="crm-frow">'
-      +   '<label class="crm-f"><span>Cash collected</span><input type="number" inputmode="decimal" value="'+(l.cash||'')+'" placeholder="0" onchange="leadSet(\'' + l.id + '\',\'cash\',parseFloat(this.value)||0)"></label>'
-      + '</div>'
-      + field('Objection', 'objection', 'Wants to start after his holiday')
-      + '<button class="crm-del" onclick="leadDelete(\'' + l.id + '\')">Delete lead</button>'
-      + '</div>';
-
-    return '<div class="crm-card">'
-      + '<div class="crm-head" onclick="leadOpen(\'' + l.id + '\')">'
-      +   '<div class="crm-name">'+(esc(l.name)||'New lead')+'</div>'
-      +   '<div class="crm-sub">'+(esc(l.platform)||'—')+' · '+esc(l.date)+'</div>'
-      +   '<span class="crm-stage'+(l.sale?' win':'')+'">'+leadStageLabel(l)+'</span>'
-      + '</div>'
-      + (l.open ? '<div class="crm-namerow"><input type="text" value="'+esc(l.name)+'" placeholder="Contact name" onchange="leadSet(\'' + l.id + '\',\'name\',this.value)"></div>' : '')
-      + body
-      + '</div>';
-  }).join('');
 }
 
 // ─── UNREAD NOTES BADGE ────────────────────────────────────────
@@ -8275,14 +8053,14 @@ async function syncBlocksToCloud() {
     if(existing?.id) {
       await supa.from('blocks').update({
         name: currentBlock.name || 'My Block',
-        data: { currentBlock, customWorkouts, archivedBlocks, trainingCycles, bodyLog, currentWeek, trainedDates, leads },
+        data: { currentBlock, customWorkouts, archivedBlocks, trainingCycles, bodyLog, currentWeek, trainedDates },
         updated_at: new Date().toISOString()
       }).eq('id', existing.id);
     } else {
       await supa.from('blocks').insert({
         user_id: currentUser.id,
         name: currentBlock.name || 'My Block',
-        data: { currentBlock, customWorkouts, archivedBlocks, trainingCycles, bodyLog, currentWeek, trainedDates, leads },
+        data: { currentBlock, customWorkouts, archivedBlocks, trainingCycles, bodyLog, currentWeek, trainedDates },
         is_current: true,
         updated_at: new Date().toISOString()
       });
@@ -8348,9 +8126,6 @@ async function loadFromCloud() {
       }
       if(Array.isArray(d.trainingCycles) && d.trainingCycles.length >= trainingCycles.length) {
         trainingCycles = d.trainingCycles; localStorage.setItem('fw_cycles', JSON.stringify(trainingCycles));
-      }
-      if(Array.isArray(d.leads) && d.leads.length >= leads.length) {
-        leads = d.leads; localStorage.setItem('fw_leads', JSON.stringify(leads));
       }
       if(Array.isArray(d.bodyLog) && d.bodyLog.length >= bodyLog.length) {
         bodyLog = d.bodyLog; localStorage.setItem('fw_body', JSON.stringify(bodyLog));
@@ -8963,13 +8738,6 @@ async function loadProgrammes() {
   // AI generator entry — FORGE+ (coached) and admin only
   const aiLink = document.getElementById('ai-programme-link');
   if(aiLink) aiLink.style.display = isCoached ? 'block' : 'none';
-
-  // Sales pipeline — admin only. A client must never see this.
-  const crm = document.getElementById('crm-section');
-  if(crm){
-    crm.style.display = isAdmin ? 'block' : 'none';
-    if(isAdmin) { try { renderPipeline(); } catch(e){ console.warn('pipeline', e); } }
-  }
 
   // Render the saved / assigned blocks (the list element now lives in this tab)
   renderBuilderSaved();
