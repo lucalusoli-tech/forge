@@ -185,6 +185,7 @@
   .macro-inputs input:focus { outline: none; border-color: var(--accent-dim); }
 
   .acct-plan { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); text-align: center; margin: 10px 0 14px; }
+  .acct-build { font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 1.5px; color: var(--text-dim); text-align: center; margin: -8px 0 14px; }
   .acct-billing { width: 100%; padding: 13px; margin-bottom: 10px; background: none; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: border-color 0.15s, color 0.15s; }
   .acct-billing:active { border-color: var(--accent-dim); color: var(--accent); }
   .bw-ytick { fill: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 8.5px; text-anchor: end; }
@@ -1334,6 +1335,7 @@
       <div class="signout-name" id="signout-sheet-name"></div>
       <div class="signout-email" id="signout-sheet-email"></div>
       <div class="acct-plan" id="signout-plan"></div>
+      <div class="acct-build" id="signout-build"></div>
       <button class="upgrade-cta" id="signout-upgrade-btn" onclick="closeSignOutSheet();openUpgrade()" style="width:100%;margin-bottom:10px;display:none">UPGRADE ✦</button>
       <button class="acct-billing" id="signout-billing-btn" onclick="openBillingPortal()" style="display:none">Manage subscription</button>
       <button class="signout-btn" onclick="handleSignOut()">Sign Out</button>
@@ -2917,7 +2919,7 @@ function switchBuildTab(tab) {
 }
 
 // ─── CHANGELOG ─────────────────────────────────────────────────
-const FORGE_VERSION = '2.2.0';
+const FORGE_VERSION = '2.3.0';
 const FORGE_CHANGELOG = [
   'Cycles — plan a full training cycle in phases (prep, hypertrophy, strength, power) and see where you are in it. A strip under your block name shows the phases you\'ve finished, the one you\'re in, and what\'s still ahead',
   'Finish a phase and the next one is waiting — one tap moves you on, no rebuilding',
@@ -8643,6 +8645,8 @@ function openSignOutSheet() {
   if(!currentUser) return;
   const planEl = document.getElementById('signout-plan');
   if(planEl) planEl.textContent = TIER_LABEL[currentUser.tier] || '';
+  const buildEl = document.getElementById('signout-build');
+  if(buildEl) buildEl.textContent = 'build ' + FORGE_VERSION;
   const billBtn = document.getElementById('signout-billing-btn');
   if(billBtn) billBtn.style.display =
     (STRIPE_PORTAL_URL && BILLED_TIERS.indexOf(currentUser.tier) > -1) ? 'block' : 'none';
