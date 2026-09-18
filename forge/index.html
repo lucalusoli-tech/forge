@@ -8042,11 +8042,29 @@ let trialStart = parseInt(localStorage.getItem('fw_trial_start')||'0');
 let _authInProgress = false; // dedupes afterAuth between handleLogin and onAuthStateChange
 
 // ─── SYNC ──────────────────────────────────────────────────────
+// Whose data is currently in localStorage. Written whenever we load or sync, so a
+// mismatch is detectable later.
+function stampDataOwner(){
+  if(currentUser?.id) localStorage.setItem('fw_owner', currentUser.id);
+}
+
+// True when local state belongs to somebody other than the signed-in user. The wipe on
+// sign-out only protects us if it runs at the right moment; this check doesn't care when
+// it runs, so a stale local copy can never be pushed onto another account's row.
+function localDataIsForeign(){
+  const owner = localStorage.getItem('fw_owner');
+  return !!(owner && currentUser?.id && owner !== currentUser.id);
+}
+
 async function syncBlocksToCloud() {
   if(!currentUser?.id) return;
   // SAFETY: never overwrite cloud data with an empty block
   if(!currentBlock.days || currentBlock.days.length === 0) {
     if(!customWorkouts.length && !archivedBlocks.length) return;
+  }
+  if(localDataIsForeign()){
+    console.warn('sync blocked: local data is not this account\'s');
+    return;
   }
   try {
     const { data: existing } = await supa.from('blocks')
@@ -8276,6 +8294,7 @@ async function afterAuth(supaUser, isNew) {
   };
   const now = Date.now();
   currentUser = user; isPremium = true;
+  stampDataOwner();
   if(isNew) { trialStart = now; localStorage.setItem('fw_trial_start', now); }
   localStorage.setItem('fw_user', JSON.stringify(user));
   localStorage.setItem('fw_premium', 'true');
@@ -8379,6 +8398,7 @@ function wipeLocalUserData(){
   Object.keys(localStorage)
     .filter(function(k){ return k.indexOf('fw_') === 0 && DEVICE_KEYS.indexOf(k) === -1; })
     .forEach(function(k){ localStorage.removeItem(k); });
+  localStorage.removeItem('fw_owner');
   try { sessionStorage.removeItem('forge:activeSession'); } catch(e) {}
   // In-memory state has to go too, or the next render writes it straight back.
   currentBlock = { name:'', methods:[], weeks:4, warmup:[], skill:[], days:[] };
