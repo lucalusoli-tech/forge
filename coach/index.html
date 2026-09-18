@@ -201,6 +201,13 @@
   .tracker-controls { padding: 16px 20px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
   .tracker-filter { display: flex; gap: 6px; }
   /* ─── PIPELINE ─────────────────────────────────────────────── */
+  .pl-strip { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; }
+  .pl-strip::-webkit-scrollbar { display: none; }
+  .pl-scol { flex: 1 0 84px; border: 1px solid var(--border); background: var(--deep); padding: 8px 9px; }
+  .pl-scol-h { font-family: 'DM Mono', monospace; font-size: 7.5px; letter-spacing: 1.5px; color: var(--text-dim); white-space: nowrap; }
+  .pl-scol-n { font-family: 'DM Mono', monospace; font-size: 17px; color: var(--text); margin-top: 3px; }
+  .pl-scol-v { font-family: 'DM Mono', monospace; font-size: 9px; color: var(--accent); margin-top: 1px; }
+  .pl-striptot { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1px; color: var(--text-dim); text-align: right; margin-top: 6px; }
   .pl-stats { border: 1px solid var(--border); background: var(--deep); display: grid; grid-template-columns: 1fr 1fr; }
   .pl-stat { padding: 9px 12px; border-bottom: 1px solid var(--border); }
   .pl-stat:nth-child(odd) { border-right: 1px solid var(--border); }
@@ -671,6 +678,7 @@
           <option>Twitter</option><option>Email</option><option>In person</option><option>Referral</option>
         </select>
         <input class="add-client-input" type="date" id="lead-date" style="max-width:150px">
+        <input class="add-client-input" type="number" inputmode="decimal" id="lead-value" placeholder="£ value" style="max-width:110px">
       </div>
       <button class="add-client-submit" onclick="addLead()" style="margin-top:10px">ADD LEAD →</button>
     </div>
@@ -678,6 +686,8 @@
     <div style="padding:0 20px">
       <input class="add-client-input" id="pl-search" placeholder="Search name…" oninput="renderPipeline()" style="width:100%">
     </div>
+
+    <div id="pl-stages" style="padding:14px 20px 0"></div>
 
     <div id="pl-analytics" style="padding:14px 20px 0"></div>
 
@@ -1302,12 +1312,13 @@ async function addLead() {
     name: name,
     email: document.getElementById('lead-email').value.trim() || null,
     platform: document.getElementById('lead-platform').value || null,
-    first_dm: document.getElementById('lead-date').value || new Date().toISOString().slice(0,10)
+    first_dm: document.getElementById('lead-date').value || new Date().toISOString().slice(0,10),
+    lead_value: parseFloat(document.getElementById('lead-value').value) || 0
   };
   const { data, error } = await supa.from('sales_leads').insert(row).select().single();
   if(error) { console.warn(error); showToast('Failed to add lead'); return; }
   leads.unshift(data);
-  ['lead-name','lead-email'].forEach(id => document.getElementById(id).value = '');
+  ['lead-name','lead-email','lead-value'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('add-lead-form').classList.remove('open');
   renderPipeline();
   showToast('Lead added');
@@ -1324,7 +1335,7 @@ async function leadSet(id, field, value) {
   const { error } = await supa.from('sales_leads').update(patch).eq('id', id);
   if(error) { console.warn(error); showToast('Save failed'); return; }
   if(field.indexOf('f_') === 0) renderPipeline();
-  else renderPipelineStats();
+  else { renderPipelineStats(); renderStageStrip(); }
 }
 
 function leadFlag(id, field) {
@@ -1399,6 +1410,29 @@ function pipelineStats() {
   };
 }
 
+// Stage strip: how many leads sit at each step and what they're worth if they sign.
+// Counts only active leads — a won or lost lead isn't 'sitting' anywhere, and including
+// them would make the forecast read higher than the money still in play.
+const STAGE_ORDER = ['sent','replied','step3','step4','pitched'];
+
+function renderStageStrip() {
+  const el = document.getElementById('pl-stages');
+  if(!el) return;
+  const live = leads.filter(l => l.status === 'active');
+  const cells = STAGE_ORDER.map(st => {
+    const inStage = live.filter(l => stageFromFlags(l) === st);
+    const val = inStage.reduce((a,l) => a + (parseFloat(l.lead_value) || 0), 0);
+    return `<div class="pl-scol">
+      <div class="pl-scol-h">${STAGE_LABEL[st]}</div>
+      <div class="pl-scol-n">${inStage.length}</div>
+      <div class="pl-scol-v">£${val.toFixed(0)}</div>
+    </div>`;
+  }).join('');
+  const pipelineValue = live.reduce((a,l) => a + (parseFloat(l.lead_value) || 0), 0);
+  el.innerHTML = `<div class="pl-strip">${cells}</div>`
+    + `<div class="pl-striptot">${live.length} active · £${pipelineValue.toFixed(0)} in play</div>`;
+}
+
 function renderPipelineStats() {
   const el = document.getElementById('pl-analytics');
   if(!el) return;
@@ -1415,6 +1449,7 @@ function renderPipelineStats() {
 }
 
 function renderPipeline() {
+  renderStageStrip();
   renderPipelineStats();
   const host = document.getElementById('pl-list');
   if(!host) return;
@@ -1494,7 +1529,7 @@ function renderPipeline() {
               <button class="pl-check${l.f_objected ? ' on' : ''}" onclick="leadFlag('${l.id}','f_objected')">Objection</button>
               <button class="pl-check${l.f_ghost ? ' on' : ''}" onclick="leadFlag('${l.id}','f_ghost')">Ghosted</button>
             </div>`
-          + f('Cash collected','cash_collected','0','number')
+          + `<div class="pl-row2">${f('Lead value','lead_value','0','number')}${f('Cash collected','cash_collected','0','number')}</div>`
           + `<label class="pl-f"><span>Objection</span><textarea placeholder="Wants to start after his holiday"
               onchange="leadSet('${l.id}','objection',this.value)">${esc(l.objection)}</textarea></label>`)}
 
