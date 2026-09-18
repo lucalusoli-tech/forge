@@ -8260,12 +8260,11 @@ async function handleNewPassword() {
 async function afterAuth(supaUser, isNew) {
   // If cached data belongs to a different user, wipe it before loading
   const cachedUser = JSON.parse(localStorage.getItem('fw_user') || 'null');
+  // Second line of defence: even if sign-out never ran (crash, cleared session, shared
+  // device), a different user landing here must not inherit the last one's data.
   if(cachedUser && cachedUser.id !== supaUser.id) {
-    ['fw_block','fw_customs','fw_archive','fw_log','fw_week',
-     'fw_premium','fw_trial_start','fw_boards','fw_trained_dates'].forEach(k => localStorage.removeItem(k));
-    // Reset in-memory state
-    currentBlock = { name:'', methods:[], weeks:4, warmup:[], skill:[], days:[] };
-    customWorkouts = []; archivedBlocks = []; sessionLog = {}; currentWeek = 1;
+    wipeLocalUserData();
+    try { await idbClear(); } catch(e) {}
   }
   const user = {
     id: supaUser.id,
@@ -8368,13 +8367,28 @@ function startApp(isGuest) {
   } catch(e) { console.warn('[FORGE] Session restore failed:', e); }
 }
 
+// Wipe every trace of the previous user from this device.
+// Deliberately a deny-list, not an allow-list: listing keys to delete means each new
+// feature leaks its data to the next account until someone remembers to add it. This bit
+// us with bodyweight showing up on a client's phone. Only the video-probe cache survives,
+// because it describes the network, not the person.
+const DEVICE_KEYS = [FV_CACHE_KEY];
+function wipeLocalUserData(){
+  Object.keys(localStorage)
+    .filter(function(k){ return k.indexOf('fw_') === 0 && DEVICE_KEYS.indexOf(k) === -1; })
+    .forEach(function(k){ localStorage.removeItem(k); });
+  try { sessionStorage.removeItem('forge:activeSession'); } catch(e) {}
+  // In-memory state has to go too, or the next render writes it straight back.
+  currentBlock = { name:'', methods:[], weeks:4, warmup:[], skill:[], days:[] };
+  customWorkouts = []; archivedBlocks = []; sessionLog = {}; currentWeek = 1;
+  trainingCycles = []; bodyLog = []; trainedDates = []; coachClients = [];
+  notesSeen = {};
+}
+
 async function handleSignOut() {
   await supa.auth.signOut();
   await idbClear();
-  // Wipe all local data so the next user on this device starts clean
-  ['fw_user','fw_premium','fw_trial_start','fw_guest',
-   'fw_block','fw_customs','fw_archive','fw_log','fw_week'].forEach(k => localStorage.removeItem(k));
-  try { sessionStorage.removeItem('forge:activeSession'); } catch(e) {}
+  wipeLocalUserData();
   currentUser = null; isPremium = false; trialStart = 0;
   location.reload();
 }
