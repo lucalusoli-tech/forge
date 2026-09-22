@@ -190,6 +190,9 @@
   .acct-billing:active { border-color: var(--accent-dim); color: var(--accent); }
   .bw-ytick { fill: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 8.5px; text-anchor: end; }
   .bw-xtick { fill: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 8.5px; }
+  .cycle-slot-edit { background: none; border: none; padding: 0; text-align: left; cursor: pointer; font: inherit; color: inherit; max-width: 100%; }
+  .cycle-slot-edit:active { color: var(--accent); }
+  .cycle-slot-pencil { color: var(--accent-dim); font-size: 0.85em; }
   .nt-del { background: none; border: none; color: var(--text-dim); font-size: 15px; line-height: 1; padding: 0 0 0 8px; cursor: pointer; }
   .nt-del:active { color: var(--accent); }
   .nav-icon { position: relative; display: inline-block; }
@@ -2468,7 +2471,9 @@ function cycleCardHTML(c){
     return `<div class="cycle-slot-row">
       <div class="cycle-slot-info">
         <span class="cycle-slot-phase">${i+1}. ${(PHASE_LABELS[s.phase]||s.phase)} <span class="cycle-slot-weeks">${s.weeks}w</span></span>
-        <span class="cycle-slot-block ${wk?'':'empty'}">${name}</span>
+        ${wk
+          ? `<button class="cycle-slot-block cycle-slot-edit" onclick="editSavedBlock('${wk.id}')" aria-label="Edit ${name.replace(/"/g,'&quot;')}">${name} <span class="cycle-slot-pencil">✎</span></button>`
+          : `<span class="cycle-slot-block empty">${name}</span>`}
       </div>
       <div class="cycle-slot-actions">
         ${notes}
@@ -2810,6 +2815,25 @@ function openBlockEndPrompt() {
     return;
   }
 
+  // In a cycle, but the next phase hasn't reached this device. The usual case for pushed
+  // clients: the coach holds the whole plan, the client only has phases delivered so far.
+  const ref = currentBlock.cycle;
+  const cyc = ref && ref.id ? getCycle(ref.id) : null;
+  const upcoming = cyc ? cyc.slots[(ref.order || 1)] : null;
+  if (upcoming) {
+    const label = PHASE_LABELS[upcoming.phase]
+      ? PHASE_LABELS[upcoming.phase].charAt(0) + PHASE_LABELS[upcoming.phase].slice(1).toLowerCase()
+      : 'The next phase';
+    document.getElementById('blockend-title').textContent = 'PHASE COMPLETE';
+    desc.textContent = label + ' is next in ' + cyc.name + '. Your coach will send it over — keep training this block until it arrives.';
+    actions.innerHTML = `
+      <button class="confirm-yes" onclick="closeBlockEndPrompt();openNoteThread({name:currentBlock.name,cycle:currentBlock.cycle})">Tell my coach I'm done →</button>
+      <button class="confirm-yes" style="background:transparent;border-color:var(--border);color:var(--text-muted);margin-top:4px" onclick="closeBlockEndPrompt();repeatBlock()">Repeat This Phase</button>
+    `;
+    document.getElementById('blockend-overlay').classList.add('open');
+    return;
+  }
+
   if (isForgePlus) {
     // FORGE+ tier — AI + coached programme
     desc.textContent = 'Nice work finishing ' + (currentBlock.name || 'this block') + '. Ready for what\'s next?';
@@ -2919,7 +2943,7 @@ function switchBuildTab(tab) {
 }
 
 // ─── CHANGELOG ─────────────────────────────────────────────────
-const FORGE_VERSION = '2.3.0';
+const FORGE_VERSION = '2.3.1';
 const FORGE_CHANGELOG = [
   'Cycles — plan a full training cycle in phases (prep, hypertrophy, strength, power) and see where you are in it. A strip under your block name shows the phases you\'ve finished, the one you\'re in, and what\'s still ahead',
   'Finish a phase and the next one is waiting — one tap moves you on, no rebuilding',
@@ -8280,9 +8304,13 @@ async function handleNewPassword() {
 async function afterAuth(supaUser, isNew) {
   // If cached data belongs to a different user, wipe it before loading
   const cachedUser = JSON.parse(localStorage.getItem('fw_user') || 'null');
-  // Second line of defence: even if sign-out never ran (crash, cleared session, shared
-  // device), a different user landing here must not inherit the last one's data.
-  if(cachedUser && cachedUser.id !== supaUser.id) {
+  // Whose data is in storage right now? Trust the owner stamp first, then the cached user.
+  // If neither exists, the data is unattributed — an older build's sign-out removed fw_user
+  // but left fw_body behind, and that orphaned data then got uploaded to the next account.
+  // Unattributed means untrusted: wipe it. The cost is re-downloading this user's own data
+  // from the cloud, which the load below does anyway.
+  const localOwner = localStorage.getItem('fw_owner') || (cachedUser && cachedUser.id) || null;
+  if(localOwner !== supaUser.id) {
     wipeLocalUserData();
     try { await idbClear(); } catch(e) {}
   }
