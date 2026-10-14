@@ -2943,12 +2943,9 @@ function switchBuildTab(tab) {
 }
 
 // ─── CHANGELOG ─────────────────────────────────────────────────
-const FORGE_VERSION = '2.3.1';
+const FORGE_VERSION = '2.3.2';
 const FORGE_CHANGELOG = [
-  'Cycles — plan a full training cycle in phases (prep, hypertrophy, strength, power) and see where you are in it. A strip under your block name shows the phases you\'ve finished, the one you\'re in, and what\'s still ahead',
-  'Finish a phase and the next one is waiting — one tap moves you on, no rebuilding',
-  'Macro targets on the Progress tab — calories, protein, carbs and fat for the phase you\'re training. Each phase carries its own',
-  'New radar chart in All Time showing how your work splits across strength, hypertrophy and skill'
+  'Moving to a new phase now starts its log clean — your previous phase\'s sessions stay in its archive instead of showing up as this phase\'s weeks'
 ];
 
 function checkChangelog() {
@@ -8933,6 +8930,15 @@ async function acceptAssignedBlock(assignmentId) {
       mode = (hasCurrent && currentBlock.name.trim().toUpperCase() === (newBlock.name || '').trim().toUpperCase())
         ? 'update' : 'new';
     }
+    // A different phase is never an update, whatever the toggle said. Phases in a cycle reuse
+    // day/exercise ids, and logs are keyed day+exercise+week, so keeping the log here makes the
+    // previous phase's sessions show up as this phase's weeks. Same cycle + same slot = a
+    // genuine edit of the current phase, and only that keeps progress.
+    if(mode === 'update' && hasCurrent) {
+      const was = currentBlock.cycle, now = newBlock.cycle;
+      const samePhase = was && now ? (was.id === now.id && was.order === now.order) : !was && !now;
+      if(!samePhase) mode = 'new';
+    }
 
     // Mark accepted + stop the notice re-appearing, regardless of branch
     await supa.from('assigned_blocks')
@@ -9046,6 +9052,7 @@ async function openPushUpdate(blockId) {
           <button type="button" id="push-mode-new" onclick="setPushMode('new')" style="flex:1;padding:11px 8px;background:none;border:1px solid var(--border);color:var(--text-muted);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;cursor:pointer;line-height:1.4">NEW<br><span style="font-size:8px;opacity:0.7">fresh start</span></button>
         </div>
         <input type="hidden" id="push-mode" value="update">
+        ${block.cycle ? `<div style="font-size:9px;color:var(--text-dim);letter-spacing:0.5px;line-height:1.5;margin:-8px 0 16px">Part of a cycle. If the client is on a different phase, this starts fresh automatically.</div>` : ''}
 
         <div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:8px">SELECT CLIENT</div>
         <select id="push-client-select" style="width:100%;padding:12px;background:var(--deep);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:12px;margin-bottom:16px">
