@@ -3086,10 +3086,10 @@ function switchBuildTab(tab) {
 }
 
 // ─── CHANGELOG ─────────────────────────────────────────────────
-const FORGE_VERSION = '2.3.6';
+const FORGE_VERSION = '2.3.7';
 const FORGE_CHANGELOG = [
   'Strength Index is now five core movements — pull-up, chin-up, muscle-up, push-up and squat — and keeps its history across every phase instead of starting over',
-  'Phase reports — finish a phase and see how it went: sessions, sets, reps, volume, your biggest gain charted week by week, and every exercise first week to last. Share it as an image. Past blocks have one too, in the Archive',
+  'Phase reports — finish your last session of a phase and the film plays by itself. See how it went: sessions, sets, reps, volume, your biggest gain charted week by week, and every exercise first week to last. Share it as an image. Past blocks have one too, in the Archive',
   'Moving to a new phase now starts its log clean — your previous phase\'s sessions stay in its archive instead of showing up as this phase\'s weeks'
 ];
 
@@ -4384,8 +4384,8 @@ function checkWeekComplete() {
 
   const total = currentBlock.weeks || 4;
   if (currentWeek >= total) {
-    // Final week — trigger block end instead
-    openBlockEndPrompt();
+    // Final week — the phase film plays first (once per block), then the block-end options.
+    if (!prAutoPlay(() => openBlockEndPrompt())) openBlockEndPrompt();
     return;
   }
 
@@ -9609,6 +9609,26 @@ function prBigSize(text){
 
 function prReplay(){ openPhaseReport(prLastIdx); }
 
+// Runs once when a block's final session is saved. Plays the film by itself, the first time
+// only for each block, and calls `after` when the report is closed. Returns false if it didn't
+// play (already seen, or nothing logged) so the caller falls back to the normal prompt.
+let prAfterClose = null;
+function prAutoKey(){
+  const c = currentBlock.cycle;
+  return (currentBlock.sourceId || currentBlock.name || 'block') + (c && c.id ? '|' + c.id + ':' + c.order : '');
+}
+function prAutoPlay(after){
+  let seen = [];
+  try { seen = JSON.parse(localStorage.getItem('fw_pr_played') || '[]'); } catch(e) {}
+  const key = prAutoKey();
+  if(seen.includes(key) || !prHasData(currentBlock, sessionLog)) return false;
+  seen.push(key);
+  try { localStorage.setItem('fw_pr_played', JSON.stringify(seen.slice(-50))); } catch(e) {}
+  prAfterClose = after || null;
+  openPhaseReport();
+  return true;
+}
+
 function prCountTo(el, from, to, dur, decimals){
   const t0 = performance.now();
   const fmt = n => { if(!decimals) return Math.round(n).toLocaleString('en-GB'); const v = Math.round(n * 2) / 2; return Number.isInteger(v) ? String(v) : v.toFixed(1); };
@@ -9811,6 +9831,9 @@ function closePhaseReport(){
   const intro = document.getElementById('pr-intro'); if(intro) intro.remove();
   if(prObserver){ prObserver.disconnect(); prObserver = null; }
   document.getElementById('phase-report').classList.remove('open', 'pr-anim');
+  // Auto-played at the end of a block: hand over to the Phase Complete options.
+  const next = prAfterClose; prAfterClose = null;
+  if(next) setTimeout(next, 450);
 }
 
 // Share as an image: emails and chat apps can't run an animation, a PNG goes anywhere.
