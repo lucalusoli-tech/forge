@@ -184,6 +184,23 @@
   .macro-inputs input { background: var(--black); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 13px; padding: 9px 10px; width: 100%; }
   .macro-inputs input:focus { outline: none; border-color: var(--accent-dim); }
 
+  .acct-plan { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); text-align: center; margin: 10px 0 14px; }
+  .acct-build { font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 1.5px; color: var(--text-dim); text-align: center; margin: -8px 0 14px; }
+  .acct-billing { width: 100%; padding: 13px; margin-bottom: 10px; background: none; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; text-transform: uppercase; cursor: pointer; transition: border-color 0.15s, color 0.15s; }
+  .acct-billing:active { border-color: var(--accent-dim); color: var(--accent); }
+  .bw-ytick { fill: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 8.5px; text-anchor: end; }
+  .bw-xtick { fill: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 8.5px; }
+  .cycle-slot-edit { background: none; border: none; padding: 0; text-align: left; cursor: pointer; font: inherit; color: inherit; max-width: 100%; }
+  .cycle-slot-edit:active { color: var(--accent); }
+  .cycle-slot-pencil { color: var(--accent-dim); font-size: 0.85em; }
+  .nt-del { background: none; border: none; color: var(--text-dim); font-size: 15px; line-height: 1; padding: 0 0 0 8px; cursor: pointer; }
+  .nt-del:active { color: var(--accent); }
+  .nav-icon { position: relative; display: inline-block; }
+  .nav-dot { position: absolute; top: -2px; right: -6px; width: 7px; height: 7px; border-radius: 50%; background: var(--accent); display: none; }
+  .nav-dot.on { display: block; }
+  .th-item.unread { border-color: var(--accent-dim); }
+  .th-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-right: 7px; vertical-align: middle; }
+
   /* ─── THREAD INDEX ─────────────────────────────────────────── */
   .th-item { border: 1px solid var(--border); background: var(--deep); padding: 13px 14px; margin-bottom: 10px; cursor: pointer; }
   .th-item:active { border-color: var(--accent-dim); }
@@ -228,8 +245,7 @@
   .bw-entry input:focus { outline: none; border-color: var(--accent-dim); }
   .bw-btn { background: var(--accent); border: none; color: var(--black); font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; padding: 9px 16px; cursor: pointer; }
   .bw-spark { border: 1px solid var(--border); border-top: none; background: var(--deep); padding: 10px 12px 6px; }
-  .bw-spark svg { width: 100%; height: 56px; display: block; }
-  .bw-sparklab { display: flex; justify-content: space-between; font-family: 'DM Mono', monospace; font-size: 8.5px; color: var(--text-dim); margin-top: 4px; }
+  .bw-spark svg { width: 100%; height: auto; display: block; }
   .si-wrap { border: 1px solid var(--border); background: var(--deep); padding: 12px; }
   .si-pick { width: 100%; background: var(--black); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 11px; padding: 9px 10px; margin-bottom: 12px; }
   .si-chart svg { width: 100%; height: 110px; display: block; }
@@ -851,7 +867,7 @@
   .onboard-freq-opt:active, .onboard-freq-opt.selected { border-color: var(--accent-dim); color: var(--accent); background: var(--accent-glow); }
   .onboard-cta { background: var(--accent-glow); border: 1px solid var(--accent-dim); color: var(--accent); font-family: 'DM Mono', monospace; font-size: 12px; letter-spacing: 3px; text-transform: uppercase; padding: 16px 32px; cursor: pointer; margin-top: 8px; }
   .onboard-cta:active { background: rgba(201,169,110,0.2); }
-  .onboard-footer { padding: 0 24px 32px; display: flex; justify-content: center; }
+  .onboard-footer { padding: 0 24px 32px; display: flex; align-items: center; justify-content: space-between; }
   .onboard-back { background: none; border: none; color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; cursor: pointer; padding: 12px; text-transform: uppercase; }
   .onboard-back:active { color: var(--accent); }
   .onboard-loading-bar { width: 120px; height: 2px; background: var(--border); margin-top: 32px; overflow: hidden; border-radius: 1px; }
@@ -995,6 +1011,48 @@
   .st-perfval{font-family:'DM Mono',monospace;font-size:26px;margin-top:10px;line-height:1;color:var(--text);}
   .st-perfval small{font-size:12px;color:var(--accent-dim);}
   .st-perfsub{font-size:11px;margin-top:7px;color:var(--text-muted);}
+  /* ── PHASE REPORT ── */
+  .pr-overlay { position: fixed; inset: 0; z-index: 900; background: var(--black); opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+  .pr-overlay.open { opacity: 1; pointer-events: all; }
+  .pr-scroll { height: 100%; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: calc(18px + env(safe-area-inset-top, 0px)) 20px calc(32px + var(--safe-bottom)); }
+  .pr-wrap { max-width: 620px; margin: 0 auto; }
+  .pr-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+  .pr-kicker { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; color: var(--accent); text-transform: uppercase; }
+  .pr-close { background: none; border: none; color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; cursor: pointer; padding: 6px 0; }
+  .pr-title { font-family: 'DM Mono', monospace; font-size: 26px; font-weight: 500; letter-spacing: 1.5px; line-height: 1.15; text-transform: uppercase; }
+  .pr-sub { font-size: 11px; color: var(--text-muted); letter-spacing: 1px; margin-top: 10px; }
+  .pr-tiles { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border); border: 1px solid var(--border); margin: 26px 0 16px; }
+  .pr-tile { background: var(--surface); padding: 16px 14px; }
+  .pr-label { font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 2px; color: var(--text-dim); text-transform: uppercase; }
+  .pr-tile-val { font-family: 'DM Mono', monospace; font-size: 26px; margin-top: 8px; color: var(--text); }
+  .pr-unit { font-size: 11px; color: var(--text-muted); margin-left: 3px; letter-spacing: 1px; }
+  .pr-card { border: 1px solid var(--border); background: var(--surface); padding: 18px 16px; margin-bottom: 16px; }
+  .pr-hero-name { font-family: 'DM Mono', monospace; font-size: 15px; letter-spacing: 1.5px; text-transform: uppercase; margin-top: 10px; }
+  .pr-hero-big { font-family: 'DM Mono', monospace; font-size: 32px; color: var(--accent); margin-top: 6px; letter-spacing: 1px; }
+  .pr-hero-pct { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1.5px; color: var(--text-muted); margin-top: 4px; }
+  .pr-chart svg { width: 100%; height: auto; display: block; margin-top: 16px; overflow: visible; }
+  .pr-axis { font-family: 'DM Mono', monospace; font-size: 8px; fill: var(--text-dim); letter-spacing: 1px; }
+  .pr-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
+  .pr-row:last-child { border-bottom: none; }
+  .pr-row-name { font-size: 13px; color: var(--text); }
+  .pr-row-vals { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-muted); white-space: nowrap; display: flex; align-items: center; }
+  .pr-chip { font-size: 9px; letter-spacing: 1px; margin-left: 10px; padding: 2px 6px; border: 1px solid var(--border); color: var(--text-dim); min-width: 44px; text-align: center; }
+  .pr-chip.up { color: var(--accent); border-color: var(--accent-dim); }
+  .pr-chip.down { color: var(--red); border-color: rgba(201,64,64,0.4); }
+  .pr-empty { font-size: 11px; color: var(--text-muted); line-height: 1.6; margin-top: 10px; }
+  .pr-actions { display: flex; gap: 10px; margin-top: 24px; }
+  .pr-btn { flex: 1; padding: 14px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; cursor: pointer; text-transform: uppercase; background: none; border: 1px solid var(--border); color: var(--text-muted); }
+  .pr-btn.primary { background: var(--accent); border-color: var(--accent); color: var(--black); }
+  .pr-anim .pr-rise { opacity: 0; transform: translateY(10px); animation: pr-rise 0.55s cubic-bezier(.2,.7,.2,1) forwards; }
+  .pr-anim .pr-line { stroke-dasharray: 1; stroke-dashoffset: 1; animation: pr-draw 1.4s cubic-bezier(.3,.7,.2,1) 0.5s forwards; }
+  .pr-anim .pr-area { opacity: 0; animation: pr-fade 0.9s ease-out 1.3s forwards; }
+  .pr-anim .pr-dot { opacity: 0; animation: pr-fade 0.3s ease-out forwards; }
+  @keyframes pr-rise { to { opacity: 1; transform: none; } }
+  @keyframes pr-draw { to { stroke-dashoffset: 0; } }
+  @keyframes pr-fade { to { opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) {
+    .pr-anim .pr-rise, .pr-anim .pr-line, .pr-anim .pr-area, .pr-anim .pr-dot { animation: none; opacity: 1; transform: none; stroke-dashoffset: 0; }
+  }
 </style>
 </head>
 <body>
@@ -1160,6 +1218,7 @@
   </div>
   <div class="onboard-footer">
     <button class="onboard-back" id="onboard-back-btn" onclick="onboardBack()" style="visibility:hidden">← BACK</button>
+    <button class="onboard-back" id="onboard-skip-btn" onclick="skipOnboarding()">Skip</button>
   </div>
 </div>
 
@@ -1320,7 +1379,10 @@
     <div class="signout-card">
       <div class="signout-name" id="signout-sheet-name"></div>
       <div class="signout-email" id="signout-sheet-email"></div>
+      <div class="acct-plan" id="signout-plan"></div>
+      <div class="acct-build" id="signout-build"></div>
       <button class="upgrade-cta" id="signout-upgrade-btn" onclick="closeSignOutSheet();openUpgrade()" style="width:100%;margin-bottom:10px;display:none">UPGRADE ✦</button>
+      <button class="acct-billing" id="signout-billing-btn" onclick="openBillingPortal()" style="display:none">Manage subscription</button>
       <button class="signout-btn" onclick="handleSignOut()">Sign Out</button>
       <div style="display:flex;justify-content:center;gap:16px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border)">
         <a href="https://forgetraining.app/terms" target="_blank" style="font-size:9px;letter-spacing:1px;color:var(--text-dim);text-transform:uppercase;text-decoration:none">Terms</a>
@@ -1443,16 +1505,6 @@
 
     <!-- PROGRESS -->
     <div class="page" id="page-progress">
-      <div class="progress-header">
-        <div class="progress-title">PROGRESS</div>
-        <div class="progress-sub" id="progress-sub">CURRENT BLOCK</div>
-        <div class="block-stats">
-          <div class="block-stat"><div class="block-stat-label">Block</div><div class="block-stat-val" id="prog-block">—</div></div>
-          <div class="block-stat"><div class="block-stat-label">Method</div><div class="block-stat-val" id="prog-method">—</div></div>
-          <div class="block-stat"><div class="block-stat-label">Split</div><div class="block-stat-val" id="prog-split">—</div></div>
-          <div class="block-stat"><div class="block-stat-label">Week</div><div class="block-stat-val" id="prog-week">W1</div></div>
-        </div>
-      </div>
       <div class="st-subtoggle"><button id="st-tab-overview" class="on" onclick="showProgressTab('overview')">Overview</button><button id="st-tab-alltime" onclick="showProgressTab('alltime')">All Time</button><button id="st-tab-log" onclick="showProgressTab('log')">Log</button></div>
       <div id="st-overview"></div>
       <div id="st-alltime" style="display:none"></div>
@@ -1688,7 +1740,7 @@
     <button class="nav-btn" id="nav-progress" onclick="navigate('progress')"><span class="nav-icon">◌</span><span class="nav-label">Progress</span></button>
     <button class="nav-btn" id="nav-builder" onclick="navigate('builder')"><span class="nav-icon">✦</span><span class="nav-label">Build</span></button>
     <button class="nav-btn" id="nav-coaching" onclick="navigate('coaching')"><span class="nav-icon">人</span><span class="nav-label">Programmes</span></button>
-    <button class="nav-btn" id="nav-board" onclick="navigate('board')"><span class="nav-icon">✎</span><span class="nav-label">Notes</span></button>
+    <button class="nav-btn" id="nav-board" onclick="navigate('board')"><span class="nav-icon">✎<i class="nav-dot" id="notes-dot"></i></span><span class="nav-label">Notes</span></button>
   </nav>
 </div>
 
@@ -1753,10 +1805,14 @@
   <div class="confirm-sheet">
     <div class="confirm-title" id="blockend-title">BLOCK COMPLETE</div>
     <div class="confirm-desc" id="blockend-desc"></div>
+    <button class="confirm-yes" id="blockend-report" style="display:none;margin-bottom:8px;background:transparent;border-color:var(--accent);color:var(--accent)" onclick="closeBlockEndPrompt();openPhaseReport()">See how it went →</button>
     <div id="blockend-actions"></div>
     <button class="confirm-no" onclick="closeBlockEndPrompt()" style="margin-top:4px">Stay on Final Week</button>
   </div>
 </div>
+
+<!-- PHASE REPORT -->
+<div class="pr-overlay" id="phase-report"><div class="pr-scroll" id="pr-body"></div></div>
 
 <div class="confirm-overlay" id="weekcomplete-overlay">
   <div class="confirm-sheet">
@@ -2461,7 +2517,9 @@ function cycleCardHTML(c){
     return `<div class="cycle-slot-row">
       <div class="cycle-slot-info">
         <span class="cycle-slot-phase">${i+1}. ${(PHASE_LABELS[s.phase]||s.phase)} <span class="cycle-slot-weeks">${s.weeks}w</span></span>
-        <span class="cycle-slot-block ${wk?'':'empty'}">${name}</span>
+        ${wk
+          ? `<button class="cycle-slot-block cycle-slot-edit" onclick="editSavedBlock('${wk.id}')" aria-label="Edit ${name.replace(/"/g,'&quot;')}">${name} <span class="cycle-slot-pencil">✎</span></button>`
+          : `<span class="cycle-slot-block empty">${name}</span>`}
       </div>
       <div class="cycle-slot-actions">
         ${notes}
@@ -2782,6 +2840,8 @@ function openBlockEndPrompt() {
   const isForgePlus = (tier === 'coached' || tier === 'admin');
 
   document.getElementById('blockend-title').textContent = 'BLOCK COMPLETE';
+  const repBtn = document.getElementById('blockend-report');
+  if(repBtn) repBtn.style.display = prHasData(currentBlock, sessionLog) ? 'block' : 'none';
   
   const desc = document.getElementById('blockend-desc');
   const actions = document.getElementById('blockend-actions');
@@ -2797,6 +2857,25 @@ function openBlockEndPrompt() {
       + ' is next in ' + next.cycle.name + '.';
     actions.innerHTML = `
       <button class="confirm-yes" onclick="closeBlockEndPrompt();advanceToNextPhase()">Start ${next.block.name} →</button>
+      <button class="confirm-yes" style="background:transparent;border-color:var(--border);color:var(--text-muted);margin-top:4px" onclick="closeBlockEndPrompt();repeatBlock()">Repeat This Phase</button>
+    `;
+    document.getElementById('blockend-overlay').classList.add('open');
+    return;
+  }
+
+  // In a cycle, but the next phase hasn't reached this device. The usual case for pushed
+  // clients: the coach holds the whole plan, the client only has phases delivered so far.
+  const ref = currentBlock.cycle;
+  const cyc = ref && ref.id ? getCycle(ref.id) : null;
+  const upcoming = cyc ? cyc.slots[(ref.order || 1)] : null;
+  if (upcoming) {
+    const label = PHASE_LABELS[upcoming.phase]
+      ? PHASE_LABELS[upcoming.phase].charAt(0) + PHASE_LABELS[upcoming.phase].slice(1).toLowerCase()
+      : 'The next phase';
+    document.getElementById('blockend-title').textContent = 'PHASE COMPLETE';
+    desc.textContent = label + ' is next in ' + cyc.name + '. Your coach will send it over — keep training this block until it arrives.';
+    actions.innerHTML = `
+      <button class="confirm-yes" onclick="closeBlockEndPrompt();openNoteThread({name:currentBlock.name,cycle:currentBlock.cycle})">Tell my coach I'm done →</button>
       <button class="confirm-yes" style="background:transparent;border-color:var(--border);color:var(--text-muted);margin-top:4px" onclick="closeBlockEndPrompt();repeatBlock()">Repeat This Phase</button>
     `;
     document.getElementById('blockend-overlay').classList.add('open');
@@ -2874,6 +2953,7 @@ function navigate(page, push=true) {
   const navIds = ['home','db','progress','builder','coaching','board'];
   document.querySelectorAll('.nav-btn').forEach((b,i) => b.classList.toggle('active', navIds[i]===page));
   if (page==='board') { try { renderThreadIndex(); } catch(err){ console.warn('threads', err); } }
+  try { refreshNotesBadge(); } catch(e) {}
   const isLog = page==='log';
   document.getElementById('back-btn').classList.toggle('visible', isLog);
   document.getElementById('topbar-logo').style.display = isLog ? 'none' : 'block';
@@ -2911,12 +2991,10 @@ function switchBuildTab(tab) {
 }
 
 // ─── CHANGELOG ─────────────────────────────────────────────────
-const FORGE_VERSION = '2.2.0';
+const FORGE_VERSION = '2.3.3';
 const FORGE_CHANGELOG = [
-  'Cycles — plan a full training cycle in phases (prep, hypertrophy, strength, power) and see where you are in it. A strip under your block name shows the phases you\'ve finished, the one you\'re in, and what\'s still ahead',
-  'Finish a phase and the next one is waiting — one tap moves you on, no rebuilding',
-  'Macro targets on the Progress tab — calories, protein, carbs and fat for the phase you\'re training. Each phase carries its own',
-  'New radar chart in All Time showing how your work splits across strength, hypertrophy and skill'
+  'Phase reports — finish a phase and see how it went: sessions, sets, reps, volume, your biggest gain charted week by week, and every exercise first week to last. Share it as an image. Past blocks have one too, in the Archive',
+  'Moving to a new phase now starts its log clean — your previous phase\'s sessions stay in its archive instead of showing up as this phase\'s weeks'
 ];
 
 function checkChangelog() {
@@ -3116,6 +3194,19 @@ function updateOnboardStep() {
   // Back button visibility
   const backBtn = document.getElementById('onboard-back-btn');
   backBtn.style.visibility = (onboardStep > 0 && onboardStep < 5) ? 'visible' : 'hidden';
+  // Hide skip on the final building screen — there's nothing left to skip by then.
+  const skipBtn = document.getElementById('onboard-skip-btn');
+  if(skipBtn) skipBtn.style.visibility = (onboardStep < 5) ? 'visible' : 'hidden';
+}
+
+// Leave without a block. Marks onboarding done so it doesn't reappear on every load, but
+// GET STARTED on the empty home still reopens it whenever they want it.
+function skipOnboarding() {
+  localStorage.setItem('fw_onboarded', '1');
+  document.getElementById('onboard-overlay').style.display = 'none';
+  renderHomeDays();
+  renderBuilderDays();
+  try { updateStats(); } catch(e) {}
 }
 
 function onboardNext() {
@@ -3602,6 +3693,7 @@ function renderArchive() {
       <div class="archived-block-body">
         ${daysHtml}
         ${progressHtml?`<div class="archived-progress"><div class="archived-progress-label">Session Data</div>${progressHtml}</div>`:''}
+        <button onclick="event.stopPropagation(); openPhaseReport(${bi})" style="width:100%;margin-top:14px;padding:12px;background:none;border:1px solid var(--accent);color:var(--accent);border-radius:10px;font-family:inherit;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;cursor:pointer">Phase report →</button>
         <button onclick="event.stopPropagation(); restoreArchivedBlock(${bi})" style="width:100%;margin-top:14px;padding:12px;background:var(--accent-glow);border:1px solid var(--accent-dim);color:var(--accent);border-radius:10px;font-family:inherit;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;cursor:pointer">&#8593; Restore as Active Block</button>
       </div>
     </div>`;
@@ -4822,6 +4914,7 @@ async function openNoteThread(block){
   document.getElementById('notethread-title').textContent = block.name || 'Notes';
   document.getElementById('notethread-list').innerHTML = '<div class="nt-empty">Loading…</div>';
   await loadNoteThread();
+  markThreadSeen(key);
 }
 function closeNoteThread(){
   document.getElementById('notethread-overlay').style.display = 'none';
@@ -4859,10 +4952,29 @@ function renderNoteThread(){
       + ' · ' + when.toLocaleTimeString(undefined,{hour:'2-digit',minute:'2-digit'});
     return '<div class="nt-row'+(mine?' mine':'')+'">'
       + '<div class="nt-meta"><span class="nt-who">'+(mine?'You':(r.author_name||r.author_email||'Coach'))+'</span>'
-      + '<span class="nt-when">'+stamp+'</span></div>'
+      + '<span class="nt-when">'+stamp+'</span>'
+      + (mine ? '<button class="nt-del" onclick="deleteNote(\''+r.id+'\')" aria-label="Delete note">×</button>' : '')
+      + '</div>'
       + '<div class="nt-body">'+String(r.body||'').replace(/[<>]/g,'')+'</div></div>';
   }).join('');
   list.scrollTop = list.scrollHeight;
+}
+
+// Delete is own-notes-only in the UI, and the RLS policy enforces the same server-side —
+// the button is a convenience, not the security boundary.
+async function deleteNote(id){
+  if(!id) return;
+  if(!confirm('Delete this note? It disappears for the other person too.')) return;
+  try{
+    const { error } = await supa.from('block_notes').delete().eq('id', id);
+    if(error) throw error;
+    noteThreadRows = noteThreadRows.filter(function(r){ return String(r.id) !== String(id); });
+    renderNoteThread();
+    refreshNotesBadge();
+  }catch(e){
+    console.warn('deleteNote', e);
+    showToast('Could not delete — check connection');
+  }
 }
 
 async function postNote(){
@@ -4890,6 +5002,45 @@ async function postNote(){
     showToast('Could not post note');
   }
   if(btn) btn.disabled = false;
+}
+
+// ─── UNREAD NOTES BADGE ────────────────────────────────────────
+// A dot on the Notes tab when someone else has posted since you last looked. Not a push
+// notification — it only refreshes while the app is open. Per-thread state so opening one
+// thread doesn't silence the others.
+let notesSeen = JSON.parse(localStorage.getItem('fw_notes_seen')||'{}');
+
+function markThreadSeen(key){
+  if(!key) return;
+  notesSeen[key] = new Date().toISOString();
+  localStorage.setItem('fw_notes_seen', JSON.stringify(notesSeen));
+  refreshNotesBadge();
+}
+
+// Threads with a note from someone else, newer than the last time you opened that thread.
+function unreadThreadKeys(rows){
+  const me = currentUser?.email;
+  const newest = {};
+  (rows||[]).forEach(function(r){
+    if(r.author_email === me) return;               // your own notes are never unread
+    if(!newest[r.thread_key] || r.created_at > newest[r.thread_key]) newest[r.thread_key] = r.created_at;
+  });
+  return Object.keys(newest).filter(function(k){
+    const seen = notesSeen[k];
+    return !seen || newest[k] > seen;
+  });
+}
+
+async function refreshNotesBadge(){
+  const dot = document.getElementById('notes-dot');
+  if(!dot) return;
+  try{
+    const { data, error } = await supa
+      .from('block_notes').select('thread_key, author_email, created_at')
+      .order('created_at', { ascending: false }).limit(200);
+    if(error) throw error;
+    dot.classList.toggle('on', unreadThreadKeys(data).length > 0);
+  }catch(e){ /* offline — leave the badge as it is */ }
 }
 
 // ─── THREAD INDEX (Notes tab) ──────────────────────────────────
@@ -4945,6 +5096,7 @@ async function renderThreadIndex(){
   }
 
   const me = currentUser?.email;
+  const unread_ = unreadThreadKeys(threadIndexRows);
   host.innerHTML = [...seen.entries()].map(function(pair){
     const key = pair[0], info = pair[1], r = info.last;
     const d = describeThreadKey(key);
@@ -4953,8 +5105,9 @@ async function renderThreadIndex(){
     const who = other ? other.split('@')[0] : 'you';
     const when = new Date(r.created_at).toLocaleDateString(undefined,{day:'numeric',month:'short'});
     const preview = String(r.body||'').replace(/[<>]/g,'').slice(0,80);
-    return '<div class="th-item" onclick="openThreadByKey(\'' + key + '\')">'
-      + '<div class="th-top"><span class="th-title">' + d.title + '</span>'
+    const unread = unread_.indexOf(key) > -1;
+    return '<div class="th-item' + (unread?' unread':'') + '" onclick="openThreadByKey(\'' + key + '\')">'
+      + '<div class="th-top"><span class="th-title">' + (unread?'<i class="th-dot"></i>':'') + d.title + '</span>'
       + '<span class="th-when">' + when + '</span></div>'
       + '<div class="th-sub">' + (d.sub ? d.sub + ' · ' : '') + 'with ' + who + ' · ' + info.count + ' note' + (info.count>1?'s':'') + '</div>'
       + '<div class="th-prev">' + preview + '</div></div>';
@@ -5023,21 +5176,46 @@ function bodyweightCardHTML(){
     + '</div>' + bwSparkHTML() + '</div>';
 }
 function bwSparkHTML(){
-  if(bodyLog.length < 2) return '';
+  // One entry is a number, not a trend — say so rather than rendering nothing, or it
+  // reads as a broken chart.
+  if(bodyLog.length < 2) return '<div class="si-empty">Log again on another day to see a trend line.</div>';
   var pts = bodyLog.slice(-40);
-  var min = Math.min.apply(null, pts.map(function(p){return p.kg;}));
-  var max = Math.max.apply(null, pts.map(function(p){return p.kg;}));
-  var pad = (max-min) < 1 ? 1 : (max-min)*0.15;
-  min -= pad; max += pad;
-  var W = 300, H = 64;
-  var xy = pts.map(function(p,i){
-    var x = pts.length===1 ? W/2 : (i/(pts.length-1))*W;
-    var y = H - ((p.kg-min)/(max-min))*H;
-    return x.toFixed(1)+','+y.toFixed(1);
-  });
-  return '<div class="bw-spark"><svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">'
-    + '<polyline points="'+xy.join(' ')+'" fill="none" stroke="var(--accent)" stroke-width="1.5" vector-effect="non-scaling-stroke"/>'
-    + '</svg><div class="bw-sparklab"><span>'+pts[0].d.slice(5)+'</span><span>'+pts[pts.length-1].d.slice(5)+'</span></div></div>';
+  var lo = Math.min.apply(null, pts.map(function(p){return p.kg;}));
+  var hi = Math.max.apply(null, pts.map(function(p){return p.kg;}));
+
+  // A 0.2kg day-to-day wobble autoscaled to full height reads like a cliff. Force a minimum
+  // 2kg window so small changes look small — which is the honest picture — then round the
+  // bounds to clean 0.5kg marks so the gridline labels are readable numbers.
+  var span = Math.max(hi - lo, 2);
+  var mid = (hi + lo) / 2;
+  var min = Math.floor((mid - span*0.75) * 2) / 2;
+  var max = Math.ceil((mid + span*0.75) * 2) / 2;
+
+  var W = 300, H = 130, L = 34, R = 6, T = 8, B = 18;   // L leaves room for axis labels
+  var pw = W - L - R, ph = H - T - B;
+  var X = function(i){ return L + (pts.length===1 ? pw/2 : (i/(pts.length-1))*pw); };
+  var Y = function(kg){ return T + ph - ((kg-min)/(max-min))*ph; };
+
+  // Three gridlines: bottom, middle, top.
+  var ticks = [min, (min+max)/2, max];
+  var grid = ticks.map(function(t){
+    var y = Y(t).toFixed(1);
+    return '<line x1="'+L+'" y1="'+y+'" x2="'+(W-R)+'" y2="'+y+'" stroke="var(--border)" stroke-width="0.5"/>'
+         + '<text x="'+(L-5)+'" y="'+(+y+2.5).toFixed(1)+'" class="bw-ytick">'+t.toFixed(1)+'</text>';
+  }).join('');
+
+  var line = pts.map(function(p,i){ return X(i).toFixed(1)+','+Y(p.kg).toFixed(1); }).join(' ');
+  var dots = pts.map(function(p,i){
+    return '<circle cx="'+X(i).toFixed(1)+'" cy="'+Y(p.kg).toFixed(1)+'" r="2.5" fill="var(--accent)"/>';
+  }).join('');
+
+  return '<div class="bw-spark"><svg viewBox="0 0 '+W+' '+H+'">'
+    + grid
+    + '<polyline points="'+line+'" fill="none" stroke="var(--accent)" stroke-width="1.5"/>'
+    + dots
+    + '<text x="'+L+'" y="'+(H-5)+'" class="bw-xtick">'+pts[0].d.slice(5)+'</text>'
+    + '<text x="'+(W-R)+'" y="'+(H-5)+'" class="bw-xtick" text-anchor="end">'+pts[pts.length-1].d.slice(5)+'</text>'
+    + '</svg></div>';
 }
 
 // ─── STRENGTH INDEX ────────────────────────────────────────────
@@ -5108,7 +5286,11 @@ function setSiExercise(id){
 
 function strengthChartHTML(){
   var opts = siLoggedExercises();
-  if(!opts.length) return '';
+  // Sets logged before date-stamping shipped carry no _d, so a user with plenty of history
+  // can still land here. Explain it instead of hiding the whole section.
+  if(!opts.length) return '<div class="st-sec"><div class="st-sechead"><h3>Strength Index</h3><span class="ln"></span>'
+    + '<span class="tg">no data yet</span></div>'
+    + '<div class="si-empty">Log a workout to start the index. Sets recorded before this update aren\'t dated, so the chart starts fresh.</div></div>';
   if(!siExercise || !opts.some(function(e){ return e.id === siExercise; })) siExercise = opts[0].id;
 
   var picker = '<select class="si-pick" onchange="setSiExercise(this.value)">'
@@ -5180,9 +5362,6 @@ function renderStatsOverview(){
   var lvlTotal=LEVELS.reduce(function(a,l){return a+s.setsByLevel[l];},0);
   var lvlColor={Beginner:'var(--text-muted)',Intermediate:'var(--text)',Advanced:'var(--accent)',Elite:'var(--red)'};
   var html=macroCardHTML(currentBlock.macros)
-    +'<div class="st-hero">'
-    +'<div class="st-card"><div class="st-label">Streak</div><div class="st-num">'+s.streak+'<span class="st-unit">d</span></div><div class="st-meta">'+(s.streak>=2?'keep it going':(s.streak===1?'day one':'no active streak'))+'</div></div>'
-    +'<div class="st-card"><div class="st-label">Workouts</div><div class="st-num">'+s.sessionsLogged+'</div><div class="st-meta">completed this block</div></div></div>'
     +bodyweightCardHTML()
     +strengthChartHTML()
     +'<div class="st-sec"><div class="st-sechead"><h3>Muscle Map</h3><span class="ln"></span><span class="tg">this week</span></div>'
@@ -5207,7 +5386,7 @@ function renderStatsOverview(){
     +'<div class="st-perfcard"><div class="st-perflabel">Frequency</div><div class="st-perfval">'+s.frequency+'<small>/wk</small></div><div class="st-perfsub">sessions per week</div></div>'
     +'<div class="st-perfcard"><div class="st-perflabel">Completion</div><div class="st-perfval">'+s.completion+'<small>%</small></div><div class="st-perfsub">of planned</div></div>'
     +'<div class="st-perfcard"><div class="st-perflabel">Total Sets</div><div class="st-perfval">'+s.lifetimeSets.toLocaleString()+'</div><div class="st-perfsub">this block</div></div>'
-    +'<div class="st-perfcard"><div class="st-perflabel">Avg / Session</div><div class="st-perfval">'+s.avgSets+'</div><div class="st-perfsub">sets</div></div></div></div>';
+    +'</div></div>';
   host.innerHTML=html;
   REGIONS.forEach(function(r){var sets=s.setsByRegion[r]||0;var nodes=host.querySelectorAll('.st-m[data-region="'+r+'"]');for(var i=0;i<nodes.length;i++){nodes[i].setAttribute('class','st-m '+band(sets));nodes[i].setAttribute('data-sets',sets);}});
 }
@@ -5518,10 +5697,12 @@ function renderProgress(){
   const c=document.getElementById('progress-container'); c.innerHTML='';
   const m=currentBlock.methods||[];
   const total=currentBlock.weeks||4;
-  document.getElementById('prog-block').textContent=currentBlock.name||'—';
-  document.getElementById('prog-method').textContent=m.length?m.join(' · '):'—';
-  document.getElementById('prog-split').textContent=(currentBlock.days?.length||0)+' days · '+total+'w';
-  document.getElementById('prog-week').textContent='W'+currentWeek+'/'+total;
+  // The block hero was removed from the Progress header; these ids may not exist.
+  var setTxt = function(id, v){ var el = document.getElementById(id); if(el) el.textContent = v; };
+  setTxt('prog-block', currentBlock.name||'—');
+  setTxt('prog-method', m.length?m.join(' · '):'—');
+  setTxt('prog-split', (currentBlock.days?.length||0)+' days · '+total+'w');
+  setTxt('prog-week', 'W'+currentWeek+'/'+total);
 
   const allIds=[...new Set((currentBlock.days||[]).flatMap(d=>d.exercises.map(e=>e.id)))];
   allIds.forEach(id=>{
@@ -7932,11 +8113,29 @@ let trialStart = parseInt(localStorage.getItem('fw_trial_start')||'0');
 let _authInProgress = false; // dedupes afterAuth between handleLogin and onAuthStateChange
 
 // ─── SYNC ──────────────────────────────────────────────────────
+// Whose data is currently in localStorage. Written whenever we load or sync, so a
+// mismatch is detectable later.
+function stampDataOwner(){
+  if(currentUser?.id) localStorage.setItem('fw_owner', currentUser.id);
+}
+
+// True when local state belongs to somebody other than the signed-in user. The wipe on
+// sign-out only protects us if it runs at the right moment; this check doesn't care when
+// it runs, so a stale local copy can never be pushed onto another account's row.
+function localDataIsForeign(){
+  const owner = localStorage.getItem('fw_owner');
+  return !!(owner && currentUser?.id && owner !== currentUser.id);
+}
+
 async function syncBlocksToCloud() {
   if(!currentUser?.id) return;
   // SAFETY: never overwrite cloud data with an empty block
   if(!currentBlock.days || currentBlock.days.length === 0) {
     if(!customWorkouts.length && !archivedBlocks.length) return;
+  }
+  if(localDataIsForeign()){
+    console.warn('sync blocked: local data is not this account\'s');
+    return;
   }
   try {
     const { data: existing } = await supa.from('blocks')
@@ -8152,12 +8351,15 @@ async function handleNewPassword() {
 async function afterAuth(supaUser, isNew) {
   // If cached data belongs to a different user, wipe it before loading
   const cachedUser = JSON.parse(localStorage.getItem('fw_user') || 'null');
-  if(cachedUser && cachedUser.id !== supaUser.id) {
-    ['fw_block','fw_customs','fw_archive','fw_log','fw_week',
-     'fw_premium','fw_trial_start','fw_boards','fw_trained_dates'].forEach(k => localStorage.removeItem(k));
-    // Reset in-memory state
-    currentBlock = { name:'', methods:[], weeks:4, warmup:[], skill:[], days:[] };
-    customWorkouts = []; archivedBlocks = []; sessionLog = {}; currentWeek = 1;
+  // Whose data is in storage right now? Trust the owner stamp first, then the cached user.
+  // If neither exists, the data is unattributed — an older build's sign-out removed fw_user
+  // but left fw_body behind, and that orphaned data then got uploaded to the next account.
+  // Unattributed means untrusted: wipe it. The cost is re-downloading this user's own data
+  // from the cloud, which the load below does anyway.
+  const localOwner = localStorage.getItem('fw_owner') || (cachedUser && cachedUser.id) || null;
+  if(localOwner !== supaUser.id) {
+    wipeLocalUserData();
+    try { await idbClear(); } catch(e) {}
   }
   const user = {
     id: supaUser.id,
@@ -8167,6 +8369,7 @@ async function afterAuth(supaUser, isNew) {
   };
   const now = Date.now();
   currentUser = user; isPremium = true;
+  stampDataOwner();
   if(isNew) { trialStart = now; localStorage.setItem('fw_trial_start', now); }
   localStorage.setItem('fw_user', JSON.stringify(user));
   localStorage.setItem('fw_premium', 'true');
@@ -8260,13 +8463,29 @@ function startApp(isGuest) {
   } catch(e) { console.warn('[FORGE] Session restore failed:', e); }
 }
 
+// Wipe every trace of the previous user from this device.
+// Deliberately a deny-list, not an allow-list: listing keys to delete means each new
+// feature leaks its data to the next account until someone remembers to add it. This bit
+// us with bodyweight showing up on a client's phone. Only the video-probe cache survives,
+// because it describes the network, not the person.
+const DEVICE_KEYS = [FV_CACHE_KEY];
+function wipeLocalUserData(){
+  Object.keys(localStorage)
+    .filter(function(k){ return k.indexOf('fw_') === 0 && DEVICE_KEYS.indexOf(k) === -1; })
+    .forEach(function(k){ localStorage.removeItem(k); });
+  localStorage.removeItem('fw_owner');
+  try { sessionStorage.removeItem('forge:activeSession'); } catch(e) {}
+  // In-memory state has to go too, or the next render writes it straight back.
+  currentBlock = { name:'', methods:[], weeks:4, warmup:[], skill:[], days:[] };
+  customWorkouts = []; archivedBlocks = []; sessionLog = {}; currentWeek = 1;
+  trainingCycles = []; bodyLog = []; trainedDates = []; coachClients = [];
+  notesSeen = {};
+}
+
 async function handleSignOut() {
   await supa.auth.signOut();
   await idbClear();
-  // Wipe all local data so the next user on this device starts clean
-  ['fw_user','fw_premium','fw_trial_start','fw_guest',
-   'fw_block','fw_customs','fw_archive','fw_log','fw_week'].forEach(k => localStorage.removeItem(k));
-  try { sessionStorage.removeItem('forge:activeSession'); } catch(e) {}
+  wipeLocalUserData();
   currentUser = null; isPremium = false; trialStart = 0;
   location.reload();
 }
@@ -8498,8 +8717,34 @@ function updateUserBar() {
   }
 }
 
+// Stripe customer portal. Dashboard > Settings > Billing > Customer portal gives a
+// shareable login link — paste it here. Empty string hides the billing button entirely,
+// so shipping before it's configured is safe.
+const STRIPE_PORTAL_URL = 'https://billing.stripe.com/p/login/8x27sKdIV1aO8QqfNTgMw00';
+
+// Tiers that pay Stripe. 'pt' clients are billed by Luca directly and 'admin' is Luca,
+// so neither gets a billing button.
+const BILLED_TIERS = ['premium','coached'];
+
+const TIER_LABEL = { premium:'FORGE · £9.99/mo', coached:'FORGE+ · coached', pt:'1-on-1 coaching', admin:'Admin', free:'Free' };
+
+function openBillingPortal(){
+  if(!STRIPE_PORTAL_URL){
+    alert('Billing portal is not set up yet.');
+    return;
+  }
+  window.open(STRIPE_PORTAL_URL, '_blank');
+}
+
 function openSignOutSheet() {
   if(!currentUser) return;
+  const planEl = document.getElementById('signout-plan');
+  if(planEl) planEl.textContent = TIER_LABEL[currentUser.tier] || '';
+  const buildEl = document.getElementById('signout-build');
+  if(buildEl) buildEl.textContent = 'build ' + FORGE_VERSION;
+  const billBtn = document.getElementById('signout-billing-btn');
+  if(billBtn) billBtn.style.display =
+    (STRIPE_PORTAL_URL && BILLED_TIERS.indexOf(currentUser.tier) > -1) ? 'block' : 'none';
   document.getElementById('signout-sheet-name').textContent = currentUser.name.toUpperCase();
   document.getElementById('signout-sheet-email').textContent = currentUser.email;
   const upgradeBtn = document.getElementById('signout-upgrade-btn');
@@ -8735,6 +8980,15 @@ async function acceptAssignedBlock(assignmentId) {
       mode = (hasCurrent && currentBlock.name.trim().toUpperCase() === (newBlock.name || '').trim().toUpperCase())
         ? 'update' : 'new';
     }
+    // A different phase is never an update, whatever the toggle said. Phases in a cycle reuse
+    // day/exercise ids, and logs are keyed day+exercise+week, so keeping the log here makes the
+    // previous phase's sessions show up as this phase's weeks. Same cycle + same slot = a
+    // genuine edit of the current phase, and only that keeps progress.
+    if(mode === 'update' && hasCurrent) {
+      const was = currentBlock.cycle, now = newBlock.cycle;
+      const samePhase = was && now ? (was.id === now.id && was.order === now.order) : !was && !now;
+      if(!samePhase) mode = 'new';
+    }
 
     // Mark accepted + stop the notice re-appearing, regardless of branch
     await supa.from('assigned_blocks')
@@ -8848,6 +9102,7 @@ async function openPushUpdate(blockId) {
           <button type="button" id="push-mode-new" onclick="setPushMode('new')" style="flex:1;padding:11px 8px;background:none;border:1px solid var(--border);color:var(--text-muted);font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1px;cursor:pointer;line-height:1.4">NEW<br><span style="font-size:8px;opacity:0.7">fresh start</span></button>
         </div>
         <input type="hidden" id="push-mode" value="update">
+        ${block.cycle ? `<div style="font-size:9px;color:var(--text-dim);letter-spacing:0.5px;line-height:1.5;margin:-8px 0 16px">Part of a cycle. If the client is on a different phase, this starts fresh automatically.</div>` : ''}
 
         <div style="font-size:9px;letter-spacing:2px;color:var(--text-muted);margin-bottom:8px">SELECT CLIENT</div>
         <select id="push-client-select" style="width:100%;padding:12px;background:var(--deep);border:1px solid var(--border);color:var(--text);font-family:'DM Mono',monospace;font-size:12px;margin-bottom:16px">
@@ -8921,10 +9176,359 @@ async function executePushUpdate() {
     return;
   }
 
+  // Pushing to a client IS the assignment — file it into their folder so the coach never has
+  // to set the same thing twice. Only fills a blank; an existing assignment is left alone in
+  // case it was deliberately different.
+  const cl = (coachClients||[]).find(c => c.client_email === clientEmail);
+  const stamp = { email: clientEmail, name: cl?.client_name || clientEmail.split('@')[0] };
+  let touched = false;
+  if(!block.client) { block.client = stamp; touched = true; }
+  if(planCycle && !planCycle.client) { planCycle.client = stamp; touched = true; }
+  if(touched){
+    saveCustoms();
+    try { localStorage.setItem('fw_cycles', JSON.stringify(trainingCycles)); } catch(e) {}
+    queueCloudSync();
+    try { renderCyclePlanner(); } catch(e) {}
+  }
+
   showToast((mode === 'update' ? 'Update' : 'New programme') + ' sent to ' + clientEmail.split('@')[0] + ' ✦');
   closePushModal();
 }
 
+
+// ─── PHASE REPORT ──────────────────────────────────────────────
+// End-of-phase results, built entirely from the block's own session log. Works on the live
+// block (from the PHASE/BLOCK COMPLETE prompt) and on any archived block (archive keeps the
+// full log snapshot). No new storage, no backend: the report is recomputed every time it opens.
+let prState = null;
+
+function phaseLabelFor(block){
+  const ref = block && block.cycle;
+  const cyc = ref && ref.id ? getCycle(ref.id) : null;
+  const slot = cyc && ref.order ? cyc.slots[ref.order - 1] : null;
+  if(slot && PHASE_LABELS[slot.phase]) return PHASE_LABELS[slot.phase];
+  return 'BLOCK';
+}
+
+function phaseReportData(block, log){
+  log = log || {};
+  const weeks = block.weeks || 4;
+  const days = block.days || [];
+  const dayIds = new Set(days.map(d => d.id));
+
+  // Every exercise in the block, with its prescribed scheme — used to tell timed holds from reps.
+  const prescribed = {};
+  [...(block.warmup || []), ...(block.skill || []), ...days.flatMap(d => d.exercises || [])].forEach(e => {
+    if(e && e.id && !(e.id in prescribed)) prescribed[e.id] = String(e.reps || e.sets || '');
+  });
+
+  const keys = Object.keys(log);
+  const perEx = {};
+  const sessions = new Set();
+  const dates = [];
+  let sets = 0, reps = 0, volume = 0;
+
+  Object.keys(prescribed).forEach(id => {
+    const needle = '_' + id + '_v';
+    const timedScheme = /\d\s*s\b/i.test(prescribed[id]);
+    keys.forEach(k => {
+      const i = k.lastIndexOf(needle);
+      if(i < 1) return;
+      const tail = k.slice(i + needle.length);
+      const wk = parseInt(tail, 10);
+      if(!wk || String(wk) !== tail || wk > weeks) return;
+      const prefix = k.slice(0, i);
+      // Only this block's days and its fixed sections — never a stray key from another block.
+      if(!dayIds.has(prefix) && !prefix.startsWith('fixed_')) return;
+      const entry = log[k];
+      if(!entry || typeof entry !== 'object') return;
+      let any = false;
+      for(let s = 1; s <= 12; s++){
+        const r = parseFloat(entry['s' + s + '_r']);
+        const w = parseFloat(entry['s' + s + '_w']);
+        const hasR = !isNaN(r) && r > 0, hasW = !isNaN(w) && w > 0;
+        if(!hasR && !hasW) continue;
+        any = true; sets++;
+        if(hasR && !timedScheme) reps += r;
+        if(hasR && hasW) volume += r * w;
+        const rec = perEx[id] || (perEx[id] = { weeks: {}, weighted: false, timed: timedScheme });
+        const wr = rec.weeks[wk] || (rec.weeks[wk] = { topW: 0, repsAtTop: 0, bestR: 0 });
+        if(hasW){
+          rec.weighted = true;
+          if(w > wr.topW || (w === wr.topW && (hasR ? r : 0) > wr.repsAtTop)){ wr.topW = w; wr.repsAtTop = hasR ? r : 0; }
+        }
+        if(hasR && r > wr.bestR) wr.bestR = r;
+      }
+      if(any){
+        if(dayIds.has(prefix)) sessions.add(prefix + '_v' + wk);
+        if(entry._d) dates.push(entry._d);
+      }
+    });
+  });
+
+  const exercises = Object.keys(perEx).map(id => {
+    const rec = perEx[id];
+    const ex = EXERCISES.find(e => e.id === id);
+    const series = [];
+    for(let w = 1; w <= weeks; w++){
+      const r = rec.weeks[w];
+      series.push(r ? (rec.weighted ? (r.topW || null) : (r.bestR || null)) : null);
+    }
+    const pts = series.map((v, i) => ({ v, i })).filter(p => p.v != null);
+    if(!pts.length) return null;
+    const start = pts[0].v, end = pts[pts.length - 1].v;
+    return {
+      id, name: ex ? ex.name : id,
+      unit: rec.weighted ? 'kg' : (rec.timed ? 's' : 'reps'),
+      series, start, end, delta: +(end - start).toFixed(1),
+      pct: start > 0 ? (end - start) / start : 0,
+      weeksLogged: pts.length
+    };
+  }).filter(Boolean);
+
+  exercises.sort((a, b) => (b.pct - a.pct) || (b.delta - a.delta) || a.name.localeCompare(b.name));
+  const hero = exercises.find(e => e.weeksLogged >= 2 && e.delta > 0) || null;
+
+  // Bodyweight across the phase, only if they logged it during the phase itself.
+  let bw = null;
+  if(dates.length && typeof bodyLog !== 'undefined'){
+    dates.sort();
+    const inPhase = bodyLog.filter(e => e.d >= dates[0] && e.d <= dates[dates.length - 1]);
+    if(inPhase.length >= 2) bw = { start: inPhase[0].kg, end: inPhase[inPhase.length - 1].kg };
+  }
+
+  return {
+    name: block.name || 'Your block',
+    phase: phaseLabelFor(block),
+    weeks,
+    planned: days.length * weeks,
+    sessions: sessions.size,
+    sets, reps: Math.round(reps), volume: Math.round(volume),
+    exercises, hero, bw
+  };
+}
+
+function prHasData(block, log){
+  try { return phaseReportData(block, log).sets > 0; } catch(e) { return false; }
+}
+
+function prFmt(v, unit){
+  const n = Math.round(v * 10) / 10;
+  return unit === 'kg' ? n + 'kg' : unit === 's' ? n + 's' : n + '';
+}
+function prDeltaChip(e){
+  if(e.weeksLogged < 2 || e.delta === 0) return '<span class="pr-chip">—</span>';
+  const up = e.delta > 0;
+  const txt = (up ? '+' : '') + prFmt(e.delta, e.unit) ;
+  return '<span class="pr-chip ' + (up ? 'up' : 'down') + '">' + txt + '</span>';
+}
+
+function prChartSVG(e, weeks){
+  const W = 320, H = 150, L = 26, R = 12, T = 16, B = 24;
+  const pts = e.series.map((v, i) => ({ v, i })).filter(p => p.v != null);
+  let lo = Math.min(...pts.map(p => p.v)), hi = Math.max(...pts.map(p => p.v));
+  if(lo === hi){ lo -= 1; hi += 1; }
+  const pad = (hi - lo) * 0.15; lo = Math.max(0, lo - pad); hi += pad;
+  const x = i => L + (weeks <= 1 ? 0 : (i / (weeks - 1)) * (W - L - R));
+  const y = v => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
+  const d = pts.map((p, k) => (k ? 'L' : 'M') + x(p.i).toFixed(1) + ' ' + y(p.v).toFixed(1)).join(' ');
+  const area = d + ' L' + x(pts[pts.length - 1].i).toFixed(1) + ' ' + (H - B) + ' L' + x(pts[0].i).toFixed(1) + ' ' + (H - B) + ' Z';
+  let grid = '';
+  [0, 0.5, 1].forEach(f => {
+    const gy = T + f * (H - T - B);
+    const gv = hi - f * (hi - lo);
+    grid += '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + gy + '" y2="' + gy + '" stroke="var(--border)" stroke-width="1"/>'
+      + '<text class="pr-axis" x="' + (L - 6) + '" y="' + (gy + 3) + '" text-anchor="end">' + Math.round(gv) + '</text>';
+  });
+  let xt = '';
+  for(let i = 0; i < weeks; i++) xt += '<text class="pr-axis" x="' + x(i) + '" y="' + (H - 6) + '" text-anchor="middle">W' + (i + 1) + '</text>';
+  const dots = pts.map((p, k) => {
+    const last = k === pts.length - 1;
+    return '<circle class="pr-dot" style="animation-delay:' + (0.5 + 1.4 * (k / Math.max(1, pts.length - 1))).toFixed(2) + 's" cx="' + x(p.i).toFixed(1) + '" cy="' + y(p.v).toFixed(1) + '" r="' + (last ? 4 : 2.5) + '" fill="' + (last ? 'var(--accent)' : 'var(--surface)') + '" stroke="var(--accent)" stroke-width="1.5"/>';
+  }).join('');
+  const lp = pts[pts.length - 1];
+  const lbl = '<text class="pr-dot" style="animation-delay:1.9s;font-family:DM Mono,monospace;font-size:10px;fill:var(--accent)" x="' + (x(lp.i) - 8) + '" y="' + (y(lp.v) - 9) + '" text-anchor="end">' + prFmt(lp.v, e.unit) + '</text>';
+  return '<svg viewBox="0 0 ' + W + ' ' + H + '"><defs><linearGradient id="pr-grad" x1="0" y1="0" x2="0" y2="1">'
+    + '<stop offset="0" stop-color="#c9a96e" stop-opacity="0.22"/><stop offset="1" stop-color="#c9a96e" stop-opacity="0"/></linearGradient></defs>'
+    + grid + xt
+    + '<path class="pr-area" d="' + area + '" fill="url(#pr-grad)"/>'
+    + '<path class="pr-line" pathLength="1" d="' + d + '" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>'
+    + dots + lbl + '</svg>';
+}
+
+function openPhaseReport(archIdx){
+  const fromArchive = archIdx != null && archivedBlocks[archIdx];
+  const block = fromArchive ? archivedBlocks[archIdx] : currentBlock;
+  const log = fromArchive ? (block.sessionLog || {}) : sessionLog;
+  if(!block || !(block.days || []).length){ showToast('No block to report on'); return; }
+  const r = phaseReportData(block, log);
+  if(!r.sets){ showToast('Nothing logged in this block yet'); return; }
+  prState = r;
+
+  const first = (currentUser && currentUser.name ? String(currentUser.name).split(/[\s._]/)[0] : '').toUpperCase();
+  let delay = 0;
+  const rise = () => ' class="pr-rise" style="animation-delay:' + (delay += 0.08).toFixed(2) + 's"';
+  const tile = (label, val, unit) => '<div class="pr-tile"><div class="pr-label">' + label + '</div><div class="pr-tile-val"><span data-pr-count="' + val + '">0</span>' + (unit ? '<span class="pr-unit">' + unit + '</span>' : '') + '</div></div>';
+
+  let html = '<div class="pr-wrap">'
+    + '<div class="pr-top"><div class="pr-kicker">' + (r.phase === 'BLOCK' ? 'Block complete' : 'Phase complete · ' + r.phase) + '</div>'
+    + '<button class="pr-close" onclick="closePhaseReport()">CLOSE ✕</button></div>'
+    + '<div' + rise() + '><div class="pr-title">Here\'s how it went' + (first ? ', ' + first : '') + '</div>'
+    + '<div class="pr-sub">' + r.name + ' · ' + r.weeks + ' weeks</div></div>'
+    + '<div class="pr-tiles pr-rise" style="animation-delay:' + (delay += 0.08).toFixed(2) + 's">'
+    + '<div class="pr-tile"><div class="pr-label">Sessions</div><div class="pr-tile-val"><span data-pr-count="' + r.sessions + '">0</span><span class="pr-unit">/ ' + r.planned + '</span></div></div>'
+    + tile('Sets', r.sets, '')
+    + tile('Reps', r.reps, '')
+    + (r.volume ? tile('Volume', r.volume, 'kg')
+      : r.bw ? '<div class="pr-tile"><div class="pr-label">Bodyweight</div><div class="pr-tile-val">' + r.bw.end + '<span class="pr-unit">kg</span></div></div>'
+      : tile('Exercises', r.exercises.length, ''))
+    + '</div>';
+
+  if(r.hero){
+    const e = r.hero;
+    html += '<div class="pr-card"' + rise() + '><div class="pr-label">Biggest gain</div>'
+      + '<div class="pr-hero-name">' + e.name + '</div>'
+      + '<div class="pr-hero-big">' + prFmt(e.start, e.unit) + ' → ' + prFmt(e.end, e.unit) + (e.unit === 'reps' ? '<span class="pr-unit">reps</span>' : '') + '</div>'
+      + '<div class="pr-hero-pct">+' + Math.round(e.pct * 100) + '% over ' + e.weeksLogged + ' weeks logged</div>'
+      + '<div class="pr-chart">' + prChartSVG(e, r.weeks) + '</div></div>';
+  } else {
+    html += '<div class="pr-card"' + rise() + '><div class="pr-label">Progress</div>'
+      + '<div class="pr-empty">Log at least two weeks of the same exercise and the trend shows up here.</div></div>';
+  }
+
+  if(r.bw && r.volume){
+    const dd = +(r.bw.end - r.bw.start).toFixed(1);
+    html += '<div class="pr-card"' + rise() + '><div class="pr-row" style="padding:0"><div><div class="pr-label">Bodyweight</div>'
+      + '<div class="pr-row-name" style="margin-top:6px">' + r.bw.start + 'kg → ' + r.bw.end + 'kg</div></div>'
+      + '<span class="pr-chip">' + (dd > 0 ? '+' : '') + dd + 'kg</span></div></div>';
+  }
+
+  html += '<div class="pr-card"' + rise() + '><div class="pr-label">Every exercise · first week → last week</div><div style="margin-top:6px">'
+    + r.exercises.map(e => '<div class="pr-row"><div class="pr-row-name">' + e.name + '</div><div class="pr-row-vals">'
+      + (e.weeksLogged >= 2 ? prFmt(e.start, e.unit) + ' → ' + prFmt(e.end, e.unit) : prFmt(e.end, e.unit))
+      + (e.unit === 'reps' ? ' reps' : '') + prDeltaChip(e) + '</div></div>').join('')
+    + '</div></div>';
+
+  html += '<div class="pr-actions"' + rise() + '><button class="pr-btn" onclick="closePhaseReport()">Close</button>'
+    + '<button class="pr-btn primary" onclick="sharePhaseReport()">Share ↗</button></div></div>';
+
+  const body = document.getElementById('pr-body');
+  body.innerHTML = html;
+  body.scrollTop = 0;
+  const ov = document.getElementById('phase-report');
+  ov.classList.remove('pr-anim'); void ov.offsetWidth; ov.classList.add('pr-anim');
+  ov.classList.add('open');
+  prCountUp(body);
+}
+
+function prCountUp(root){
+  const els = root.querySelectorAll('[data-pr-count]');
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  els.forEach(el => {
+    const target = +el.getAttribute('data-pr-count') || 0;
+    const fmt = n => Math.round(n).toLocaleString('en-GB');
+    if(reduce || !target){ el.textContent = fmt(target); return; }
+    const t0 = performance.now() + 250, dur = 1000;
+    const step = now => {
+      const t = Math.min(1, Math.max(0, (now - t0) / dur));
+      el.textContent = fmt(target * (1 - Math.pow(1 - t, 3)));
+      if(t < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  });
+}
+
+function closePhaseReport(){
+  document.getElementById('phase-report').classList.remove('open', 'pr-anim');
+}
+
+// Share as an image: emails and chat apps can't run an animation, a PNG goes anywhere.
+async function sharePhaseReport(){
+  const r = prState; if(!r) return;
+  try { await document.fonts.load("500 40px 'DM Mono'"); } catch(e) {}
+  const S = 1080, H = 1350, c = document.createElement('canvas');
+  c.width = S; c.height = H;
+  const g = c.getContext('2d');
+  const GOLD = '#c9a96e', IVORY = '#e8e2d9', MUTED = '#8c8480', DIM = '#555', LINE = '#242424', SURF = '#141414';
+  const mono = (px, wt) => (wt || 400) + ' ' + px + "px 'DM Mono', monospace";
+  const sp = v => { try { g.letterSpacing = v + 'px'; } catch(e) {} };
+  g.fillStyle = '#080808'; g.fillRect(0, 0, S, H);
+  const P = 80;
+
+  g.fillStyle = GOLD; g.font = mono(24); sp(6);
+  g.fillText((r.phase === 'BLOCK' ? 'BLOCK COMPLETE' : 'PHASE COMPLETE · ' + r.phase), P, 130);
+  g.fillStyle = IVORY; g.font = mono(62, 500); sp(3);
+  g.fillText("HERE'S HOW", P, 225); g.fillText('IT WENT', P, 300);
+  g.fillStyle = MUTED; g.font = "400 26px 'Inter', sans-serif"; sp(1);
+  g.fillText((r.name + ' · ' + r.weeks + ' weeks').slice(0, 60), P, 355);
+
+  // Tiles
+  const tiles = [['SESSIONS', r.sessions + ' / ' + r.planned], ['SETS', r.sets.toLocaleString('en-GB')],
+    ['REPS', r.reps.toLocaleString('en-GB')], r.volume ? ['VOLUME', r.volume.toLocaleString('en-GB') + ' kg'] : ['EXERCISES', String(r.exercises.length)]];
+  const tw = (S - P * 2) / 2, th = 120, ty = 410;
+  tiles.forEach((t, i) => {
+    const tx = P + (i % 2) * tw, yy = ty + Math.floor(i / 2) * th;
+    g.fillStyle = SURF; g.fillRect(tx, yy, tw, th);
+    g.strokeStyle = LINE; g.lineWidth = 2; g.strokeRect(tx, yy, tw, th);
+    g.fillStyle = DIM; g.font = mono(18); sp(4); g.fillText(t[0], tx + 30, yy + 48);
+    g.fillStyle = IVORY; g.font = mono(44); sp(1); g.fillText(t[1], tx + 30, yy + 96);
+  });
+
+  // Hero
+  let y = ty + th * 2 + 70;
+  if(r.hero){
+    const e = r.hero;
+    g.fillStyle = DIM; g.font = mono(18); sp(4); g.fillText('BIGGEST GAIN', P, y);
+    g.fillStyle = IVORY; g.font = mono(32, 500); sp(2); g.fillText(e.name.toUpperCase().slice(0, 34), P, y + 50);
+    g.fillStyle = GOLD; g.font = mono(64); sp(1);
+    g.fillText(prFmt(e.start, e.unit) + ' → ' + prFmt(e.end, e.unit) + (e.unit === 'reps' ? ' reps' : ''), P, y + 130);
+    // Line
+    const cx = P, cw = S - P * 2, cy = y + 165, ch = 120;
+    const pts = e.series.map((v, i) => ({ v, i })).filter(p => p.v != null);
+    let lo = Math.min(...pts.map(p => p.v)), hi = Math.max(...pts.map(p => p.v));
+    if(lo === hi){ lo -= 1; hi += 1; }
+    const X = i => cx + (r.weeks <= 1 ? 0 : (i / (r.weeks - 1)) * cw);
+    const Y = v => cy + (1 - (v - lo) / (hi - lo)) * ch;
+    g.strokeStyle = LINE; g.lineWidth = 2;
+    [0, 1].forEach(f => { g.beginPath(); g.moveTo(cx, cy + f * ch); g.lineTo(cx + cw, cy + f * ch); g.stroke(); });
+    g.strokeStyle = GOLD; g.lineWidth = 5; g.lineJoin = 'round'; g.beginPath();
+    pts.forEach((p, k) => k ? g.lineTo(X(p.i), Y(p.v)) : g.moveTo(X(p.i), Y(p.v))); g.stroke();
+    pts.forEach((p, k) => { g.beginPath(); g.arc(X(p.i), Y(p.v), k === pts.length - 1 ? 10 : 6, 0, Math.PI * 2); g.fillStyle = k === pts.length - 1 ? GOLD : '#080808'; g.fill(); g.lineWidth = 4; g.strokeStyle = GOLD; g.stroke(); });
+    g.fillStyle = DIM; g.font = mono(18); sp(2);
+    for(let i = 0; i < r.weeks; i++){ g.textAlign = 'center'; g.fillText('W' + (i + 1), X(i), cy + ch + 40); }
+    g.textAlign = 'left';
+    y = cy + ch + 105;
+  }
+
+  // Top gains
+  const rest = r.exercises.filter(e => e !== r.hero && e.weeksLogged >= 2 && e.delta > 0).slice(0, 3);
+  rest.forEach(e => {
+    if(y > H - 130) return;
+    g.fillStyle = IVORY; g.font = "400 28px 'Inter', sans-serif"; sp(0); g.fillText(e.name.slice(0, 32), P, y);
+    g.fillStyle = GOLD; g.font = mono(26); g.textAlign = 'right';
+    g.fillText(prFmt(e.start, e.unit) + ' → ' + prFmt(e.end, e.unit) + (e.unit === 'reps' ? ' reps' : ''), S - P, y); g.textAlign = 'left';
+    g.strokeStyle = LINE; g.lineWidth = 2; g.beginPath(); g.moveTo(P, y + 26); g.lineTo(S - P, y + 26); g.stroke();
+    y += 62;
+  });
+
+  g.fillStyle = GOLD; g.font = mono(30); sp(10); g.fillText('FORGE', P, H - 70);
+  g.fillStyle = DIM; g.font = mono(18); sp(3); g.textAlign = 'right'; g.fillText('FORGETRAINING.APP', S - P, H - 72); g.textAlign = 'left';
+
+  const blob = await new Promise(res => c.toBlob(res, 'image/png'));
+  if(!blob){ showToast('Could not create image'); return; }
+  const file = new File([blob], 'forge-phase-report.png', { type: 'image/png' });
+  try {
+    if(navigator.canShare && navigator.canShare({ files: [file] })){
+      await navigator.share({ files: [file], title: 'FORGE · ' + r.name });
+      return;
+    }
+  } catch(e) { if(e && e.name === 'AbortError') return; }
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = 'forge-phase-report.png';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  showToast('Report saved ✓');
+}
 </script>
 </body>
 </html>
