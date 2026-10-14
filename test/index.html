@@ -247,8 +247,20 @@
   .bw-spark { border: 1px solid var(--border); border-top: none; background: var(--deep); padding: 10px 12px 6px; }
   .bw-spark svg { width: 100%; height: auto; display: block; }
   .si-wrap { border: 1px solid var(--border); background: var(--deep); padding: 12px; }
+  .si-tabs { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 14px; }
+  .si-tabs::-webkit-scrollbar { display: none; }
+  .si-tab { min-width: 0; background: none; border: 1px solid var(--border); color: var(--text-muted); font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 0.5px; text-transform: uppercase; padding: 9px 0; cursor: pointer; white-space: nowrap; overflow: hidden; }
+  .si-tab.on { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+  .si-tab.off { opacity: 0.35; cursor: default; }
+  .si-hero { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 12px; }
+  .si-now { font-family: 'DM Mono', monospace; font-size: 30px; color: var(--text); line-height: 1; }
+  .si-now small { font-size: 11px; color: var(--text-muted); margin-left: 3px; }
+  .si-sub { font-family: 'DM Mono', monospace; font-size: 8.5px; letter-spacing: 1.5px; color: var(--text-dim); text-transform: uppercase; margin-top: 6px; }
+  .si-hero .si-gain { text-align: right; font-size: 14px; }
+  .si-hero .si-gain small { display: block; font-size: 8px; letter-spacing: 1px; color: var(--text-dim); margin-top: 4px; text-transform: uppercase; }
+  .si-ax { font-family: 'DM Mono', monospace; font-size: 7px; fill: var(--text-dim); }
   .si-pick { width: 100%; background: var(--black); border: 1px solid var(--border); color: var(--text); font-family: 'DM Mono', monospace; font-size: 11px; padding: 9px 10px; margin-bottom: 12px; }
-  .si-chart svg { width: 100%; height: 110px; display: block; }
+  .si-chart svg { width: 100%; height: auto; display: block; overflow: visible; }
   .si-empty { font-size: 11px; color: var(--text-dim); padding: 18px 4px; text-align: center; line-height: 1.5; }
   .si-foot { display: flex; align-items: center; gap: 14px; margin-top: 10px; flex-wrap: wrap; }
   .si-key { display: flex; align-items: center; gap: 5px; font-family: 'DM Mono', monospace; font-size: 8.5px; letter-spacing: 1px; color: var(--text-dim); text-transform: uppercase; }
@@ -3074,8 +3086,9 @@ function switchBuildTab(tab) {
 }
 
 // ─── CHANGELOG ─────────────────────────────────────────────────
-const FORGE_VERSION = '2.3.5';
+const FORGE_VERSION = '2.3.6';
 const FORGE_CHANGELOG = [
+  'Strength Index is now five core movements — pull-up, chin-up, muscle-up, push-up and squat — and keeps its history across every phase instead of starting over',
   'Phase reports — finish a phase and see how it went: sessions, sets, reps, volume, your biggest gain charted week by week, and every exercise first week to last. Share it as an image. Past blocks have one too, in the Archive',
   'Moving to a new phase now starts its log clean — your previous phase\'s sessions stay in its archive instead of showing up as this phase\'s weeks'
 ];
@@ -5367,52 +5380,110 @@ function setSiExercise(id){
   renderStatsOverview();
 }
 
+// Five core movements, fixed — easier to read than a dropdown of every exercise logged.
+// Each one counts only the movement itself (with or without added weight), never harder or
+// easier variants, so the line is always the same lift getting stronger.
+const SI_CORE = [
+  { key:'pullup', label:'Pull-Up',   ids:['bwf-pull-up'] },
+  { key:'chinup', label:'Chin-Up',   ids:['chin-ups'] },
+  { key:'mu',     label:'Muscle-Up', ids:['muscle-up','bwf-strict-bar-mu'] },
+  { key:'pushup', label:'Push-Up',   ids:['bwf-push-up'] },
+  { key:'squat',  label:'Squat',     ids:['bb-squat','squat'] }
+];
+let siCore = localStorage.getItem('fw_si_core') || '';
+
+// Best index per day for one core movement, across the live block AND every archived block —
+// the live log is cleared on each phase change, so reading it alone reset the line every phase.
+function siCoreSeries(core){
+  var logs = [sessionLog].concat((archivedBlocks || []).map(function(b){ return b.sessionLog || {}; }));
+  var byDate = {};
+  core.ids.forEach(function(exId){
+    var ex = EXERCISES.find(function(e){ return e.id === exId; });
+    if(!ex) return;
+    var needle = '_' + exId + '_v';
+    logs.forEach(function(log){
+      Object.keys(log).forEach(function(k){
+        var i = k.lastIndexOf(needle);
+        if(i < 1 || !/^\d+$/.test(k.slice(i + needle.length))) return;
+        var entry = log[k];
+        if(!entry || typeof entry !== 'object' || !entry._d) return;
+        for(var sN = 1; sN <= 12; sN++){
+          var r = parseInt(entry['s'+sN+'_r']);
+          var w = parseFloat(entry['s'+sN+'_w']);
+          if(isNaN(r) || r < 1) continue;
+          var idx = strengthIndex(ex, r, isNaN(w) ? 0 : w, latestBodyweight(entry._d));
+          if(idx !== null && (!byDate[entry._d] || idx > byDate[entry._d])) byDate[entry._d] = idx;
+        }
+      });
+    });
+  });
+  return Object.keys(byDate).sort().map(function(d){ return { d:d, v:byDate[d] }; });
+}
+
+function setSiCore(key){
+  siCore = key;
+  try { localStorage.setItem('fw_si_core', key); } catch(e) {}
+  renderStatsOverview();
+}
+
 function strengthChartHTML(){
-  var opts = siLoggedExercises();
-  // Sets logged before date-stamping shipped carry no _d, so a user with plenty of history
-  // can still land here. Explain it instead of hiding the whole section.
-  if(!opts.length) return '<div class="st-sec"><div class="st-sechead"><h3>Strength Index</h3><span class="ln"></span>'
-    + '<span class="tg">no data yet</span></div>'
-    + '<div class="si-empty">Log a workout to start the index. Sets recorded before this update aren\'t dated, so the chart starts fresh.</div></div>';
-  if(!siExercise || !opts.some(function(e){ return e.id === siExercise; })) siExercise = opts[0].id;
+  var all = SI_CORE.map(function(c){ return { core:c, series:siCoreSeries(c) }; });
+  var withData = all.filter(function(x){ return x.series.length; });
+  var head = '<div class="st-sechead"><h3>Strength Index</h3><span class="ln"></span><span class="tg">trend, not a 1RM</span></div>';
+  if(!withData.length) return '<div class="st-sec">' + head
+    + '<div class="si-empty">Log a pull-up, chin-up, muscle-up, push-up or squat to start the index. Sets recorded before date-stamping aren\'t dated, so the chart starts from your next session.</div></div>';
+  if(!siCore || !withData.some(function(x){ return x.core.key === siCore; })) siCore = withData[0].core.key;
+  var sel = all.find(function(x){ return x.core.key === siCore; });
 
-  var picker = '<select class="si-pick" onchange="setSiExercise(this.value)">'
-    + opts.map(function(e){ return '<option value="'+e.id+'"'+(e.id===siExercise?' selected':'')+'>'+e.name+'</option>'; }).join('')
-    + '</select>';
+  var tabs = '<div class="si-tabs">' + all.map(function(x){
+    var on = x.core.key === siCore, has = x.series.length > 0;
+    return '<button class="si-tab' + (on ? ' on' : '') + (has ? '' : ' off') + '"' + (has ? ' onclick="setSiCore(\'' + x.core.key + '\')"' : ' disabled') + '>' + x.core.label + '</button>';
+  }).join('') + '</div>';
 
-  var series = siSeriesFor(siExercise);
-  var body;
+  var series = sel.series, body;
+  var last = series[series.length - 1].v, first = series[0].v;
+  var gain = +(last - first).toFixed(1);
+  var hero = '<div class="si-hero"><div><div class="si-now">' + Math.round(last) + '<small>kg</small></div>'
+    + '<div class="si-sub">' + sel.core.label + ' · latest best set</div></div>'
+    + (series.length > 1 ? '<div class="si-gain ' + (gain >= 0 ? 'up' : 'down') + '">' + (gain >= 0 ? '+' : '') + gain + 'kg<small>since ' + series[0].d.slice(5).split('-').reverse().join('/') + '</small></div>' : '')
+    + '</div>';
+
   if(series.length < 2){
-    body = '<div class="si-empty">Log this exercise on two separate days to see a trend.</div>';
+    body = '<div class="si-empty">Log ' + sel.core.label.toLowerCase() + 's on two separate days to see the trend.</div>';
   } else {
-    var W=300, H=110;
+    var W = 300, H = 120, L = 26, T = 8, B = 18;
     var vals = series.map(function(p){ return p.v; });
-    var bws  = series.map(function(p){ return latestBodyweight(p.d) || 0; });
-    var all  = vals.concat(bws.filter(function(x){ return x>0; }));
-    var min = Math.min.apply(null, all), max = Math.max.apply(null, all);
-    var pad = (max-min) < 2 ? 2 : (max-min)*0.15;
-    min -= pad; max += pad;
-    var X = function(i){ return series.length===1 ? W/2 : (i/(series.length-1))*W; };
-    var Y = function(v){ return H - ((v-min)/(max-min))*H; };
-
-    var bwLine = bws.every(function(b){ return b>0; })
-      ? '<polyline points="'+bws.map(function(b,i){ return X(i).toFixed(1)+','+Y(b).toFixed(1); }).join(' ')
-        + '" fill="none" stroke="var(--text-dim)" stroke-width="1" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>' : '';
-    var siLine = '<polyline points="'+vals.map(function(v,i){ return X(i).toFixed(1)+','+Y(v).toFixed(1); }).join(' ')
-        + '" fill="none" stroke="var(--accent)" stroke-width="1.75" vector-effect="non-scaling-stroke"/>';
-
-    var first = vals[0], last = vals[vals.length-1];
-    var gain = +(last-first).toFixed(1);
-    body = '<div class="si-chart"><svg viewBox="0 0 '+W+' '+H+'" preserveAspectRatio="none">'+bwLine+siLine+'</svg></div>'
+    // Bodyweight only belongs on bodyweight movements — next to a barbell squat it just squashes the line.
+    var showBw = sel.core.key !== 'squat';
+    var bws = series.map(function(p){ return latestBodyweight(p.d) || 0; });
+    var pool = vals.concat(showBw ? bws.filter(function(x){ return x > 0; }) : []);
+    var min = Math.min.apply(null, pool), max = Math.max.apply(null, pool);
+    var pad = (max - min) < 4 ? 2 : (max - min) * 0.12;
+    min = Math.floor(min - pad); max = Math.ceil(max + pad);
+    var X = function(i){ return L + (i / (series.length - 1)) * (W - L - 6); };
+    var Y = function(v){ return T + (1 - (v - min) / (max - min)) * (H - T - B); };
+    var grid = [0, 0.5, 1].map(function(f){
+      var gy = T + f * (H - T - B), gv = Math.round(max - f * (max - min));
+      return '<line x1="' + L + '" x2="' + W + '" y1="' + gy + '" y2="' + gy + '" stroke="var(--border)"/>'
+        + '<text x="' + (L - 5) + '" y="' + (gy + 3) + '" text-anchor="end" class="si-ax">' + gv + '</text>';
+    }).join('');
+    var bwLine = showBw && bws.every(function(b){ return b > 0; })
+      ? '<polyline points="' + bws.map(function(b, i){ return X(i).toFixed(1) + ',' + Y(b).toFixed(1); }).join(' ') + '" fill="none" stroke="var(--text-dim)" stroke-width="1" stroke-dasharray="3 3"/>' : '';
+    var pts = vals.map(function(v, i){ return X(i).toFixed(1) + ',' + Y(v).toFixed(1); });
+    var area = '<polygon points="' + X(0).toFixed(1) + ',' + (H - B) + ' ' + pts.join(' ') + ' ' + X(vals.length - 1).toFixed(1) + ',' + (H - B) + '" fill="rgba(201,169,110,0.08)"/>';
+    var line = '<polyline points="' + pts.join(' ') + '" fill="none" stroke="var(--accent)" stroke-width="1.75" stroke-linejoin="round"/>';
+    var dots = vals.map(function(v, i){ var lastPt = i === vals.length - 1;
+      return '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(v).toFixed(1) + '" r="' + (lastPt ? 3.5 : 2) + '" fill="' + (lastPt ? 'var(--accent)' : 'var(--deep)') + '" stroke="var(--accent)" stroke-width="1.2"/>'; }).join('');
+    var dl = function(d){ return d.slice(5).split('-').reverse().join('/'); };
+    var xt = '<text x="' + L + '" y="' + (H - 4) + '" class="si-ax">' + dl(series[0].d) + '</text>'
+      + '<text x="' + W + '" y="' + (H - 4) + '" text-anchor="end" class="si-ax">' + dl(series[series.length - 1].d) + '</text>';
+    body = '<div class="si-chart"><svg viewBox="0 0 ' + W + ' ' + H + '">' + grid + area + bwLine + line + dots + xt + '</svg></div>'
       + '<div class="si-foot"><span class="si-key"><i class="k-si"></i>Strength index</span>'
-      + '<span class="si-key"><i class="k-bw"></i>Bodyweight</span>'
-      + '<span class="si-gain '+(gain>=0?'up':'down')+'">'+(gain>=0?'+':'')+gain+'kg</span></div>'
-      + '<div class="si-range"><span>'+series[0].d.slice(5)+'</span><span>'+last+'kg</span><span>'+series[series.length-1].d.slice(5)+'</span></div>';
+      + (bwLine ? '<span class="si-key"><i class="k-bw"></i>Bodyweight</span>' : '')
+      + '<span class="si-key" style="margin-left:auto">' + series.length + ' sessions</span></div>';
   }
 
-  return '<div class="st-sec"><div class="st-sechead"><h3>Strength Index</h3><span class="ln"></span>'
-    + '<span class="tg">trend, not a 1RM</span></div>'
-    + '<div class="si-wrap">'+picker+body+'</div></div>';
+  return '<div class="st-sec">' + head + '<div class="si-wrap">' + tabs + hero + body + '</div></div>';
 }
 
 // Coach-set macro targets shown at the top of Progress. Purely a reference card — nothing
