@@ -1148,9 +1148,77 @@
   @media (prefers-reduced-motion: reduce) {
     .pr-scroll .pr-rise, .pr-anim .pr-rise, .pr-anim .pr-line, .pr-anim .pr-area, .pr-anim .pr-dot { animation: none; opacity: 1; transform: none; filter: none; stroke-dashoffset: 0; }
   }
+
+  /* ══ HOME v2 ══ calmer Home: cycle on top, the week as tiles, one gold action. */
+  :root { --r-card: 14px; --r-btn: 12px; --r-sm: 6px; }
+  #page-home .home-hero, #page-home #home-stats-row, #page-home #phase-bar { display: none !important; }
+  #page-home .home-hero.hv-empty { display: block !important; }
+  body[data-page="home"] .week-pill { visibility: hidden; }
+  .hv-head { padding: 18px 20px 22px; border-bottom: 1px solid var(--border); }
+  .hv-top { display: flex; justify-content: space-between; align-items: baseline; }
+  .hv-k { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase; }
+  .hv-wk { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--text-muted); }
+  .hv-wk b { color: var(--accent); font-weight: 400; }
+  .hv-segs { display: flex; gap: 4px; margin-top: 16px; }
+  .hv-seg { position: relative; height: 3px; background: var(--border); border-radius: 2px; min-width: 0; }
+  .hv-seg i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--accent); border-radius: 2px; transition: width 0.6s ease; }
+  .hv-seg.done i { width: 100%; background: var(--accent-dim); }
+  .hv-seg.now { background: rgba(201,169,110,0.22); }
+  .hv-seg span { position: absolute; top: 11px; left: 0; right: 0; font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 1.5px; color: var(--text-dim); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hv-seg.now span { color: var(--accent); overflow: visible; }
+  .hv-segs.labelled { margin-bottom: 22px; }
+  .hv-name { font-size: 20px; font-weight: 500; line-height: 1.25; margin-top: 22px; letter-spacing: 0.1px; overflow-wrap: anywhere; }
+  .hv-subrow { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+  .hv-sub { font-size: 12.5px; color: var(--text-muted); }
+  .hv-nav { background: none; border: 1px solid var(--border); color: var(--text-muted); width: 26px; height: 26px; border-radius: 50%; font-size: 13px; line-height: 1; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; flex-shrink: 0; }
+  .hv-nav:disabled { opacity: 0.25; cursor: default; }
+  .hv-week { padding: 22px 20px 0; }
+  .hv-sec-row { display: flex; justify-content: space-between; align-items: center; }
+  .hv-sec { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase; }
+  .hv-dots { display: flex; gap: 5px; }
+  .hv-dots i { width: 16px; height: 3px; border-radius: 2px; background: var(--border); }
+  .hv-dots i.on { background: var(--accent); }
+  #home-day-cards.hv-tiles { display: grid; grid-template-columns: repeat(var(--hv-cols, 3), minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+  .hv-tile { border: 1px solid var(--border); border-radius: var(--r-card); padding: 14px 12px 12px; min-height: 124px; display: flex; flex-direction: column; background: none; text-align: left; color: var(--text); cursor: pointer; font-family: inherit; min-width: 0; }
+  .hv-tile .d { font-family: 'DM Mono', monospace; font-size: 17px; letter-spacing: 2px; white-space: nowrap; }
+  .hv-tile .t { font-family: 'DM Mono', monospace; font-size: 8.5px; letter-spacing: 1.5px; color: var(--accent-dim); text-transform: uppercase; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hv-tile .p { font-size: 11.5px; color: var(--text-dim); margin-top: 9px; line-height: 1.5; flex: 1; }
+  .hv-tile .p div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hv-tile .s { font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 2px; color: var(--text-dim); margin-top: 8px; }
+  .hv-tile.next { border-color: var(--accent-dim); background: linear-gradient(180deg, rgba(201,169,110,0.08), transparent 75%); }
+  .hv-tile.next .s { color: var(--accent); }
+  .hv-tile.done .d, .hv-tile.done .p { opacity: 0.55; }
+  .hv-tile.done .s { color: var(--text-muted); }
+  .hv-cta { display: block; width: 100%; margin-top: 14px; padding: 16px; background: var(--accent); color: var(--black); border: 0; border-radius: var(--r-btn); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 4px; text-transform: uppercase; cursor: pointer; }
+  .hv-cta.quiet { background: none; border: 1px solid var(--accent-dim); color: var(--accent); }
+  .hv-fixed-wrap { padding: 30px 20px 4px; }
+  .hv-fixed-wrap:empty, .hv-fixed-wrap.none { display: none; }
+  #page-home .fixed-section { margin: 10px 0 0; border-radius: var(--r-card); overflow: hidden; }
+  #page-home .fixed-section-header { padding: 14px 16px; }
+  .hv-fx-title { font-size: 14px; color: var(--text); }
+  .hv-fx-meta { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px; color: var(--text-dim); text-transform: uppercase; }
+  #page-home .fixed-section-body { padding: 0 16px; }
+  #page-home .fixed-section.open .fixed-section-body { padding-bottom: 8px; }
+
+  /* ══ ROUNDED SYSTEM ══ cards 14 · buttons, inputs, chips 12 · badges 6 · sheets round on top. */
+  .fixed-section, .archived-block, .bw-card, .changelog-card, .client-folder, .cycle-card, .day-builder-card,
+  .progress-ex-card, .ready-card, .saved-wk-card, .si-wrap, .nt-card, .weekly-card, .pr-card, .pr-tiles,
+  .st-card, .st-panel, .st-perfcard, .st-ringcard, .at-panel, .at-hero, .builder-fixed, .block-stats,
+  .ai-result-day, .mc-wrap, .coaching-pillars, .tour-callout, .add-ex-results { border-radius: var(--r-card); }
+  .pr-tiles { overflow: hidden; }
+  .start-btn, .confirm-yes, .confirm-no, .home-empty-cta, .save-btn, .onboard-cta, .ready-cta, .weekly-cta,
+  .coaching-submit, .auth-btn-ghost, .signout-btn, .acct-billing, .add-day-btn, .pr-btn, .fixed-section-start,
+  .upgrade-dismiss, .add-ex-search, .search-input, .auth-input, .coaching-input, .coaching-textarea, .notes-input,
+  .ai-text-input, .name-field, .day-name-input, .day-ex-search, .cycle-draft-select, .cycle-client-select, .onboard-opt,
+  .onboard-freq-opt, .timer-btn, .timer-dur-btn, .numpad-key, .numpad-done, .toast, .si-tab, .ai-reply-chip,
+  .cycle-slot-push, .cycle-slot-set, .video-btn, .ss-link-btn, .ai-send-btn, .saved-wk-del, .home-lastweek { border-radius: var(--r-btn); }
+  .set-field, .set-note-input, .day-mini-input, .cycle-draft-weeks, .cycle-draft-x { border-radius: 8px; }
+  .w-tab, .week-pill, .fixed-section-badge, .tag, .free-badge, .pr-chip, .filter-chip, .picker-chip,
+  .day-ex-chip, .day-ex-pill, .dur-chip, .cycle-slot-live, .cycle-slot-note { border-radius: var(--r-sm); }
+  .confirm-sheet, .bottom-sheet, .upgrade-sheet { border-radius: 20px 20px 0 0; }
 </style>
 </head>
-<body>
+<body data-page="home">
 
 <!-- ── BLOCK NOTE THREAD ── -->
 <div class="nt-overlay" id="notethread-overlay" style="display:none" onclick="if(event.target===this)closeNoteThread()">
@@ -1530,8 +1598,17 @@
           </div>
           <div class="phase-strip" id="phase-strip"></div>
         </div>
-        <div id="home-fixed-sections"></div>
-        <div id="home-day-cards"></div>
+        <!-- Home v2: where you are in the cycle, this week's days, one next action, then the fixed work. -->
+        <div class="hv-head" id="hv-head"></div>
+        <div class="hv-week" id="hv-week">
+          <div class="hv-sec-row"><span class="hv-sec">This week</span><span class="hv-dots" id="hv-dots"></span></div>
+          <div id="home-day-cards"></div>
+          <button class="hv-cta" id="hv-cta"></button>
+        </div>
+        <div class="hv-fixed-wrap" id="hv-fixed-wrap">
+          <div class="hv-sec">Every session</div>
+          <div id="home-fixed-sections"></div>
+        </div>
       </div>
       <div id="home-empty-state" style="display:none">
         <div class="home-empty-wrap">
@@ -2831,6 +2908,7 @@ function updateStats() {
   const blockLabel = document.getElementById('current-block-label'); // removed from Home — name is already the hero title
   if(blockLabel) blockLabel.textContent = currentBlock.name || 'Current Block';
   renderPhaseStrip();
+  try { renderHomeHeader(); } catch(e) {}
 
   // Count logged sessions from sessionLog
   const days = currentBlock.days || [];
@@ -3044,6 +3122,7 @@ function navigate(page, push=true) {
   if (push && navHistory[navHistory.length-1] !== page) navHistory.push(page);
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
+  document.body.dataset.page = page; // Home hides the week pill — its own header carries the week
   document.getElementById('scroll-area').scrollTop = 0;
   const navIds = ['home','db','progress','builder','coaching','board'];
   document.querySelectorAll('.nav-btn').forEach((b,i) => b.classList.toggle('active', navIds[i]===page));
@@ -3086,11 +3165,11 @@ function switchBuildTab(tab) {
 }
 
 // ─── CHANGELOG ─────────────────────────────────────────────────
-const FORGE_VERSION = '2.3.7';
+const FORGE_VERSION = '2.4.0';
 const FORGE_CHANGELOG = [
-  'Strength Index is now five core movements — pull-up, chin-up, muscle-up, push-up and squat — and keeps its history across every phase instead of starting over',
-  'Phase reports — finish your last session of a phase and the film plays by itself. See how it went: sessions, sets, reps, volume, your biggest gain charted week by week, and every exercise first week to last. Share it as an image. Past blocks have one too, in the Archive',
-  'Moving to a new phase now starts its log clean — your previous phase\'s sessions stay in its archive instead of showing up as this phase\'s weeks'
+  'A calmer Home — where you are in your cycle at the top, this week as tiles, one button for your next session',
+  'Softer, rounded look across the app',
+  'Fixed old sessions reappearing as logged when switching between devices'
 ];
 
 function checkChangelog() {
@@ -3648,9 +3727,7 @@ function renderHomeDays() {
   const lastWeekEl = document.getElementById('home-lastweek');
   const total = currentBlock.weeks || 4;
   if (hasActiveBlock && currentWeek >= total) {
-    lastWeekEl.textContent = 'Final week of this block — tap to plan what\'s next →';
-    lastWeekEl.onclick = () => openBlockEndPrompt();
-    lastWeekEl.classList.add('visible');
+    lastWeekEl.classList.remove('visible'); // the Home CTA now handles the final week
   } else {
     lastWeekEl.classList.remove('visible');
   }
@@ -3662,25 +3739,108 @@ function renderHomeDays() {
     return;
   }
 
-  currentBlock.days.forEach(day => {
-    const rows = day.exercises.slice(0,5).map(e => {
-      const ex = EXERCISES.find(x => x.id===e.id);
-      return `<div class="ex-row"><span class="ex-name">${ex?.name||e.id}</span><span class="ex-scheme">${e.sets}×${e.reps}</span></div>`;
-    }).join('');
-    const more = day.exercises.length>5 ? `<div style="font-size:10px;color:var(--text-dim);padding:6px 0 0">+${day.exercises.length-5} more</div>` : '';
+  c.classList.add('hv-tiles');
+  const days = currentBlock.days;
+  c.style.setProperty('--hv-cols', Math.min(days.length, 3));
+  const nextDay = days.find(d => !isDayLoggedForWeek(d, currentWeek));
+  c.innerHTML = days.map(day => {
     const done = isDayLoggedForWeek(day, currentWeek);
-    c.innerHTML += `
-      <div class="day-card${done?' is-done':''}" id="dc-${day.id}">
-        <div class="day-card-header" onclick="toggleDayCard('${day.id}')">
-          <div class="day-card-left"><div class="day-tag">${day.name}</div><div class="day-type">${day.type||''}</div></div>
-          ${done ? `<div class="day-done-badge">✓ W${currentWeek} LOGGED</div>` : ''}
-          <div class="day-chevron">›</div>
-        </div>
-        <div class="day-card-exercises">${rows}${more}
-          <button class="start-btn${done?' is-review':''}" onclick="startDay('${day.id}')">${done ? 'REVIEW SESSION ✓' : 'START SESSION →'}</button>
-        </div>
-      </div>`;
-  });
+    const isNext = day === nextDay;
+    const [label, title] = hvSplitDayName(day.name);
+    const names = day.exercises.slice(0, 3).map(e => {
+      const ex = EXERCISES.find(x => x.id === e.id);
+      return '<div>' + (ex ? ex.name : e.id) + '</div>';
+    }).join('');
+    const more = day.exercises.length > 3 ? '<div>+' + (day.exercises.length - 3) + ' more</div>' : '';
+    return `<button class="hv-tile${done ? ' done' : ''}${isNext ? ' next' : ''}" onclick="startDay('${day.id}')">
+      <div class="d">${label}</div>${title ? `<div class="t">${title}</div>` : ''}
+      <div class="p">${names}${more}</div>
+      <div class="s">${done ? '✓ DONE' : isNext ? 'NEXT' : '—'}</div>
+    </button>`;
+  }).join('');
+  renderHomeHeader();
+}
+
+// ─── HOME v2 HEADER ─────────────────────────────────────────────
+// "DAY 1 - MU" → ["DAY 1", "MU"]. Coach-written titles sit under the day as a small line.
+function hvSplitDayName(name){
+  const parts = String(name || '').split(/\s+[-–—:]\s+/);
+  return [parts[0] || 'DAY', parts.slice(1).join(' · ')];
+}
+
+function renderHomeHeader(){
+  const head = document.getElementById('hv-head');
+  if(!head) return;
+  const days = currentBlock.days || [];
+  if(!days.length){ head.innerHTML = ''; document.getElementById('hv-week').style.display = 'none'; return; }
+  document.getElementById('hv-week').style.display = '';
+  const total = currentBlock.weeks || 4;
+  const ref = currentBlock.cycle;
+  const cyc = ref && ref.id ? getCycle(ref.id) : null;
+  const doneCount = days.filter(d => isDayLoggedForWeek(d, currentWeek)).length;
+  const weekFrac = (currentWeek - 1 + doneCount / days.length) / total;
+
+  let top, segs, nextPhase = '';
+  if(cyc && Array.isArray(cyc.slots) && cyc.slots.length > 1){
+    const curIdx = Math.min(Math.max(ref.order || 1, 1), cyc.slots.length) - 1;
+    const elapsed = cyc.slots.slice(0, curIdx).reduce((a, sl) => a + (sl.weeks || 0), 0);
+    const cycTotal = cyc.slots.reduce((a, sl) => a + (sl.weeks || 0), 0);
+    top = '<span class="hv-k">Your cycle</span><span class="hv-wk">WEEK <b>' + Math.min(elapsed + currentWeek, cycTotal) + '</b> / ' + cycTotal + '</span>';
+    segs = '<div class="hv-segs labelled">' + cyc.slots.map((sl, i) => {
+      const cls = i < curIdx ? 'done' : i === curIdx ? 'now' : '';
+      const fill = i === curIdx ? ' style="width:' + Math.round(weekFrac * 100) + '%"' : '';
+      const lab = PHASE_LABELS[sl.phase] || String(sl.phase || '').toUpperCase();
+      return '<div class="hv-seg ' + cls + '" style="flex:' + (sl.weeks || 4) + '"><i' + fill + '></i><span>' + lab + '</span></div>';
+    }).join('') + '</div>';
+    const nx = cyc.slots[curIdx + 1];
+    if(nx) nextPhase = PHASE_LABELS[nx.phase] || String(nx.phase || '');
+  } else {
+    top = '<span class="hv-k">This block</span><span class="hv-wk">WEEK <b>' + currentWeek + '</b> / ' + total + '</span>';
+    segs = '<div class="hv-segs">' + Array.from({ length: total }, (_, i) => {
+      const w = i + 1;
+      const cls = w < currentWeek ? 'done' : w === currentWeek ? 'now' : '';
+      const fill = w === currentWeek ? ' style="width:' + Math.round(doneCount / days.length * 100) + '%"' : '';
+      return '<div class="hv-seg ' + cls + '" style="flex:1"><i' + fill + '></i></div>';
+    }).join('') + '</div>';
+  }
+
+  let sub = 'Week ' + currentWeek + ' of ' + total;
+  if(doneCount === days.length) sub += ' · all done';
+  else if(doneCount) sub += ' · ' + doneCount + ' of ' + days.length + ' done';
+  if(currentWeek >= total && nextPhase) sub += ' · then ' + nextPhase.charAt(0) + nextPhase.slice(1).toLowerCase();
+
+  head.innerHTML = '<div class="hv-top">' + top + '</div>' + segs
+    + '<div class="hv-name">' + (currentBlock.name || 'Current block') + '</div>'
+    + '<div class="hv-subrow"><button class="hv-nav" onclick="weekBack()"' + (currentWeek <= 1 ? ' disabled' : '') + ' aria-label="Previous week">‹</button>'
+    + '<span class="hv-sub">' + sub + '</span>'
+    + '<button class="hv-nav" onclick="hvWeekForward()"' + (currentWeek >= total ? ' disabled' : '') + ' aria-label="Next week">›</button></div>';
+
+  // Week dots: one per day.
+  const dots = document.getElementById('hv-dots');
+  if(dots) dots.innerHTML = days.map(d => '<i class="' + (isDayLoggedForWeek(d, currentWeek) ? 'on' : '') + '"></i>').join('');
+
+  // The one action on the screen.
+  const cta = document.getElementById('hv-cta');
+  const next = days.find(d => !isDayLoggedForWeek(d, currentWeek));
+  cta.classList.remove('quiet');
+  if(next){
+    cta.textContent = 'Start ' + hvSplitDayName(next.name)[0].toLowerCase();
+    cta.onclick = () => startDay(next.id);
+  } else if(currentWeek < total){
+    cta.textContent = 'Start week ' + (currentWeek + 1);
+    cta.onclick = () => hvWeekForward();
+  } else {
+    cta.textContent = 'Block complete — what\'s next';
+    cta.onclick = () => openBlockEndPrompt();
+  }
+}
+
+// Forward only within the block — at the end, the block-end prompt takes over (cycleWeek does that).
+function hvWeekForward(){
+  const total = currentBlock.weeks || 4;
+  if(currentWeek >= total){ openBlockEndPrompt(); return; }
+  applyWeek(currentWeek + 1);
+  renderHomeDays();
 }
 
 function toggleDayCard(id) { document.getElementById('dc-'+id)?.classList.toggle('open'); }
@@ -3715,9 +3875,10 @@ async function executeArchive() {
   localStorage.setItem('fw_week_starts', JSON.stringify({}));
   // Sync the archive (with session log saved inside) BEFORE clearing the log
   await syncBlocksToCloud();
-  // Now clear the session log
-  sessionLog = {};
-  localStorage.setItem('fw_log', JSON.stringify({}));
+  // Now clear the session log — the next block is a new instance with its own stamp
+  currentBlock.instanceId = newBlockInstance();
+  sessionLog = { __block: currentBlock.instanceId };
+  localStorage.setItem('fw_log', JSON.stringify(sessionLog));
   // Force sync the empty log (legitimate clear after archive)
   await syncLogsToCloud(true);
   saveCurrentBlock();
@@ -3816,7 +3977,8 @@ async function restoreArchivedBlock(bi) {
   delete blockFields.sessionLog;
   delete blockFields.archivedAt;
   currentBlock = blockFields;
-  sessionLog = {...restoredLog};
+  if(!currentBlock.instanceId) currentBlock.instanceId = newBlockInstance();
+  sessionLog = {...restoredLog, __block: currentBlock.instanceId};
   currentWeek = 1;
   weekStarts = {};
   // persist
@@ -6005,12 +6167,14 @@ function removeFixedEx(section, i) {
 // Warm-up and skill work start EXPANDED — they're the part of the session that actually
 // gets skipped when hidden. State is held here so a re-render doesn't reopen something
 // the user deliberately folded away.
-const fixedSectionOpen = { warmup: true, skill: true };
+const fixedSectionOpen = { warmup: false, skill: false };
 function renderHomeFixedSections() {
   const c = document.getElementById('home-fixed-sections');
   if(!c) return;
   const warmup = currentBlock.warmup || [];
   const skill  = currentBlock.skill  || [];
+  const fxWrap = document.getElementById('hv-fixed-wrap');
+  if(fxWrap) fxWrap.classList.toggle('none', !warmup.length && !skill.length);
   if(!warmup.length && !skill.length) { c.innerHTML=''; return; }
   let html = '';
 
@@ -6027,9 +6191,9 @@ function renderHomeFixedSections() {
   if(warmup.length) {
     html += `<div class="fixed-section${fixedSectionOpen.warmup?' open':''}" id="fixed-warmup">
       <div class="fixed-section-header" onclick="toggleFixedSection('warmup')">
-        <div><div class="fixed-section-label">Fixed · Every Session</div><div class="fixed-section-title">WARM-UP</div></div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span class="fixed-section-badge">FIXED</span>
+        <div class="hv-fx-title">Warm-up</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="hv-fx-meta">${warmup.length} exercise${warmup.length===1?'':'s'}</span>
           <div class="day-chevron">›</div>
         </div>
       </div>
@@ -6039,9 +6203,9 @@ function renderHomeFixedSections() {
   if(skill.length) {
     html += `<div class="fixed-section${fixedSectionOpen.skill?' open':''}" id="fixed-skill">
       <div class="fixed-section-header" onclick="toggleFixedSection('skill')">
-        <div><div class="fixed-section-label">Fixed · Every Session</div><div class="fixed-section-title">SKILL WORK</div></div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span class="fixed-section-badge">FIXED</span>
+        <div class="hv-fx-title">Skill work</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="hv-fx-meta">${skill.length} exercise${skill.length===1?'':'s'}</span>
           <div class="day-chevron">›</div>
         </div>
       </div>
@@ -6487,6 +6651,19 @@ function saveBlockOnly() {
   showToast(isCurrent ? 'Current block updated ✓' : 'Block saved ✓');
 }
 
+// ─── BLOCK-SCOPED LOG ──────────────────────────────────────────
+// The live log is keyed day+exercise+week, and day ids repeat between blocks. Clearing it on
+// activation wasn't enough: every load and sync MERGED local with cloud, so any device still
+// holding a previous block's log (an iPad or Mac not opened since) merged it straight back.
+// Now each block instance gets an id and the log carries it in `__block`. A log stamped for a
+// different block is never merged in. Ids embed their creation time, so between two blocks the
+// newer one wins.
+function newBlockInstance(){ return 'bi_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7); }
+function biTime(id){ const m = /^bi_(\d+)/.exec(id || ''); return m ? +m[1] : 0; }
+function stampLog(){
+  if(currentBlock && currentBlock.instanceId) sessionLog.__block = currentBlock.instanceId;
+}
+
 // ─── BLOCK ACTIVATION — SINGLE SOURCE OF TRUTH ─────────────────
 // EVERY path that makes a block "current" MUST call this. The live session log is keyed
 // day+exercise+week (NOT block-scoped) and day ids repeat across blocks (day_1, day_2…), so a
@@ -6518,14 +6695,15 @@ async function activateBlock(newBlock){
     cycle: newBlock.cycle || null, // phase-tracking group — MUST be listed here or it's dropped on activation
     macros: newBlock.macros || null, // coach-set macro targets — same whitelist rule applies
     coachEmail: newBlock.coachEmail || null, // note-thread participants — same rule again
-    clientEmail: newBlock.clientEmail || null
+    clientEmail: newBlock.clientEmail || null,
+    instanceId: newBlockInstance() // a fresh instance every activation, even of the same saved block
   };
   currentWeek = 1;
-  sessionLog = {};
+  sessionLog = { __block: currentBlock.instanceId };
   weekStarts = {};
   localStorage.setItem('fw_block', JSON.stringify(currentBlock));
   localStorage.setItem('fw_week', '1');
-  localStorage.setItem('fw_log', JSON.stringify({}));
+  localStorage.setItem('fw_log', JSON.stringify(sessionLog));
   localStorage.setItem('fw_week_starts', JSON.stringify({}));
   await syncLogsToCloud(true); // force the empty log up — stops loadFromCloud re-hydrating stale data
   saveCurrentBlock();
@@ -8321,6 +8499,7 @@ async function syncLogsToCloud(force = false) {
     return;
   }
   try {
+    stampLog();
     if(force) {
       // Deliberate replace (after archiving/activating a block, or restoring one) — write as-is.
       await supa.from('logs').upsert({
@@ -8337,7 +8516,17 @@ async function syncLogsToCloud(force = false) {
     const { data: cloudRow } = await supa.from('logs')
       .select('data').eq('user_id', currentUser.id).maybeSingle();
     const cloudLog = (cloudRow && cloudRow.data) ? cloudRow.data : {};
+    const cur = currentBlock.instanceId || null, theirs = cloudLog.__block || null;
+    // Block-scoped rules: never merge a log that belongs to a different block.
+    if(!cur && theirs){ console.log('Sync skipped: cloud log belongs to a stamped block, this device has not loaded it yet'); return; }
+    if(cur && theirs && theirs !== cur){
+      if(biTime(theirs) > biTime(cur)){ console.log('Sync skipped: a newer block is live on another device'); return; }
+      // This device holds the newer block — replace the cloud log, don't merge the old one in.
+      await supa.from('logs').upsert({ user_id: currentUser.id, data: sessionLog, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+      return;
+    }
     const merged = { ...cloudLog, ...sessionLog };
+    if(cur) merged.__block = cur;
     sessionLog = merged;
     localStorage.setItem('fw_log', JSON.stringify(merged));
     await supa.from('logs').upsert({
@@ -8391,8 +8580,15 @@ async function loadFromCloud() {
       const localKeys = Object.keys(localLog).length;
       const cloudKeys = Object.keys(cloudLog).length;
       
-      if(cloudKeys > 0 && localKeys > 0) {
-        // Merge: start with cloud, overlay local (local is more recent if user was logging)
+      const cur = currentBlock.instanceId || null;
+      if(cur){
+        // Block-scoped: only logs stamped for the live block count. An unstamped log next to a
+        // stamped one came from an older build and may be a previous block — it's dropped.
+        const cloudOk = cloudLog.__block === cur || (!cloudLog.__block && localLog.__block !== cur);
+        const localOk = localLog.__block === cur || (!localLog.__block && cloudLog.__block !== cur);
+        sessionLog = { ...(cloudOk ? cloudLog : {}), ...(localOk ? localLog : {}), __block: cur };
+      } else if(cloudKeys > 0 && localKeys > 0) {
+        // Legacy block (no instance id yet): old merge behaviour — it gets stamped right after load
         sessionLog = { ...cloudLog, ...localLog };
       } else if(cloudKeys > 0) {
         // Cloud has data, local is empty — use cloud
@@ -8400,6 +8596,18 @@ async function loadFromCloud() {
       }
       // If cloud is empty but local has data — keep local (don't overwrite)
       localStorage.setItem('fw_log', JSON.stringify(sessionLog));
+    }
+    // First load on this build: give a legacy live block its instance id and stamp the log, so
+    // every device from here on scopes to it. The first device to do this decides what counts,
+    // which is why the docs say: open the new build on the clean device first.
+    if((currentBlock.days || []).length && !currentBlock.instanceId){
+      currentBlock.instanceId = newBlockInstance();
+      localStorage.setItem('fw_block', JSON.stringify(currentBlock));
+      stampLog();
+      localStorage.setItem('fw_log', JSON.stringify(sessionLog));
+      try { await syncBlocksToCloud(); await syncLogsToCloud(true); } catch(e) {}
+    } else if(currentBlock.instanceId && sessionLog.__block !== currentBlock.instanceId){
+      stampLog(); localStorage.setItem('fw_log', JSON.stringify(sessionLog));
     }
   } catch(e) { console.warn('Load from cloud failed:', e); }
 }
@@ -9926,4 +10134,3 @@ async function sharePhaseReport(){
 </script>
 </body>
 </html>
-
