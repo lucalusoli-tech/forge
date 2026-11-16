@@ -3165,7 +3165,7 @@ function switchBuildTab(tab) {
 }
 
 // ─── CHANGELOG ─────────────────────────────────────────────────
-const FORGE_VERSION = '2.4.0';
+const FORGE_VERSION = '2.4.1';
 const FORGE_CHANGELOG = [
   'A calmer Home — where you are in your cycle at the top, this week as tiles, one button for your next session',
   'Softer, rounded look across the app',
@@ -8471,7 +8471,13 @@ async function syncBlocksToCloud() {
   }
   try {
     const { data: existing } = await supa.from('blocks')
-      .select('id').eq('user_id', currentUser.id).eq('is_current', true).maybeSingle();
+      .select('id, iid:data->currentBlock->>instanceId').eq('user_id', currentUser.id).eq('is_current', true).maybeSingle();
+    // A device that hasn't loaded yet must not push an older block instance over a newer one
+    // (that would re-open the door for its stale log). Newer instance wins, same rule as the log.
+    if(existing?.iid && biTime(existing.iid) > biTime(currentBlock.instanceId)){
+      console.log('Block sync skipped: a newer block instance is live — reload to pick it up');
+      return;
+    }
     
     if(existing?.id) {
       await supa.from('blocks').update({
