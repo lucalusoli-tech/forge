@@ -3218,11 +3218,11 @@ function switchBuildTab(tab) {
 }
 
 // ─── CHANGELOG ─────────────────────────────────────────────────
-const FORGE_VERSION = '2.5.0';
+const FORGE_VERSION = '2.6.0';
 const FORGE_CHANGELOG = [
+  'Rest timer alerts now arrive with your phone locked — allow notifications when asked',
   'New session log — each exercise is a chip: tap to log, tick the circle to repeat last session in one tap',
-  'Finish an exercise and the next one opens by itself',
-  'Supersets log round by round in a single card'
+  'Finish an exercise and the next one opens by itself'
 ];
 
 function checkChangelog() {
@@ -6991,14 +6991,82 @@ let timerFired = false; // guards fireTimerAlert against multi-firing on iOS res
 
 // Tell the SW to schedule/cancel its own notification timeout
 function swTimerStart(durationSecs) {
+  // With server push on, the server owns the lock-screen alert (iOS freezes the service
+  // worker's own countdown). The local SW timer stays as the fallback when push isn't set up.
+  if (pushReady) { pushTimerStart(durationSecs); return; }
+  swTimerStartLocal(durationSecs);
+}
+function swTimerStartLocal(durationSecs) {
   if (navigator.serviceWorker && navigator.serviceWorker.controller) {
     navigator.serviceWorker.controller.postMessage({ type: 'TIMER_START', duration: durationSecs });
   }
 }
 function swTimerCancel() {
+  if (pushReady) pushTimerCancel();
   if (navigator.serviceWorker && navigator.serviceWorker.controller) {
     navigator.serviceWorker.controller.postMessage({ type: 'TIMER_CANCEL' });
   }
+}
+
+// ─── WEB PUSH · REST TIMER ─────────────────────────────────────
+// The rest alert comes from the server: the app tells Supabase when the rest ends, a database
+// job checks every 5s and the send-rest-push Edge Function delivers it through Apple/Google
+// push. Works with the screen locked on iPhone (FORGE installed to the home screen, iOS 16.4+).
+const VAPID_PUBLIC_KEY = 'BP_KxzwxdpaVg1ajvhu8N7KYgpjORZnv6XjsbauKtxcNmwPRA_tKhuNgzzq-r6w-zpchwkiPTVy57Masy7Ga9mM';
+var pushReady = false;      // var: read by swTimerStart, which can run before this line on boot
+var pushGuardTimeout = null;
+
+function pushKeyBytes(b64u){
+  const pad = '='.repeat((4 - b64u.length % 4) % 4);
+  const raw = atob((b64u + pad).replace(/-/g, '+').replace(/_/g, '/'));
+  return Uint8Array.from(raw, ch => ch.charCodeAt(0));
+}
+
+// Subscribe this device and register it to whoever is signed in. Safe to call repeatedly.
+async function pushSubscribe(){
+  try {
+    if (!currentUser?.id || !('serviceWorker' in navigator) || !('PushManager' in window)) return false;
+    if (!('Notification' in window) || Notification.permission !== 'granted') return false;
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: pushKeyBytes(VAPID_PUBLIC_KEY) });
+    const j = sub.toJSON();
+    const { error } = await supa.rpc('save_push_subscription', { p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth });
+    pushReady = !error;
+    if (error) console.warn('[push] could not save subscription:', error.message);
+    else console.log('[push] ready');
+    return pushReady;
+  } catch (e) { console.warn('[push] subscribe failed:', e); pushReady = false; return false; }
+}
+
+// Before signing out, detach this phone from the account so it stops getting their alerts.
+async function pushDetach(){
+  try {
+    if (!('serviceWorker' in navigator)) return;
+    const reg = await navigator.serviceWorker.getRegistration();
+    const sub = reg && await reg.pushManager.getSubscription();
+    if (sub) await supa.rpc('remove_push_subscription', { p_endpoint: sub.endpoint });
+    await supa.rpc('cancel_rest_timer');
+  } catch (e) {}
+}
+
+function pushTimerStart(secs){
+  const label = (document.getElementById('timer-ex-label')?.textContent || '').trim();
+  const target = (document.getElementById('timer-next-target')?.textContent || '').trim();
+  const body = label && label !== '—' ? 'Up next · ' + label + (target ? ' · ' + target : '') : 'Time for your next set';
+  supa.rpc('start_rest_timer', { p_seconds: Math.round(secs), p_title: 'Rest over', p_body: body }).then(({ error }) => {
+    if (error) { console.warn('[push] timer not sent, using local fallback:', error.message); swTimerStartLocal(secs); }
+  });
+  // If FORGE is still open on screen near the end, the in-app alert covers it — call off the
+  // push so you don't get both. Locked or in the background, this never runs and the push fires.
+  clearTimeout(pushGuardTimeout);
+  pushGuardTimeout = setTimeout(() => {
+    if (document.visibilityState === 'visible' && timerEndTime > 0 && !timerPaused) supa.rpc('cancel_rest_timer');
+  }, Math.max(0, secs - 4) * 1000);
+}
+function pushTimerCancel(){
+  clearTimeout(pushGuardTimeout);
+  supa.rpc('cancel_rest_timer').then(() => {}, () => {});
 }
 const TIMER_CIRCUMFERENCE = 590.6;
 
@@ -7172,7 +7240,7 @@ function startTimer(exName, wk, justCompletedSet) {
 
   // Request notification permission on first timer use
   if ('Notification' in window && Notification.permission === 'default') {
-    Notification.requestPermission();
+    Notification.requestPermission().then(p => { if (p === 'granted') pushSubscribe(); });
   }
 
   // Tell SW to independently schedule the notification
@@ -8840,6 +8908,7 @@ async function afterAuth(supaUser, isNew) {
   }
   await loadFromCloud();
   startApp(false);
+  pushSubscribe();
 }
 
 function startApp(isGuest) {
@@ -8907,6 +8976,7 @@ function wipeLocalUserData(){
 }
 
 async function handleSignOut() {
+  await pushDetach();
   await supa.auth.signOut();
   await idbClear();
   wipeLocalUserData();
