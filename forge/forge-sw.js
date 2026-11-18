@@ -1,70 +1,66 @@
-// FORGE Timer Service Worker
-// Schedules lock-screen notifications — but ONLY fires them when the page
-// is hidden. If the page is foreground, the page itself handles UX
-// (ring, beep, vibrate) and the SW stays silent. This prevents duplicate
-// notifications when both fire near-simultaneously.
+// FORGE service worker — notifications only. No fetch handler, no caching (by design).
+//
+// Two ways a rest alert reaches the lock screen:
+//  1. PUSH (main path): the server sends a Web Push when the rest ends. Reliable on iPhone
+//     with FORGE installed to the home screen, and on Android.
+//  2. LOCAL TIMER (fallback, when push isn't set up): the page posts TIMER_START and this worker
+//     counts down itself. iOS pauses this once the app is in the background, which is why push exists.
 
-self.addEventListener('install', e => self.skipWaiting());
-self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+const REST_TAG = 'forge-rest';
+let localTimer = null;
 
-let timerTimeout = null;
+self.addEventListener('install', () => self.skipWaiting());
+self.addEventListener('activate', (event) => event.waitUntil(self.clients.claim()));
 
-// Helper: are any of our windows currently visible to the user?
-async function isAnyClientVisible() {
-  const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
-  return clients.some(c => c.visibilityState === 'visible');
+async function tellPagesFired() {
+  const pages = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+  pages.forEach((c) => c.postMessage({ type: 'TIMER_SW_FIRED' }));
 }
 
-self.addEventListener('message', e => {
-  if (!e.data) return;
+function showRest(title, body) {
+  return self.registration.showNotification(title || 'Rest over', {
+    body: body || 'Time for your next set',
+    tag: REST_TAG,          // one rest alert at a time — a newer one replaces the old
+    renotify: true,
+    vibrate: [200, 100, 200, 100, 200],
+    data: { url: './' },
+  });
+}
 
-  if (e.data.type === 'TIMER_START') {
-    if (timerTimeout) clearTimeout(timerTimeout);
-    const ms = (e.data.duration || 90) * 1000;
-    timerTimeout = setTimeout(async () => {
-      timerTimeout = null;
-      // Only fire the notification if NO window is currently visible.
-      // If the user is looking at the app, the page itself handles
-      // the alert (ring + beep + vibrate). Firing a notification on top
-      // of that creates the duplicate.
-      const visible = await isAnyClientVisible();
-      if (visible) return;
-      self.registration.showNotification('FORGE', {
-        body: 'Rest over — next set',
-        icon: 'https://forgetraining.app/icon-192.png',
-        tag: 'forge-timer',
-        renotify: false,
-        requireInteraction: true,
-        vibrate: [200, 100, 200, 100, 200],
-        silent: false
-      });
+// ── 1. Server push ──
+self.addEventListener('push', (event) => {
+  let data = {};
+  try { data = event.data ? event.data.json() : {}; } catch (e) { data = { body: event.data && event.data.text() }; }
+  // Safari requires every push to show a notification, so this always shows one.
+  event.waitUntil(Promise.all([showRest(data.title, data.body), tellPagesFired()]));
+});
+
+// ── 2. Local countdown fallback ──
+self.addEventListener('message', (event) => {
+  const msg = event.data || {};
+  if (msg.type === 'TIMER_START') {
+    clearTimeout(localTimer);
+    const ms = Math.max(1, Number(msg.duration) || 90) * 1000;
+    localTimer = setTimeout(async () => {
+      localTimer = null;
+      const pages = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      const onScreen = pages.some((c) => c.visibilityState === 'visible');
+      if (!onScreen) await showRest(); // the page handles its own alert when it's open on screen
+      tellPagesFired();
     }, ms);
-  }
-
-  if (e.data.type === 'TIMER_CANCEL') {
-    if (timerTimeout) { clearTimeout(timerTimeout); timerTimeout = null; }
-  }
-
-  // Fallback: page can request immediate notification
-  if (e.data.type === 'TIMER_DONE') {
-    if (timerTimeout) { clearTimeout(timerTimeout); timerTimeout = null; }
-    self.registration.showNotification('FORGE', {
-      body: 'Rest over — next set',
-      icon: 'https://forgetraining.app/icon-192.png',
-      tag: 'forge-timer',
-      renotify: false,
-      requireInteraction: true,
-      vibrate: [200, 100, 200, 100, 200],
-      silent: false
-    });
+  } else if (msg.type === 'TIMER_CANCEL') {
+    clearTimeout(localTimer);
+    localTimer = null;
   }
 });
 
-self.addEventListener('notificationclick', e => {
-  e.notification.close();
-  e.waitUntil(
-    self.clients.matchAll({ type: 'window' }).then(cls => {
-      if (cls.length > 0) { cls[0].focus(); } else { self.clients.openWindow('/'); }
-    })
-  );
+// ── Tap on the notification: back into FORGE ──
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil((async () => {
+    const pages = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+    const open = pages.find((c) => 'focus' in c);
+    if (open) return open.focus();
+    return self.clients.openWindow((event.notification.data && event.notification.data.url) || './');
+  })());
 });
