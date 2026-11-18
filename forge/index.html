@@ -1148,9 +1148,129 @@
   @media (prefers-reduced-motion: reduce) {
     .pr-scroll .pr-rise, .pr-anim .pr-rise, .pr-anim .pr-line, .pr-anim .pr-area, .pr-anim .pr-dot { animation: none; opacity: 1; transform: none; filter: none; stroke-dashoffset: 0; }
   }
+
+  /* ══ HOME v2 ══ calmer Home: cycle on top, the week as tiles, one gold action. */
+  :root { --r-card: 14px; --r-btn: 12px; --r-sm: 6px; }
+  #page-home .home-hero, #page-home #home-stats-row, #page-home #phase-bar { display: none !important; }
+  #page-home .home-hero.hv-empty { display: block !important; }
+  body[data-page="home"] .week-pill { visibility: hidden; }
+  .hv-head { padding: 18px 20px 22px; border-bottom: 1px solid var(--border); }
+  .hv-top { display: flex; justify-content: space-between; align-items: baseline; }
+  .hv-k { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase; }
+  .hv-wk { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 2px; color: var(--text-muted); }
+  .hv-wk b { color: var(--accent); font-weight: 400; }
+  .hv-segs { display: flex; gap: 4px; margin-top: 16px; }
+  .hv-seg { position: relative; height: 3px; background: var(--border); border-radius: 2px; min-width: 0; }
+  .hv-seg i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: var(--accent); border-radius: 2px; transition: width 0.6s ease; }
+  .hv-seg.done i { width: 100%; background: var(--accent-dim); }
+  .hv-seg.now { background: rgba(201,169,110,0.22); }
+  .hv-seg span { position: absolute; top: 11px; left: 0; right: 0; font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 1.5px; color: var(--text-dim); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hv-seg.now span { color: var(--accent); overflow: visible; }
+  .hv-segs.labelled { margin-bottom: 22px; }
+  .hv-name { font-size: 20px; font-weight: 500; line-height: 1.25; margin-top: 22px; letter-spacing: 0.1px; overflow-wrap: anywhere; }
+  .hv-subrow { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+  .hv-sub { font-size: 12.5px; color: var(--text-muted); }
+  .hv-nav { background: none; border: 1px solid var(--border); color: var(--text-muted); width: 26px; height: 26px; border-radius: 50%; font-size: 13px; line-height: 1; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; padding: 0; flex-shrink: 0; }
+  .hv-nav:disabled { opacity: 0.25; cursor: default; }
+  .hv-week { padding: 22px 20px 0; }
+  .hv-sec-row { display: flex; justify-content: space-between; align-items: center; }
+  .hv-sec { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase; }
+  .hv-dots { display: flex; gap: 5px; }
+  .hv-dots i { width: 16px; height: 3px; border-radius: 2px; background: var(--border); }
+  .hv-dots i.on { background: var(--accent); }
+  #home-day-cards.hv-tiles { display: grid; grid-template-columns: repeat(var(--hv-cols, 3), minmax(0, 1fr)); gap: 8px; margin-top: 12px; }
+  .hv-tile { border: 1px solid var(--border); border-radius: var(--r-card); padding: 14px 12px 12px; min-height: 124px; display: flex; flex-direction: column; background: none; text-align: left; color: var(--text); cursor: pointer; font-family: inherit; min-width: 0; }
+  .hv-tile .d { font-family: 'DM Mono', monospace; font-size: 17px; letter-spacing: 2px; white-space: nowrap; }
+  .hv-tile .t { font-family: 'DM Mono', monospace; font-size: 8.5px; letter-spacing: 1.5px; color: var(--accent-dim); text-transform: uppercase; margin-top: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hv-tile .p { font-size: 11.5px; color: var(--text-dim); margin-top: 9px; line-height: 1.5; flex: 1; }
+  .hv-tile .p div { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hv-tile .s { font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 2px; color: var(--text-dim); margin-top: 8px; }
+  .hv-tile.next { border-color: var(--accent-dim); background: linear-gradient(180deg, rgba(201,169,110,0.08), transparent 75%); }
+  .hv-tile.next .s { color: var(--accent); }
+  .hv-tile.done .d, .hv-tile.done .p { opacity: 0.55; }
+  .hv-tile.done .s { color: var(--text-muted); }
+  .hv-cta { display: block; width: 100%; margin-top: 14px; padding: 16px; background: var(--accent); color: var(--black); border: 0; border-radius: var(--r-btn); font-family: 'DM Mono', monospace; font-size: 11px; letter-spacing: 4px; text-transform: uppercase; cursor: pointer; }
+  .hv-cta.quiet { background: none; border: 1px solid var(--accent-dim); color: var(--accent); }
+  .hv-fixed-wrap { padding: 30px 20px 4px; }
+  .hv-fixed-wrap:empty, .hv-fixed-wrap.none { display: none; }
+  #page-home .fixed-section { margin: 10px 0 0; border-radius: var(--r-card); overflow: hidden; }
+  #page-home .fixed-section-header { padding: 14px 16px; }
+  .hv-fx-title { font-size: 14px; color: var(--text); }
+  .hv-fx-meta { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px; color: var(--text-dim); text-transform: uppercase; }
+  #page-home .fixed-section-body { padding: 0 16px; }
+  #page-home .fixed-section.open .fixed-section-body { padding-bottom: 8px; }
+
+  /* ══ ROUNDED SYSTEM ══ cards 14 · buttons, inputs, chips 12 · badges 6 · sheets round on top. */
+  .fixed-section, .archived-block, .bw-card, .changelog-card, .client-folder, .cycle-card, .day-builder-card,
+  .progress-ex-card, .ready-card, .saved-wk-card, .si-wrap, .nt-card, .weekly-card, .pr-card, .pr-tiles,
+  .st-card, .st-panel, .st-perfcard, .st-ringcard, .at-panel, .at-hero, .builder-fixed, .block-stats,
+  .ai-result-day, .mc-wrap, .coaching-pillars, .tour-callout, .add-ex-results { border-radius: var(--r-card); }
+  .pr-tiles { overflow: hidden; }
+  .start-btn, .confirm-yes, .confirm-no, .home-empty-cta, .save-btn, .onboard-cta, .ready-cta, .weekly-cta,
+  .coaching-submit, .auth-btn-ghost, .signout-btn, .acct-billing, .add-day-btn, .pr-btn, .fixed-section-start,
+  .upgrade-dismiss, .add-ex-search, .search-input, .auth-input, .coaching-input, .coaching-textarea, .notes-input,
+  .ai-text-input, .name-field, .day-name-input, .day-ex-search, .cycle-draft-select, .cycle-client-select, .onboard-opt,
+  .onboard-freq-opt, .timer-btn, .timer-dur-btn, .numpad-key, .numpad-done, .toast, .si-tab, .ai-reply-chip,
+  .cycle-slot-push, .cycle-slot-set, .video-btn, .ss-link-btn, .ai-send-btn, .saved-wk-del, .home-lastweek { border-radius: var(--r-btn); }
+  .set-field, .set-note-input, .day-mini-input, .cycle-draft-weeks, .cycle-draft-x { border-radius: 8px; }
+  .w-tab, .week-pill, .fixed-section-badge, .tag, .free-badge, .pr-chip, .filter-chip, .picker-chip,
+  .day-ex-chip, .day-ex-pill, .dur-chip, .cycle-slot-live, .cycle-slot-note { border-radius: var(--r-sm); }
+  .confirm-sheet, .bottom-sheet, .upgrade-sheet { border-radius: 20px 20px 0 0; }
+
+  /* ══ LOG v2 ══ exercises as chips — tap to log, one open at a time. */
+  #log-exercises-container { padding: 16px 16px 4px; }
+  .lc-prog { font-size: 12.5px; color: var(--text-muted); padding: 0 4px; }
+  .lc-bar { display: flex; gap: 4px; margin: 10px 4px 16px; }
+  .lc-bar i { flex: 1; height: 3px; border-radius: 2px; background: var(--border); transition: background .4s; }
+  .lc-bar i.on { background: var(--accent); }
+  .lc-chip { border: 1px solid var(--border); border-radius: 14px; margin-bottom: 8px; transition: border-color .3s, box-shadow .5s, background .3s; }
+  .lc-top { display: flex; align-items: center; gap: 10px; padding: 0 14px 0 0; }
+  .lc-hit { flex: 1; min-width: 0; background: none; border: 0; text-align: left; color: var(--text); padding: 14px 0 14px 16px; cursor: pointer; font-family: inherit; }
+  .lc-name { font-size: 15px; line-height: 1.3; }
+  .lc-sub { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; color: var(--text-dim); margin-top: 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lc-names { font-family: 'Inter', sans-serif; font-size: 12.5px; letter-spacing: 0; color: var(--text-muted); white-space: normal; }
+  .lc-tag { font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 2px; color: var(--accent); border: 1px solid var(--accent-dim); border-radius: 6px; padding: 2px 6px; margin-left: 8px; vertical-align: 2px; }
+  .lc-st { width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--border-light); background: none; color: var(--text-dim); font-family: 'DM Mono', monospace; font-size: 9px; flex-shrink: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 0; }
+  .lc-chip.done { background: rgba(201,169,110,0.06); border-color: rgba(201,169,110,0.28); }
+  .lc-chip.done .lc-st { background: var(--accent); border-color: var(--accent); color: var(--black); font-size: 12px; }
+  .lc-chip.done .lc-sub { color: var(--accent-dim); }
+  .lc-chip.part .lc-st { border-color: var(--accent); color: var(--accent); }
+  .lc-chip.open { border-color: var(--accent-dim); border-radius: 16px; background: linear-gradient(180deg, rgba(201,169,110,0.06), transparent 160px); }
+  .lc-chip.open .lc-sub { display: none; }
+  .lc-chip.flash { box-shadow: 0 0 0 1px rgba(201,169,110,.6), 0 0 26px rgba(201,169,110,.32); }
+  .lc-body { padding: 0 16px 6px; }
+  .lc-meta { font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 1px; color: var(--text-muted); margin-top: -6px; }
+  .lc-link { background: none; border: 0; color: var(--accent); font-family: inherit; font-size: inherit; letter-spacing: inherit; padding: 0; cursor: pointer; }
+  .lc-last { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 1.5px; color: var(--text-dim); margin: 10px 0 6px; }
+  .lc-last b { font-weight: 400; color: var(--text-muted); }
+  .lc-coach { font-size: 12px; color: var(--accent-dim); margin: 6px 0; }
+  .lc-set { display: grid; grid-template-columns: 44px 1fr 1fr 34px; gap: 8px; align-items: center; padding: 5px 0; }
+  .lc-lab { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; color: var(--text-dim); }
+  .lc-f { position: relative; display: block; min-width: 0; }
+  .lc-f .lc-in { width: 100%; box-sizing: border-box; background: transparent; border: 1px solid var(--border); border-radius: 10px; color: var(--text); font-family: 'DM Mono', monospace; font-size: 15px; padding: 10px 40px 10px 12px; outline: none; }
+  .lc-f .lc-in::placeholder { color: #474747; }
+  .lc-f small { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-family: 'DM Mono', monospace; font-size: 8px; letter-spacing: 1px; color: var(--text-dim); pointer-events: none; }
+  .lc-f.now .lc-in, .lc-f .lc-in.numpad-active { border-color: var(--accent); }
+  .lc-ok { width: 32px; height: 32px; border-radius: 50%; border: 1px solid var(--border-light); background: none; color: var(--text-dim); font-size: 12px; cursor: pointer; padding: 0; }
+  .lc-ok.on { background: var(--accent); border-color: var(--accent); color: var(--black); }
+  .lc-set.done .lc-in, .lc-rrow.done .lc-in { color: var(--text-muted); }
+  .lc-round { padding: 4px 0 2px; }
+  .lc-rl { display: flex; justify-content: space-between; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; color: var(--text-dim); margin: 8px 0 6px; }
+  .lc-rl b { font-weight: 400; color: var(--accent); }
+  .lc-round.done .lc-en { opacity: 0.5; }
+  .lc-rrow { display: grid; grid-template-columns: minmax(0,1fr) 72px 72px 32px; gap: 6px; align-items: center; margin-bottom: 6px; }
+  .lc-rrow .lc-in { padding: 9px 30px 9px 9px; font-size: 13px; }
+  .lc-rrow .lc-f small { right: 7px; font-size: 7px; }
+  .lc-en { background: none; border: 0; color: var(--text); font-family: 'Inter', sans-serif; font-size: 12.5px; text-align: left; padding: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+  .lc-foot { display: flex; justify-content: space-between; padding: 10px 0 8px; }
+  .lc-foot button { background: none; border: 0; font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--text-muted); padding: 4px 0; cursor: pointer; }
+  .lc-foot button:last-child { color: var(--accent); }
+  .lc-note { padding: 0 0 10px; display: flex; flex-direction: column; gap: 8px; }
+  .lc-note.hide { display: none; }
+  #page-log .save-btn.lc-ready { background: var(--accent); color: var(--black); }
 </style>
 </head>
-<body>
+<body data-page="home">
 
 <!-- ── BLOCK NOTE THREAD ── -->
 <div class="nt-overlay" id="notethread-overlay" style="display:none" onclick="if(event.target===this)closeNoteThread()">
@@ -1530,8 +1650,17 @@
           </div>
           <div class="phase-strip" id="phase-strip"></div>
         </div>
-        <div id="home-fixed-sections"></div>
-        <div id="home-day-cards"></div>
+        <!-- Home v2: where you are in the cycle, this week's days, one next action, then the fixed work. -->
+        <div class="hv-head" id="hv-head"></div>
+        <div class="hv-week" id="hv-week">
+          <div class="hv-sec-row"><span class="hv-sec">This week</span><span class="hv-dots" id="hv-dots"></span></div>
+          <div id="home-day-cards"></div>
+          <button class="hv-cta" id="hv-cta"></button>
+        </div>
+        <div class="hv-fixed-wrap" id="hv-fixed-wrap">
+          <div class="hv-sec">Every session</div>
+          <div id="home-fixed-sections"></div>
+        </div>
       </div>
       <div id="home-empty-state" style="display:none">
         <div class="home-empty-wrap">
@@ -2831,6 +2960,7 @@ function updateStats() {
   const blockLabel = document.getElementById('current-block-label'); // removed from Home — name is already the hero title
   if(blockLabel) blockLabel.textContent = currentBlock.name || 'Current Block';
   renderPhaseStrip();
+  try { renderHomeHeader(); } catch(e) {}
 
   // Count logged sessions from sessionLog
   const days = currentBlock.days || [];
@@ -2841,6 +2971,7 @@ function updateStats() {
       const hasData = d.exercises && d.exercises.some(ex => {
         const entry = sessionLog[`${d.id}_${ex.id}_v${w}`];
         if(!entry) return false;
+        if(entry.done === true) return true;
         for(let s = 1; s <= 10; s++) {
           const wv = entry[`s${s}_w`], rv = entry[`s${s}_r`];
           if(wv && wv !== '' && wv !== '0') return true;
@@ -3044,6 +3175,7 @@ function navigate(page, push=true) {
   if (push && navHistory[navHistory.length-1] !== page) navHistory.push(page);
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById('page-'+page).classList.add('active');
+  document.body.dataset.page = page; // Home hides the week pill — its own header carries the week
   document.getElementById('scroll-area').scrollTop = 0;
   const navIds = ['home','db','progress','builder','coaching','board'];
   document.querySelectorAll('.nav-btn').forEach((b,i) => b.classList.toggle('active', navIds[i]===page));
@@ -3086,11 +3218,11 @@ function switchBuildTab(tab) {
 }
 
 // ─── CHANGELOG ─────────────────────────────────────────────────
-const FORGE_VERSION = '2.3.7';
+const FORGE_VERSION = '2.6.0';
 const FORGE_CHANGELOG = [
-  'Strength Index is now five core movements — pull-up, chin-up, muscle-up, push-up and squat — and keeps its history across every phase instead of starting over',
-  'Phase reports — finish your last session of a phase and the film plays by itself. See how it went: sessions, sets, reps, volume, your biggest gain charted week by week, and every exercise first week to last. Share it as an image. Past blocks have one too, in the Archive',
-  'Moving to a new phase now starts its log clean — your previous phase\'s sessions stay in its archive instead of showing up as this phase\'s weeks'
+  'Rest timer alerts now arrive with your phone locked — allow notifications when asked',
+  'New session log — each exercise is a chip: tap to log, tick the circle to repeat last session in one tap',
+  'Finish an exercise and the next one opens by itself'
 ];
 
 function checkChangelog() {
@@ -3582,6 +3714,7 @@ function isDayLoggedForWeek(day, week) {
   return (day.exercises || []).some(e => {
     const entry = sessionLog[`${day.id}_${e.id}_v${week}`];
     if (!entry) return false;
+    if (entry.done === true) return true;
     return Object.keys(entry).some(k => (k.endsWith('_w') || k.endsWith('_r')) && String(entry[k] ?? '').trim() !== '');
   });
 }
@@ -3648,9 +3781,7 @@ function renderHomeDays() {
   const lastWeekEl = document.getElementById('home-lastweek');
   const total = currentBlock.weeks || 4;
   if (hasActiveBlock && currentWeek >= total) {
-    lastWeekEl.textContent = 'Final week of this block — tap to plan what\'s next →';
-    lastWeekEl.onclick = () => openBlockEndPrompt();
-    lastWeekEl.classList.add('visible');
+    lastWeekEl.classList.remove('visible'); // the Home CTA now handles the final week
   } else {
     lastWeekEl.classList.remove('visible');
   }
@@ -3662,25 +3793,108 @@ function renderHomeDays() {
     return;
   }
 
-  currentBlock.days.forEach(day => {
-    const rows = day.exercises.slice(0,5).map(e => {
-      const ex = EXERCISES.find(x => x.id===e.id);
-      return `<div class="ex-row"><span class="ex-name">${ex?.name||e.id}</span><span class="ex-scheme">${e.sets}×${e.reps}</span></div>`;
-    }).join('');
-    const more = day.exercises.length>5 ? `<div style="font-size:10px;color:var(--text-dim);padding:6px 0 0">+${day.exercises.length-5} more</div>` : '';
+  c.classList.add('hv-tiles');
+  const days = currentBlock.days;
+  c.style.setProperty('--hv-cols', Math.min(days.length, 3));
+  const nextDay = days.find(d => !isDayLoggedForWeek(d, currentWeek));
+  c.innerHTML = days.map(day => {
     const done = isDayLoggedForWeek(day, currentWeek);
-    c.innerHTML += `
-      <div class="day-card${done?' is-done':''}" id="dc-${day.id}">
-        <div class="day-card-header" onclick="toggleDayCard('${day.id}')">
-          <div class="day-card-left"><div class="day-tag">${day.name}</div><div class="day-type">${day.type||''}</div></div>
-          ${done ? `<div class="day-done-badge">✓ W${currentWeek} LOGGED</div>` : ''}
-          <div class="day-chevron">›</div>
-        </div>
-        <div class="day-card-exercises">${rows}${more}
-          <button class="start-btn${done?' is-review':''}" onclick="startDay('${day.id}')">${done ? 'REVIEW SESSION ✓' : 'START SESSION →'}</button>
-        </div>
-      </div>`;
-  });
+    const isNext = day === nextDay;
+    const [label, title] = hvSplitDayName(day.name);
+    const names = day.exercises.slice(0, 3).map(e => {
+      const ex = EXERCISES.find(x => x.id === e.id);
+      return '<div>' + (ex ? ex.name : e.id) + '</div>';
+    }).join('');
+    const more = day.exercises.length > 3 ? '<div>+' + (day.exercises.length - 3) + ' more</div>' : '';
+    return `<button class="hv-tile${done ? ' done' : ''}${isNext ? ' next' : ''}" onclick="startDay('${day.id}')">
+      <div class="d">${label}</div>${title ? `<div class="t">${title}</div>` : ''}
+      <div class="p">${names}${more}</div>
+      <div class="s">${done ? '✓ DONE' : isNext ? 'NEXT' : '—'}</div>
+    </button>`;
+  }).join('');
+  renderHomeHeader();
+}
+
+// ─── HOME v2 HEADER ─────────────────────────────────────────────
+// "DAY 1 - MU" → ["DAY 1", "MU"]. Coach-written titles sit under the day as a small line.
+function hvSplitDayName(name){
+  const parts = String(name || '').split(/\s+[-–—:]\s+/);
+  return [parts[0] || 'DAY', parts.slice(1).join(' · ')];
+}
+
+function renderHomeHeader(){
+  const head = document.getElementById('hv-head');
+  if(!head) return;
+  const days = currentBlock.days || [];
+  if(!days.length){ head.innerHTML = ''; document.getElementById('hv-week').style.display = 'none'; return; }
+  document.getElementById('hv-week').style.display = '';
+  const total = currentBlock.weeks || 4;
+  const ref = currentBlock.cycle;
+  const cyc = ref && ref.id ? getCycle(ref.id) : null;
+  const doneCount = days.filter(d => isDayLoggedForWeek(d, currentWeek)).length;
+  const weekFrac = (currentWeek - 1 + doneCount / days.length) / total;
+
+  let top, segs, nextPhase = '';
+  if(cyc && Array.isArray(cyc.slots) && cyc.slots.length > 1){
+    const curIdx = Math.min(Math.max(ref.order || 1, 1), cyc.slots.length) - 1;
+    const elapsed = cyc.slots.slice(0, curIdx).reduce((a, sl) => a + (sl.weeks || 0), 0);
+    const cycTotal = cyc.slots.reduce((a, sl) => a + (sl.weeks || 0), 0);
+    top = '<span class="hv-k">Your cycle</span><span class="hv-wk">WEEK <b>' + Math.min(elapsed + currentWeek, cycTotal) + '</b> / ' + cycTotal + '</span>';
+    segs = '<div class="hv-segs labelled">' + cyc.slots.map((sl, i) => {
+      const cls = i < curIdx ? 'done' : i === curIdx ? 'now' : '';
+      const fill = i === curIdx ? ' style="width:' + Math.round(weekFrac * 100) + '%"' : '';
+      const lab = PHASE_LABELS[sl.phase] || String(sl.phase || '').toUpperCase();
+      return '<div class="hv-seg ' + cls + '" style="flex:' + (sl.weeks || 4) + '"><i' + fill + '></i><span>' + lab + '</span></div>';
+    }).join('') + '</div>';
+    const nx = cyc.slots[curIdx + 1];
+    if(nx) nextPhase = PHASE_LABELS[nx.phase] || String(nx.phase || '');
+  } else {
+    top = '<span class="hv-k">This block</span><span class="hv-wk">WEEK <b>' + currentWeek + '</b> / ' + total + '</span>';
+    segs = '<div class="hv-segs">' + Array.from({ length: total }, (_, i) => {
+      const w = i + 1;
+      const cls = w < currentWeek ? 'done' : w === currentWeek ? 'now' : '';
+      const fill = w === currentWeek ? ' style="width:' + Math.round(doneCount / days.length * 100) + '%"' : '';
+      return '<div class="hv-seg ' + cls + '" style="flex:1"><i' + fill + '></i></div>';
+    }).join('') + '</div>';
+  }
+
+  let sub = 'Week ' + currentWeek + ' of ' + total;
+  if(doneCount === days.length) sub += ' · all done';
+  else if(doneCount) sub += ' · ' + doneCount + ' of ' + days.length + ' done';
+  if(currentWeek >= total && nextPhase) sub += ' · then ' + nextPhase.charAt(0) + nextPhase.slice(1).toLowerCase();
+
+  head.innerHTML = '<div class="hv-top">' + top + '</div>' + segs
+    + '<div class="hv-name">' + (currentBlock.name || 'Current block') + '</div>'
+    + '<div class="hv-subrow"><button class="hv-nav" onclick="weekBack()"' + (currentWeek <= 1 ? ' disabled' : '') + ' aria-label="Previous week">‹</button>'
+    + '<span class="hv-sub">' + sub + '</span>'
+    + '<button class="hv-nav" onclick="hvWeekForward()"' + (currentWeek >= total ? ' disabled' : '') + ' aria-label="Next week">›</button></div>';
+
+  // Week dots: one per day.
+  const dots = document.getElementById('hv-dots');
+  if(dots) dots.innerHTML = days.map(d => '<i class="' + (isDayLoggedForWeek(d, currentWeek) ? 'on' : '') + '"></i>').join('');
+
+  // The one action on the screen.
+  const cta = document.getElementById('hv-cta');
+  const next = days.find(d => !isDayLoggedForWeek(d, currentWeek));
+  cta.classList.remove('quiet');
+  if(next){
+    cta.textContent = 'Start ' + hvSplitDayName(next.name)[0].toLowerCase();
+    cta.onclick = () => startDay(next.id);
+  } else if(currentWeek < total){
+    cta.textContent = 'Start week ' + (currentWeek + 1);
+    cta.onclick = () => hvWeekForward();
+  } else {
+    cta.textContent = 'Block complete — what\'s next';
+    cta.onclick = () => openBlockEndPrompt();
+  }
+}
+
+// Forward only within the block — at the end, the block-end prompt takes over (cycleWeek does that).
+function hvWeekForward(){
+  const total = currentBlock.weeks || 4;
+  if(currentWeek >= total){ openBlockEndPrompt(); return; }
+  applyWeek(currentWeek + 1);
+  renderHomeDays();
 }
 
 function toggleDayCard(id) { document.getElementById('dc-'+id)?.classList.toggle('open'); }
@@ -3715,9 +3929,10 @@ async function executeArchive() {
   localStorage.setItem('fw_week_starts', JSON.stringify({}));
   // Sync the archive (with session log saved inside) BEFORE clearing the log
   await syncBlocksToCloud();
-  // Now clear the session log
-  sessionLog = {};
-  localStorage.setItem('fw_log', JSON.stringify({}));
+  // Now clear the session log — the next block is a new instance with its own stamp
+  currentBlock.instanceId = newBlockInstance();
+  sessionLog = { __block: currentBlock.instanceId };
+  localStorage.setItem('fw_log', JSON.stringify(sessionLog));
   // Force sync the empty log (legitimate clear after archive)
   await syncLogsToCloud(true);
   saveCurrentBlock();
@@ -3816,7 +4031,8 @@ async function restoreArchivedBlock(bi) {
   delete blockFields.sessionLog;
   delete blockFields.archivedAt;
   currentBlock = blockFields;
-  sessionLog = {...restoredLog};
+  if(!currentBlock.instanceId) currentBlock.instanceId = newBlockInstance();
+  sessionLog = {...restoredLog, __block: currentBlock.instanceId};
   currentWeek = 1;
   weekStarts = {};
   // persist
@@ -3866,12 +4082,13 @@ function startDay(dayId, overrideDay) {
   const notesEl = document.getElementById('session-notes');
   if(notesEl) notesEl.value = sessionLog[notesKey] || '';
   
+  lcOpenKey = null;
   renderLogExercises(day.exercises);
   navigate('log');
   maybeStartTour('log');
 }
 
-function renderLogExercises(exercises) {
+function renderLogExercisesLegacy(exercises) {
   const c = document.getElementById('log-exercises-container');
   c.innerHTML = '';
 
@@ -4345,6 +4562,7 @@ function isDayLogged(dayId, week) {
   return day.exercises.some(ex => {
     const entry = sessionLog[`${dayId}_${ex.id}_v${week}`];
     if (!entry) return false;
+    if (entry.done === true) return true;
     for (let s = 1; s <= 10; s++) {
       const wv = entry[`s${s}_w`], rv = entry[`s${s}_r`];
       if (wv && wv !== '' && wv !== '0') return true;
@@ -6005,12 +6223,14 @@ function removeFixedEx(section, i) {
 // Warm-up and skill work start EXPANDED — they're the part of the session that actually
 // gets skipped when hidden. State is held here so a re-render doesn't reopen something
 // the user deliberately folded away.
-const fixedSectionOpen = { warmup: true, skill: true };
+const fixedSectionOpen = { warmup: false, skill: false };
 function renderHomeFixedSections() {
   const c = document.getElementById('home-fixed-sections');
   if(!c) return;
   const warmup = currentBlock.warmup || [];
   const skill  = currentBlock.skill  || [];
+  const fxWrap = document.getElementById('hv-fixed-wrap');
+  if(fxWrap) fxWrap.classList.toggle('none', !warmup.length && !skill.length);
   if(!warmup.length && !skill.length) { c.innerHTML=''; return; }
   let html = '';
 
@@ -6027,9 +6247,9 @@ function renderHomeFixedSections() {
   if(warmup.length) {
     html += `<div class="fixed-section${fixedSectionOpen.warmup?' open':''}" id="fixed-warmup">
       <div class="fixed-section-header" onclick="toggleFixedSection('warmup')">
-        <div><div class="fixed-section-label">Fixed · Every Session</div><div class="fixed-section-title">WARM-UP</div></div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span class="fixed-section-badge">FIXED</span>
+        <div class="hv-fx-title">Warm-up</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="hv-fx-meta">${warmup.length} exercise${warmup.length===1?'':'s'}</span>
           <div class="day-chevron">›</div>
         </div>
       </div>
@@ -6039,9 +6259,9 @@ function renderHomeFixedSections() {
   if(skill.length) {
     html += `<div class="fixed-section${fixedSectionOpen.skill?' open':''}" id="fixed-skill">
       <div class="fixed-section-header" onclick="toggleFixedSection('skill')">
-        <div><div class="fixed-section-label">Fixed · Every Session</div><div class="fixed-section-title">SKILL WORK</div></div>
-        <div style="display:flex;align-items:center;gap:8px">
-          <span class="fixed-section-badge">FIXED</span>
+        <div class="hv-fx-title">Skill work</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="hv-fx-meta">${skill.length} exercise${skill.length===1?'':'s'}</span>
           <div class="day-chevron">›</div>
         </div>
       </div>
@@ -6487,6 +6707,19 @@ function saveBlockOnly() {
   showToast(isCurrent ? 'Current block updated ✓' : 'Block saved ✓');
 }
 
+// ─── BLOCK-SCOPED LOG ──────────────────────────────────────────
+// The live log is keyed day+exercise+week, and day ids repeat between blocks. Clearing it on
+// activation wasn't enough: every load and sync MERGED local with cloud, so any device still
+// holding a previous block's log (an iPad or Mac not opened since) merged it straight back.
+// Now each block instance gets an id and the log carries it in `__block`. A log stamped for a
+// different block is never merged in. Ids embed their creation time, so between two blocks the
+// newer one wins.
+function newBlockInstance(){ return 'bi_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7); }
+function biTime(id){ const m = /^bi_(\d+)/.exec(id || ''); return m ? +m[1] : 0; }
+function stampLog(){
+  if(currentBlock && currentBlock.instanceId) sessionLog.__block = currentBlock.instanceId;
+}
+
 // ─── BLOCK ACTIVATION — SINGLE SOURCE OF TRUTH ─────────────────
 // EVERY path that makes a block "current" MUST call this. The live session log is keyed
 // day+exercise+week (NOT block-scoped) and day ids repeat across blocks (day_1, day_2…), so a
@@ -6518,14 +6751,15 @@ async function activateBlock(newBlock){
     cycle: newBlock.cycle || null, // phase-tracking group — MUST be listed here or it's dropped on activation
     macros: newBlock.macros || null, // coach-set macro targets — same whitelist rule applies
     coachEmail: newBlock.coachEmail || null, // note-thread participants — same rule again
-    clientEmail: newBlock.clientEmail || null
+    clientEmail: newBlock.clientEmail || null,
+    instanceId: newBlockInstance() // a fresh instance every activation, even of the same saved block
   };
   currentWeek = 1;
-  sessionLog = {};
+  sessionLog = { __block: currentBlock.instanceId };
   weekStarts = {};
   localStorage.setItem('fw_block', JSON.stringify(currentBlock));
   localStorage.setItem('fw_week', '1');
-  localStorage.setItem('fw_log', JSON.stringify({}));
+  localStorage.setItem('fw_log', JSON.stringify(sessionLog));
   localStorage.setItem('fw_week_starts', JSON.stringify({}));
   await syncLogsToCloud(true); // force the empty log up — stops loadFromCloud re-hydrating stale data
   saveCurrentBlock();
@@ -6757,14 +6991,82 @@ let timerFired = false; // guards fireTimerAlert against multi-firing on iOS res
 
 // Tell the SW to schedule/cancel its own notification timeout
 function swTimerStart(durationSecs) {
+  // With server push on, the server owns the lock-screen alert (iOS freezes the service
+  // worker's own countdown). The local SW timer stays as the fallback when push isn't set up.
+  if (pushReady) { pushTimerStart(durationSecs); return; }
+  swTimerStartLocal(durationSecs);
+}
+function swTimerStartLocal(durationSecs) {
   if (navigator.serviceWorker && navigator.serviceWorker.controller) {
     navigator.serviceWorker.controller.postMessage({ type: 'TIMER_START', duration: durationSecs });
   }
 }
 function swTimerCancel() {
+  if (pushReady) pushTimerCancel();
   if (navigator.serviceWorker && navigator.serviceWorker.controller) {
     navigator.serviceWorker.controller.postMessage({ type: 'TIMER_CANCEL' });
   }
+}
+
+// ─── WEB PUSH · REST TIMER ─────────────────────────────────────
+// The rest alert comes from the server: the app tells Supabase when the rest ends, a database
+// job checks every 5s and the send-rest-push Edge Function delivers it through Apple/Google
+// push. Works with the screen locked on iPhone (FORGE installed to the home screen, iOS 16.4+).
+const VAPID_PUBLIC_KEY = 'BP_KxzwxdpaVg1ajvhu8N7KYgpjORZnv6XjsbauKtxcNmwPRA_tKhuNgzzq-r6w-zpchwkiPTVy57Masy7Ga9mM';
+var pushReady = false;      // var: read by swTimerStart, which can run before this line on boot
+var pushGuardTimeout = null;
+
+function pushKeyBytes(b64u){
+  const pad = '='.repeat((4 - b64u.length % 4) % 4);
+  const raw = atob((b64u + pad).replace(/-/g, '+').replace(/_/g, '/'));
+  return Uint8Array.from(raw, ch => ch.charCodeAt(0));
+}
+
+// Subscribe this device and register it to whoever is signed in. Safe to call repeatedly.
+async function pushSubscribe(){
+  try {
+    if (!currentUser?.id || !('serviceWorker' in navigator) || !('PushManager' in window)) return false;
+    if (!('Notification' in window) || Notification.permission !== 'granted') return false;
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: pushKeyBytes(VAPID_PUBLIC_KEY) });
+    const j = sub.toJSON();
+    const { error } = await supa.rpc('save_push_subscription', { p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth });
+    pushReady = !error;
+    if (error) console.warn('[push] could not save subscription:', error.message);
+    else console.log('[push] ready');
+    return pushReady;
+  } catch (e) { console.warn('[push] subscribe failed:', e); pushReady = false; return false; }
+}
+
+// Before signing out, detach this phone from the account so it stops getting their alerts.
+async function pushDetach(){
+  try {
+    if (!('serviceWorker' in navigator)) return;
+    const reg = await navigator.serviceWorker.getRegistration();
+    const sub = reg && await reg.pushManager.getSubscription();
+    if (sub) await supa.rpc('remove_push_subscription', { p_endpoint: sub.endpoint });
+    await supa.rpc('cancel_rest_timer');
+  } catch (e) {}
+}
+
+function pushTimerStart(secs){
+  const label = (document.getElementById('timer-ex-label')?.textContent || '').trim();
+  const target = (document.getElementById('timer-next-target')?.textContent || '').trim();
+  const body = label && label !== '—' ? 'Up next · ' + label + (target ? ' · ' + target : '') : 'Time for your next set';
+  supa.rpc('start_rest_timer', { p_seconds: Math.round(secs), p_title: 'Rest over', p_body: body }).then(({ error }) => {
+    if (error) { console.warn('[push] timer not sent, using local fallback:', error.message); swTimerStartLocal(secs); }
+  });
+  // If FORGE is still open on screen near the end, the in-app alert covers it — call off the
+  // push so you don't get both. Locked or in the background, this never runs and the push fires.
+  clearTimeout(pushGuardTimeout);
+  pushGuardTimeout = setTimeout(() => {
+    if (document.visibilityState === 'visible' && timerEndTime > 0 && !timerPaused) supa.rpc('cancel_rest_timer');
+  }, Math.max(0, secs - 4) * 1000);
+}
+function pushTimerCancel(){
+  clearTimeout(pushGuardTimeout);
+  supa.rpc('cancel_rest_timer').then(() => {}, () => {});
 }
 const TIMER_CIRCUMFERENCE = 590.6;
 
@@ -6938,7 +7240,7 @@ function startTimer(exName, wk, justCompletedSet) {
 
   // Request notification permission on first timer use
   if ('Notification' in window && Notification.permission === 'default') {
-    Notification.requestPermission();
+    Notification.requestPermission().then(p => { if (p === 'granted') pushSubscribe(); });
   }
 
   // Tell SW to independently schedule the notification
@@ -8293,7 +8595,13 @@ async function syncBlocksToCloud() {
   }
   try {
     const { data: existing } = await supa.from('blocks')
-      .select('id').eq('user_id', currentUser.id).eq('is_current', true).maybeSingle();
+      .select('id, iid:data->currentBlock->>instanceId').eq('user_id', currentUser.id).eq('is_current', true).maybeSingle();
+    // A device that hasn't loaded yet must not push an older block instance over a newer one
+    // (that would re-open the door for its stale log). Newer instance wins, same rule as the log.
+    if(existing?.iid && biTime(existing.iid) > biTime(currentBlock.instanceId)){
+      console.log('Block sync skipped: a newer block instance is live — reload to pick it up');
+      return;
+    }
     
     if(existing?.id) {
       await supa.from('blocks').update({
@@ -8321,6 +8629,7 @@ async function syncLogsToCloud(force = false) {
     return;
   }
   try {
+    stampLog();
     if(force) {
       // Deliberate replace (after archiving/activating a block, or restoring one) — write as-is.
       await supa.from('logs').upsert({
@@ -8337,7 +8646,17 @@ async function syncLogsToCloud(force = false) {
     const { data: cloudRow } = await supa.from('logs')
       .select('data').eq('user_id', currentUser.id).maybeSingle();
     const cloudLog = (cloudRow && cloudRow.data) ? cloudRow.data : {};
+    const cur = currentBlock.instanceId || null, theirs = cloudLog.__block || null;
+    // Block-scoped rules: never merge a log that belongs to a different block.
+    if(!cur && theirs){ console.log('Sync skipped: cloud log belongs to a stamped block, this device has not loaded it yet'); return; }
+    if(cur && theirs && theirs !== cur){
+      if(biTime(theirs) > biTime(cur)){ console.log('Sync skipped: a newer block is live on another device'); return; }
+      // This device holds the newer block — replace the cloud log, don't merge the old one in.
+      await supa.from('logs').upsert({ user_id: currentUser.id, data: sessionLog, updated_at: new Date().toISOString() }, { onConflict: 'user_id' });
+      return;
+    }
     const merged = { ...cloudLog, ...sessionLog };
+    if(cur) merged.__block = cur;
     sessionLog = merged;
     localStorage.setItem('fw_log', JSON.stringify(merged));
     await supa.from('logs').upsert({
@@ -8391,8 +8710,15 @@ async function loadFromCloud() {
       const localKeys = Object.keys(localLog).length;
       const cloudKeys = Object.keys(cloudLog).length;
       
-      if(cloudKeys > 0 && localKeys > 0) {
-        // Merge: start with cloud, overlay local (local is more recent if user was logging)
+      const cur = currentBlock.instanceId || null;
+      if(cur){
+        // Block-scoped: only logs stamped for the live block count. An unstamped log next to a
+        // stamped one came from an older build and may be a previous block — it's dropped.
+        const cloudOk = cloudLog.__block === cur || (!cloudLog.__block && localLog.__block !== cur);
+        const localOk = localLog.__block === cur || (!localLog.__block && cloudLog.__block !== cur);
+        sessionLog = { ...(cloudOk ? cloudLog : {}), ...(localOk ? localLog : {}), __block: cur };
+      } else if(cloudKeys > 0 && localKeys > 0) {
+        // Legacy block (no instance id yet): old merge behaviour — it gets stamped right after load
         sessionLog = { ...cloudLog, ...localLog };
       } else if(cloudKeys > 0) {
         // Cloud has data, local is empty — use cloud
@@ -8400,6 +8726,18 @@ async function loadFromCloud() {
       }
       // If cloud is empty but local has data — keep local (don't overwrite)
       localStorage.setItem('fw_log', JSON.stringify(sessionLog));
+    }
+    // First load on this build: give a legacy live block its instance id and stamp the log, so
+    // every device from here on scopes to it. The first device to do this decides what counts,
+    // which is why the docs say: open the new build on the clean device first.
+    if((currentBlock.days || []).length && !currentBlock.instanceId){
+      currentBlock.instanceId = newBlockInstance();
+      localStorage.setItem('fw_block', JSON.stringify(currentBlock));
+      stampLog();
+      localStorage.setItem('fw_log', JSON.stringify(sessionLog));
+      try { await syncBlocksToCloud(); await syncLogsToCloud(true); } catch(e) {}
+    } else if(currentBlock.instanceId && sessionLog.__block !== currentBlock.instanceId){
+      stampLog(); localStorage.setItem('fw_log', JSON.stringify(sessionLog));
     }
   } catch(e) { console.warn('Load from cloud failed:', e); }
 }
@@ -8570,6 +8908,7 @@ async function afterAuth(supaUser, isNew) {
   }
   await loadFromCloud();
   startApp(false);
+  pushSubscribe();
 }
 
 function startApp(isGuest) {
@@ -8637,6 +8976,7 @@ function wipeLocalUserData(){
 }
 
 async function handleSignOut() {
+  await pushDetach();
   await supa.auth.signOut();
   await idbClear();
   wipeLocalUserData();
@@ -9922,6 +10262,309 @@ async function sharePhaseReport(){
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(() => URL.revokeObjectURL(a.href), 4000);
   showToast('Report saved ✓');
+}
+
+// ─── LOG v2 · EXERCISE CHIPS ───────────────────────────────────
+// The session reads like a checklist: one rounded chip per exercise (a superset is one chip
+// for the whole circuit). Tap a chip to log it; only one is open at a time. Ticking the last
+// set closes it and opens the next. The circle on a closed chip copies last session's sets in
+// one tap. Data is written to the SAME sessionLog keys as before (`${day}_${ex}_v${week}` with
+// sN_w / sN_r), so history, reports and the strength index are untouched. New optional fields
+// on an entry: `_n` (set count when sets were added), `done` (ticked with no history to copy),
+// `_qt` (sets filled by a quick tick, so the tick can be undone cleanly).
+var lcOpenKey = null; // var, not let: startDay can run during boot before this line executes
+
+function lcSetsOf(ex){ return typeof ex.sets === 'number' ? ex.sets : (parseInt(ex.sets) || 3); }
+function lcTarget(ex){ return typeof ex.sets === 'number' ? ex.sets + ' × ' + (ex.reps || '') : String(ex.sets || ''); }
+function lcWk(exId){ return `${currentDayId}_${exId}_v${currentWeek}`; }
+function lcEntry(exId){ return sessionLog[lcWk(exId)] || {}; }
+function lcName(exId){ const d = EXERCISES.find(e => e.id === exId); return d ? d.name : exId; }
+function lcHas(v){ return v !== undefined && v !== null && String(v).trim() !== ''; }
+function lcCount(ex){ const e = lcEntry(ex.id); return Math.max(lcSetsOf(ex), parseInt(e._n) || 0); }
+function lcDoneSets(ex){ const e = lcEntry(ex.id); let n = 0; for(let s = 1; s <= lcCount(ex); s++) if(lcHas(e['s'+s+'_r'])) n++; return n; }
+function lcExDone(ex){ const e = lcEntry(ex.id); return e.done === true || lcDoneSets(ex) >= lcCount(ex); }
+function lcW(w){ const n = parseFloat(w); return (!lcHas(w) || n === 0) ? 'BW' : (Math.round(n * 10) / 10) + 'kg'; }
+
+// Chips in day order: plain exercises, and supersets collapsed into one item.
+function lcItems(){
+  const exs = _currentDayExercises().length ? _currentDayExercises() : (lcFixedDay ? lcFixedDay.exercises : []);
+  const out = [];
+  for(let i = 0; i < exs.length; i++){
+    const g = exs[i].supersetGroup;
+    if(g){
+      const members = [];
+      while(i < exs.length && exs[i].supersetGroup === g){ members.push(exs[i]); i++; }
+      i--;
+      out.push({ key: 'g:' + g, group: g, members });
+    } else out.push({ key: 'x:' + exs[i].id, ex: exs[i], members: [exs[i]] });
+  }
+  return out;
+}
+var lcFixedDay = null;
+function lcRounds(item){ return Math.max(...item.members.map(lcCount)); }
+function lcItemDone(item){ return item.members.every(lcExDone); }
+function lcItemProgress(item){
+  if(!item.group) return { done: lcDoneSets(item.ex), total: lcCount(item.ex) };
+  let done = 0; const total = lcRounds(item);
+  for(let r = 1; r <= total; r++) if(item.members.every(m => r > lcCount(m) || lcHas(lcEntry(m.id)['s' + r + '_r']))) done++;
+  return { done, total };
+}
+
+// Most recent earlier performance of an exercise: earlier weeks of this block (any day), then
+// archived blocks newest first. Returns the entry object or null.
+function lcLastEntry(exId){
+  const has = e => e && typeof e === 'object' && Object.keys(e).some(k => /^s\d+_r$/.test(k) && lcHas(e[k]));
+  const scan = (log, maxWeek) => {
+    let best = null, bestW = -1;
+    Object.keys(log || {}).forEach(k => {
+      const i = k.lastIndexOf('_' + exId + '_v'); if(i < 1) return;
+      const w = parseInt(k.slice(i + exId.length + 3)); if(!w || (maxWeek && w >= maxWeek)) return;
+      if(w > bestW && has(log[k])){ best = log[k]; bestW = w; }
+    });
+    return best;
+  };
+  const cur = scan(sessionLog, currentWeek); if(cur) return cur;
+  for(const b of (archivedBlocks || [])){ const e = scan(b.sessionLog, 0); if(e) return e; }
+  return null;
+}
+function lcLastSets(exId){
+  const e = lcLastEntry(exId); if(!e) return [];
+  const out = [];
+  for(let s = 1; s <= 12; s++) if(lcHas(e['s' + s + '_r'])) out.push({ w: e['s' + s + '_w'] || '', r: e['s' + s + '_r'] });
+  return out;
+}
+function lcSummary(sets){
+  if(!sets.length) return '';
+  const ws = sets.map(x => lcW(x.w));
+  return ws.every(w => w === ws[0]) ? ws[0] + ' × ' + sets.map(x => x.r).join(', ') : sets.map(x => lcW(x.w).replace('kg', '') + '×' + x.r).join(', ');
+}
+function lcLoggedSets(ex){
+  const e = lcEntry(ex.id), out = [];
+  for(let s = 1; s <= lcCount(ex); s++) if(lcHas(e['s' + s + '_r'])) out.push({ w: e['s' + s + '_w'] || '', r: e['s' + s + '_r'] });
+  return out;
+}
+
+function renderLogExercises(exercises){
+  const c = document.getElementById('log-exercises-container');
+  if(!c) return;
+  if(currentDayId && currentDayId.startsWith('fixed_')) lcFixedDay = { exercises };
+  else lcFixedDay = null;
+  const items = lcItems();
+  if(lcOpenKey && !items.some(it => it.key === lcOpenKey)) lcOpenKey = null;
+  const doneN = items.filter(lcItemDone).length;
+  let html = '<div class="lc-prog"><span>' + doneN + ' of ' + items.length + ' logged</span></div>'
+    + '<div class="lc-bar">' + items.map(it => '<i class="' + (lcItemDone(it) ? 'on' : '') + '"></i>').join('') + '</div>'
+    + '<div class="lc-list">';
+  items.forEach((it, idx) => { html += lcChipHTML(it, idx); });
+  html += '</div>';
+  c.innerHTML = html;
+  try { fvScan(c); } catch(e) {}
+}
+
+function lcChipHTML(it, idx){
+  const done = lcItemDone(it), prog = lcItemProgress(it), open = it.key === lcOpenKey;
+  const part = !done && prog.done > 0;
+  const st = done ? '✓' : part ? prog.done + '/' + prog.total : '';
+  let name, sub;
+  if(it.group){
+    name = (it.members.length === 3 ? 'Tri-set' : 'Superset') + '<span class="lc-tag">' + lcRounds(it) + ' ROUNDS</span>';
+    sub = done || part
+      ? it.members.map(m => lcName(m.id).split(/[\s—-]/)[0].toUpperCase() + ' ' + lcSummary(lcLoggedSets(m))).join(' · ')
+      : '<span class="lc-names">' + it.members.map(m => lcName(m.id)).join(' + ') + '</span>';
+  } else {
+    name = lcName(it.ex.id);
+    const e = lcEntry(it.ex.id);
+    sub = (done || part) ? (lcLoggedSets(it.ex).length ? lcLoggedSets(it.ex).length + ' SETS · ' + lcSummary(lcLoggedSets(it.ex)) : (e.done ? 'DONE' : '')) : lcTarget(it.ex);
+  }
+  let h = '<div class="lc-chip' + (done ? ' done' : part ? ' part' : '') + (open ? ' open' : '') + '" id="lc-' + idx + '" data-key="' + it.key + '">'
+    + '<div class="lc-top"><button class="lc-hit" onclick="lcToggle(\'' + it.key + '\')"><div class="lc-name">' + name + '</div><div class="lc-sub">' + sub + '</div></button>'
+    + '<button class="lc-st" onclick="lcQuickTick(\'' + it.key + '\')" aria-label="' + (done ? 'Logged' : 'Tick off with last session') + '">' + st + '</button></div>';
+  if(open) h += it.group ? lcGroupBody(it) : lcExBody(it.ex);
+  return h + '</div>';
+}
+
+function lcField(wk, s, kind, val, ph, now){
+  const id = wk + '_s' + s + '_' + kind;
+  return '<label class="lc-f' + (now ? ' now' : '') + '"><input class="set-field lc-in" type="text" inputmode="none" readonly id="' + id + '" value="' + (val || '') + '" placeholder="' + ph + '"'
+    + ' autocomplete="one-time-code" data-lpignore="true" data-form-type="other" data-numpad="' + (kind === 'w' ? 'decimal' : 'integer') + '"'
+    + ' oninput="autoSaveSet(\'' + wk + '\',' + s + ')"' + (kind === 'r' ? ' onblur="lcOnRepsBlur(\'' + wk + '\',' + s + ')"' : '') + '>'
+    + '<small>' + (kind === 'w' ? 'KG' : 'REPS') + '</small></label>';
+}
+
+function lcExBody(ex){
+  const wk = lcWk(ex.id), e = lcEntry(ex.id), last = lcLastSets(ex.id), n = lcCount(ex);
+  let firstOpen = 0;
+  for(let s = 1; s <= n; s++) if(!lcHas(e['s' + s + '_r'])){ firstOpen = s; break; }
+  let h = '<div class="lc-meta">' + lcTarget(ex) + ' · <button class="lc-link" onclick="openSheet(\'' + ex.id + '\')">▶ demo</button></div>';
+  if(last.length) h += '<div class="lc-last">LAST TIME · <b>' + lcSummary(last) + '</b></div>';
+  if(ex.note) h += '<div class="lc-coach">' + ex.note + '</div>';
+  for(let s = 1; s <= n; s++){
+    const L = last[s - 1] || last[last.length - 1] || null;
+    const isDone = lcHas(e['s' + s + '_r']);
+    const wph = isDone ? 'BW' : (L ? (parseFloat(L.w) > 0 ? L.w : 'BW') : '—');
+    const rph = L ? L.r : '—';
+    h += '<div class="lc-set' + (isDone ? ' done' : '') + '"><span class="lc-lab">SET ' + s + '</span>'
+      + lcField(wk, s, 'w', e['s' + s + '_w'], wph, s === firstOpen) + lcField(wk, s, 'r', e['s' + s + '_r'], rph, false)
+      + '<button class="lc-ok' + (isDone ? ' on' : '') + '" onclick="lcTick(\'' + ex.id + '\',' + s + ')">✓</button></div>';
+  }
+  const note = (sessionLog[`${currentDayId}_${ex.id}_note`] ?? e.note ?? '').replace(/"/g, '&quot;');
+  h += '<div class="lc-foot"><button onclick="lcAddSet(\'' + ex.id + '\')">+ Add set</button><button onclick="lcNoteToggle(this)">Note' + (note ? ' ·' : '') + '</button></div>'
+    + '<div class="lc-note' + (note ? '' : ' hide') + '"><input class="set-note-input" type="text" placeholder="Technique, feel, load…" value="' + note + '" id="' + wk + '_note" autocomplete="off" onblur="autoSaveNote(\'' + wk + '\')"></div>';
+  return '<div class="lc-body">' + h + '</div>';
+}
+
+function lcGroupBody(it){
+  const rounds = lcRounds(it);
+  const last = it.members.map(m => lcLastSets(m.id));
+  let now = null;
+  for(let r = 1; r <= rounds && !now; r++) for(const m of it.members){ if(r <= lcCount(m) && !lcHas(lcEntry(m.id)['s' + r + '_r'])){ now = { r, id: m.id }; break; } }
+  let h = '<div class="lc-meta">Back to back · rest after each round</div>';
+  const lastTxt = it.members.map((m, i) => last[i].length ? lcW(last[i][0].w) + ' × ' + last[i][0].r : null).filter(Boolean);
+  if(lastTxt.length) h += '<div class="lc-last">LAST TIME · <b>' + lastTxt.join(' · ') + '</b></div>';
+  for(let r = 1; r <= rounds; r++){
+    const rDone = it.members.every(m => r > lcCount(m) || lcHas(lcEntry(m.id)['s' + r + '_r']));
+    h += '<div class="lc-round' + (rDone ? ' done' : '') + '"><div class="lc-rl"><span>ROUND ' + r + '</span><b>' + (rDone ? '✓' : (now && now.r === r ? 'NOW' : '')) + '</b></div>';
+    it.members.forEach((m, i) => {
+      if(r > lcCount(m)) return;
+      const wk = lcWk(m.id), e = lcEntry(m.id), L = last[i][r - 1] || last[i][last[i].length - 1] || null;
+      const isDone = lcHas(e['s' + r + '_r']);
+      h += '<div class="lc-rrow' + (isDone ? ' done' : '') + '"><button class="lc-en" onclick="openSheet(\'' + m.id + '\')">' + lcName(m.id) + '</button>'
+        + lcField(wk, r, 'w', e['s' + r + '_w'], isDone ? 'BW' : (L ? (parseFloat(L.w) > 0 ? L.w : 'BW') : '—'), now && now.r === r && now.id === m.id)
+        + lcField(wk, r, 'r', e['s' + r + '_r'], L ? L.r : '—', false)
+        + '<button class="lc-ok' + (isDone ? ' on' : '') + '" onclick="lcTick(\'' + m.id + '\',' + r + ')">✓</button></div>';
+    });
+    h += '</div>';
+  }
+  h += '<div class="lc-foot"><button onclick="lcAddRound(\'' + it.group + '\')">+ Add round</button><button onclick="lcNoteToggle(this)">Note</button></div><div class="lc-note hide">';
+  it.members.forEach(m => {
+    const wk = lcWk(m.id), note = (sessionLog[`${currentDayId}_${m.id}_note`] ?? lcEntry(m.id).note ?? '').replace(/"/g, '&quot;');
+    h += '<input class="set-note-input" type="text" placeholder="' + lcName(m.id) + ' — note" value="' + note + '" id="' + wk + '_note" autocomplete="off" onblur="autoSaveNote(\'' + wk + '\')">';
+  });
+  return '<div class="lc-body">' + h + '</div></div>';
+}
+
+function lcRefresh(){ renderLogExercises(lcFixedDay ? lcFixedDay.exercises : _currentDayExercises()); }
+function lcItemFor(exId){ return lcItems().find(it => it.members.some(m => m.id === exId)); }
+function lcScrollTo(key){
+  requestAnimationFrame(() => {
+    const el = document.querySelector('.lc-chip[data-key="' + key + '"]');
+    if(el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+}
+
+function lcToggle(key){
+  lcOpenKey = lcOpenKey === key ? null : key;
+  lcRefresh();
+  if(lcOpenKey) lcScrollTo(key);
+}
+
+function lcSave(){ localStorage.setItem('fw_log', JSON.stringify(sessionLog)); scheduleSync(); }
+
+// Tick a set: fill it from last time if it's empty, otherwise un-tick it. With no history
+// and nothing typed, open the reps pad instead of inventing a number.
+function lcTick(exId, s){
+  const wk = lcWk(exId);
+  const e = sessionLog[wk] || (sessionLog[wk] = {});
+  if(lcHas(e['s' + s + '_r'])){ e['s' + s + '_r'] = ''; lcSave(); lcRefresh(); return; }
+  const last = lcLastSets(exId), L = last[s - 1] || last[last.length - 1] || null;
+  if(!L){
+    const r = document.getElementById(wk + '_s' + s + '_r');
+    if(r) r.click();
+    return;
+  }
+  if(!lcHas(e['s' + s + '_w']) && parseFloat(L.w) > 0) e['s' + s + '_w'] = L.w;
+  e['s' + s + '_r'] = L.r;
+  e._d = todayISO();
+  lcSave();
+  lcSetCompleted(exId, s);
+}
+
+// Reps entered on the numpad (DONE or tap away) count as a finished set.
+function lcOnRepsBlur(wk, s){
+  if(document.body.classList.contains('numpad-open')) return;
+  const r = document.getElementById(wk + '_s' + s + '_r');
+  if(!r || !lcHas(r.value)) return;
+  const ex = (lcFixedDay ? lcFixedDay.exercises : _currentDayExercises()).find(e => wk === lcWk(e.id));
+  if(!ex) return;
+  (sessionLog[wk] || (sessionLog[wk] = {}))._d = todayISO();
+  lcSave();
+  lcSetCompleted(ex.id, s);
+}
+
+function lcSetCompleted(exId, s){
+  const it = lcItemFor(exId);
+  if(!it){ lcRefresh(); return; }
+  // Rest timer: after each set, or after each whole round in a superset.
+  const roundDone = !it.group || it.members.every(m => s > lcCount(m) || lcHas(lcEntry(m.id)['s' + s + '_r']));
+  if(typeof timerEnabled !== 'undefined' && timerEnabled && roundDone && !lcItemDone(it)) {
+    try { startTimer(lcName(exId), lcWk(exId), s); } catch(e) {}
+  }
+  if(lcItemDone(it)) return lcAdvance(it.key);
+  lcRefresh();
+}
+
+// The item is finished: close it with a glow and open the next unfinished one.
+function lcAdvance(fromKey){
+  const items = lcItems();
+  const i = items.findIndex(x => x.key === fromKey);
+  const next = items.slice(i + 1).find(x => !lcItemDone(x)) || items.slice(0, i).find(x => !lcItemDone(x));
+  lcOpenKey = next ? next.key : null;
+  lcRefresh();
+  const done = document.querySelector('.lc-chip[data-key="' + fromKey + '"]');
+  if(done){ done.classList.add('flash'); setTimeout(() => done.classList.remove('flash'), 1300); }
+  if(next) setTimeout(() => lcScrollTo(next.key), 250);
+  else { const b = document.querySelector('#page-log .save-btn'); if(b){ b.classList.add('lc-ready'); } }
+}
+
+// The circle on a closed chip: copy last session's sets into every empty set in one tap.
+// No history → mark it done without numbers. Tapping again undoes only what the tick filled.
+function lcQuickTick(key){
+  const it = lcItems().find(x => x.key === key); if(!it) return;
+  const filledByTick = it.members.some(m => Array.isArray(lcEntry(m.id)._qt) || lcEntry(m.id).done === true);
+  if(lcItemDone(it)){
+    if(!filledByTick){ lcToggle(key); return; } // real numbers — open it rather than wipe them
+    it.members.forEach(m => {
+      const e = sessionLog[lcWk(m.id)]; if(!e) return;
+      (e._qt || []).forEach(s => { e['s' + s + '_r'] = ''; e['s' + s + '_w'] = ''; });
+      delete e._qt; delete e.done;
+    });
+    lcSave(); lcRefresh(); return;
+  }
+  it.members.forEach(m => {
+    const wk = lcWk(m.id), e = sessionLog[wk] || (sessionLog[wk] = {}), last = lcLastSets(m.id);
+    if(!last.length){ e.done = true; e._d = todayISO(); return; }
+    const filled = [];
+    for(let s = 1; s <= lcCount(m); s++){
+      if(lcHas(e['s' + s + '_r'])) continue;
+      const L = last[s - 1] || last[last.length - 1];
+      e['s' + s + '_r'] = L.r;
+      if(!lcHas(e['s' + s + '_w'])) e['s' + s + '_w'] = L.w || '';
+      filled.push(s);
+    }
+    if(filled.length) e._qt = filled;
+    e._d = todayISO();
+  });
+  if(lcOpenKey === key) lcOpenKey = null;
+  lcSave(); lcRefresh();
+  const el = document.querySelector('.lc-chip[data-key="' + key + '"]');
+  if(el){ el.classList.add('flash'); setTimeout(() => el.classList.remove('flash'), 1300); }
+}
+
+function lcAddSet(exId){
+  const ex = (lcFixedDay ? lcFixedDay.exercises : _currentDayExercises()).find(e => e.id === exId); if(!ex) return;
+  const e = sessionLog[lcWk(exId)] || (sessionLog[lcWk(exId)] = {});
+  e._n = lcCount(ex) + 1;
+  lcSave(); lcRefresh();
+}
+function lcAddRound(group){
+  const it = lcItems().find(x => x.group === group); if(!it) return;
+  const n = lcRounds(it) + 1;
+  it.members.forEach(m => { const e = sessionLog[lcWk(m.id)] || (sessionLog[lcWk(m.id)] = {}); e._n = n; });
+  lcSave(); lcRefresh();
+}
+function lcNoteToggle(btn){
+  const n = btn.closest('.lc-body').querySelector('.lc-note');
+  if(n){ n.classList.toggle('hide'); const i = n.querySelector('input'); if(i && !n.classList.contains('hide')) i.focus(); }
 }
 </script>
 </body>
