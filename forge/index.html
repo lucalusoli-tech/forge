@@ -2730,8 +2730,10 @@ function cycleCardHTML(c){
     // shows as CURRENT rather than offering to re-activate itself.
     const isLive = wk && currentBlock.cycle && currentBlock.cycle.id === c.id
                       && (currentBlock.cycle.order || 1) === i+1;
+    const lockedAhead = wk && wk.upcoming && currentUser?.tier !== 'admin';
     const action = isLive
       ? `<span class="cycle-slot-live">Current</span>`
+      : lockedAhead ? `<span class="cycle-slot-live" style="opacity:0.45">Up next</span>`
       : (wk ? `<button class="cycle-slot-set" onclick="setAsCurrentBlock('${wk.id}')">Set →</button>` : '');
     const push = (currentUser?.tier === 'admin' && wk)
       ? `<button class="cycle-slot-push" onclick="openPushUpdate('${wk.id}')">Push</button>` : '';
@@ -3056,7 +3058,18 @@ function nextPhaseInCycle(){
 async function advanceToNextPhase(){
   const next = nextPhaseInCycle();
   if(!next){ showToast('No next phase built'); return; }
+  if(next.block.upcoming){ next.block.upcoming = false; localStorage.setItem('fw_customs', JSON.stringify(customWorkouts)); }
   await setAsCurrentBlock(next.block.id);
+}
+
+// End of a phase with the next one ready: the review has just been shown, so move on
+// without asking. "Repeat this phase" is still reachable from the cycle card.
+async function phaseAutoAdvance(){
+  const next = nextPhaseInCycle();
+  if(!next){ openBlockEndPrompt(); return; }
+  const lab = PHASE_LABELS[next.phase] ? PHASE_LABELS[next.phase].charAt(0) + PHASE_LABELS[next.phase].slice(1).toLowerCase() : next.block.name;
+  await advanceToNextPhase();
+  setTimeout(() => showToast(lab + ' starts now · week 1 ✦'), 700);
 }
 
 function openBlockEndPrompt() {
@@ -3218,11 +3231,10 @@ function switchBuildTab(tab) {
 }
 
 // ─── CHANGELOG ─────────────────────────────────────────────────
-const FORGE_VERSION = '2.6.0';
+const FORGE_VERSION = '2.6.1';
 const FORGE_CHANGELOG = [
-  'Rest timer alerts now arrive with your phone locked — allow notifications when asked',
-  'New session log — each exercise is a chip: tap to log, tick the circle to repeat last session in one tap',
-  'Finish an exercise and the next one opens by itself'
+  'Finish a phase and your results play, then the next phase of your plan starts by itself',
+  'Rest timer alerts now arrive with your phone locked — allow notifications when asked'
 ];
 
 function checkChangelog() {
@@ -4602,8 +4614,11 @@ function checkWeekComplete() {
 
   const total = currentBlock.weeks || 4;
   if (currentWeek >= total) {
-    // Final week — the phase film plays first (once per block), then the block-end options.
-    if (!prAutoPlay(() => openBlockEndPrompt())) openBlockEndPrompt();
+    // Final week. Everything logged and the next phase is on this device → the review plays,
+    // then the next phase starts by itself. Otherwise (missed sessions, or nothing next) the
+    // block-end options are shown as before.
+    const after = (weekDone && nextPhaseInCycle()) ? () => phaseAutoAdvance() : () => openBlockEndPrompt();
+    if (!prAutoPlay(after)) after();
     return;
   }
 
@@ -6797,7 +6812,7 @@ function renderBuilderSaved(){
   renderBuilderCyclePicker();
   const c=document.getElementById('builder-saved-list');
   // Only hide programme blocks — show personal AND assigned blocks
-  const visible = customWorkouts.filter(wk => !wk.id?.startsWith('prog_'));
+  const visible = customWorkouts.filter(wk => !wk.id?.startsWith('prog_') && !wk.upcoming);
   if(!visible.length){c.innerHTML=`<div class="empty-state">No saved blocks yet</div>`;return;}
   const isAdmin = currentUser?.tier === 'admin';
   const cardFor = (wk)=>{
@@ -9462,6 +9477,19 @@ async function acceptAssignedBlock(assignmentId) {
       else { mine.name = plan.name; }
       const ord = newBlock.cycle && newBlock.cycle.order;
       if(ord && mine.slots[ord-1]) mine.slots[ord-1].blockId = newId;
+      // Later phases delivered with this push. Stable ids per cycle+phase, so a re-push replaces
+      // the copy instead of piling up duplicates. A phase that's already live is never touched.
+      (row.block_data?.upcomingPhases || []).forEach(up => {
+        if(!up || !up.block || !up.order || !mine.slots[up.order-1]) return;
+        const live = currentBlock.cycle && currentBlock.cycle.id === plan.id && (currentBlock.cycle.order || 1) >= up.order;
+        if(live) return;
+        const pid = 'phase_' + plan.id + '_' + up.order;
+        const entry = { ...up.block, id: pid, upcoming: true, warmup: up.block.warmup || [], skill: up.block.skill || [] };
+        const at = customWorkouts.findIndex(w => w.id === pid);
+        if(at > -1) customWorkouts[at] = entry; else customWorkouts.push(entry);
+        mine.slots[up.order-1].blockId = pid;
+      });
+      localStorage.setItem('fw_customs', JSON.stringify(customWorkouts));
       localStorage.setItem('fw_cycles', JSON.stringify(trainingCycles));
     }
 
@@ -9652,13 +9680,26 @@ async function executePushUpdate() {
     slots: planCycle.slots.map(sl => ({ phase: sl.phase, weeks: sl.weeks, blockId: null }))
   } : null;
 
+  // Every LATER phase that's already built rides along, so the client's app can move straight
+  // into the next phase when this one ends — no waiting for the coach to push it. They're
+  // stored as locked "upcoming" phases on the client: visible in the plan, not startable early.
+  // Re-pushing any phase refreshes them, so edits to future phases still reach the client.
+  const curOrder = (block.cycle && block.cycle.order) || 1;
+  const upcomingPhases = planCycle ? planCycle.slots.map((sl, i) => {
+    if(i + 1 <= curOrder || !sl.blockId) return null;
+    const wk = customWorkouts.find(w => w.id === sl.blockId);
+    if(!wk) return null;
+    return { order: i + 1, phase: sl.phase,
+             block: { ...wk, client: null, coachEmail: currentUser.email, clientEmail, cycle: { id: planCycle.id, order: i + 1 } } };
+  }).filter(Boolean) : [];
+
   // mode 'update' → client keeps their logs (applied in place). mode 'new' → fresh start.
   const { error } = await supa.from('assigned_blocks').insert({
     coach_id: currentUser.id,
     coach_email: currentUser.email,
     client_email: clientEmail,
     block_name: block.name,
-    block_data: { currentBlock: { ...block, coachEmail: currentUser.email, clientEmail: clientEmail }, mode, cyclePlan },
+    block_data: { currentBlock: { ...block, coachEmail: currentUser.email, clientEmail: clientEmail }, mode, cyclePlan, upcomingPhases },
     note: mode === 'update' ? 'Updated version of your programme — your progress is kept' : 'New programme',
     status: 'pending'
   });
@@ -9679,9 +9720,11 @@ async function executePushUpdate() {
   if(!block.client) { block.client = stamp; touched = true; }
   if(planCycle && !planCycle.client) { planCycle.client = stamp; touched = true; }
   if(touched){
-    saveCustoms();
+    // (Called saveCustoms()/queueCloudSync() before — neither exists, so this threw after every
+    // first push: no toast, modal left open, client folder never stamped.)
+    localStorage.setItem('fw_customs', JSON.stringify(customWorkouts));
     try { localStorage.setItem('fw_cycles', JSON.stringify(trainingCycles)); } catch(e) {}
-    queueCloudSync();
+    scheduleSync();
     try { renderCyclePlanner(); } catch(e) {}
   }
 
